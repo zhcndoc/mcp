@@ -1,42 +1,42 @@
 ---
-title: "SEP-1034: Support default values for all primitive types in elicitation schemas"
-sidebarTitle: "SEP-1034: Support default values for all primitiv…"
-description: "Support default values for all primitive types in elicitation schemas"
+title: "SEP-1034: 支持询问模式中所有原始类型的默认值"
+sidebarTitle: "SEP-1034: 支持所有原始类型的默认值…"
+description: "支持询问模式中所有原始类型的默认值"
 ---
 
 <div className="flex items-center gap-2 mb-4">
   <Badge color="green" shape="pill">
-    Final
+    最终版
   </Badge>
   <Badge color="gray" shape="pill">
-    Standards Track
+    标准轨道
   </Badge>
 </div>
 
-| Field         | Value                                                                           |
+| 字段          | 值                                                                            |
 | ------------- | ------------------------------------------------------------------------------- |
 | **SEP**       | 1034                                                                            |
-| **Title**     | Support default values for all primitive types in elicitation schemas           |
-| **Status**    | Final                                                                           |
-| **Type**      | Standards Track                                                                 |
-| **Created**   | 2025-07-22                                                                      |
-| **Author(s)** | Tapan Chugh (chugh.tapan[@gmail](https://github.com/gmail).com)                 |
-| **Sponsor**   | None                                                                            |
+| **标题**      | 支持询问模式中所有原始类型的默认值                                              |
+| **状态**      | 最终版                                                                          |
+| **类型**      | 标准轨道                                                                        |
+| **创建日期**  | 2025-07-22                                                                      |
+| **作者**      | Tapan Chugh (chugh.tapan[@gmail](https://github.com/gmail).com)                 |
+| **赞助者**    | 无                                                                              |
 | **PR**        | [#1034](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1034) |
 
 ---
 
-## Abstract
+## 摘要
 
-This SEP recommends adding support for default values to all primitive types in the MCP elicitation schema (StringSchema, NumberSchema, and EnumSchema), extending the existing support that only covers BooleanSchema.
+本 SEP 建议在 MCP 询问模式（StringSchema, NumberSchema 和 EnumSchema）的所有原始类型中添加对默认值的支持，扩展现有的仅覆盖 BooleanSchema 的支持。
 
-## Motivation
+## 动机
 
-Elicitations in MCP offer a way to mitigate complex API designs: tools can request information on-demand rather than resorting to convoluted parameter handling. The challenge however is that users must manually enter obvious information that could be pre-populated for more natural interactions. Currently, only `BooleanSchema` supports default values in elicitation requests. This limitation prevents servers from providing sensible defaults for text inputs, numbers, and enum selections leading to more user overhead.
+MCP 中的询问提供了一种减轻复杂 API 设计的方法：工具可以按需请求信息，而不是诉诸复杂的参数处理。然而，挑战在于用户必须手动输入显而易见的信息，而这些信息本可以预填充以实现更自然的交互。目前，只有 `BooleanSchema` 在询问请求中支持默认值。这一限制阻止了服务器为文本输入、数字和枚举选择提供合理的默认值，导致更多的用户负担。
 
-### Real-World Example
+### 现实世界示例
 
-Consider implementing an email reply function. Without elicitation, the tool becomes unwieldy:
+考虑实现一个电子邮件回复功能。如果没有询问功能，该工具会变得笨拙：
 
 ```python
 def reply_to_email_thread(
@@ -45,19 +45,19 @@ def reply_to_email_thread(
     recipient_list: List[str] = [],
     cc_list: List[str] = []
 ) -> None:
-    # Ambiguity: Does empty list mean "no recipients" or "use defaults"?
-    # Complex logic needed to handle different combinations
+    # 歧义：空列表意味着“无收件人”还是“使用默认值”？
+    # 需要复杂逻辑来处理不同的组合
 ```
 
-With elicitation, the tool signature itself can be much simpler
+有了询问功能，工具签名本身可以简单得多
 
 ```python
 def reply_to_email_thread(
     thread_id: str,
     content: Optional[str] = ""
 ) -> None:
-    # Code can lookup the participants from the original thread
-    # and prepare an elicitation request with the defaults setup
+    # 代码可以从原始线程中查找参与者
+    # 并准备一个设置了默认值的询问请求
 ```
 
 ```typescript
@@ -69,35 +69,35 @@ const response = await client.request("elicitation/create", {
       recipients: {
         type: "string",
         title: "Recipients",
-        default: "alice@company.com, bob@company.com"  // Pre-filled
+        default: "alice@company.com, bob@company.com"  // 预填充
       },
       cc: {
         type: "string",
         title: "CC",
-        default: "john@company.com"  // Pre-filled
+        default: "john@company.com"  // 预填充
       },
       content: {
         type: "string",
         title: "Message"
-        default: "" // If provided in the tool above
+        default: "" // 如果在上面的工具中提供
       }
     }
   }
 });
 ```
 
-### Implementation
+### 实现
 
-A working implementation demonstrating clients require minimal changes to display defaults (~10 lines of code):
+一个可行的实现表明客户端只需极少更改即可显示默认值（约 10 行代码）：
 
-- Implementation PR: https://github.com/chughtapan/fast-agent/pull/2
-- A demo with the above email reply workflow: https://asciinema.org/a/X7aQZjT2B5jVwn9dJ9sqQVkOM
+- 实现 PR: https://github.com/chughtapan/fast-agent/pull/2
+- 上述电子邮件回复工作流程的演示：https://asciinema.org/a/X7aQZjT2B5jVwn9dJ9sqQVkOM
 
-## Specification
+## 规范
 
-### Schema Changes
+### 模式变更
 
-Extend the elicitation primitive schemas to include optional default values:
+扩展询问原始模式以包含可选的默认值：
 
 ```typescript
 export interface StringSchema {
@@ -107,7 +107,7 @@ export interface StringSchema {
   minLength?: number;
   maxLength?: number;
   format?: "email" | "uri" | "date" | "date-time";
-  default?: string; // NEW
+  default?: string; // 新增
 }
 
 export interface NumberSchema {
@@ -116,7 +116,7 @@ export interface NumberSchema {
   description?: string;
   minimum?: number;
   maximum?: number;
-  default?: number; // NEW
+  default?: number; // 新增
 }
 
 export interface EnumSchema {
@@ -125,39 +125,39 @@ export interface EnumSchema {
   description?: string;
   enum: string[];
   enumNames?: string[];
-  default?: string; // NEW - must be one of enum values
+  default?: string; // 新增 - 必须是枚举值之一
 }
 
-// BooleanSchema already has default?: boolean
+// BooleanSchema 已经有 default?: boolean
 ```
 
-### Behavior
+### 行为
 
-1. The `default` field is optional, maintaining full backward compatibility
-2. Default values must match the schema type
-3. For EnumSchema, the default must be one of the valid enum values
-4. Clients that support defaults SHOULD pre-populate form fields. Clients that don't support defaults MAY ignore the field entirely.
+1. `default` 字段是可选的，保持完全的向后兼容性
+2. 默认值必须匹配模式类型
+3. 对于 EnumSchema，默认值必须是有效的枚举值之一
+4. 支持默认值的客户端应预填充表单字段。不支持默认值的客户端可完全忽略该字段。
 
-## Rationale
+## 理由
 
-1. The high-level rationale is to follow the precedent set by BooleanSchema rather than creating new mechanisms.
-2. Making defaults optional ensures backward compatibility.
-3. This maintains the high-level intuition of keeping the client implementation simple.
+1. 高层理由是遵循 BooleanSchema 设定的先例，而不是创建新机制。
+2. 将默认值设为可选确保了向后兼容性。
+3. 这保持了客户端实现简单的高层直觉。
 
-### Alternatives Considered
+### 考虑的替代方案
 
-1. **Server-side Templates**: Servers could maintain templates separately, but this adds complexity
-2. **New Request Type**: A separate request type for forms with defaults would fragment the API
-3. **Required Defaults**: Making defaults required would break existing implementations
+1. **服务器端模板**：服务器可以单独维护模板，但这增加了复杂性
+2. **新请求类型**：用于带默认值表单的单独请求类型会碎片化 API
+3. **必需默认值**：将默认值设为必需会破坏现有实现
 
-## Backwards Compatibility
+## 向后兼容性
 
-This change is fully backward compatible with no breaking changes. Clients that don't understand defaults will ignore them, and existing elicitation requests continue to work unchanged. Clients can adopt default support at their own pace
+此更改完全向后兼容，无破坏性更改。不理解默认值的客户端将忽略它们，现有的询问请求继续正常工作。客户端可以按照自己的节奏采用默认值支持
 
-## Security Implications
+## 安全影响
 
-No new security concerns:
+无新的安全问题：
 
-1. **No Sensitive Data**: The existing guidance against requesting sensitive information still applies
-2. **Client Control**: Clients retain full control over what data is sent to servers
-3. **User Visibility**: Default values are visible to users who can modify them before submission
+1. **无敏感数据**：现有关于请求敏感信息的指南仍然适用
+2. **客户端控制**：客户端保留对发送到服务器数据的完全控制
+3. **用户可见性**：默认值对用户可见，用户可以在提交前修改它们

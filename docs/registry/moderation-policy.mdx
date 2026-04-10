@@ -1,62 +1,62 @@
 ---
-title: The MCP Registry Moderation Policy
-sidebarTitle: Moderation Policy
+title: MCP 注册表审核政策
+sidebarTitle: 审核政策
 ---
 
 <Note>
-  The MCP Registry is currently in preview. Breaking changes or data resets may occur before general availability. If you encounter any issues, please report them on [GitHub](https://github.com/modelcontextprotocol/registry/issues).
+  MCP 注册表目前处于预览阶段。在正式发布之前，可能会发生破坏性更改或数据重置。如果您遇到任何问题，请在 [GitHub](https://github.com/modelcontextprotocol/registry/issues) 上报告。
 </Note>
 
-**TL;DR**: The MCP Registry is quite permissive! We only remove illegal content, malware, spam, and completely broken servers.
+**TL;DR**：MCP 注册表非常宽松！我们只移除非法内容、恶意软件、垃圾信息和完全无法使用的服务器。
 
-## Scope
+## 范围
 
-This policy applies to the official MCP Registry at `registry.modelcontextprotocol.io`.
+本政策适用于位于 `registry.modelcontextprotocol.io` 的官方 MCP 注册表。
 
-Subregistries may have their own moderation policies. If you have questions about content on a specific subregistry, please contact them directly.
+子注册表可能有自己的审核政策。如果您对特定子注册表上的内容有疑问，请直接联系他们。
 
-## Disclaimer
+## 免责声明
 
-The MCP Registry **does not** make guarantees about moderation, and consumers should assume minimal-to-no moderation.
+MCP 注册表**不**对审核做出保证，使用者应假设几乎没有或完全没有审核。
 
-The MCP Registry is a community supported project, and we have limited active moderation capabilities. We largely rely on upstream package registries (like NPM, PyPI, and Docker) or downstream subregistries (like the GitHub MCP Registry) to do more in-depth moderation.
+MCP 注册表是一个社区支持的项目，我们的主动审核能力有限。我们主要依赖上游包注册表（如 NPM、PyPI 和 Docker）或下游子注册表（如 GitHub MCP 注册表）来进行更深入的审核。
 
-This means there may be content in the MCP Registry that should be removed under this policy, but which we haven't yet removed. Consumers should treat scraped data accordingly.
+这意味着 MCP 注册表中可能存在根据本政策应被移除但尚未被移除的内容。使用者应相应地对待抓取的数据。
 
-## What We Remove
+## 我们移除什么
 
-We will remove servers that contain:
+我们将移除包含以下内容的服务器：
 
-- Illegal content, which includes obscene content, copyright violations, and hacking tools
-- Malware, regardless of intentions
-- Spam, especially mass-created servers that disrupt the registry. Examples:
-  - The same server being submitted multiple times under different names
-  - A server that doesn't do anything but provide a fixed response with some marketing copy
-  - A server with a description stuffed with marketing copy and an unrelated implementation
-- Non-functioning servers
+- 非法内容，包括淫秽内容、侵犯版权和黑客工具
+- 恶意软件，无论意图如何
+- 垃圾信息，尤其是破坏注册表的大批量创建的服务器。例如：
+  - 同一服务器以不同名称多次提交
+  - 除了提供带有某些营销文案的固定响应外什么都不做的服务器
+  - 描述中塞满了营销文案且实现不相关的服务器
+- 无法运行的服务器
 
-## What We Don't Remove
+## 我们不移除什么
 
-Generally, we believe in keeping the registry open and pushing moderation to subregistries. We therefore **won't** remove:
+通常，我们相信保持注册表开放并将审核推给子注册表。因此我们**不会**移除：
 
-- Low-quality or buggy servers
-- Servers with security vulnerabilities
-- Servers that do the same thing as other servers
-- Servers that provide or contain adult content
+- 低质量或有错误的服务器
+- 存在安全漏洞的服务器
+- 与其他服务器做同样事情的服务器
+- 提供或包含成人内容的服务器
 
-## How Removal Works
+## 移除如何运作
 
-When we remove a server, we set the server's `status` to `"deleted"`, but the server's metadata remains accessible via the MCP Registry API. Aggregators may then remove the server from their indexes.
+当我们移除服务器时，我们将服务器的 `status` 设置为 `"deleted"`，但服务器的元数据仍可通过 MCP 注册表 API 访问。聚合器随后可以从其索引中移除该服务器。
 
-In extreme cases, we may overwrite or erase the server's metadata. For example, if the metadata itself is unlawful.
+在极端情况下，我们可能会覆盖或擦除服务器的元数据。例如，如果元数据本身是非法的。
 
-## Appeals
+## 申诉
 
-Think we made a mistake? Open an issue on our [GitHub repository](https://github.com/modelcontextprotocol/registry) with:
+认为我们犯了错误？在我们的 [GitHub 仓库](https://github.com/modelcontextprotocol/registry) 上开启一个 issue，包含：
 
-- The name of the server
-- Why you believe the server doesn't meet the above criteria for removal
+- 服务器名称
+- 您认为该服务器不符合上述移除标准的原因
 
-## Changes to This Policy
+## 本政策的变更
 
-We're still learning how best to run the MCP Registry! As such, we might end up changing this policy in the future.
+我们仍在学习如何最好地运行 MCP 注册表！因此，我们未来可能会更改此政策。

@@ -1,153 +1,153 @@
 ---
-title: "SEP-991: Enable URL-based Client Registration using OAuth Client ID Metadata Documents"
-sidebarTitle: "SEP-991: Enable URL-based Client Registration us…"
-description: "Enable URL-based Client Registration using OAuth Client ID Metadata Documents"
+title: "SEP-991: 启用基于 URL 的客户端注册，使用 OAuth Client ID 元数据文档"
+sidebarTitle: "SEP-991: 启用基于 URL 的客户端注册…"
+description: "启用基于 URL 的客户端注册，使用 OAuth Client ID 元数据文档"
 ---
 
 <div className="flex items-center gap-2 mb-4">
   <Badge color="green" shape="pill">
-    Final
+    最终版
   </Badge>
   <Badge color="gray" shape="pill">
-    Standards Track
+    标准轨道
   </Badge>
 </div>
 
-| Field         | Value                                                                                                             |
-| ------------- | ----------------------------------------------------------------------------------------------------------------- |
-| **SEP**       | 991                                                                                                               |
-| **Title**     | Enable URL-based Client Registration using OAuth Client ID Metadata Documents                                     |
-| **Status**    | Final                                                                                                             |
-| **Type**      | Standards Track                                                                                                   |
-| **Created**   | 2025-07-07                                                                                                        |
-| **Author(s)** | Paul Carleton ([@pcarleton](https://github.com/pcarleton)) Aaron Parecki ([@aaronpk](https://github.com/aaronpk)) |
-| **Sponsor**   | None                                                                                                              |
-| **PR**        | [#991](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/991)                                     |
+| 字段           | 值                                                                                                              |
+| -------------- | --------------------------------------------------------------------------------------------------------------- |
+| **SEP**        | 991                                                                                                             |
+| **标题**       | 启用基于 URL 的客户端注册，使用 OAuth Client ID 元数据文档                                                      |
+| **状态**       | 最终版                                                                                                          |
+| **类型**       | 标准轨道                                                                                                        |
+| **创建日期**   | 2025-07-07                                                                                                      |
+| **作者**       | Paul Carleton ([@pcarleton](https://github.com/pcarleton)) Aaron Parecki ([@aaronpk](https://github.com/aaronpk)) |
+| **赞助者**     | 无                                                                                                              |
+| **PR**         | [#991](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/991)                                   |
 
 ---
 
-## Abstract
+## 摘要
 
-This SEP proposes adopting OAuth Client ID Metadata Documents as specified in [draft-parecki-oauth-client-id-metadata-document-03](https://datatracker.ietf.org/doc/draft-parecki-oauth-client-id-metadata-document/) as an additional client registration mechanism for the Model Context Protocol (MCP). This approach allows OAuth clients to use HTTPS URLs as client identifiers, where the URL points to a JSON document containing client metadata. This specifically addresses the common MCP scenario where servers and clients have no pre-existing relationship, enabling servers to trust clients without pre-coordination while maintaining full control over access policies.
+本 SEP 提议采用 [draft-parecki-oauth-client-id-metadata-document-03](https://datatracker.ietf.org/doc/draft-parecki-oauth-client-id-metadata-document/) 中指定的 OAuth Client ID 元数据文档，作为模型上下文协议 (MCP) 的额外客户端注册机制。这种方法允许 OAuth 客户端使用 HTTPS URL 作为客户端标识符，其中该 URL 指向包含客户端元数据的 JSON 文档。这专门解决了常见的 MCP 场景，即服务器和客户端之间没有预先存在的关系，使服务器能够在无需预先协调的情况下信任客户端，同时保持对访问策略的完全控制。
 
-## Motivation
+## 动机
 
-The Model Context Protocol currently supports two client registration approaches:
+模型上下文协议目前支持两种客户端注册方法：
 
-1. **Pre-registration**: Requires either client developers or users to manually register clients with each server
-2. **Dynamic Client Registration (DCR)**: Allows just-in-time registration by sending client metadata to a register endpoint on the Authorization server.
+1. **预注册**：要求客户端开发人员或用户手动向每个服务器注册客户端
+2. **动态客户端注册 (DCR)**：允许通过向授权服务器上的注册端点发送客户端元数据进行即时注册。
 
-Both approaches have significant limitations for MCP's use case where clients frequently need to connect to servers they've never encountered before:
+对于 MCP 的用例（客户端经常需要连接到它们以前从未遇到过的服务器），这两种方法都有显著的局限性：
 
-- Pre-registration by developers is impractical as servers may not exist when clients ship
-- Pre-registration by users creates poor UX requiring manual credential management
-- DCR requires servers to manage unbounded databases, handle expiration, and trust self-asserted metadata
+- 开发人员进行预注册是不切实际的，因为客户端发布时服务器可能尚不存在
+- 用户进行预注册会造成糟糕的用户体验，需要手动管理凭据
+- DCR 要求服务器管理无边界数据库、处理过期问题，并信任自我声明的元数据
 
-### The Target Use Case: No Pre-existing Relationship
+### 目标用例：无预先存在的关系
 
-This proposal specifically targets the common MCP scenario where:
+本提议专门针对常见的 MCP 场景，其中：
 
-- A user wants to connect a client to a server they've discovered
-- The client developer has never heard of this server
-- The server operator has never heard of this client
-- Both parties need to establish trust without prior coordination
+- 用户希望将客户端连接到他们发现的服务器
+- 客户端开发人员从未听说过此服务器
+- 服务器运营商从未听说过此客户端
+- 双方需要在无需预先协调的情况下建立信任
 
-For scenarios with pre-existing relationships, pre-registration remains the optimal solution. However, MCP's value comes from its ability to connect arbitrary clients and servers, making the "no pre-existing relationship" case critical to address.
+对于存在预先关系的场景，预注册仍然是最佳解决方案。然而，MCP 的价值在于其能够连接任意客户端和服务器，因此解决“无预先存在的关系”的情况至关重要。
 
-Relatedly, there are many more MCP servers than there are clients (similar to how there are many more web browsers than API's). A common scenario is an MCP server developer wanting to restrict usage to a set of clients they trust.
+相关地，MCP 服务器的数量远多于客户端（类似于网页浏览器远多于 API 的情况）。一个常见的场景是 MCP 服务器开发人员希望将使用限制为他们信任的一组客户端。
 
-### Key Innovation: Server-Controlled Trust Without Pre-Coordination
+### 关键创新：无需预先协调的服务器控制信任
 
-Client ID Metadata Documents enable a unique trust model where:
+Client ID 元数据文档启用了一种独特的信任模型，其中：
 
-1. **Servers can trust clients they've never seen before** based on:
-   - The HTTPS domain hosting the metadata
-   - The metadata content itself
-   - Domain reputation and security policies
+1. **服务器可以信任它们以前从未见过的客户端**，基于：
+   - 托管元数据的 HTTPS 域名
+   - 元数据内容本身
+   - 域名声誉和安全策略
 
-2. **Servers maintain full control** through flexible policies:
-   - **Open Servers**: Can accept any HTTPS client_id, enabling maximum interoperability
-   - **Protected Servers**: Can restrict to trusted domains or specific clients
+2. **服务器通过灵活的策略保持完全控制**：
+   - **开放服务器**：可以接受任何 HTTPS client_id，实现最大互操作性
+   - **受保护服务器**：可以限制为受信任的域或特定客户端
 
-3. **No client pre-coordination required**:
-   - Clients don't need to know about servers in advance
-   - Clients just need to host their metadata document
-   - Trust flows from the client's domain, not prior registration
+3. **无需客户端预先协调**：
+   - 客户端无需提前了解服务器
+   - 客户端只需托管其元数据文档
+   - 信任源自客户端的域，而非预先注册
 
-## Specification Changes
+## 规范变更
 
-The change to the specification will be adding Client ID Metadata documents as a SHOULD, and changing DCR to a MAY, as we think that Client ID Metadata documents are a better default option for this scenario.
+对规范的变更是将 Client ID 元数据文档添加为 SHOULD（应该），并将 DCR 更改为 MAY（可以），因为我们认为 Client ID 元数据文档是此场景的更好默认选项。
 
-We will primarily rely on the text in the linked RFC, aiming not to repeat most of it. Below is a short version of what we'll need to specify.
+我们将主要依赖链接的 RFC 中的文本， aim 不重复大部分内容。以下是我们需要指定的简短版本。
 
 ```mermaid
   sequenceDiagram
       participant User
-      participant Client as MCP Client
-      participant Server as Authorization Server
-      participant Metadata as Metadata Endpoint<br/>(Client's HTTPS URL)
-      participant Resource as MCP Server
+      participant Client as MCP 客户端
+      participant Server as 授权服务器
+      participant Metadata as 元数据端点<br/>(客户端的 HTTPS URL)
+      participant Resource as MCP 服务器
 
-      Note over Client,Metadata: Client hosts metadata at<br/>https://app.example.com/oauth/metadata.json
+      Note over Client,Metadata: 客户端托管元数据于<br/>https://app.example.com/oauth/metadata.json
 
-      User->>Client: Initiates connection to MCP Server
-      Client->>Server: Authorization Request<br/>client_id=https://app.example.com/oauth/metadata.json<br/>redirect_uri=http://localhost:3000/callback
+      User->>Client: 发起连接到 MCP 服务器
+      Client->>Server: 授权请求<br/>client_id=https://app.example.com/oauth/metadata.json<br/>redirect_uri=http://localhost:3000/callback
 
-      Note over Server: Authenticates user
+      Note over Server: 验证用户
 
 
-      Note over Server: Detects URL-formatted client_id
+      Note over Server: 检测到 URL 格式的 client_id
 
       Server->>Metadata: GET https://app.example.com/oauth/metadata.json
-      Metadata-->>Server: JSON Metadata Document<br/>{client_id, client_name, redirect_uris, ...}
+      Metadata-->>Server: JSON 元数据文档<br/>{client_id, client_name, redirect_uris, ...}
 
-      Note over Server: Validates:<br/>1. client_id matches URL<br/>2. redirect_uri in allowed list<br/>3. Document structure valid<br/>4. Domain allowed via trust policy
+      Note over Server: 验证:<br/>1. client_id 与 URL 匹配<br/>2. redirect_uri 在允许列表中<br/>3. 文档结构有效<br/>4. 域通过信任策略允许
 
-      alt Validation Success
-          Server->>User: Display consent page with client_name
-          User->>Server: Approves access
-          Server->>Client: Authorization code via redirect_uri
-          Client->>Server: Exchange code for token<br/>client_id=https://app.example.com/oauth/metadata.json
-          Server-->>Client: Access token
-          Client->>Resource: MCP requests with access token
-          Resource-->>Client: MCP responses
-      else Validation Failure
-          Server->>User: Error response<br/>error=invalid_client or invalid_request
+      alt 验证成功
+          Server->>User: 显示带有 client_name 的同意页面
+          User->>Server: 批准访问
+          Server->>Client: 通过 redirect_uri 返回授权码
+          Client->>Server: 交换代码以获取令牌<br/>client_id=https://app.example.com/oauth/metadata.json
+          Server-->>Client: 访问令牌
+          Client->>Resource: 带有访问令牌的 MCP 请求
+          Resource-->>Client: MCP 响应
+      else 验证失败
+          Server->>User: 错误响应<br/>error=invalid_client 或 invalid_request
       end
 
-      Note over Server: Cache metadata for future requests<br/>(respecting HTTP cache headers)
+      Note over Server: 缓存元数据以供未来请求使用<br/>(遵守 HTTP 缓存头)
 ```
 
-### Client Requirements
+### 客户端要求
 
-- Clients MUST host their metadata document at an HTTPS URL following RFC requirements
-- The client_id URL MUST use "https" scheme and contain a path component
-- Metadata documents MUST be valid JSON and include at minimum:
-  - `client_id`: matching the document URL exactly
-  - `client_name`: human-readable name for authorization prompts
-  - `redirect_uris`: array of allowed redirect URIs
-  - `token_endpoint_auth_method`: "none" for public clients
+- 客户端必须遵循 RFC 要求在其 HTTPS URL 上托管元数据文档
+- client_id URL 必须使用 "https" 方案并包含路径组件
+- 元数据文档必须是有效的 JSON 并至少包括：
+  - `client_id`：与文档 URL 完全匹配
+  - `client_name`：用于授权提示的人类可读名称
+  - `redirect_uris`：允许的重定向 URI 数组
+  - `token_endpoint_auth_method`：公共客户端为 "none"
 
-Note a client can use `private_key_jwt` for a `token_endpoint_auth_method` given the client metadata can provide public key information.
+注意，鉴于客户端元数据可以提供公钥信息，客户端可以对 `token_endpoint_auth_method` 使用 `private_key_jwt`。
 
-### Server Requirements
+### 服务器要求
 
-- Servers SHOULD fetch metadata documents when encountering URL-formatted client_ids
-- Servers MUST validate the fetched document contains matching client_id
-- Servers SHOULD cache metadata respecting HTTP headers (max 24 hours recommended)
-- Servers MUST validate redirect URIs match those in metadata document
+- 服务器在遇到 URL 格式的 client_ids 时应获取元数据文档
+- 服务器必须验证获取的文档包含匹配的 client_id
+- 服务器应缓存元数据并遵守 HTTP 头（建议最多 24 小时）
+- 服务器必须验证重定向 URI 与元数据文档中的匹配
 
-### Discovery
+### 发现
 
-- Servers advertise support via OAuth metadata: `client_id_metadata_document_supported: true`
-- Clients detect support and can fallback to DCR or pre-registration if unavailable
+- 服务器通过 OAuth 元数据广告支持：`client_id_metadata_document_supported: true`
+- 客户端检测支持，如果不可用可以回退到 DCR 或预注册
 
-Example metadata document:
+元数据文档示例：
 
 ```json
 {
   "client_id": "https://app.example.com/oauth/client-metadata.json",
-  "client_name": "Example MCP Client",
+  "client_name": "示例 MCP 客户端",
   "client_uri": "https://app.example.com",
   "logo_uri": "https://app.example.com/logo.png",
   "redirect_uris": [
@@ -160,137 +160,137 @@ Example metadata document:
 }
 ```
 
-### Integration with Existing MCP Auth
+### 与现有 MCP 认证的集成
 
-This proposal adds Client ID Metadata Documents as a third registration option alongside pre-registration and DCR. Servers MAY support any combination of these approaches:
+本提议将 Client ID 元数据文档作为第三种注册选项添加到预注册和 DCR 之外。服务器可以支持这些方法的任何组合：
 
-- Pre-registration remains unchanged
-- DCR remains unchanged
-- Client ID Metadata Documents are detected by URL-formatted client_ids, and server support is advertised in OAuth metadata.
+- 预注册保持不变
+- DCR 保持不变
+- Client ID 元数据文档通过 URL 格式的 client_ids 检测，服务器支持在 OAuth 元数据中广告。
 
-## Rationale
+## 理由
 
-### Why This Solves the "No Pre-existing Relationship" Problem
+### 为何这能解决“无预先存在的关系”问题
 
-Unlike pre-registration which requires coordination, or DCR which requires servers to manage a registration database, Client ID Metadata Documents provide:
+与需要协调的预注册或需要服务器管理注册数据库的 DCR 不同，Client ID 元数据文档提供：
 
-1. **Verifiable Identity**: The HTTPS URL serves as both identifier and trust anchor
-2. **No Coordination Needed**: Clients publish metadata, servers consume it
-3. **Flexible Trust Policies**: Servers decide their own trust criteria without requiring client changes
-4. **Stable Identifiers**: Unlike DCR's ephemeral IDs, URLs are stable and auditable
+1. **可验证的身份**：HTTPS URL 既作为标识符又作为信任锚点
+2. **无需协调**：客户端发布元数据，服务器消费它
+3. **灵活的信任策略**：服务器决定自己的信任标准，无需客户端更改
+4. **稳定的标识符**：与 DCR 的临时 ID 不同，URL 是稳定且可审计的
 
-### Redirect URI Attestation
+### 重定向 URI 证明
 
-A key benefit of Client ID Metadata Documents is attestation of redirect URIs:
+Client ID 元数据文档的一个关键好处是重定向 URI 的证明：
 
-1. **The metadata document cryptographically binds redirect URIs to the client identity** via HTTPS
-2. **Servers can trust that redirect URIs in the metadata are controlled by the client** - not attacker-supplied
-3. **This prevents redirect URI manipulation attacks** common with self-asserted registration
+1. **元数据文档通过 HTTPS 将重定向 URI 加密绑定到客户端身份**
+2. **服务器可以信任元数据中的重定向 URI 由客户端控制** - 而非攻击者提供
+3. **这防止了自我声明注册中常见的重定向 URI 操纵攻击**
 
-### Risks of this approach
+### 此方法的风险
 
-#### Risk: Localhost URL Impersonation
+#### 风险：Localhost URL 冒充
 
-A limitation of Client ID Metadata Documents is that they cannot prevent localhost URL impersonation by itself. An attacker can claim to be any client by:
+Client ID 元数据文档的一个局限性是它们本身无法防止 localhost URL 冒充。攻击者可以通过以下方式声称是任何客户端：
 
-1. Providing the legitimate client's metadata URL as their client_id
-2. Binding to the same localhost port the legitimate client uses
-3. Intercepting the authorization code when the user approves
+1. 提供合法客户端的元数据 URL 作为其 client_id
+2. 绑定到合法客户端使用的相同 localhost 端口
+3. 当用户批准时拦截授权码
 
-This attack is concerning because the server sees the correct metadata
-document and the user sees the correct client name, making detection
-difficult.
+这种攻击令人担忧，因为服务器看到正确的元数据
+文档，用户看到正确的客户端名称，使得检测
+变得困难。
 
-Platform-specific attestations (iOS DeviceCheck, Android
-Play Integrity) could address this, but they're not universally available. This
-would work by a developer running a backend service that consumes the DeviceCheck / Play Integrity
-signatures and returns a JWT usable as the `private_key_jwt` authentication for the `token_endpoint_auth_method`.
+特定平台的证明（iOS DeviceCheck, Android
+Play Integrity）可以解决此问题，但它们并非普遍可用。这
+将通过开发人员运行后端服务来实现，该服务消费 DeviceCheck / Play Integrity
+签名并返回可用作 `token_endpoint_auth_method` 的 `private_key_jwt` 认证的 JWT。
 
-A similar approach without requiring platform-specific attestations that still raises the cost of the attack
-is possible using JWKS and short-lived JWTs signed by a server-side component hosted by the client developer. This component could use attestation mechanisms other than platform-specific ones to attest to the clients identity, such as the client's standard login flow. Using short lived JWTs reduces the risk of credential compromise and replay, but does not eliminate it
-entirely - an attacker could still proxy requests to the legitimate
-client's signing endpoint.
+一种类似的方法不需要特定平台的证明，但仍提高了攻击成本，
+可以使用 JWKS 和由客户端开发人员托管的服务器端组件签发的短期 JWT。该组件可以使用除特定平台之外的证明机制来证明客户端身份，例如客户端的标准登录流程。使用短期 JWT 降低了凭据泄露和重放的风险，但并未完全消除它
+- 攻击者仍然可以将请求代理到合法
+客户端的签名端点。
 
-Fully mitigating this risk is outside the scope of this proposal. This
-proposal has the same risks as DCR does in a localhost redirect scenario.
+完全缓解此风险超出了本提议的范围。本
+提议在 localhost 重定向场景中与 DCR 具有相同的风险。
 
-Servers SHOULD display additional warnings for localhost-only clients.
+服务器应对仅 localhost 的客户端显示额外警告。
 
-#### Risk: Server Side Request Forgery (SSRF)
+#### 风险：服务器端请求伪造 (SSRF)
 
-The authorization server takes a URL as input from an unknown client, and then fetches that URL. A malicious client could use this to send non-metadata requests on behalf of the authorization server. An example would be sending a URL corresponding to a private administration endpoint that the authorization server has access to.
+授权服务器接受来自未知客户端的 URL 作为输入，然后获取该 URL。恶意客户端可以利用此代表授权服务器发送非元数据请求。例如，发送对应于授权服务器有权访问的私有管理端点的 URL。
 
-This can be prevented by validating the URL's and the IP's those URL's resolve to prior to initiating a fetch request.
+这可以通过在发起获取请求之前验证 URL 和这些 URL 解析到的 IP 来防止。
 
-#### Risk: Distributed Denial of Service (DDoS)
+#### 风险：分布式拒绝服务 (DDoS)
 
-Similarly, an attacker could try to leverage a pool of authorization servers to perform a denial of service attack on a non-MCP server.
+类似地，攻击者可能试图利用授权服务器池对非 MCP 服务器执行拒绝服务攻击。
 
-There is not any additional amplification for the fetch request (i.e. the bandwidth from the client to make the request roughly equals the bandwidth of the request sent to the target server), and each authorization server can aggressively cache the result of these metadata fetches, so it is unlikely to be an attractive DDoS vector.
+获取请求没有任何额外的放大（即，客户端发出请求的带宽大致等于发送到目标服务器的请求带宽），并且每个授权服务器可以积极缓存这些元数据获取的结果，因此它不太可能成为一个有吸引力的 DDoS 向量。
 
-#### Risk: Maturity of referenced specification
+#### 风险：引用规范的成熟度
 
-The RFC for Client ID Metadata documents is still a draft. It has been implemented by the platform Bluesky, but has not been ratified or very widely adopted outside of that, and may evolve over time. Our intention is to evolve and align with subsequent drafts and any final standard, while minimizing disruption and breakage with existing implementations.
+Client ID 元数据文档的 RFC 仍然是草案。它已被平台 Bluesky 实现，但尚未被批准或在该平台之外广泛采用，并且可能会随时间演变。我们的意图是 evolve 并与后续草案和任何最终标准保持一致，同时最大限度地减少对现有实现的干扰和破坏。
 
-This approach has the risk that there are implementation challenges or flaws in the protocol that have not surfaced yet. However, even though DCR has been ratified, and it also has a number of implementation challenges that developers are facing when trying to use it in an open ecosystem context like MCP. Those challenges are the motiviation behind this proposal.
+这种方法存在风险，即协议中尚未出现的实现挑战或缺陷。然而，即使 DCR 已被批准，它在开发人员试图在像 MCP 这样的开放生态系统上下文中使用时也面临许多实现挑战。这些挑战是本提议背后的动机。
 
-#### Risk: Client implementation burden, espcially local clients
+#### 风险：客户端实现负担，尤其是本地客户端
 
-This specification requires an additional piece of infrastructure for clients, since they need to host a metadata file behind an HTTPS url. Without this specification, a client could be strictly a desktop application for example.
+本规范要求客户端具备额外的基础设施，因为他们需要在 HTTPS URL 后面托管元数据文件。没有本规范，例如客户端可以严格是一个桌面应用程序。
 
-The burden of hosting this endpoint is expected to be low as hosting a static JSON file is fairly straightforward and most known clients have a webpage advertising their client or providing download links.
+托管此端点的负担预计较低，因为托管静态 JSON 文件相当简单，并且大多数已知客户端都有网页广告其客户端或提供下载链接。
 
-#### Risk: Fragmentation of authorization approaches
+#### 风险：授权方法的碎片化
 
-Authorization for MCP is already challenging to fully implement for clients and servers. Questions about how to do it correctly and best practices are some of the most common in the community. Adding another branch to the authorization flow means this could be even more complicated and fractured, meaning fewer developers succeed in following the specification, and the promise of compatibility and an open ecosystem suffers as a result.
+对于客户端和服务器来说，MCP 的授权已经难以完全实现。关于如何正确执行和最佳实践的问题是社区中最常见的问题。在授权流程中添加另一个分支意味着这可能变得更加复杂和分散，意味着更少的开发人员成功遵循规范，兼容性和开放生态系统的承诺因此受损。
 
-This proposal intends to simplify the story for authorization server and resource server developers by providing a clearer mechanism to trust redirect URIs and less operational overhead. This proposal depends on that simplicity being clearly the better option for most folks, which will drive more adoption and end up being the most supported option. If we do not believe that it is clearly the better option, then we should not adopt this proposal.
+本提议旨在通过提供更清晰的机制来信任重定向 URI 和减少操作开销，简化授权服务器和资源服务器开发人员的故事。本提议取决于这种简单性对大多数人来说显然是更好的选择，这将推动更多采用并最终成为支持最多的选项。如果我们不认为它显然是更好的选择，那么我们不应采用本提议。
 
-This proposal also provides a unified mechanism for both open servers and servers that want to restrict which clients can be used. Alternatives to this proposal require that clients and servers implement different mechanisms for the open and protected use cases.
+本提议还为开放服务器和希望限制可使用哪些客户端的服务器提供了统一机制。本提议的替代方案要求客户端和服务器为开放和受保护用例实现不同的机制。
 
-## Alternatives Considered
+## 考虑的替代方案
 
-1. **Enhanced DCR with Software Statements**: More complex, requires JWKS hosting and JWT signing
-2. **Mandatory Pre-registration**: Poor developer and user experience for MCP's distributed ecosystem
-3. **Mutual TLS**: Requires trusting a client certificate authority, impractical in an open ecosystem
-4. **Status Quo**: Continues current pain points for server implementers
+1. **带有软件声明的增强型 DCR**：更复杂，需要 JWKS 托管和 JWT 签名
+2. **强制预注册**：对于 MCP 的分布式生态系统而言，开发者和用户体验较差
+3. **双向 TLS**：需要信任客户端证书颁发机构，在开放生态系统中不切实际
+4. **现状**：继续存在服务器实现者当前的痛点
 
-Client ID Metadata document is a strict improvement over DCR for the most common open-ecosystem use case. It can be further extended in the future to better support things like OS-level attestations and jwks_uri's.
+客户端 ID 元数据文档是针对最常见的开放生态系统用例对 DCR 的严格改进。它可以进一步扩展，以便在未来更好地支持操作系统级别的证明和 jwks_uri 等内容。
 
-## Backward Compatibility
+## 向后兼容性
 
-This proposal is fully backward compatible:
+本提案完全向后兼容：
 
-- Existing pre-registered clients continue working unchanged
-- Existing DCR implementations continue working unchanged
-- Servers can adopt Client ID Metadata Documents incrementally
-- Clients can detect support and fall back to other methods
+- 现有的预注册客户端继续正常工作，无需更改
+- 现有的 DCR 实现继续正常工作，无需更改
+- 服务器可以逐步采用客户端 ID 元数据文档
+- 客户端可以检测支持情况并回退到其他方法
 
-## Prototype Implementation
+## 原型实现
 
-A prototype implementation is available [here](https://github.com/modelcontextprotocol/typescript-sdk/pull/839) demonstrating:
+原型实现可在 [此处](https://github.com/modelcontextprotocol/typescript-sdk/pull/839) 获取，演示了：
 
-1. Client-side metadata document hosting
-2. Server-side metadata fetching and validation
-3. Integration with existing MCP OAuth flows
-4. Proper error handling and fallback behavior
+1. 客户端侧元数据文档托管
+2. 服务器侧元数据获取和验证
+3. 与现有 MCP OAuth 流程集成
+4. 适当的错误处理和回退行为
 
-## Security Implications
+## 安全影响
 
-1. **Phishing Prevention**: Display client hostname prominently
-2. **SSRF Protection**: Validate URLs, limit response size, timeout requests, rate limit outbound requests
+1. **网络钓鱼预防**：显著显示客户端主机名
+2. **SSRF 保护**：验证 URL，限制响应大小，设置请求超时，限制出站请求速率
 
-### Best Practices
+### 最佳实践
 
-- Only fetch client metadata after authenticating the user
-- Implement rate limiting on outbound metadata fetches
-- Consider additional warnings for new/unknown/localhost domains
-- Log metadata fetch failures for monitoring
+- 仅在认证用户后获取客户端元数据
+- 对出站元数据获取实施速率限制
+- 考虑对新的/未知的/本地主机域名发出额外警告
+- 记录元数据获取失败以便监控
 
-## References
+## 参考资料
 
 - [draft-parecki-oauth-client-id-metadata-document-03](https://www.ietf.org/archive/id/draft-parecki-oauth-client-id-metadata-document-03.txt)
 - [OAuth 2.1](https://datatracker.ietf.org/doc/draft-ietf-oauth-v2-1/)
-- [RFC 7591 - OAuth 2.0 Dynamic Client Registration](https://www.rfc-editor.org/rfc/rfc7591.html)
-- [MCP Specification - Authorization](https://modelcontextprotocol.org/docs/spec/authorization)
-- [Evolving OAuth Client Registration in the Model Context Protocol](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1027/)
+- [RFC 7591 - OAuth 2.0 动态客户端注册](https://www.rfc-editor.org/rfc/rfc7591.html)
+- [MCP 规范 - 授权](https://modelcontextprotocol.org/docs/spec/authorization)
+- [在模型上下文协议中演进 OAuth 客户端注册](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1027/)

@@ -1,21 +1,21 @@
 ---
-title: MCP Registry Supported Package Types
-sidebarTitle: Package Types
+title: MCP 注册表支持的包类型
+sidebarTitle: 包类型
 ---
 
 <Note>
-  The MCP Registry is currently in preview. Breaking changes or data resets may occur before general availability. If you encounter any issues, please report them on [GitHub](https://github.com/modelcontextprotocol/registry/issues).
+  MCP 注册表目前处于预览阶段。在正式发布之前，可能会发生破坏性更改或数据重置。如果遇到任何问题，请在 [GitHub](https://github.com/modelcontextprotocol/registry/issues) 上报告。
 </Note>
 
-# Package Types
+# 包类型
 
-The MCP Registry supports several different package types, and each package type has its own verification method.
+MCP 注册表支持几种不同的包类型，每种包类型都有其自己的验证方法。
 
-## npm Packages
+## npm 包
 
-For npm packages, the MCP Registry currently supports the npm public registry (`https://registry.npmjs.org`) only.
+对于 npm 包，MCP 注册表目前仅支持 npm 公共注册表（`https://registry.npmjs.org`）。
 
-npm packages use `"registryType": "npm"` in `server.json`. For example:
+npm 包在 `server.json` 中使用 `"registryType": "npm"`。例如：
 
 ```json server.json highlight={9}
 {
@@ -37,9 +37,9 @@ npm packages use `"registryType": "npm"` in `server.json`. For example:
 }
 ```
 
-### Ownership Verification
+### 所有权验证
 
-The MCP Registry verifies ownership of npm packages by checking `mcpName` in `package.json`. The `mcpName` property **MUST** match the server name from `server.json`. For example:
+MCP 注册表通过检查 `package.json` 中的 `mcpName` 来验证 npm 包的所有权。`mcpName` 属性**必须**与 `server.json` 中的服务器名称匹配。例如：
 
 ```json package.json
 {
@@ -49,11 +49,11 @@ The MCP Registry verifies ownership of npm packages by checking `mcpName` in `pa
 }
 ```
 
-## PyPI Packages
+## PyPI 包
 
-For PyPI packages, the MCP Registry currently supports the official PyPI registry (`https://pypi.org`) only.
+对于 PyPI 包，MCP 注册表目前仅支持官方 PyPI 注册表（`https://pypi.org`）。
 
-PyPI packages use `"registryType": "pypi"` in `server.json`. For example:
+PyPI 包在 `server.json` 中使用 `"registryType": "pypi"`。例如：
 
 ```json server.json highlight={9}
 {
@@ -75,9 +75,9 @@ PyPI packages use `"registryType": "pypi"` in `server.json`. For example:
 }
 ```
 
-### Ownership Verification
+### 所有权验证
 
-The MCP Registry verifies ownership of PyPI packages by checking for the existence of an `mcp-name: $SERVER_NAME` string in the package README (which becomes the package description on PyPI). The string may be hidden in a comment, but the `$SERVER_NAME` portion **MUST** match the server name from `server.json`. For example:
+MCP 注册表通过检查包 README 中是否存在 `mcp-name: $SERVER_NAME` 字符串来验证 PyPI 包的所有权（该 README 会成为 PyPI 上的包描述）。该字符串可以隐藏在注释中，但 `$SERVER_NAME` 部分**必须**与 `server.json` 中的服务器名称匹配。例如：
 
 ```markdown README.md highlight={5}
 # Database Query MCP Server
@@ -87,11 +87,11 @@ This MCP server executes SQL queries and manages database connections.
 <!-- mcp-name: io.github.username/database-query-mcp -->
 ```
 
-## NuGet Packages
+## NuGet 包
 
-For NuGet packages, the MCP Registry currently supports the official NuGet registry (`https://api.nuget.org/v3/index.json`) only.
+对于 NuGet 包，MCP 注册表目前仅支持官方 NuGet 注册表（`https://api.nuget.org/v3/index.json`）。
 
-NuGet packages use `"registryType": "nuget"` in `server.json`. For example:
+NuGet 包在 `server.json` 中使用 `"registryType": "nuget"`。例如：
 
 ```json server.json highlight={9}
 {
@@ -113,9 +113,9 @@ NuGet packages use `"registryType": "nuget"` in `server.json`. For example:
 }
 ```
 
-### Ownership Verification
+### 所有权验证
 
-The MCP Registry verifies ownership of NuGet packages by checking for the existence of an `mcp-name: $SERVER_NAME` string in the package README. The string may be hidden in a comment, but the `$SERVER_NAME` portion **MUST** match the server name from `server.json`. For example:
+MCP 注册表通过检查包 README 中是否存在 `mcp-name: $SERVER_NAME` 字符串来验证 NuGet 包的所有权。该字符串可以隐藏在注释中，但 `$SERVER_NAME` 部分**必须**与 `server.json` 中的服务器名称匹配。例如：
 
 ```markdown README.md highlight={5}
 # Azure DevOps MCP Server
@@ -125,17 +125,17 @@ This MCP server manages Azure DevOps work items and pipelines.
 <!-- mcp-name: io.github.username/azure-devops-mcp -->
 ```
 
-## Docker/OCI Images
+## Docker/OCI 镜像
 
-For Docker/OCI images, the MCP Registry currently supports:
+对于 Docker/OCI 镜像，MCP 注册表目前支持：
 
 - Docker Hub (`docker.io`)
-- GitHub Container Registry (`ghcr.io`)
-- Google Artifact Registry (any `*.pkg.dev` domain)
-- Azure Container Registry (`*.azurecr.io`)
-- Microsoft Container Registry (`mcr.microsoft.com`)
+- GitHub 容器注册表 (`ghcr.io`)
+- Google Artifact Registry（任何 `*.pkg.dev` 域名）
+- Azure 容器注册表 (`*.azurecr.io`)
+- Microsoft 容器注册表 (`mcr.microsoft.com`)
 
-Docker/OCI images use `"registryType": "oci"` in `server.json`. For example:
+Docker/OCI 镜像在 `server.json` 中使用 `"registryType": "oci"`。例如：
 
 ```json server.json highlight={9}
 {
@@ -156,21 +156,21 @@ Docker/OCI images use `"registryType": "oci"` in `server.json`. For example:
 }
 ```
 
-The format of `identifier` is `registry/namespace/repository:tag`. For example, `docker.io/user/app:1.0.0` or `ghcr.io/user/app:1.0.0`. The tag can also be specified as a digest.
+`identifier` 的格式是 `registry/namespace/repository:tag`。例如，`docker.io/user/app:1.0.0` 或 `ghcr.io/user/app:1.0.0`。标签也可以指定为摘要。
 
-### Ownership Verification
+### 所有权验证
 
-The MCP Registry verifies ownership of Docker/OCI images by checking for an `io.modelcontextprotocol.server.name` annotation. The value of the `io.modelcontextprotocol.server.name` annotation **MUST** match the server name from `server.json`. For example:
+MCP 注册表通过检查 `io.modelcontextprotocol.server.name` 注解来验证 Docker/OCI 镜像的所有权。`io.modelcontextprotocol.server.name` 注解的值**必须**与 `server.json` 中的服务器名称匹配。例如：
 
 ```dockerfile Dockerfile
 LABEL io.modelcontextprotocol.server.name="io.github.username/kubernetes-manager-mcp"
 ```
 
-## MCPB Packages
+## MCPB 包
 
-For MCPB packages, the MCP Registry currently supports MCPB artifacts hosted via GitHub or GitLab releases.
+对于 MCPB 包，MCP 注册表目前支持通过 GitHub 或 GitLab 发布版本托管的 MCPB 工件。
 
-MCPB packages use `"registryType": "mcpb"` in `server.json`. For example:
+MCPB 包在 `server.json` 中使用 `"registryType": "mcpb"`。例如：
 
 ```json server.json highlight={9}
 {
@@ -192,14 +192,14 @@ MCPB packages use `"registryType": "mcpb"` in `server.json`. For example:
 }
 ```
 
-### Verification
+### 验证
 
-The MCPB package URL (`identifier` in `server.json`) **MUST** contain the string "mcp". That can be as part of the `.mcpb` file extension or in the name of the repository.
+MCPB 包 URL（`server.json` 中的 `identifier`）**必须**包含字符串 "mcp"。这可以是 `.mcpb` 文件扩展名的一部分，也可以是存储库名称的一部分。
 
-The package metadata in `server.json` **MUST** include a `fileSha256` property with a SHA-256 hash of the MCPB artifact, which can be computed using the `openssl` command:
+`server.json` 中的包元数据**必须**包含一个 `fileSha256` 属性，其中包含 MCPB 工件的 SHA-256 哈希值，可以使用 `openssl` 命令计算：
 
 ```bash
 openssl dgst -sha256 image-processor.mcpb
 ```
 
-The MCP Registry does not validate this hash; however, MCP clients **do** validate the hash before installation to ensure file integrity. Downstream registries may also implement their own validation.
+MCP 注册表不验证此哈希；但是，MCP 客户端**会**在安装前验证哈希以确保文件完整性。下游注册表也可能实施自己的验证。

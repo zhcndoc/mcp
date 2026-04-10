@@ -1,113 +1,113 @@
 ---
-title: Governance and Stewardship
-description: Learn about the Model Context Protocol's governance structure and how to participate in the community
+title: 治理与管理
+description: 了解 Model Context Protocol 的治理结构以及如何参与社区
 ---
 
-The Model Context Protocol (MCP) follows a formal governance model to ensure transparent decision-making and community participation. This document outlines how the project is organized and how decisions are made.
+Model Context Protocol (MCP) 遵循正式的治理模型，以确保透明的决策和社区参与。本文档概述了项目的组织方式以及决策制定过程。
 
-## General Project Policies
+## 一般项目政策
 
-Model Context Protocol has been established as **Model Context Protocol a Series of LF Projects, LLC**. Policies applicable to Model Context Protocol and participants in Model Context Protocol, including guidelines on the usage of trademarks, are located at [https://www.lfprojects.org/policies/](https://www.lfprojects.org/policies/). Governance changes approved as per the provisions of this governance document must also be approved by LF Projects, LLC.
+Model Context Protocol 已成立为 **Model Context Protocol a Series of LF Projects, LLC**。适用于 Model Context Protocol 及其参与者的政策，包括商标使用指南，位于 [https://www.lfprojects.org/policies/](https://www.lfprojects.org/policies/)。根据本治理文件规定批准的治理变更也必须得到 LF Projects, LLC 的批准。
 
-Model Context Protocol participants acknowledge that the copyright in all new contributions will be retained by the copyright holder as independent works of authorship and that no contributor or copyright holder will be required to assign copyrights to the project.
+Model Context Protocol 参与者承认，所有新贡献的版权将由版权所有者作为独立的作者作品保留，并且不要求任何贡献者或版权所有者将版权转让给项目。
 
-Except as described below, all code and specification contributions to the project must be made using the Apache License, Version 2.0 (available here: [https://www.apache.org/licenses/LICENSE-2.0](https://www.apache.org/licenses/LICENSE-2.0)) (the "Project License").
+除下文所述外，对项目的所有代码和规范贡献必须使用 Apache 许可证 2.0 版（此处可用：[https://www.apache.org/licenses/LICENSE-2.0](https://www.apache.org/licenses/LICENSE-2.0)）（“项目许可证”）。
 
-All outbound code and specifications will be made available under the Project License. The Core Maintainers may approve the use of an alternative open license or licenses for inbound or outbound contributions on an exception basis.
+所有出站代码和规范将在项目许可证下提供。核心维护者可以在例外情况下批准使用替代的开源许可证用于入站或出站贡献。
 
-All documentation (excluding specifications) will be made available under Creative Commons Attribution 4.0 International license, available at: https://creativecommons.org/licenses/by/4.0.
+所有文档（不包括规范）将根据 Creative Commons Attribution 4.0 International 许可证提供，地址：https://creativecommons.org/licenses/by/4.0。
 
-## Technical Governance
+## 技术治理
 
-The MCP project adopts a hierarchical structure, similar to Python, PyTorch, and other open source projects:
+MCP 项目采用层级结构，类似于 Python、PyTorch 和其他开源项目：
 
-| Role                        | Scope                            |
+| 角色                        | 范围                            |
 | --------------------------- | -------------------------------- |
-| **Lead Maintainers (BDFL)** | Final decision authority         |
-| **Core Maintainers**        | Overall project direction        |
-| **Maintainers**             | Working Groups, SDKs, components |
-| **Contributors**            | Issues, PRs, discussions         |
+| **首席维护者 (BDFL)**       | 最终决策权                       |
+| **核心维护者**              | 整体项目方向                     |
+| **维护者**                  | 工作组、SDK、组件                |
+| **贡献者**                  | Issue、PR、讨论                  |
 
-- **Contributors** file issues, make pull requests, and contribute to the project.
-- **Maintainers** drive components within the MCP project, such as SDKs, documentation, and Working Groups.
-- **Core Maintainers** drive the overall project direction and oversee contributors and maintainers.
-- **Lead Maintainers** are the final decision makers (also known as BDFL - Benevolent Dictator for Life).
+- **贡献者** 提交 issue、发起 pull request 并为项目做贡献。
+- **维护者** 推动 MCP 项目内的组件，例如 SDK、文档和工作组。
+- **核心维护者** 推动整体项目方向并监督贡献者和维护者。
+- **首席维护者** 是最终决策者（也称为 BDFL - 终身仁慈独裁者）。
 
-Together, Maintainers, Core Maintainers, and Lead Maintainers form the **MCP Steering Group**.
+维护者、核心维护者和首席维护者共同组成 **MCP 指导小组**。
 
-All maintainers are expected to have a strong bias towards MCP's design philosophy. Membership in the technical governance process is for individuals, not companies. That is, there are no seats reserved for specific companies, and membership is associated with the person rather than the company employing that person.
+所有维护者都应强烈倾向于 MCP 的设计理念。技术治理过程中的成员资格是针对个人的，而不是公司。也就是说，没有为特定公司保留席位，成员资格与个人而非雇佣该个人的公司相关联。
 
-### Communication Channels
+### 沟通渠道
 
-Technical governance is facilitated through a shared [Discord server](https://discord.gg/6CSzBmMkjX) for all maintainers. Each maintainer group can choose additional communication channels, but all decisions and their supporting discussions must be recorded and made transparently available on the Discord server.
+技术治理通过所有维护者共享的 [Discord 服务器](https://discord.gg/6CSzBmMkjX) 进行促进。每个维护者组可以选择额外的沟通渠道，但所有决策及其支持性讨论必须记录并在 Discord 服务器上透明公开。
 
-### Roles
+### 角色
 
-The [Contributor Ladder](/community/contributor-ladder) is the canonical definition of each role — its requirements, responsibilities, privileges, advancement process, and inactivity policy. This section gives a conceptual overview of how the roles relate to governance.
+[贡献者阶梯](/community/contributor-ladder) 是每个角色的规范定义——其要求、职责、特权、晋升流程和不活跃政策。本节概述了角色如何与治理相关联的概念。
 
-**Maintainers** steward specific areas such as SDKs, documentation, or [Working Groups](/community/working-interest-groups). They make decisions for their area independently and escalate to Core Maintainers when needed. Maintainers have write access to their respective repositories.
+**维护者** 管理特定领域，如 SDK、文档或 [工作组](/community/working-interest-groups)。他们独立为其领域做出决策，并在需要时升级至核心维护者。维护者拥有各自仓库的写入权限。
 
-**Core Maintainers** steer the MCP specification and overall project direction. They can veto Maintainer decisions by majority vote, resolve disputes, and appoint or remove Maintainers. Core Maintainers have admin access to all MCP repositories but use the same pull-request workflow as outside contributors.
+**核心维护者** 指导 MCP 规范和整体项目方向。他们可以通过多数投票否决维护者的决策，解决争议，并任命或移除维护者。核心维护者拥有所有 MCP 仓库的管理权限，但使用与外部贡献者相同的 pull-request 工作流程。
 
-**Lead Maintainers** hold final authority and can veto any decision by Core Maintainers or Maintainers — the role commonly known as Benevolent Dictator for Life (BDFL). Lead Maintainers appoint and remove Core Maintainers, and are administrators on all project infrastructure. They are part of the Core Maintainer group and are expected to publicly articulate their reasoning.
+**首席维护者** 拥有最终权威，可以否决核心维护者或维护者的任何决策——该角色通常称为终身仁慈独裁者 (BDFL)。首席维护者任命和移除核心维护者，并且是所有项目基础设施的管理员。他们是核心维护者组的一部分，并期望公开阐述其理由。
 
-The [Contributor Ladder](/community/contributor-ladder) also defines the **Member** and **Community Moderator** roles, which sit outside the Steering Group.
+[贡献者阶梯](/community/contributor-ladder) 还定义了 **成员** 和 **社区版主** 角色，它们位于指导小组之外。
 
-### Decision Process
+### 决策流程
 
-The Core Maintainer group meets every two weeks to discuss and vote on proposals, as well as discuss any topics needed. The shared Discord server can be used to discuss and vote on smaller proposals if needed.
+核心维护者组每两周开会一次，讨论和投票表决提案，以及讨论任何需要的话题。如果需要，共享的 Discord 服务器可用于讨论和投票表决较小的提案。
 
-The Lead Maintainer, Core Maintainer, and Maintainer group should attempt to meet in person every three to six months.
+首席维护者、核心维护者和维护者组应尝试每三到六个月亲自见面一次。
 
-## Processes
+## 流程
 
-Core Maintainers and Lead Maintainers are responsible for all aspects of Model Context Protocol, including documentation, issues, suggestions for content, and all other parts under the [MCP project](https://github.com/modelcontextprotocol). Maintainers are responsible for documentation, issues, and suggestions of content for their area of the MCP project, but are encouraged to partake in general maintenance of the MCP projects.
+核心维护者和首席维护者负责 Model Context Protocol 的所有方面，包括文档、issue、内容建议以及 [MCP 项目](https://github.com/modelcontextprotocol) 下的所有其他部分。维护者负责其 MCP 项目领域的文档、issue 和内容建议，但鼓励参与 MCP 项目的一般维护。
 
-Maintainers, Core Maintainers, and Lead Maintainers should use the same contribution process as external contributors, rather than making direct changes to repos. This provides insight into intent and opportunity for discussion.
+维护者、核心维护者和首席维护者应使用与外部贡献者相同的贡献流程，而不是直接更改仓库。这提供了对意图的洞察和讨论的机会。
 
-### Working Groups and Interest Groups
+### 工作组和兴趣组
 
-MCP collaboration and contributions are organized around two structures: [Working Groups and Interest Groups](/community/working-interest-groups).
+MCP 协作和贡献围绕两个结构组织：[工作组和兴趣组](/community/working-interest-groups)。
 
-- **Interest Groups** identify and articulate problems that MCP should address through open discussions
-- **Working Groups** develop concrete solutions by producing deliverables like SEPs or implementations
+- **兴趣组** 通过公开讨论识别并阐述 MCP 应解决的问题
+- **工作组** 通过产生交付物（如 SEP 或实现）来开发具体解决方案
 
-For details on how to create, participate in, and facilitate these groups, see the [Working and Interest Groups](/community/working-interest-groups) documentation.
+有关如何创建、参与和促进这些组的详细信息，请参阅 [工作组和兴趣组](/community/working-interest-groups) 文档。
 
-### Specification Enhancement Proposals (SEPs)
+### 规范增强提案 (SEPs)
 
-Proposed changes to the specification must be submitted as [Specification Enhancement Proposals (SEPs)](/community/sep-guidelines). SEPs are the primary mechanism for proposing major new features, collecting community input, and documenting design decisions.
+对规范的拟议变更必须作为 [规范增强提案 (SEPs)](/community/sep-guidelines) 提交。SEPs 是提议主要新功能、收集社区输入和记录设计决策的主要机制。
 
-For the complete SEP process, format requirements, and status workflow, see the [SEP Guidelines](/community/sep-guidelines).
+有关完整的 SEP 流程、格式要求和状态工作流，请参阅 [SEP 指南](/community/sep-guidelines)。
 
-### Maintenance Responsibilities
+### 维护职责
 
-Components without dedicated maintainers (such as documentation) fall under Core Maintainer responsibility. These follow standard contribution guidelines through pull requests, with maintainers handling reviews and escalating to Core Maintainer review for any significant changes.
+没有专门维护者的组件（如文档）属于核心维护者责任。这些通过 pull request 遵循标准贡献指南，维护者处理审查，并将任何重大变更升级至核心维护者审查。
 
-Core Maintainers and Maintainers are encouraged to improve any part of the MCP project, regardless of formal maintenance assignments.
+鼓励核心维护者和维护者改进 MCP 项目的任何部分，无论正式的维护分配如何。
 
-## Communication
+## 沟通
 
-### Core Maintainer Meetings
+### 核心维护者会议
 
-The Core Maintainer group meets on a bi-weekly basis to discuss proposals and the project. Notes on proposals should be made public. The Core Maintainer group will strive to meet in person every 3-6 months.
+核心维护者组每两周开会一次，讨论提案和项目。提案笔记应公开。核心维护者组将努力每 3-6 个月亲自见面一次。
 
-### Public Chat
+### 公共聊天
 
-The MCP project maintains a [public Discord server](https://discord.gg/6CSzBmMkjX) with open chats for interest groups. The MCP project may have private channels for certain communications.
+MCP 项目维护一个 [公共 Discord 服务器](https://discord.gg/6CSzBmMkjX)，设有兴趣组的公开聊天。MCP 项目可能设有用于某些通信的私人渠道。
 
-## Nominating, Confirming, and Removing Maintainers
+## 提名、确认和移除维护者
 
-Membership in maintainer groups is given to **individuals** on a merit basis after demonstrated expertise and alignment with MCP's direction. Membership is associated with the person, not their employer, and has no term limit.
+维护者组的成员资格是基于功绩授予**个人**的，需经过证实的专业知识并与 MCP 的方向保持一致。成员资格与个人相关联，而非其雇主，且没有任期限制。
 
-The nomination process, sponsorship requirements, review timeline, and inactivity criteria for each role are defined in the [Contributor Ladder's Advancement Process](/community/contributor-ladder#advancement-process).
+每个角色的提名流程、赞助要求、审查时间表和不活跃标准在 [贡献者阶梯的晋升流程](/community/contributor-ladder#advancement-process) 中定义。
 
-## Current Lead Maintainers
+## 现任首席维护者
 
 - Justin Spahr-Summers
 - David Soria Parra
 
-## Current Core Maintainers
+## 现任核心维护者
 
 - Peter Alexander
 - Caitie McCaffrey
@@ -119,6 +119,6 @@ The nomination process, sponsorship requirements, review timeline, and inactivit
 - Che Liu
 - Den Delimarsky
 
-## Current Maintainers and Working Groups
+## 现任维护者和工作组
 
-Refer to [the maintainer list](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/MAINTAINERS.md).
+请参阅 [维护者列表](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/MAINTAINERS.md)。

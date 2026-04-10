@@ -1,98 +1,98 @@
 ---
-title: Server Card Charter
-description: Charter for the MCP Server Card Working Group.
+title: 服务器卡片章程
+description: MCP 服务器卡片工作组的章程。
 ---
 
-## Group Type
+## 小组类型
 
-**Working Group**
+**工作组**
 
-## Mission Statement
+## 使命陈述
 
-The Server Card Working Group exists to define mechanisms that facilitate discovery and usage of MCP servers via common discovery mechanisms, and to provide guidance on how this fits into broader AI standardization efforts around discovery. Concretely, the WG will define what constitutes an MCP Server Card, the standardized document format a Server Card must follow, and how clients discover a Server Card for a given server.
+服务器卡片工作组旨在定义机制，以促进通过通用发现机制发现和使用的 MCP 服务器，并就其如何融入更广泛的围绕发现的 AI 标准化工作提供指导。具体来说，工作组将定义什么是 MCP 服务器卡片，服务器卡片必须遵循的标准化文档格式，以及客户端如何发现给定服务器的服务器卡片。
 
-## Scope
+## 范围
 
-### In Scope
+### 范围内
 
-- **Specification Work**: SEPs or extensions defining what constitutes an MCP Server Card and the specific format of the Server Card document.
-- **Discovery Mechanism**: Specification of how an MCP Server Card document is discovered (well-known URL, resource-based discovery, etc.).
-- **Cross-Ecosystem Coordination**: A recommendation to the [AI Card](https://github.com/Agent-Card/ai-card) effort on how to interact with MCP Server Cards.
-- **Documentation**: Specification sections and guidance covering Server Card authoring and consumption.
+- **规范工作**：定义什么是 MCP 服务器卡片以及服务器卡片文档具体格式的 SEP 或扩展。
+- **发现机制**：指定如何发现 MCP 服务器卡片文档（well-known URL、基于资源的发现等）。
+- **跨生态系统协调**：向 [AI 卡片](https://github.com/Agent-Card/ai-card) 工作提出关于如何与 MCP 服务器卡片交互的建议。
+- **文档**：涵盖服务器卡片编写和使用的规范部分和指南。
 
-### Out of Scope
+### 范围外
 
-- Changes to the MCP initialization handshake or transport layer.
-- A general-purpose MCP server registry or catalog (owned by the Registry WG).
-- Internationalization of Server Card content until an MCP-wide i18n approach is defined.
+- 更改 MCP 初始化握手或传输层。
+- 通用 MCP 服务器注册表或目录（由注册表工作组拥有）。
+- 在定义 MCP 范围的 i18n 方法之前，服务器卡片内容的国际化。
 
-### Related Groups
+### 相关小组
 
-- **Registry WG** — Server Card format should stay as close as possible to a subset of `server.json`; coordination required to avoid divergence.
-- **AI Card effort** (external) — ongoing discussion on whether and how an AI Catalog can link directly to an MCP Server Card.
+- **注册表工作组** — 服务器卡片格式应尽可能保持与 `server.json` 子集接近；需要协调以避免分歧。
+- **AI 卡片工作**（外部）— 正在讨论 AI 目录是否可以以及如何直接链接到 MCP 服务器卡片。
 
-## Leadership
+## 领导层
 
-| Role | Name              | Organization | GitHub                                               | Term                         |
+| 角色 | 姓名 | 组织 | GitHub | 任期 |
 | ---- | ----------------- | ------------ | ---------------------------------------------------- | ---------------------------- |
-| Lead | David Soria Parra | Anthropic    | [@dsp-ant](https://github.com/dsp-ant)               | 6 months (ends Aug 14, 2026) |
-| Lead | Sam Morrow Drums  | GitHub       | [@SamMorrowDrums](https://github.com/SamMorrowDrums) | 6 months (ends Aug 14, 2026) |
+| 负责人 | David Soria Parra | Anthropic | [@dsp-ant](https://github.com/dsp-ant) | 6 个月（截至 2026 年 8 月 14 日） |
+| 负责人 | Sam Morrow Drums | GitHub | [@SamMorrowDrums](https://github.com/SamMorrowDrums) | 6 个月（截至 2026 年 8 月 14 日） |
 
-## Authority & Decision Rights
+## 权限与决策权
 
-| Decision Type                       | Authority Level                                        |
+| 决策类型 | 权限级别 |
 | ----------------------------------- | ------------------------------------------------------ |
-| Meeting logistics & scheduling      | WG Leads (autonomous)                                  |
-| Proposal prioritization within WG   | WG Leads (autonomous)                                  |
-| SEP triage & closure (in scope)     | WG Leads (autonomous, with documented rationale)       |
-| Technical design within scope       | WG consensus                                           |
-| Spec changes (additive)             | WG consensus → Core Maintainer approval                |
-| Spec changes (breaking/fundamental) | WG consensus → Core Maintainer approval + wider review |
-| Scope expansion                     | Core Maintainer approval required                      |
-| WG Member approval                  | WG Member sponsors                                     |
+| 会议后勤与调度 | 工作组负责人（自主） |
+| 工作组内提案优先级 | 工作组负责人（自主） |
+| SEP 分类与关闭（范围内） | 工作组负责人（自主，需记录理由） |
+| 范围内的技术设计 | 工作组共识 |
+| 规范变更（增量） | 工作组共识 → 核心维护者批准 |
+| 规范变更（破坏性/根本性） | 工作组共识 → 核心维护者批准 + 更广泛的审查 |
+| 范围扩展 | 需要核心维护者批准 |
+| 工作组成员批准 | 工作组成员推荐人 |
 
-## Membership
+## 成员资格
 
-| Name               | Organization | GitHub                                               | Discord | Level     |
+| 姓名 | 组织 | GitHub | Discord | 级别 |
 | ------------------ | ------------ | ---------------------------------------------------- | ------- | --------- |
-| David Soria Parra  | Anthropic    | [@dsp-ant](https://github.com/dsp-ant)               |         | Lead      |
-| Sam Morrow Drums   | GitHub       | [@SamMorrowDrums](https://github.com/SamMorrowDrums) |         | Lead      |
-| Tadas Antanavicius |              | [@tadasant](https://github.com/tadasant)             |         | WG Member |
+| David Soria Parra | Anthropic | [@dsp-ant](https://github.com/dsp-ant) | | 负责人 |
+| Sam Morrow Drums | GitHub | [@SamMorrowDrums](https://github.com/SamMorrowDrums) | | 负责人 |
+| Tadas Antanavicius | | [@tadasant](https://github.com/tadasant) | | 工作组成员 |
 
-## Operations
+## 运营
 
-| Meeting         | Frequency | Duration | Purpose                               |
+| 会议 | 频率 | 时长 | 目的 |
 | --------------- | --------- | -------- | ------------------------------------- |
-| Working Session | Weekly    | 60 min   | Technical discussion, proposal review |
+| 工作会议 | 每周 | 60 分钟 | 技术讨论，提案审查 |
 
 Discord: [#server-card-wg](https://discord.com/channels/1358869848138059966/1399986204405141534)
 
-## Deliverables & Success Metrics
+## 交付物与成功指标
 
-### Active Work Items
+### 活跃工作项
 
-| Item                                                                                                | Status | Target Date | Champion                               |
+| 项目 | 状态 | 目标日期 | 倡导者 |
 | --------------------------------------------------------------------------------------------------- | ------ | ----------- | -------------------------------------- |
-| [SEP-2127: MCP Server Card](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2127) | Draft  | Apr 3, 2026 | [@dsp-ant](https://github.com/dsp-ant) |
+| [SEP-2127: MCP 服务器卡片](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2127) | 草案 | 2026 年 4 月 3 日 | [@dsp-ant](https://github.com/dsp-ant) |
 
-### Success Criteria
+### 成功标准
 
-### Active Work Items
+### 活跃工作项
 
-| Item                                    | Status | Target Date | Champion |
+| 项目 | 状态 | 目标日期 | 倡导者 |
 | --------------------------------------- | ------ | ----------- | -------- |
-| SEP 2127: MCP Server Cards              | Draft  | End March   | @dsp-ant |
-| Reference implementation in Tier-1 SDKs | —      | End April   | TBD      |
+| SEP 2127: MCP 服务器卡片 | 草案 | 3 月底 | @dsp-ant |
+| 一级 SDK 中的参考实现 | — | 4 月底 | 待定 |
 
-### Success Criteria
+### 成功标准
 
-- Spec changes accepted by Core Maintainers.
-- SDK implementations available.
-- Real-world clients with reach implementing the proposal.
-- Real-world servers with reach implementing the proposal.
+- 规范变更被核心维护者接受。
+- SDK 实现可用。
+- 具备覆盖面的真实客户端实现了该提案。
+- 具备覆盖面的真实服务器实现了该提案。
 
-## Changelog
+## 变更日志
 
-| Date       | Change          |
+| 日期 | 变更 |
 | ---------- | --------------- |
-| 2026-03-26 | Initial charter |
+| 2026-03-26 | 初始章程 |

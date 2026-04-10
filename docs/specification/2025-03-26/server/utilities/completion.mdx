@@ -1,27 +1,20 @@
 ---
-title: Completion
+title: 补全
 ---
 
-The Model Context Protocol (MCP) provides a standardized way for servers to offer
-argument autocompletion suggestions for prompts and resource URIs. This enables rich,
-IDE-like experiences where users receive contextual suggestions while entering argument
-values.
+Model Context Protocol (MCP) 为服务器提供了一种标准化方式，以便为提示词和资源 URI 提供参数自动补全建议。这使得用户能够在输入参数值时接收上下文建议，从而实现丰富的、类似 IDE 的体验。
 
-## User Interaction Model
+## 用户交互模型
 
-Completion in MCP is designed to support interactive user experiences similar to IDE code
-completion.
+MCP 中的补全旨在支持类似于 IDE 代码补全的交互式用户体验。
 
-For example, applications may show completion suggestions in a dropdown or popup menu as
-users type, with the ability to filter and select from available options.
+例如，应用程序可以在用户输入时在下拉菜单或弹出菜单中显示补全建议，并能够过滤和选择可用选项。
 
-However, implementations are free to expose completion through any interface pattern that
-suits their needs&mdash;the protocol itself does not mandate any specific user
-interaction model.
+然而，实现者可以通过任何适合其需求的界面模式来暴露补全功能——协议本身并不强制要求任何特定的用户交互模型。
 
-## Capabilities
+## 能力
 
-Servers that support completions **MUST** declare the `completions` capability:
+支持补全的服务器 **必须** 声明 `completions` 能力：
 
 ```json
 {
@@ -31,14 +24,13 @@ Servers that support completions **MUST** declare the `completions` capability:
 }
 ```
 
-## Protocol Messages
+## 协议消息
 
-### Requesting Completions
+### 请求补全
 
-To get completion suggestions, clients send a `completion/complete` request specifying
-what is being completed through a reference type:
+为了获取补全建议，客户端发送 `completion/complete` 请求，通过引用类型指定正在补全的内容：
 
-**Request:**
+**请求：**
 
 ```json
 {
@@ -58,7 +50,7 @@ what is being completed through a reference type:
 }
 ```
 
-**Response:**
+**响应：**
 
 ```json
 {
@@ -74,82 +66,82 @@ what is being completed through a reference type:
 }
 ```
 
-### Reference Types
+### 引用类型
 
-The protocol supports two types of completion references:
+协议支持两种类型的补全引用：
 
-| Type           | Description                 | Example                                             |
+| 类型           | 描述                 | 示例                                             |
 | -------------- | --------------------------- | --------------------------------------------------- |
-| `ref/prompt`   | References a prompt by name | `{"type": "ref/prompt", "name": "code_review"}`     |
-| `ref/resource` | References a resource URI   | `{"type": "ref/resource", "uri": "file:///{path}"}` |
+| `ref/prompt`   | 按名称引用提示词 | `{"type": "ref/prompt", "name": "code_review"}`     |
+| `ref/resource` | 引用资源 URI   | `{"type": "ref/resource", "uri": "file:///{path}"}` |
 
-### Completion Results
+### 补全结果
 
-Servers return an array of completion values ranked by relevance, with:
+服务器返回按相关性排序的补全值数组，包括：
 
-- Maximum 100 items per response
-- Optional total number of available matches
-- Boolean indicating if additional results exist
+- 每个响应最多 100 项
+- 可选的可用匹配总数
+- 布尔值，指示是否存在更多结果
 
-## Message Flow
+## 消息流
 
 ```mermaid
 sequenceDiagram
     participant Client
     participant Server
 
-    Note over Client: User types argument
+    Note over Client: 用户输入参数
     Client->>Server: completion/complete
-    Server-->>Client: Completion suggestions
+    Server-->>Client: 补全建议
 
-    Note over Client: User continues typing
+    Note over Client: 用户继续输入
     Client->>Server: completion/complete
-    Server-->>Client: Refined suggestions
+    Server-->>Client: 优化后的建议
 ```
 
-## Data Types
+## 数据类型
 
 ### CompleteRequest
 
-- `ref`: A `PromptReference` or `ResourceReference`
-- `argument`: Object containing:
-  - `name`: Argument name
-  - `value`: Current value
+- `ref`: 一个 `PromptReference` 或 `ResourceReference`
+- `argument`: 包含以下的对象：
+  - `name`: 参数名称
+  - `value`: 当前值
 
 ### CompleteResult
 
-- `completion`: Object containing:
-  - `values`: Array of suggestions (max 100)
-  - `total`: Optional total matches
-  - `hasMore`: Additional results flag
+- `completion`: 包含以下的对象：
+  - `values`: 建议数组（最多 100 个）
+  - `total`: 可选的匹配总数
+  - `hasMore`: 更多结果标志
 
-## Error Handling
+## 错误处理
 
-Servers **SHOULD** return standard JSON-RPC errors for common failure cases:
+服务器 **应该** 为常见失败情况返回标准 JSON-RPC 错误：
 
-- Method not found: `-32601` (Capability not supported)
-- Invalid prompt name: `-32602` (Invalid params)
-- Missing required arguments: `-32602` (Invalid params)
-- Internal errors: `-32603` (Internal error)
+- 方法未找到：`-32601`（不支持的能力）
+- 无效的提示词名称：`-32602`（无效的参数）
+- 缺少必需参数：`-32602`（无效的参数）
+- 内部错误：`-32603`（内部错误）
 
-## Implementation Considerations
+## 实现注意事项
 
-1. Servers **SHOULD**:
-   - Return suggestions sorted by relevance
-   - Implement fuzzy matching where appropriate
-   - Rate limit completion requests
-   - Validate all inputs
+1. 服务器 **应该**：
+   - 返回按相关性排序的建议
+   - 在适当的情况下实现模糊匹配
+   - 对补全请求进行速率限制
+   - 验证所有输入
 
-2. Clients **SHOULD**:
-   - Debounce rapid completion requests
-   - Cache completion results where appropriate
-   - Handle missing or partial results gracefully
+2. 客户端 **应该**：
+   - 对快速的补全请求进行防抖处理
+   - 在适当的情况下缓存补全结果
+   - 优雅地处理缺失或部分结果
 
-## Security
+## 安全性
 
-Implementations **MUST**:
+实现 **必须**：
 
-- Validate all completion inputs
-- Implement appropriate rate limiting
-- Control access to sensitive suggestions
-- Prevent completion-based information disclosure
+- 验证所有补全输入
+- 实施适当的速率限制
+- 控制对敏感建议的访问
+- 防止基于补全的信息泄露

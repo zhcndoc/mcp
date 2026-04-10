@@ -1,107 +1,103 @@
 ---
-title: "Build with Agent Skills"
-description: "Use agent skills to guide AI coding assistants through MCP server design and implementation"
+title: "使用 Agent 技能构建"
+description: "使用 Agent 技能指导 AI 编码助手完成 MCP 服务器的设计与实现"
 ---
 
-[Agent skills](https://agentskills.io/home) are portable instruction sets that
-give AI coding assistants domain knowledge for a task. For MCP development,
-they encode the design decisions (deployment model, tool patterns, auth) so
-your agent can interrogate your use case and scaffold a server that fits.
+[Agent 技能](https://agentskills.io/home) 是可移植的指令集，
+为 AI 编码助手提供特定任务的领域知识。对于 MCP 开发，
+它们编码了设计决策（部署模型、工具模式、认证），以便
+你的 Agent 可以询问你的用例并搭建一个合适的服务器骨架。
 
-## Available skills
+## 可用技能
 
-A reference set of MCP development skills is available as the
-[`mcp-server-dev` plugin](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/mcp-server-dev).
-It provides three composing skills:
+一组参考的 MCP 开发技能可作为
+[`mcp-server-dev` 插件](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/mcp-server-dev) 获取。
+它提供了三个组合技能：
 
-| Skill              | Purpose                                                                                                                 |
+| 技能               | 用途                                                                                                                 |
 | ------------------ | ----------------------------------------------------------------------------------------------------------------------- |
-| `build-mcp-server` | Entry point. Interrogates the use case, picks a deployment model and tool-design pattern, routes to specialized skills. |
-| `build-mcp-app`    | Adds interactive UI widgets (forms, pickers, dashboards) rendered inline in chat.                                       |
-| `build-mcpb`       | Packages a local stdio server with its runtime so users can install it without Node or Python.                          |
+| `build-mcp-server` | 入口点。询问用例，选择部署模型和工具设计模式，路由到专用技能。 |
+| `build-mcp-app`    | 添加交互式 UI 小部件（表单、选择器、仪表板），在聊天中内联渲染。                                       |
+| `build-mcpb`       | 将本地 stdio 服务器与其运行时打包，以便用户无需 Node 或 Python 即可安装。                          |
 
-Each skill ships a `SKILL.md` file plus a `references/` folder of supporting
-material (auth flows, tool-design patterns, widget templates, manifest schemas)
-that the agent reads on demand. The files follow the open format and work with
-any agent that implements the standard. For example, to install them in Claude
-Code:
+每个技能都附带一个 `SKILL.md` 文件以及一个 `references/` 文件夹，其中包含支持
+材料（认证流程、工具设计模式、小部件模板、清单 schema），
+Agent 可按需读取这些文件。这些文件遵循开放格式，适用于
+任何实现该标准的 Agent。例如，要在 Claude
+Code 中安装它们：
 
 ```bash
 /plugin marketplace add anthropics/claude-plugins-official
 /plugin install mcp-server-dev
 ```
 
-For other agents, check your skills or extensions catalog, or clone the
-[skill directories](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/mcp-server-dev/skills)
-(`SKILL.md` plus `references/`) into your agent's skills location.
+对于其他 Agent，请检查你的技能或扩展目录，或克隆
+[技能目录](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/mcp-server-dev/skills)
+（`SKILL.md` 加 `references/`）到你的 Agent 的技能位置。
 
-## Start a build
+## 开始构建
 
-With the skills installed, ask your agent to help you build an MCP server. The
-entry skill triggers on natural-language requests, or you can invoke it
-directly using your agent's skill-invocation syntax.
+安装技能后，请你的 Agent 帮助你构建一个 MCP 服务器。该
+入口技能由自然语言请求触发，或者你可以使用
+Agent 的技能调用语法直接调用它。
 
-The skill runs a short discovery phase before writing any code. Expect
-questions about:
+该技能在编写任何代码之前会运行一个简短的发现阶段。预计
+会问到以下内容：
 
-- **What it connects to** — a cloud API, a local process, the filesystem, hardware
-- **Who will use it** — just you, your team, or anyone who installs it
-- **Action surface size** — a handful of operations versus wrapping a large API
-- **User interaction needs** — plain text results, structured input via
-  [elicitation](/specification/draft/client/elicitation), or rich UI widgets
-- **Upstream auth** — API keys, OAuth 2.0, or none
+- **连接对象** — 云 API、本地进程、文件系统、硬件
+- **使用者** — 仅你自己、你的团队，或任何安装它的人
+- **功能范围** — 少数操作还是封装大型 API
+- **用户交互需求** — 纯文本结果、通过
+  [需求诱导](/specification/draft/client/elicitation) 的结构化输入，或丰富的 UI 小部件
+- **上游认证** — API 密钥、OAuth 2.0，或无
 
-If your opening message already covers these, the agent skips ahead to the
-recommendation.
+如果你的开场消息已经涵盖了这些，Agent 会跳过并直接给出建议。
 
-## Deployment paths
+## 部署路径
 
-Based on discovery, the skill recommends one of four paths and scaffolds
-accordingly:
+基于发现结果，该技能会推荐四种路径之一并相应地搭建骨架：
 
-**Remote [Streamable HTTP](/specification/draft/basic/transports#streamable-http)**
-is the default for anything wrapping a cloud API. Zero install friction, one
-deployment serves all users, and OAuth flows work properly because the server
-can handle redirects and token storage. The reference skill includes scaffolds
-for Cloudflare Workers and portable Express/FastMCP setups.
+**远程 [Streamable HTTP](/specification/draft/basic/transports#streamable-http)**
+是封装云 API 的默认选项。零安装门槛，一次部署服务于所有用户，并且
+OAuth 流程能正常工作，因为服务器可以处理重定向和令牌存储。参考技能包含
+Cloudflare Workers 和便携式 Express/FastMCP 设置的骨架。
 
-**[MCP apps](/extensions/apps/overview)** extend a server with interactive
-widgets rendered in chat, such as searchable pickers, charts, and live
-dashboards. The skill hands off to `build-mcp-app` when
-[elicitation's](/specification/draft/client/elicitation) flat-form constraints
-don't fit.
+**[MCP 应用](/extensions/apps/overview)** 通过交互式
+小部件扩展服务器，这些小部件在聊天中渲染，例如可搜索选择器、图表和实时
+仪表板。当
+[需求诱导](/specification/draft/client/elicitation) 的扁平表单限制
+不适用时，该技能会移交至 `build-mcp-app`。
 
-**[MCP Bundles (MCPB)](https://github.com/modelcontextprotocol/mcpb)** package a
-local server together with its runtime as a single `.mcpb` archive, so users
-can install it without setting up Node or Python. Use this path when the server
-must touch the user's machine: reading local files, driving desktop apps, or
-talking to localhost services. The skill hands off to `build-mcpb`.
+**[MCP 捆绑包 (MCPB)](https://github.com/modelcontextprotocol/mcpb)** 将
+本地服务器与其运行时打包为单个 `.mcpb` 归档文件，以便用户
+无需设置 Node 或 Python 即可安装。当服务器必须
+访问用户机器时使用此路径：读取本地文件、驱动桌面应用，或
+与 localhost 服务通信。该技能会移交至 `build-mcpb`。
 
-**Local [stdio](/specification/draft/basic/transports#stdio)** remains available
-for prototyping, with a noted upgrade path to MCPB when you're ready to
-distribute.
+**本地 [stdio](/specification/draft/basic/transports#stdio)** 仍可用于
+原型设计，并注意当你准备
+分发时有升级到 MCPB 的路径。
 
-## Next steps
+## 后续步骤
 
-Once your agent scaffolds the server, iterate on tool descriptions and error
-handling, then test and ship:
+一旦你的 Agent 搭建好服务器骨架，迭代优化工具描述和错误处理，然后测试并发布：
 
 <CardGroup cols={2}>
   <Card
-    title="MCP Inspector"
+    title="MCP 检查器"
     icon="magnifying-glass"
     href="/docs/tools/inspector"
   >
-    Test your server's tools, resources, and prompts interactively
+    交互式测试你的服务器的工具、资源和提示词
   </Card>
   <Card
-    title="Connect to a client"
+    title="连接到客户端"
     icon="plug"
     href="/docs/develop/connect-local-servers"
   >
-    Wire your server into an MCP client via local or remote configuration
+    通过本地或远程配置将你的服务器接入 MCP 客户端
   </Card>
-  <Card title="Publish to the Registry" icon="box" href="/registry/quickstart">
-    Make your server discoverable in the MCP Registry
+  <Card title="发布到注册中心" icon="box" href="/registry/quickstart">
+    让你的服务器在 MCP 注册中心中可被发现
   </Card>
 </CardGroup>

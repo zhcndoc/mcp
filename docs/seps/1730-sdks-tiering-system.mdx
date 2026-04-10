@@ -1,97 +1,97 @@
 ---
-title: "SEP-1730: SDKs Tiering System"
-sidebarTitle: "SEP-1730: SDKs Tiering System"
-description: "SDKs Tiering System"
+title: "SEP-1730: SDK 层级系统"
+sidebarTitle: "SEP-1730: SDK 层级系统"
+description: "SDK 层级系统"
 ---
 
 <div className="flex items-center gap-2 mb-4">
   <Badge color="green" shape="pill">
-    Final
+    最终版
   </Badge>
   <Badge color="gray" shape="pill">
-    Standards Track
+    标准轨道
   </Badge>
 </div>
 
-| Field         | Value                                                                           |
+| 字段         | 值                                                                           |
 | ------------- | ------------------------------------------------------------------------------- |
 | **SEP**       | 1730                                                                            |
-| **Title**     | SDKs Tiering System                                                             |
-| **Status**    | Final                                                                           |
-| **Type**      | Standards Track                                                                 |
+| **Title**     | SDK 层级系统                                                             |
+| **Status**    | 最终版                                                                           |
+| **Type**      | 标准轨道                                                                 |
 | **Created**   | 2025-10-29                                                                      |
 | **Author(s)** | Inna Harper, Felix Weinberger                                                   |
-| **Sponsor**   | None                                                                            |
+| **Sponsor**   | 无                                                                            |
 | **PR**        | [#1730](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1730) |
 
 ---
 
-## Abstract
+## 摘要
 
-This SEP proposes a tiering system for Model Context Protocol (MCP) SDKs to establish clear expectations for feature support, maintenance commitments, and quality standards. The system defines three tiers of SDK support with objective, measurable criteria for classification.
+本 SEP  propose 了一个模型上下文协议 (MCP) SDK 的层级系统，以建立对功能支持、维护承诺和质量标准的清晰预期。该系统定义了三个 SDK 支持层级，并具有客观、可衡量的分类标准。
 
-## Motivation
+## 动机
 
-The MCP ecosystem needs SDK harmonization to help users make informed decisions. Users currently face challenges:
+MCP 生态系统需要 SDK 协调以帮助用户做出明智的决定。用户目前面临挑战：
 
-- **Feature Support Uncertainty**: No standardized way to know which SDKs support specific MCP features (OAuth, client/server/system features, like sampling, transports)
-- **Maintenance Expectations**: Unclear commitment levels for bug fixes, security patches, and feature updates
-- **Implementation Timelines**: No visibility into when SDKs will support new protocol versions and features
+- **功能支持不确定性**：没有标准化的方法来了解哪些 SDK 支持特定的 MCP 功能（OAuth、客户端/服务器/系统功能，如采样、传输）
+- **维护预期**：对于错误修复、安全补丁和功能更新的承诺级别不明确
+- **实施时间表**：无法了解 SDK 何时支持新协议版本和功能
 
-## Specification
+## 规范
 
-### Tier Definitions
+### 层级定义
 
-#### Tier 1: fully supported
+#### 层级 1：完全支持
 
-SDKs in this tier provides full protocol implementation and is well supported
+此层级中的 SDK 提供完整的协议实现且得到良好支持
 
-**Requirements:**
+**要求：**
 
-- **Feature complete and full support of the protocol**
-  - All conformance tests pass
-  - New protocol features before the new spec version release. (There is two week window between Release Candidate and the new protocol version release)
-- **SDK maintenance**
-  - Acknowledge and triage issues within two business days
-  - Resolve security and critical bugs within seven days
-  - Stable release and SDK versioning clearly documented
-- **Documentation**
-  - Comprehensive documentation with examples for all features
-  - Published dependency update policy
+- **功能完整且完全支持协议**
+  - 所有一致性测试通过
+  - 新协议功能在新规范版本发布前实现。（在发布候选版和新协议版本发布之间有两周的时间窗口）
+- **SDK 维护**
+  - 在两个工作日内确认并分类问题
+  - 在七天内解决安全和关键漏洞
+  - 稳定发布且 SDK 版本控制有清晰文档
+- **文档**
+  - 包含所有功能示例的综合文档
+  - 已发布的依赖更新策略
 
-#### Tier 2: commitment to be fully supported
+#### 层级 2：承诺完全支持
 
-SDKs with established implementations actively working toward full protocol support.
+已建立的实现正积极致力于完全协议支持的 SDK。
 
-**Requirements:**
+**要求：**
 
-- **Feature complete and full support of the protocol**
-  - 80% of conformance tests pass
-  - New protocol features implemented within six months
-- **SDK maintenance**
-  - Active issue tracking and management
-  - At least one stable release
-- **Documentation**
-  - Basic documentation covering core features
-  - Published dependency update policy
-- **Commitment to move to Tier1**
-  - Published roadmap showing intent to achieve Tier 1 or, if SDK will remain in Tier 2 indefinitely, a transparent roadmap about the direction of the SDK and reasons for not being feature complete
+- **功能完整且完全支持协议**
+  - 80% 的一致性测试通过
+  - 新协议功能在六个月内实现
+- **SDK 维护**
+  - 活跃的问题跟踪和管理
+  - 至少一次稳定发布
+- **文档**
+  - 涵盖核心功能的基础文档
+  - 已发布的依赖更新策略
+- **晋升至层级 1 的承诺**
+  - 发布路线图显示达到层级 1 的意图，或者如果 SDK 将无限期保持在层级 2，则提供关于 SDK 方向及为何功能不完整的透明路线图
 
-#### Tier 3: Experimental
+#### 层级 3：实验性
 
-Early-stage or specialized SDKs exploring the protocol space.
+探索协议空间的早期或专用 SDK。
 
-**Characteristics:**
+**特征：**
 
-- No feature completeness guarantees
-- No stable release requirement
-- May focus on specific use cases or experimental features
-- No timeline commitments for updates
-- Suitable for niche implementations that may remain at this tier
+- 无功能完整性保证
+- 无稳定发布要求
+- 可能专注于特定用例或实验性功能
+- 无更新时间表承诺
+- 适用于可能保留在此层级的小众实现
 
-### Conformance Testing
+### 一致性测试
 
-All SDKs must undergo conformance testing using protocol trace validation: for details see [Conformance Testing RFC (forthcoming)](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1627). This SEP is not focusing on Conformance testing. For the initial version of tiering, we will go with the simplified version where we would have an Example server for each SDK and run simplified conformance tests against those.
+所有 SDK 必须使用协议追踪验证进行一致性测试：详情见 [一致性测试 RFC（即将发布）](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1627)。本 SEP 不专注于一致性测试。对于初始版本的层级划分，我们将采用简化版本，即为每个 SDK 提供一个示例服务器并针对这些服务器运行简化的一致性测试。
 
 ```mermaid
 sequenceDiagram
@@ -99,169 +99,169 @@ sequenceDiagram
     participant Test Suite
     participant Validator
 
-    Test Suite->>SDK: Execute test scenario
-    SDK->>Test Suite: Protocol messages
-    Test Suite->>Validator: Submit trace
-    Validator->>Test Suite: Compliance report
-    Test Suite->>SDK: Pass/Fail result
+    Test Suite->>SDK: 执行测试场景
+    SDK->>Test Suite: 协议消息
+    Test Suite->>Validator: 提交追踪
+    Validator->>Test Suite: 合规报告
+    Test Suite->>SDK: 通过/失败结果
 ```
 
-**Compliance Scoring:**
+**合规评分：**
 
-- SDKs receive a percentage score based on test results
-- Scores can be displayed as badges (e.g., "90% MCP Compliant")
-- Tier 1: 100% compliance required
-- Tier 2: 80% compliance required
-- Tier 3: No minimum requirement
+- SDK 根据测试结果获得百分比评分
+- 评分可以显示为徽章（例如，"90% MCP 合规"）
+- 层级 1：要求 100% 合规
+- 层级 2：要求 80% 合规
+- 层级 3：无最低要求
 
-### Tier Advancement Process
+### 层级晋升流程
 
-1. **Self-Assessment:** Maintainers evaluate their SDK against tier criteria
-2. **Application:** Submit tier advancement request with evidence
-3. **Review:** Community review period (2 weeks)
-4. **Validation:** Automated conformance testing, github stats on issues
-5. **Decision:** Tier assignment by MCP maintainers
+1. **自我评估：** 维护者根据层级标准评估其 SDK
+2. **申请：** 提交带有证据的层级晋升请求
+3. **审查：** 社区审查期（2 周）
+4. **验证：** 自动化一致性测试，GitHub 问题统计
+5. **决定：** 由 MCP 维护者分配层级
 
-### Tier Relegation Process
+### 层级降级流程
 
-1. **Auto validation:**
-   1. compliance tests continuously not passing for four week for Tier 1
-   2. 20% of compliance tests continuously not passing for four week for Tier 2
-2. Issues:
-   1. Issues are not addressed within two months
+1. **自动验证：**
+   1. 层级 1 的合规测试连续四周未通过
+   2. 层级 2 的 20% 合规测试连续四周未通过
+2. 问题：
+   1. 问题在两个月内未得到解决
 
-### Requirements matrix
+### 需求矩阵
 
-| Feature                                           | SDK A   | SDK B    | SDK C  |
+| 功能                                           | SDK A   | SDK B    | SDK C  |
 | :------------------------------------------------ | :------ | :------- | :----- |
-| **Protocol Features support (Conformance tests)** | 85%     | 60%%     | 100%   |
-| **GitHub support stats**                          | 10 days | 100 days | 5 days |
-| **Documentation (self reported)**                 | Good    | Minimal  | Good   |
-| **Tier (computed from above)**                    | Tier 2  | Tier 3   | Tier 1 |
+| **协议功能支持（一致性测试）** | 85%     | 60%%     | 100%   |
+| **GitHub 支持统计**                          | 10 天 | 100 天 | 5 天 |
+| **文档（自报）**                 | 良好    | 最小化  | 良好   |
+| **层级（根据上述计算）**                    | 层级 2  | 层级 3   | 层级 1 |
 
-## Rationale
+## 理由
 
-### Why Three Tiers?
+### 为什么是三个层级？
 
-- **Tier 1** ensures users have well supported, fully-featured SDK
-- **Tier 2** provides a clear pathway for improving SDKs
-- **Tier 3** allows experimentation without creating barriers to entry
+- **层级 1** 确保用户拥有支持良好、功能齐全的 SDK
+- **层级 2** 为改进 SDK 提供清晰的路径
+- **层级 3** 允许实验而不造成进入壁垒
 
-### Why Time-Based Commitments?
+### 为什么是基于时间的承诺？
 
-While the community raised concerns about rigid timelines, they provide:
+虽然社区对严格的时间表提出了担忧，但它们提供了：
 
-- Clear expectations for users
-- Measurable goals for maintainers
-- Flexibility through tier progression
+- 用户的清晰预期
+- 维护者的可衡量目标
+- 通过层级晋升的灵活性
 
-### Why Not Just Feature Matrices?
+### 为什么不只是功能矩阵？
 
-Feature matrices alone don't communicate:
+仅功能矩阵无法传达：
 
-- Maintenance commitment
-- Quality standards
-- Support expectations
+- 维护承诺
+- 质量标准
+- 支持预期
 
-The tiering system combines feature support with quality guarantees.
+层级系统结合了功能支持质量保证。
 
-## Alternatives Considered
+## 考虑的替代方案
 
-### 1\. Feature Matrix Only
+### 1\. 仅功能矩阵
 
-**Rejected because:** Doesn't communicate maintenance commitments or quality standards
+**拒绝原因：** 无法传达维护承诺或质量标准
 
-### 2\. Percentage-Based Scoring
+### 2\. 基于百分比的评分
 
-**Rejected because:** Too granular and doesn't capture qualitative aspects like support
+**拒绝原因：** 过于细化且无法捕捉支持等定性方面
 
-### 3\. Properties-Based System
+### 3\. 基于属性的系统
 
-**Rejected because:** Multiple overlapping properties could confuse users
+**拒绝原因：** 多个重叠的属性可能会混淆用户
 
-### 4\. Latest Version Listing Only
+### 4\. 仅列出最新版本
 
-**Rejected because:** Simply listing "supports MCP date" fails to capture critical information:
+**拒绝原因：** 仅列出“支持 MCP 日期”无法捕捉关键信息：
 
-- Version support may be incomplete (e.g., supports \<date\> except OAuth)
-- No indication of maintenance commitment or issue response times
-- Lacks information about security patch timelines
-- Doesn't communicate dependency update policies
-- Version numbers alone don't indicate production readiness
+- 版本支持可能不完整（例如，支持 \<日期\> 但不包括 OAuth）
+- 无维护承诺或问题响应时间的指示
+- 缺乏安全补丁时间表的信息
+- 无法传达依赖更新策略
+- 仅版本号不能表明生产就绪状态
 
-### 5\. No Formal System
+### 5\. 无正式系统
 
-**Rejected because:** Current ad-hoc approach creates uncertainty for users
+**拒绝原因：** 当前的临时方法为用户创造了不确定性
 
-## Backward Compatibility
+## 向后兼容性
 
-This proposal introduces a new classification system with no breaking changes:
+本提案引入了一种新的分类系统，无破坏性变更：
 
-- Existing SDKs continue to function
-- Classification is opt-in initially
-- Grace period for existing SDKs to achieve tier status
+- 现有 SDK 继续运行
+- 分类最初是可选加入的
+- 现有 SDK 达到层级状态的宽限期
 
-## Security Implications
+## 安全影响
 
-- Tier 1 SDKs must address security issues within 7 days
-- All tiers encouraged to follow security best practices
-- Conformance tests include security validation
+- 层级 1 SDK 必须在 7 天内解决安全问题
+- 鼓励所有层级遵循安全最佳实践
+- 一致性测试包括安全验证
 
-## Implementation Plan
+## 实施计划
 
-- [ ] Finalize simplified conformance test suite \- Nov 4, 2025
-- [ ] SDK maintainers self-assess and apply for tiers \- Nov 14, 2025
-- [ ] Initial tier assignments \- before the November spec release
-- [ ] Implement full compliance tests
-- [ ] Implement automatic issue tracking analysis for SDKs
+- [ ] 完成简化的一致性测试套件 \- 2025 年 11 月 4 日
+- [ ] SDK 维护者自我评估并申请层级 \- 2025 年 11 月 14 日
+- [ ] 初始层级分配 \- 11 月规范发布前
+- [ ] 实施完整合规测试
+- [ ] 实施 SDK 自动问题跟踪分析
 
-## Community Impact
+## 社区影响
 
-### SDK Maintainers
+### SDK 维护者
 
-- Clear goals for improvement
-- Recognition for quality implementations
-- Structured pathway for advancement
+- 清晰的改进目标
+- 对高质量实现的认可
+- 结构化的晋升路径
 
-### SDK Users
+### SDK 用户
 
-- Informed selection of SDKs
-- Clear expectations for support
-- Confidence in tier 1 implementations
+- 明智地选择 SDK
+- 清晰的支持预期
+- 对层级 1 实现的信心
 
-### Ecosystem
+### 生态系统
 
-- Improved overall SDK quality
-- Standardized feature support
-- Healthy competition between implementations
+- 整体 SDK 质量提高
+- 标准化功能支持
+- 实现之间的健康竞争
 
-## References
+## 参考资料
 
-- [SDK Maintainer Meeting Notes (\#1648)](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1648)
-- [SDK Harmonization Goals (\#1444)](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1444)
-- [Conformance Testing SEP (DRAFT)](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1627)
+- [SDK 维护者会议记录 (\#1648)](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1648)
+- [SDK 协调目标 (\#1444)](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1444)
+- [一致性测试 SEP（草案）](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1627)
 
-## Appendix
+## 附录
 
-### Simplified conformance tests
+### 简化的一致性测试
 
-While we are working on a [comprehensive proposal for conformance testing](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1627) which will take some time to implement, we want to move forward with at least some automated way to check if SDK has a full set of features. We will start from Servers features set, as we have many more servers than clients and the vast majority of developers using SDKs are Server implementers.
+虽然我们正在致力于 [一致性测试的综合提案](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1627)，这需要一些时间来实施，但我们希望至少通过某种自动化方式来检查 SDK 是否拥有全套功能。我们将从服务器功能集开始，因为我们的服务器比客户端多得多，而且绝大多数使用 SDK 的开发者是服务器实现者。
 
-The most straightforward approach is to have an Example Server for each SDK, similar to to [Everything Server](https://github.com/modelcontextprotocol/servers/tree/main/src/everything). Then we will have Conformance Test Client with all the test cases we want to be able to test, for example:
+最直接的方法是为每个 SDK 提供一个示例服务器，类似于 [Everything 服务器](https://github.com/modelcontextprotocol/servers/tree/main/src/everything)。然后我们将拥有包含所有我们想要测试的测试用例的一致性测试客户端，例如：
 
-- execute “hello world” tool
-- Get prompt
-- Get completion
-- Get resource template
-- Receive notifications
+- 执行"hello world"工具
+- 获取提示
+- 获取补全
+- 获取资源模板
+- 接收通知
 
-**What is needed form SDKs maintainers:** implement everything server based on a spec. Spec will look like:
+**SDK 维护者需要提供什么：** 基于规范实现 everything 服务器。规范将如下所示：
 
-- Tool “say_hello” to return simple text
-- Tool “show_image” to return and image
-- Tool “tool_with_logging” to return structured output in a format \<\> and log three events: start, process, end
-- Tool "tool_with_notifications" to return structured output in a format \<\> and have two notifications \<\>
+- 工具"say_hello"返回简单文本
+- 工具"show_image"返回图像
+- 工具"tool_with_logging"以格式 \<\> 返回结构化输出并记录三个事件：开始、处理、结束
+- 工具 "tool_with_notifications" 以格式 \<\> 返回结构化输出并拥有两个通知 \<\>
 
-Given well defined spec for the server and SDK documentation, it should be easy to implement it with the help of any coding agent. We want to check it into each SDKs repo as it will serve as an example for server implementers.
+鉴于定义良好的服务器规范和 SDK 文档，在任何编码代理的帮助下实现它应该很容易。我们希望将其签入每个 SDK 仓库，因为它将作为服务器实现者的示例。
 
-Once each SDK has an Everything server, we will run the Conformance Test Client against it.
+一旦每个 SDK 拥有了 Everything 服务器，我们将针对它运行一致性测试客户端。

@@ -1,245 +1,245 @@
 ---
-title: SEP Guidelines
-description: Specification Enhancement Proposal (SEP) guidelines for proposing changes to the Model Context Protocol
+title: SEP 指南
+description: 用于提议更改模型上下文协议 (Model Context Protocol) 的规范增强提案 (SEP) 指南
 ---
 
-## What is a SEP?
+## 什么是 SEP？
 
-SEP stands for Specification Enhancement Proposal. A SEP is a design document providing information to the MCP community, or describing a new feature for the Model Context Protocol or its processes. The SEP should provide a concise technical specification of the feature and a rationale for the feature.
+SEP 代表规范增强提案 (Specification Enhancement Proposal)。SEP 是一份设计文档，用于向 MCP 社区提供信息，或描述模型上下文协议 (Model Context Protocol) 及其流程的新功能。SEP 应提供该功能的简明技术规范以及该功能的理由。
 
-SEPs are the primary mechanism for proposing major new features, collecting community input on an issue, and documenting the design decisions that have gone into MCP. The SEP author is responsible for building consensus within the community and documenting dissenting opinions.
+SEP 是提议主要新功能、收集社区对某个问题的意见以及记录 MCP 设计决策的主要机制。SEP 作者负责在社区内建立共识并记录反对意见。
 
-When drafting a SEP, authors should review the [MCP design principles](/community/design-principles), which outline the core values and tradeoffs that guide the protocol's evolution.
+在起草 SEP 时，作者应查阅 [MCP 设计原则](/community/design-principles)，其中概述了指导协议演进的核心价值观和权衡。
 
-SEPs are maintained as markdown files in the [`seps/` directory](https://github.com/modelcontextprotocol/modelcontextprotocol/tree/main/seps) of the specification repository. Their revision history serves as the historical record of the feature proposal.
+SEP 作为 markdown 文件维护在规范仓库的 [`seps/` 目录](https://github.com/modelcontextprotocol/modelcontextprotocol/tree/main/seps) 中。它们的修订历史作为功能提案的历史记录。
 
-## When to Write a SEP
+## 何时编写 SEP
 
-The SEP process is reserved for changes that are substantial enough to require broad community discussion, a formal design document, and a historical record. A regular GitHub pull request is often more appropriate for smaller changes.
+SEP 流程保留给那些需要广泛社区讨论、正式设计文档和历史记录的重大更改。对于较小的更改，常规的 GitHub 拉取请求通常更合适。
 
-**Write a SEP if your change involves:**
+**如果您的更改涉及以下内容，请编写 SEP：**
 
-- **A new feature or protocol change** - Adding, modifying, or removing features in the protocol (new API methods, message format changes, interoperability standards)
-- **A breaking change** - Any change that is not backwards-compatible
-- **A governance or process change** - Altering decision-making or contribution guidelines
-- **A complex or controversial topic** - Changes likely to have multiple valid solutions or generate significant debate
+- **新功能或协议更改** - 在协议中添加、修改或删除功能（新的 API 方法、消息格式更改、互操作性标准）
+- **破坏性更改** - 任何不向后兼容的更改
+- **治理或流程更改** - 更改决策或贡献指南
+- **复杂或有争议的主题** - 可能有多种有效解决方案或引发重大辩论的更改
 
-**Skip the SEP process for:**
+**以下情况可跳过 SEP 流程：**
 
-- Bug fixes and typo corrections
-- Documentation clarifications
-- Adding examples to existing features
-- Minor schema fixes that don't change behavior
+- Bug 修复和拼写纠正
+- 文档澄清
+- 为现有功能添加示例
+- 不改变行为的次要模式修复
 
-Not sure? Ask in [Discord](/community/communication#discord) before starting significant work.
+不确定？在开始重要工作之前，请在 [Discord](/community/communication#discord) 中询问。
 
-## SEP Types
+## SEP 类型
 
-There are three kinds of SEP:
+有三种类型的 SEP：
 
-1. **Standards Track** - Describes a new feature or implementation for the Model Context Protocol, or an interoperability standard supported outside the core specification.
-2. **Informational** - Describes a design issue or provides guidelines/information to the community without proposing a new feature.
-3. **Process** - Describes a process surrounding MCP or proposes a change to a process (like this document).
+1. **标准轨道** - 描述模型上下文协议的新功能或实现，或核心规范之外支持的互操作性标准。
+2. **信息类** - 描述设计问题或向社区提供指南/信息，而不提议新功能。
+3. **流程类** - 描述围绕 MCP 的流程或提议更改流程（如本文档）。
 
-## SEP Workflow
+## SEP 工作流程
 
 ```mermaid
 flowchart TD
-    Idea["Idea"]
-    AwaitingSponsor{"Awaiting Sponsor<br/>(up to 6 months)"}
-    Draft["Draft"]
-    Dormant["Dormant<br/>(no sponsor)"]
-    Withdrawn["Withdrawn<br/>(by author)"]
-    InReview["In-Review"]
-    Decision{"Core Maintainers decide"}
-    Accepted["Accepted"]
-    Rejected["Rejected"]
-    Final["Final"]
+    Idea["想法"]
+    AwaitingSponsor{"等待赞助人<br/>（最多 6 个月）"}
+    Draft["草稿"]
+    Dormant["休眠<br/>（无赞助人）"]
+    Withdrawn["撤回<br/>（由作者）"]
+    InReview["审查中"]
+    Decision{"核心维护者决定"}
+    Accepted["已接受"]
+    Rejected["已拒绝"]
+    Final["最终版"]
 
-    Idea -->|"Submit PR with SEP file"| AwaitingSponsor
+    Idea -->|"提交包含 SEP 文件的 PR"| AwaitingSponsor
     AwaitingSponsor --> Draft
     AwaitingSponsor --> Dormant
     AwaitingSponsor --> Withdrawn
-    Draft -->|"Sponsor reviews"| InReview
+    Draft -->|"赞助人审查"| InReview
     InReview --> Decision
     Decision --> Accepted
     Decision --> Rejected
-    Accepted -->|"Reference implementation complete"| Final
+    Accepted -->|"参考实现完成"| Final
 ```
 
-### Step-by-Step Process
+### 逐步流程
 
 <Note>
-  To improve your chances of a SEP being accepted:
+  为了提高 SEP 被接受的机会：
 
-- **Discuss your idea with the relevant [working or interest group](/community/working-interest-groups) in [Discord](/community/communication#discord) first.** This is the single best way to refine your proposal and build early support.
-- **If no relevant group exists, start a conversation in [GitHub Discussions](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions) or the `#general` channel in [Discord](/community/communication#discord).** If there is enough interest, it may be worth [creating a new IG or WG](/community/working-interest-groups#creating-an-interest-group) — the effort involved in finding sponsors and facilitators is a good signal of whether the idea has sufficient traction, and is still preferable to a cold submission.
-- **Check alignment with [Core Maintainer](/community/governance#roles) priorities and [design principles](/community/design-principles).** Priorities are generally reflected in the [project roadmap](/development/roadmap). Proposals outside current priorities or that conflict with design principles are more likely to face delays or additional friction in the review process.
+- **首先在 [Discord](/community/communication#discord) 中与相关的 [工作组或兴趣组](/community/working-interest-groups) 讨论您的想法。** 这是完善提案并建立早期支持的最佳方式。
+- **如果不存在相关组，请在 [GitHub Discussions](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions) 或 [Discord](/community/communication#discord) 的 `#general` 频道中发起对话。** 如果有足够的兴趣，可能值得 [创建新的 IG 或 WG](/community/working-interest-groups#creating-an-interest-group) —— 寻找赞助人和协调人所涉及的努力是想法是否有足够吸引力的良好信号，并且仍然优于冷提交。
+- **检查与 [核心维护者](/community/governance#roles) 优先级和 [设计原则](/community/design-principles) 的一致性。** 优先级通常反映在 [项目路线图](/development/roadmap) 中。当前优先级之外或与设计原则冲突的提案更可能在审查过程中面临延误或额外的摩擦。
 
 </Note>
 
-1. **Draft your SEP** as a markdown file named `0000-your-feature-title.md`, using `0000` as a placeholder. Follow the [SEP format](#sep-format) below.
+1. **起草您的 SEP** 为一个名为 `0000-your-feature-title.md` 的 markdown 文件，使用 `0000` 作为占位符。遵循下面的 [SEP 格式](#sep-format)。
 
-2. **Create a pull request** adding your SEP file to the `seps/` directory in the [specification repository](https://github.com/modelcontextprotocol/modelcontextprotocol).
+2. **创建拉取请求**，将您的 SEP 文件添加到 [规范仓库](https://github.com/modelcontextprotocol/modelcontextprotocol) 的 `seps/` 目录中。
 
-3. **Update the SEP number**: Once your PR is created, rename the file using the PR number (e.g., PR #1850 becomes `1850-your-feature-title.md`) and update the SEP header.
+3. **更新 SEP 编号**：一旦创建了您的 PR，使用 PR 编号重命名文件（例如，PR #1850 变为 `1850-your-feature-title.md`）并更新 SEP  header。
 
-4. **Find a Sponsor**: Tag a Core Maintainer or Maintainer from [the maintainer list](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/MAINTAINERS.md). Choose someone whose area relates to your proposal. Tips:
-   - Tag 1-2 relevant maintainers, not everyone
-   - Share your PR in the relevant Discord channel
-   - If no response after 2 weeks, ask in `#general`
+4. **寻找赞助人**：标记 [维护者列表](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/MAINTAINERS.md) 中的核心维护者或维护者。选择与您提案领域相关的人。提示：
+   - 标记 1-2 位相关的维护者，而不是所有人
+   - 在相关的 Discord 频道中分享您的 PR
+   - 如果 2 周后没有回应，请在 `#general` 中询问
 
-5. **Sponsor assigns themselves**: When a sponsor agrees, they assign themselves to the PR and update the SEP status to `draft`.
+5. **赞助人指派自己**：当赞助人同意后，他们将自己指派给 PR 并将 SEP 状态更新为 `draft`。
 
-6. **Informal review**: The sponsor reviews the proposal and may request changes. Discussion happens in PR comments.
+6. **非正式审查**：赞助人审查提案并可能请求更改。讨论发生在 PR 评论中。
 
-7. **Formal review**: When ready, the sponsor updates the status to `in-review`. The SEP enters formal review by Core Maintainers (meetings every two weeks).
+7. **正式审查**：准备就绪后，赞助人将状态更新为 `in-review`。SEP 进入核心维护者的正式审查（每两周举行会议）。
 
-8. **Resolution**: The SEP may be `accepted`, `rejected`, or returned for revision. The sponsor updates the status.
+8. **决议**：SEP 可能被 `accepted`、`rejected` 或返回修订。赞助人更新状态。
 
-9. **Finalization**: Once accepted, the reference implementation must be completed. When complete and incorporated into the specification, the sponsor updates the status to `final`.
+9. **最终确定**：一旦被接受，必须完成参考实现。当完成并纳入规范后，赞助人将状态更新为 `final`。
 
-### SEP Statuses
+### SEP 状态
 
-| Status       | Meaning                                          |
+| 状态         | 含义                                          |
 | ------------ | ------------------------------------------------ |
-| `draft`      | Has a sponsor, undergoing informal review        |
-| `in-review`  | Ready for formal Core Maintainer review          |
-| `accepted`   | Approved, awaiting reference implementation      |
-| `rejected`   | Declined by Core Maintainers                     |
-| `withdrawn`  | Author withdrew the proposal                     |
-| `final`      | Complete with reference implementation           |
-| `superseded` | Replaced by a newer SEP                          |
-| `dormant`    | No sponsor found within 6 months; can be revived |
+| `draft`      | 已有赞助人，正在进行非正式审查        |
+| `in-review`  | 准备就绪，等待核心维护者正式审查          |
+| `accepted`   | 已批准，等待参考实现      |
+| `rejected`   | 被核心维护者拒绝                     |
+| `withdrawn`  | 作者撤回了提案                     |
+| `final`      | 完成，包含参考实现           |
+| `superseded` | 被更新的 SEP 取代                          |
+| `dormant`    | 6 个月内未找到赞助人；可恢复 |
 
-**Important distinction**: `dormant` is not the same as `rejected`. A dormant SEP simply didn't find a sponsor - the idea may still be valid. If circumstances change (new community interest, new use cases), a dormant SEP can be revived by finding a sponsor and reopening the PR.
+**重要区别**：`dormant` 与 `rejected` 不同。休眠的 SEP 只是没有找到赞助人——想法可能仍然有效。如果情况发生变化（新的社区兴趣、新的用例），可以通过寻找赞助人并重新打开 PR 来恢复休眠的 SEP。
 
-## SEP Format
+## SEP 格式
 
-Each SEP should have the following parts:
+每个 SEP 应包含以下部分：
 
-### 1. Preamble
+### 1. 前言
 
-A short descriptive title, author names/contact info, current status, SEP type, and PR number.
+简短的描述性标题、作者姓名/联系信息、当前状态、SEP 类型和 PR 编号。
 
-### 2. Abstract
+### 2. 摘要
 
-A short (~200 word) description of the technical issue being addressed.
+对所解决的技术问题的简短（约 200 字）描述。
 
-### 3. Motivation
+### 3. 动机
 
-Why the existing protocol specification is inadequate. This is critical - SEPs without sufficient motivation may be rejected outright.
+为什么现有的协议规范不足。这至关重要——没有充分动机的 SEP 可能会被直接拒绝。
 
-### 4. Specification
+### 4. 规范
 
-The technical specification describing syntax and semantics of the new feature. Must be detailed enough for competing, interoperable implementations.
+描述新功能语法和语义的技术规范。必须足够详细，以便进行竞争性的互操作实现。
 
-### 5. Rationale
+### 5. 理由
 
-Why particular design decisions were made, alternate designs considered, and related work. Should provide evidence of community consensus and address objections raised during discussion.
+为何做出特定的设计决策、考虑的替代设计以及相关的工作。应提供社区共识的证据并解决讨论期间提出的反对意见。
 
-### 6. Backward Compatibility
+### 6. 向后兼容性
 
-All SEPs introducing backward incompatibilities must describe these incompatibilities, their severity, and how to deal with them.
+所有引入向后不兼容性的 SEP 必须描述这些不兼容性、其严重程度以及如何处理它们。
 
-### 7. Reference Implementation
+### 7. 参考实现
 
-Must be completed before the SEP reaches "Final" status, but need not be complete before acceptance.
+必须在 SEP 达到 "Final" 状态之前完成，但在接受之前不必完成。
 
-### 8. Security Implications
+### 8. 安全影响
 
-Any security concerns related to the SEP should be explicitly documented.
+任何与 SEP 相关的安全问题都应明确记录。
 
-See the [SEP template](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/seps/README.md#sep-file-structure) for the complete file structure.
+有关完整的文件结构，请参阅 [SEP 模板](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/seps/README.md#sep-file-structure)。
 
-## Prototype Requirements
+## 原型要求
 
-Before a SEP can be accepted, you need "a prototype implementation demonstrating the proposal." Here's what qualifies:
+在 SEP 被接受之前，您需要“一个演示提案的原型实现”。以下是符合条件的内容：
 
-**Acceptable prototypes:**
+**可接受的原型：**
 
-- A working implementation in one of the official SDKs (as a branch/fork)
-- A standalone proof-of-concept demonstrating the key mechanics
-- Integration tests showing the proposed behavior
-- A reference server or client implementing the feature
+- 官方 SDK 之一中的工作实现（作为分支/分叉）
+- 演示关键机制的独立概念验证
+- 显示提议行为的集成测试
+- 实现该功能的参考服务器或客户端
 
-**The prototype should:**
+**原型应该：**
 
-- Demonstrate the core functionality works as described
-- Show the API design is practical and ergonomic
-- Reveal any edge cases or implementation challenges
-- Be runnable by reviewers (include setup instructions)
+- 演示核心功能按描述工作
+- 显示 API 设计是实用且符合人体工程学的
+- 揭示任何边缘情况或实现挑战
+- 可供审查者运行（包括设置说明）
 
-**Not sufficient:**
+**不足够：**
 
-- Pseudocode alone
-- A design document without code
-- "Trust me, it works" - reviewers need to see it
+- 仅伪代码
+- 没有代码的设计文档
+- “相信我，它有效”——审查者需要看到它
 
-The prototype doesn't need to be production-ready. It exists to prove feasibility and surface issues early.
+原型不需要达到生产就绪状态。它的存在是为了证明可行性并尽早发现问题。
 
-## The Sponsor Role
+## 赞助人角色
 
-A Sponsor is a Core Maintainer or Maintainer who champions the SEP through the review process. The sponsor's responsibilities include:
+赞助人是核心维护者或维护者，他们在审查过程中支持 SEP。赞助人的职责包括：
 
-- Reviewing the proposal and providing constructive feedback
-- Requesting changes based on community input
-- **Updating the SEP status** as the proposal progresses
-- Initiating formal review when the SEP is ready
-- Presenting and discussing the proposal at Core Maintainer meetings
-- Ensuring the proposal meets quality standards
+- 审查提案并提供建设性反馈
+- 根据社区意见请求更改
+- **更新 SEP 状态** 随着提案的进展
+- 当 SEP 准备就绪时启动正式审查
+- 在核心维护者会议上展示和讨论提案
+- 确保提案符合质量标准
 
-Authors should request status changes through their sponsor rather than modifying the status field themselves.
+作者应通过其赞助人请求状态更改，而不是自己修改状态字段。
 
-## Status Management
+## 状态管理
 
-**The Sponsor is responsible for updating the SEP status.** This ensures status transitions are made by someone with the authority and context to do so appropriately.
+**发起人负责更新 SEP 状态。** 这确保状态转换由具有相应权限和上下文的人适当地进行。
 
-The sponsor:
+发起人：
 
-1. Updates the `Status` field directly in the SEP markdown file (or, if they do not have access to the source repo, work with the author to set the right status)
-2. Applies matching labels to the pull request (e.g., `draft`, `in-review`, `accepted`)
+1. 直接在 SEP markdown 文件中更新 `Status` 字段（或者，如果他们无法访问源仓库，则与作者合作设置正确的状态）
+2. 将匹配的标签应用于拉取请求（例如，`draft`、`in-review`、`accepted`）
 
-Both the markdown status field and PR labels should be kept in sync. The markdown file is the canonical record (versioned with the proposal), while PR labels make it easy to filter and search.
+markdown 状态字段和 PR 标签都应保持同步。markdown 文件是规范记录（与提案一起版本化），而 PR 标签使其易于过滤和搜索。
 
-## SEP Review & Resolution
+## SEP 审查与决议
 
-SEPs are reviewed by the MCP Core Maintainers team every two weeks.
+SEP 由 MCP 核心维护者团队每两周审查一次。
 
-For a SEP to be accepted it must meet these criteria:
+SEP 要被接受，必须满足以下标准：
 
-- A prototype implementation demonstrating the proposal
-- Clear benefit to the MCP ecosystem
-- Community support and consensus
+- 一个展示该提案的原型实现
+- 对 MCP 生态系统有明确的好处
+- 社区支持和共识
 
-Once a SEP has been accepted, the reference implementation must be completed. When complete and incorporated into the main repository, the status changes to "Final".
+一旦 SEP 被接受，必须完成参考实现。完成后并入主仓库，状态变为 "Final"。
 
-## After Rejection
+## 被拒绝后
 
-Rejection is not permanent. You can:
+拒绝不是永久性的。你可以：
 
-1. **Address the feedback** - If specific concerns were raised, address them and resubmit
-2. **Discuss the rejection** - Ask in Discord to understand the reasoning
-3. **Submit a competing SEP** - Sometimes a different approach works better
-4. **Wait for the right time** - Community needs evolve; what's rejected today may be welcomed later
+1. **解决反馈** - 如果提出了具体顾虑，解决它们并重新提交
+2. **讨论拒绝原因** - 在 Discord 中询问以了解理由
+3. **提交竞争性 SEP** - 有时不同的方法效果更好
+4. **等待合适的时机** - 社区需求会演变；今天被拒绝的内容以后可能会受到欢迎
 
-## Reporting SEP Bugs or Updates
+## 报告 SEP 错误或更新
 
-For SEPs not yet reaching `final` state, comment directly on the SEP's pull request. Once a SEP is finalized and merged, submit updates by creating a new pull request that modifies the SEP file.
+对于尚未达到 `final` 状态的 SEP，直接在 SEP 的拉取请求上评论。一旦 SEP 定稿并合并，通过创建修改 SEP 文件的新拉取请求来提交更新。
 
-## Transferring SEP Ownership
+## 转移 SEP 所有权
 
-It occasionally becomes necessary to transfer ownership of SEPs to a new author. In general, we'd like to retain the original author as a co-author, but that's up to the original author.
+偶尔有必要将 SEP 的所有权转移给新作者。一般来说，我们希望保留原作者作为共同作者，但这取决于原作者。
 
-Good reasons to transfer ownership:
+转移所有权的好理由：
 
-- Original author no longer has time or interest
-- Original author is unreachable
+- 原作者不再有时间和兴趣
+- 原作者无法联系
 
-Bad reasons:
+不好的理由：
 
-- You disagree with the direction (submit a competing SEP instead)
+- 你不同意方向（改为提交竞争性 SEP）
 
-## Copyright
+## 版权
 
-This document is placed in the public domain or under the CC0-1.0-Universal license, whichever is more permissive.
+本文档置于公共领域或根据 CC0-1.0-Universal 许可发布，以较宽松者为准。

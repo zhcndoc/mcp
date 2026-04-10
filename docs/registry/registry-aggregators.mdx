@@ -1,37 +1,37 @@
 ---
-title: MCP Registry Aggregators
-sidebarTitle: Registry Aggregators
+title: MCP Registry 聚合器
+sidebarTitle: Registry 聚合器
 ---
 
 <Note>
-  The MCP Registry is currently in preview. Breaking changes or data resets may occur before general availability. If you encounter any issues, please report them on [GitHub](https://github.com/modelcontextprotocol/registry/issues).
+  MCP Registry 目前处于预览阶段。在正式发布之前，可能会发生破坏性更改或数据重置。如果遇到任何问题，请在 [GitHub](https://github.com/modelcontextprotocol/registry/issues) 上报告。
 </Note>
 
-Aggregators are downstream consumers of the MCP Registry that provide additional value. For example, a server marketplace that provides user ratings and security scanning.
+聚合器是 MCP Registry 的下游消费者，提供额外价值。例如，提供用户评分和安全扫描的服务器市场。
 
-The MCP Registry provides an unauthenticated read-only REST API that aggregators can use to populate their data stores. Aggregators are expected to scrape data on a regular but infrequent basis (e.g., once per hour), and persist the data in their own data store. The MCP Registry **does not provide uptime or data durability guarantees**.
+MCP Registry 提供一个无需身份验证的只读 REST API，聚合器可使用它来填充其数据存储。期望聚合器定期但不频繁地抓取数据（例如，每小时一次），并将数据持久化到自己的数据存储中。MCP Registry **不提供正常运行时间或数据耐久性保证**。
 
-## Consuming the MCP Registry REST API
+## 使用 MCP Registry REST API
 
-The base URL for the MCP Registry REST API is `https://registry.modelcontextprotocol.io`. It supports the following endpoints:
+MCP Registry REST API 的基础 URL 是 `https://registry.modelcontextprotocol.io`。它支持以下端点：
 
-- [`GET /v0.1/servers`](https://registry.modelcontextprotocol.io/docs#/operations/list-servers-v0.1) — List all servers.
-- [`GET /v0.1/servers/{serverName}/versions`](https://registry.modelcontextprotocol.io/docs#/operations/get-server-versions-v0.1) — List all versions of a server.
-- [`GET /v0.1/servers/{serverName}/versions/{version}`](https://registry.modelcontextprotocol.io/docs#/operations/get-server-version-v0.1) — Get a specific version of a server. Use the special version `latest` to get the latest version of the server.
+- [`GET /v0.1/servers`](https://registry.modelcontextprotocol.io/docs#/operations/list-servers-v0.1) — 列出所有服务器。
+- [`GET /v0.1/servers/{serverName}/versions`](https://registry.modelcontextprotocol.io/docs#/operations/get-server-versions-v0.1) — 列出服务器的所有版本。
+- [`GET /v0.1/servers/{serverName}/versions/{version}`](https://registry.modelcontextprotocol.io/docs#/operations/get-server-version-v0.1) — 获取服务器的特定版本。使用特殊版本 `latest` 获取服务器的最新版本。
 
 <Warning>
 
-URL path parameters such as `serverName` and `version` **must** be URL-encoded. For example, `io.modelcontextprotocol/everything` must be encoded as `io.modelcontextprotocol%2Feverything`.
+URL 路径参数（如 `serverName` 和 `version`）**必须**进行 URL 编码。例如，`io.modelcontextprotocol/everything` 必须编码为 `io.modelcontextprotocol%2Feverything`。
 
 </Warning>
 
-Aggregators will most likely scrape the `GET /v0.1/servers` endpoint.
+聚合器最有可能抓取 `GET /v0.1/servers` 端点。
 
-### Pagination
+### 分页
 
-The `GET /v0.1/servers` endpoint supports cursor-based pagination.
+`GET /v0.1/servers` 端点支持基于游标的分页。
 
-For example, the first page can be fetched using a `limit` query parameter:
+例如，可以使用 `limit` 查询参数获取第一页：
 
 ```bash
 curl "https://registry.modelcontextprotocol.io/v0.1/servers?limit=100"
@@ -49,33 +49,33 @@ curl "https://registry.modelcontextprotocol.io/v0.1/servers?limit=100"
 }
 ```
 
-Then subsequent pages can be fetched by passing the `nextCursor` value as the `cursor` query parameter:
+然后通过将 `nextCursor` 值作为 `cursor` 查询参数传递来获取后续页面：
 
 ```bash
 curl "https://registry.modelcontextprotocol.io/v0.1/servers?limit=100&cursor=com.example/my-server:1.0.0"
 ```
 
-### Filtering Since
+### 按更新时间过滤
 
-The `GET /v0.1/servers` endpoint supports filtering servers that have been updated since a given timestamp.
+`GET /v0.1/servers` 端点支持过滤自给定时间戳以来已更新的服务器。
 
-For example, servers that have been updated since 2025-10-23 can be fetched using an `updated_since` query parameter in [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339) date-time format:
+例如，可以使用 [RFC 3339](https://datatracker.ietf.org/doc/html/rfc3339) 日期时间格式的 `updated_since` 查询参数获取自 2025-10-23 以来已更新的服务器：
 
 ```bash
 curl "https://registry.modelcontextprotocol.io/v0.1/servers?updated_since=2025-10-23T00:00:00.000Z"
 ```
 
-## Server Status
+## 服务器状态
 
-Server metadata is generally immutable, except for the `status` field which may be updated to, e.g., `"deprecated"` or `"deleted"`. We recommend that aggregators keep their copy of each server's `status` up to date.
+服务器元数据通常是不可变的，但 `status` 字段除外，该字段可能会更新为 `"deprecated"` 或 `"deleted"` 等。我们建议聚合器保持每个服务器的 `status` 副本为最新状态。
 
-The `"deleted"` status typically indicates that a server has violated our permissive [moderation policy](./moderation-policy), suggesting the server might be spam, malware, or illegal. Aggregators may prefer to remove these servers from their index.
+`"deleted"` 状态通常表示服务器违反了我们宽松的 [审核政策](./moderation-policy)，表明该服务器可能是垃圾邮件、恶意软件或非法内容。聚合器可能倾向于从其索引中删除这些服务器。
 
-## Acting as a Subregistry
+## 作为子注册表运行
 
-A subregistry is an aggregator that also implements the [OpenAPI spec](https://github.com/modelcontextprotocol/registry/blob/main/docs/reference/api/openapi.yaml) defined by the MCP Registry. This allows clients, such as MCP host applications, to consume server metadata via a standardized interface.
+子注册表是一种聚合器，它还实现了 MCP Registry 定义的 [OpenAPI 规范](https://github.com/modelcontextprotocol/registry/blob/main/docs/reference/api/openapi.yaml)。这允许客户端（例如 MCP 宿主应用程序）通过标准化接口使用服务器元数据。
 
-The subregistry OpenAPI spec allows subregistries to inject custom metadata via the `_meta` field. For example, a subregistry could inject user ratings, download counts, and security scan results:
+子注册表 OpenAPI 规范允许子注册表通过 `_meta` 字段注入自定义元数据。例如，子注册表可以注入用户评分、下载次数和安全扫描结果：
 
 ```json server.json highlight={17-26}
 {
@@ -107,4 +107,4 @@ The subregistry OpenAPI spec allows subregistries to inject custom metadata via 
 }
 ```
 
-We recommend that custom metadata be put under a key that reflects the subregistry (e.g., `"com.example.subregistry/custom"` in the above example).
+我们建议将自定义元数据放在反映子注册表的键下（例如，上面示例中的 `"com.example.subregistry/custom"`）。

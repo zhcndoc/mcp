@@ -1,55 +1,43 @@
 ---
-title: Elicitation
+title: 信息收集
 ---
 
 <div id="enable-section-numbers" />
 
-The Model Context Protocol (MCP) provides a standardized way for servers to request additional
-information from users through the client during interactions. This flow allows clients to
-maintain control over user interactions and data sharing while enabling servers to gather
-necessary information dynamically.
+模型上下文协议 (MCP) 提供了一种标准化方式，允许服务器在交互过程中通过客户端向用户请求额外信息。此流程允许客户端保持对用户交互和数据共享的控制，同时使服务器能够动态收集必要信息。
 
-Elicitation supports two modes:
+信息收集支持两种模式：
 
-- **Form mode**: Servers can request structured data from users with optional JSON schemas to validate responses
-- **URL mode**: Servers can direct users to external URLs for sensitive interactions that must _not_ pass through the MCP client
+- **表单模式**：服务器可以向用户请求结构化数据，并使用可选的 JSON Schema 验证响应
+- **URL 模式**：服务器可以将用户引导至外部 URL 进行敏感交互，这些交互**不得**经过 MCP 客户端
 
-## User Interaction Model
+## 用户交互模型
 
-Elicitation in MCP allows servers to implement interactive workflows by enabling user input
-requests to occur _nested_ inside other MCP server features.
+MCP 中的信息收集允许服务器通过启用用户输入请求**嵌套**在其他 MCP 服务器功能内来实现交互式工作流。
 
-Implementations are free to expose elicitation through any interface pattern that suits
-their needs&mdash;the protocol itself does not mandate any specific user interaction
-model.
+实现者可以自由地通过任何适合其需求的界面模式来暴露信息收集功能——协议本身并不强制任何特定的用户交互模型。
 
 <Warning>
 
-For trust & safety and security:
+为了信任、安全和安全性：
 
-- Servers **MUST NOT** use form mode elicitation to request sensitive information such as
-  passwords, API keys, access tokens, or payment credentials
-- Servers **MUST** use [URL mode](#url-mode-elicitation-requests) for interactions involving
-  such sensitive information
+- 服务器**不得**使用表单模式信息收集来请求敏感信息，例如密码、API 密钥、访问令牌或支付凭证
+- 服务器**必须**使用 [URL 模式](#url-mode-elicitation-requests) 进行涉及此类敏感信息的交互
 
-"Sensitive information" in this context refers to secrets and credentials that grant access or
-authorize transactions. General contact or profile information (such as a name, email address,
-or username) is not categorically prohibited; whether to request such data via form mode is at
-the discretion of the server and subject to the user's ability to review and decline.
+此上下文中的“敏感信息”指的是授予访问权限或授权交易的秘密和凭证。一般联系或个人资料信息（例如姓名、电子邮件地址或用户名）并非绝对禁止；是否通过表单模式请求此类数据由服务器自行决定，并取决于用户审查和拒绝的能力。
 
-MCP clients **MUST**:
+MCP 客户端**必须**：
 
-- Provide UI that makes it clear which server is requesting information
-- Respect user privacy and provide clear decline and cancel options
-- For form mode, allow users to review and modify their responses before sending
-- For URL mode, clearly display the target domain/host and gather user consent before navigation to the target URL
+- 提供用户界面，清楚表明是哪个服务器在请求信息
+- 尊重用户隐私，并提供明确的拒绝和取消选项
+- 对于表单模式，允许用户在发送前审查和修改其响应
+- 对于 URL 模式，清楚显示目标域名/主机，并在导航到目标 URL 之前获取用户同意
 
 </Warning>
 
-## Capabilities
+## 能力
 
-Clients that support elicitation **MUST** declare the `elicitation` capability during
-[initialization](../basic/lifecycle#initialization):
+支持信息收集的客户端**必须**在 [初始化](../basic/lifecycle#initialization) 期间声明 `elicitation` 能力：
 
 ```json
 {
@@ -62,67 +50,65 @@ Clients that support elicitation **MUST** declare the `elicitation` capability d
 }
 ```
 
-For backwards compatibility, an empty capabilities object is equivalent to declaring support for `form` mode only:
+为了向后兼容性，空能力对象等同于仅声明支持 `form` 模式：
 
 ```jsonc
 {
   "capabilities": {
-    "elicitation": {}, // Equivalent to { "form": {} }
+    "elicitation": {}, // 等同于 { "form": {} }
   },
 }
 ```
 
-Clients declaring the `elicitation` capability **MUST** support at least one mode (`form` or `url`).
+声明 `elicitation` 能力的客户端**必须**至少支持一种模式（`form` 或 `url`）。
 
-Servers **MUST NOT** send elicitation requests with modes that are not supported by the client.
+服务器**不得**发送客户端不支持的模式的信息收集请求。
 
-## Protocol Messages
+## 协议消息
 
-### Elicitation Requests
+### 信息收集请求
 
-To request information from a user, servers send an `elicitation/create` request.
+要向用户请求信息，服务器发送 `elicitation/create` 请求。
 
-All elicitation requests **MUST** include the following parameters:
+所有信息收集请求**必须**包含以下参数：
 
-| Name      | Type   | Options       | Description                                                                            |
-| --------- | ------ | ------------- | -------------------------------------------------------------------------------------- |
-| `mode`    | string | `form`, `url` | The mode of the elicitation. Optional for form mode (defaults to `"form"` if omitted). |
-| `message` | string |               | A human-readable message explaining why the interaction is needed.                     |
+| 名称      | 类型   | 选项          | 描述                                                                                    |
+| --------- | ------ | ------------- | --------------------------------------------------------------------------------------- |
+| `mode`    | string | `form`, `url` | 信息收集的模式。对于表单模式为可选（如果省略则默认为 `"form"`）。 |
+| `message` | string |               | 一条人类可读的消息，解释为何需要此交互。                     |
 
-The `mode` parameter specifies the type of elicitation:
+`mode` 参数指定信息收集的类型：
 
-- `"form"`: In-band structured data collection with optional schema validation. Data is exposed to the client.
-- `"url"`: Out-of-band interaction via URL navigation. Data (other than the URL itself) is **not** exposed to the client.
+- `"form"`：带内结构化数据收集，带有可选的 Schema 验证。数据会暴露给客户端。
+- `"url"`：通过 URL 导航进行带外交互。数据（URL 本身除外）**不会**暴露给客户端。
 
-For backwards compatibility, servers **MAY** omit the `mode` field for form mode elicitation requests. Clients **MUST** treat requests without a `mode` field as form mode.
+为了向后兼容性，服务器**可以**省略表单模式信息收集请求的 `mode` 字段。客户端**必须**将没有 `mode` 字段的请求视为表单模式。
 
-### Form Mode Elicitation Requests
+### 表单模式信息收集请求
 
-Form mode elicitation allows servers to collect structured data directly through the MCP client.
+表单模式信息收集允许服务器通过 MCP 客户端直接收集结构化数据。
 
-Form mode elicitation requests **MUST** either specify `mode: "form"` or omit the `mode` field, and include these additional parameters:
+表单模式信息收集请求**必须**指定 `mode: "form"` 或省略 `mode` 字段，并包含以下额外参数：
 
-| Name              | Type   | Description                                                    |
-| ----------------- | ------ | -------------------------------------------------------------- |
-| `requestedSchema` | object | A JSON Schema defining the structure of the expected response. |
+| 名称              | 类型   | 描述                                                    |
+| ----------------- | ------ | ------------------------------------------------------- |
+| `requestedSchema` | object | 一个 JSON Schema，定义预期响应的结构。 |
 
-#### Requested Schema
+#### 请求的 Schema
 
-The `requestedSchema` parameter allows servers to define the structure of the expected
-response using a restricted subset of JSON Schema.
+`requestedSchema` 参数允许服务器使用受限的 JSON Schema 子集来定义预期响应的结构。
 
-To simplify client user experience, form mode elicitation schemas are limited to flat objects
-with primitive properties only.
+为了简化客户端用户体验，表单模式信息收集 Schema 仅限于具有原始属性的扁平对象。
 
-The schema is restricted to these primitive types:
+Schema 仅限于以下原始类型：
 
-1. **String Schema**
+1. **字符串 Schema**
 
    ```json
    {
      "type": "string",
-     "title": "Display Name",
-     "description": "Description text",
+     "title": "显示名称",
+     "description": "描述文本",
      "minLength": 3,
      "maxLength": 50,
      "pattern": "^[A-Za-z]+$",
@@ -131,53 +117,53 @@ The schema is restricted to these primitive types:
    }
    ```
 
-   Supported formats: `email`, `uri`, `date`, `date-time`
+   支持的格式：`email`, `uri`, `date`, `date-time`
 
-2. **Number Schema**
+2. **数字 Schema**
 
    ```json
    {
-     "type": "number", // or "integer"
-     "title": "Display Name",
-     "description": "Description text",
+     "type": "number", // 或 "integer"
+     "title": "显示名称",
+     "description": "描述文本",
      "minimum": 0,
      "maximum": 100,
      "default": 50
    }
    ```
 
-3. **Boolean Schema**
+3. **布尔值 Schema**
 
    ```json
    {
      "type": "boolean",
-     "title": "Display Name",
-     "description": "Description text",
+     "title": "显示名称",
+     "description": "描述文本",
      "default": false
    }
    ```
 
-4. **Enum Schema**
+4. **枚举 Schema**
 
-   Single-select enum (without titles):
+   单选枚举（无标题）：
 
    ```json
    {
      "type": "string",
-     "title": "Color Selection",
-     "description": "Choose your favorite color",
+     "title": "颜色选择",
+     "description": "选择您喜欢的颜色",
      "enum": ["Red", "Green", "Blue"],
      "default": "Red"
    }
    ```
 
-   Single-select enum (with titles):
+   单选枚举（有标题）：
 
    ```json
    {
      "type": "string",
-     "title": "Color Selection",
-     "description": "Choose your favorite color",
+     "title": "颜色选择",
+     "description": "选择您喜欢的颜色",
      "oneOf": [
        { "const": "#FF0000", "title": "Red" },
        { "const": "#00FF00", "title": "Green" },
@@ -187,13 +173,13 @@ The schema is restricted to these primitive types:
    }
    ```
 
-   Multi-select enum (without titles):
+   多选枚举（无标题）：
 
    ```json
    {
      "type": "array",
-     "title": "Color Selection",
-     "description": "Choose your favorite colors",
+     "title": "颜色选择",
+     "description": "选择您喜欢的颜色",
      "minItems": 1,
      "maxItems": 2,
      "items": {
@@ -204,13 +190,13 @@ The schema is restricted to these primitive types:
    }
    ```
 
-   Multi-select enum (with titles):
+   多选枚举（有标题）：
 
    ```json
    {
      "type": "array",
-     "title": "Color Selection",
-     "description": "Choose your favorite colors",
+     "title": "颜色选择",
+     "description": "选择您喜欢的颜色",
      "minItems": 1,
      "maxItems": 2,
      "items": {
@@ -224,19 +210,19 @@ The schema is restricted to these primitive types:
    }
    ```
 
-Clients can use this schema to:
+客户端可以使用此 Schema 来：
 
-1. Generate appropriate input forms
-2. Validate user input before sending
-3. Provide better guidance to users
+1. 生成适当的输入表单
+2. 发送前验证用户输入
+3. 为用户提供更好的指导
 
-All primitive types support optional default values to provide sensible starting points. Clients that support defaults SHOULD pre-populate form fields with these values.
+所有原始类型都支持可选默认值，以提供合理的起点。支持默认值的客户端 SHOULD 使用这些值预填充表单字段。
 
-Note that complex nested structures, arrays of objects (beyond enums), and other advanced JSON Schema features are intentionally not supported to simplify client user experience.
+请注意，复杂嵌套结构、对象数组（枚举除外）和其他高级 JSON Schema 功能故意不支持，以简化客户端用户体验。
 
-#### Example: Simple Text Request
+#### 示例：简单文本请求
 
-**Request:**
+**请求：**
 
 ```json
 {
@@ -245,7 +231,7 @@ Note that complex nested structures, arrays of objects (beyond enums), and other
   "method": "elicitation/create",
   "params": {
     "mode": "form",
-    "message": "Please provide your GitHub username",
+    "message": "请提供您的 GitHub 用户名",
     "requestedSchema": {
       "type": "object",
       "properties": {
@@ -259,7 +245,7 @@ Note that complex nested structures, arrays of objects (beyond enums), and other
 }
 ```
 
-**Response:**
+**响应：**
 
 ```json
 {
@@ -274,9 +260,9 @@ Note that complex nested structures, arrays of objects (beyond enums), and other
 }
 ```
 
-#### Example: Structured Data Request
+#### 示例：结构化数据请求
 
-**Request:**
+**请求：**
 
 ```json
 {
@@ -285,23 +271,23 @@ Note that complex nested structures, arrays of objects (beyond enums), and other
   "method": "elicitation/create",
   "params": {
     "mode": "form",
-    "message": "Please provide your contact information",
+    "message": "请提供您的联系信息",
     "requestedSchema": {
       "type": "object",
       "properties": {
         "name": {
           "type": "string",
-          "description": "Your full name"
+          "description": "您的全名"
         },
         "email": {
           "type": "string",
           "format": "email",
-          "description": "Your email address"
+          "description": "您的电子邮件地址"
         },
         "age": {
           "type": "number",
           "minimum": 18,
-          "description": "Your age"
+          "description": "您的年龄"
         }
       },
       "required": ["name", "email"]
@@ -310,7 +296,7 @@ Note that complex nested structures, arrays of objects (beyond enums), and other
 }
 ```
 
-**Response:**
+**响应：**
 
 ```json
 {
@@ -327,41 +313,39 @@ Note that complex nested structures, arrays of objects (beyond enums), and other
 }
 ```
 
-### URL Mode Elicitation Requests
+### URL 模式信息收集请求
 
 <Note>
 
-**New feature:** URL mode elicitation is introduced in the `2025-11-25` version of the MCP specification. Its design and implementation may change in future protocol revisions.
+**新功能：** URL 模式信息收集是在 `2025-11-25` 版本的 MCP 规范中引入的。其设计和实现可能会在未来的协议修订中更改。
 
 </Note>
 
-URL mode elicitation enables servers to direct users to external URLs for out-of-band interactions that must not pass through the MCP client. This is essential for auth flows, payment processing, and other sensitive or secure operations.
+URL 模式信息收集使服务器能够将用户引导至外部 URL 进行带外交互，这些交互不得经过 MCP 客户端。这对于认证流程、支付处理和其他敏感或安全操作至关重要。
 
-URL mode elicitation requests **MUST** specify `mode: "url"`, a `message`, and include these additional parameters:
+URL 模式信息收集请求**必须**指定 `mode: "url"`、`message`，并包含以下额外参数：
 
-| Name            | Type   | Description                               |
-| --------------- | ------ | ----------------------------------------- |
-| `url`           | string | The URL that the user should navigate to. |
-| `elicitationId` | string | A unique identifier for the elicitation.  |
+| 名称            | 类型   | 描述                               |
+| --------------- | ------ | ---------------------------------- |
+| `url`           | string | 用户应该导航到的 URL。 |
+| `elicitationId` | string | 信息收集的唯一标识符。  |
 
-The `url` parameter **MUST** contain a valid URL.
+`url` 参数**必须**包含一个有效的 URL。
 
 <Note>
-  **Important**: URL mode elicitation is *not* for authorizing the MCP client's
-  access to the MCP server (that's handled by [MCP
-  authorization](../basic/authorization)). Instead, it's used when the MCP
-  server needs to obtain sensitive information or third-party authorization on
-  behalf of the user. The MCP client's bearer token remains unchanged. The
-  client's only responsibility is to provide the user with context about the
-  elicitation URL the server wants them to open.
+  **重要**：URL 模式信息收集*不是*用于授权 MCP 客户端访问
+  MCP 服务器（这由 [MCP
+  授权](../basic/authorization) 处理）。相反，当 MCP
+  服务器需要代表用户获取敏感信息或第三方授权时使用它。MCP 客户端的 Bearer 令牌保持不变。
+  客户端的唯一责任是为用户提供关于服务器希望他们打开的信息收集 URL 的上下文。
 </Note>
 
-#### Example: Request Sensitive Data
+#### 示例：请求敏感数据
 
-This example shows a URL mode elicitation request directing the user to a secure URL where they can provide sensitive information (an API key, for example).
-The same request could direct the user into an OAuth authorization flow, or a payment flow. The only difference is the URL and the message.
+此示例显示了一个 URL 模式信息收集请求，将用户引导至一个安全 URL，他们可以在那里提供敏感信息（例如 API 密钥）。
+相同的请求可以将用户引导至 OAuth 授权流程或支付流程。唯一的区别是 URL 和消息。
 
-**Request:**
+**请求：**
 
 ```json
 {
@@ -372,12 +356,12 @@ The same request could direct the user into an OAuth authorization flow, or a pa
     "mode": "url",
     "elicitationId": "550e8400-e29b-41d4-a716-446655440000",
     "url": "https://mcp.example.com/ui/set_api_key",
-    "message": "Please provide your API key to continue."
+    "message": "请提供您的 API 密钥以继续。"
   }
 }
 ```
 
-**Response:**
+**响应：**
 
 ```json
 {
@@ -389,27 +373,24 @@ The same request could direct the user into an OAuth authorization flow, or a pa
 }
 ```
 
-The response with `action: "accept"` indicates that the user has consented to the
-interaction. It does not mean that the interaction is complete. The interaction occurs out
-of band and the client is not aware of the outcome until and unless the server sends a notification indicating completion.
+带有 `action: "accept"` 的响应表示用户已同意交互。这并不意味着交互已完成。交互发生在带外，客户端不知道结果，除非服务器发送表示完成的通知。
 
-### Completion Notifications for URL Mode Elicitation
+### URL 模式信息收集的完成通知
 
-Servers **MAY** send a `notifications/elicitation/complete` notification when an
-out-of-band interaction started by URL mode elicitation is completed. This allows clients to react programmatically if appropriate.
+当由 URL 模式信息收集启动的带外交互完成时，服务器**可以**发送 `notifications/elicitation/complete` 通知。这允许客户端在适当时以编程方式反应。
 
-Servers sending notifications:
+发送通知的服务器：
 
-- **MUST** only send the notification to the client that initiated the elicitation request.
-- **MUST** include the `elicitationId` established in the original `elicitation/create` request.
+- **必须**仅将通知发送给发起信息收集请求的客户端。
+- **必须**包含在原始 `elicitation/create` 请求中建立的 `elicitationId`。
 
-Clients:
+客户端：
 
-- **MUST** ignore notifications referencing unknown or already-completed IDs.
-- **MAY** wait for this notification to automatically retry requests that received a [URLElicitationRequiredError](#error-handling), update the user interface, or otherwise continue an interaction.
-- **SHOULD** still provide manual controls that let the user retry or cancel the original request (or otherwise resume interacting with the client) if the notification never arrives.
+- **必须**忽略引用未知或已完成 ID 的通知。
+- **可以**等待此通知以自动重试收到 [URLElicitationRequiredError](#error-handling) 的请求，更新用户界面，或以其他方式继续交互。
+- **应该**仍然提供手动控制，如果通知从未到达，允许用户重试或取消原始请求（或以其他方式恢复与客户端交互）。
 
-#### Example
+#### 示例
 
 ```json
 {
@@ -421,15 +402,15 @@ Clients:
 }
 ```
 
-### URL Elicitation Required Error
+### 需要 URL 信息收集错误
 
-When a request cannot be processed until an elicitation is completed, the server **MAY** return a [`URLElicitationRequiredError`](#error-handling) (code `-32042`) to indicate to the client that a URL mode elicitation is required. The server **MUST NOT** return this error except when URL mode elicitation is required.
+当请求在信息收集完成之前无法处理时，服务器**可以**返回 [`URLElicitationRequiredError`](#error-handling)（代码 `-32042`）以向客户端指示需要 URL 模式信息收集。服务器**不得**返回此错误，除非需要 URL 模式信息收集。
 
-The error **MUST** include a list of elicitations that are required to complete before the original can be retried.
+错误**必须**包含在完成原始请求之前必须完成的信息收集列表。
 
-Any elicitations returned in the error **MUST** be URL mode elicitations and have an `elicitationId` property.
+错误中返回的任何信息收集**必须**是 URL 模式信息收集，并具有 `elicitationId` 属性。
 
-**Error Response:**
+**错误响应：**
 
 ```json
 {
@@ -437,14 +418,14 @@ Any elicitations returned in the error **MUST** be URL mode elicitations and hav
   "id": 2,
   "error": {
     "code": -32042, // URL_ELICITATION_REQUIRED
-    "message": "This request requires more information.",
+    "message": "此请求需要更多信息。",
     "data": {
       "elicitations": [
         {
           "mode": "url",
           "elicitationId": "550e8400-e29b-41d4-a716-446655440000",
           "url": "https://mcp.example.com/connect?elicitationId=550e8400-e29b-41d4-a716-446655440000",
-          "message": "Authorization is required to access your Example Co files."
+          "message": "需要授权才能访问您的 Example Co 文件。"
         }
       ]
     }
@@ -452,9 +433,9 @@ Any elicitations returned in the error **MUST** be URL mode elicitations and hav
 }
 ```
 
-## Message Flow
+## 消息流程
 
-### Form Mode Flow
+### 表单模式流程
 
 ```mermaid
 sequenceDiagram
@@ -462,81 +443,81 @@ sequenceDiagram
     participant Client
     participant Server
 
-    Note over Server: Server initiates elicitation
+    Note over Server: 服务器发起信息收集
     Server->>Client: elicitation/create (mode: form)
 
-    Note over User,Client: Present elicitation UI
-    User-->>Client: Provide requested information
+    Note over User,Client: 展示信息收集 UI
+    User-->>Client: 提供请求的信息
 
-    Note over Server,Client: Complete request
-    Client->>Server: Return user response
+    Note over Server,Client: 完成请求
+    Client->>Server: 返回用户响应
 
-    Note over Server: Continue processing with new information
+    Note over Server: 继续使用新信息进行处理
 ```
 
-### URL Mode Flow
+### URL 模式流程
 
 ```mermaid
 sequenceDiagram
-    participant UserAgent as User Agent (Browser)
+    participant UserAgent as 用户代理 (浏览器)
     participant User
     participant Client
     participant Server
 
-    Note over Server: Server initiates elicitation
+    Note over Server: 服务器发起信息收集
     Server->>Client: elicitation/create (mode: url)
 
-    Client->>User: Present consent to open URL
-    User-->>Client: Provide consent
+    Client->>User: 展示打开 URL 的同意请求
+    User-->>Client: 提供同意
 
-    Client->>UserAgent: Open URL
-    Client->>Server: Accept response
+    Client->>UserAgent: 打开 URL
+    Client->>Server: 接受响应
 
-    Note over User,UserAgent: User interaction
-    UserAgent-->>Server: Interaction complete
+    Note over User,UserAgent: 用户交互
+    UserAgent-->>Server: 交互完成
     Server-->>Client: notifications/elicitation/complete (optional)
 
-    Note over Server: Continue processing with new information
+    Note over Server: 继续使用新信息进行处理
 ```
 
-### URL Mode With Elicitation Required Error Flow
+### 带有信息收集必需错误的 URL 模式流程
 
 ```mermaid
 sequenceDiagram
-    participant UserAgent as User Agent (Browser)
+    participant UserAgent as 用户代理 (浏览器)
     participant User
     participant Client
     participant Server
 
     Client->>Server: tools/call
 
-    Note over Server: Server needs authorization
+    Note over Server: 服务器需要授权
     Server->>Client: URLElicitationRequiredError
-    Note over Client: Client notes the original request can be retried after elicitation
+    Note over Client: 客户端注意原始请求可以在信息收集后重试
 
-    Client->>User: Present consent to open URL
-    User-->>Client: Provide consent
+    Client->>User: 展示打开 URL 的同意请求
+    User-->>Client: 提供同意
 
-    Client->>UserAgent: Open URL
+    Client->>UserAgent: 打开 URL
 
-    Note over User,UserAgent: User interaction
+    Note over User,UserAgent: 用户交互
 
-    UserAgent-->>Server: Interaction complete
+    UserAgent-->>Server: 交互完成
     Server-->>Client: notifications/elicitation/complete (optional)
 
-    Client->>Server: Retry tools/call (optional)
+    Client->>Server: 重试 tools/call (可选)
 ```
 
-## Response Actions
+## 响应操作
 
-Elicitation responses use a three-action model to clearly distinguish between different user actions. These actions apply to both form and URL elicitation modes.
+信息收集响应使用三操作模型来清楚地区分不同的用户操作。这些操作适用于表单和 URL 信息收集模式。
 
 ```json
 {
   "jsonrpc": "2.0",
   "id": 1,
   "result": {
-    "action": "accept", // or "decline" or "cancel"
+    "action": "accept", // 或 "decline" 或 "cancel"
     "content": {
       "propertyName": "value",
       "anotherProperty": 42
@@ -545,237 +526,232 @@ Elicitation responses use a three-action model to clearly distinguish between di
 }
 ```
 
-The three response actions are:
+三个响应操作是：
 
-1. **Accept** (`action: "accept"`): User explicitly approved and submitted with data
-   - For form mode: The `content` field contains the submitted data matching the requested schema
-   - For URL mode: The `content` field is omitted
-   - Example: User clicked "Submit", "OK", "Confirm", etc.
+1. **接受** (`action: "accept"`): 用户明确批准并提交数据
+   - 对于表单模式：`content` 字段包含与请求模式匹配的提交数据
+   - 对于 URL 模式：`content` 字段被省略
+   - 示例：用户点击了“提交”、“确定”、“确认”等。
 
-2. **Decline** (`action: "decline"`): User explicitly declined the request
-   - The `content` field is typically omitted
-   - Example: User clicked "Reject", "Decline", "No", etc.
+2. **拒绝** (`action: "decline"`): 用户明确拒绝请求
+   - `content` 字段通常被省略
+   - 示例：用户点击了“拒绝”、“谢绝”、“否”等。
 
-3. **Cancel** (`action: "cancel"`): User dismissed without making an explicit choice
-   - The `content` field is typically omitted
-   - Example: User closed the dialog, clicked outside, pressed Escape, browser failed to load, etc.
+3. **取消** (`action: "cancel"`): 用户解散而未做出明确选择
+   - `content` 字段通常被省略
+   - 示例：用户关闭了对话框、点击了外部、按了 Escape 键、浏览器加载失败等。
 
-Servers should handle each state appropriately:
+服务器应适当处理每种状态：
 
-- **Accept**: Process the submitted data
-- **Decline**: Handle explicit decline (e.g., offer alternatives)
-- **Cancel**: Handle dismissal (e.g., prompt again later)
+- **接受**：处理提交的数据
+- **拒绝**：处理明确拒绝（例如，提供替代方案）
+- **取消**：处理解散（例如，稍后再次提示）
 
-## Implementation Considerations
+## 实现注意事项
 
-### Statefulness
+### 状态性
 
-Most practical uses of elicitation require that the server maintain state about users:
+大多数实际的信息收集用例要求服务器维护关于用户的状态：
 
-- Whether required information has been collected (e.g., the user's display name via form mode elicitation)
-- Status of resource access (e.g., API keys or a payment flow via URL mode elicitation)
+- 是否已收集所需信息（例如，通过表单模式信息收集获取用户的显示名称）
+- 资源访问状态（例如，通过 URL 模式信息收集获取 API 密钥或支付流程）
 
-Servers implementing elicitation **MUST** securely associate this state with individual users following the guidelines in the [security best practices](../basic/security_best_practices) document. Specifically:
+实现信息收集的服务器 **必须** 按照 [安全最佳实践](../basic/security_best_practices) 文档中的指南，将此状态与个别用户安全地关联。具体来说：
 
-- State **MUST NOT** be associated with session IDs alone
-- State storage **MUST** be protected against unauthorized access
-- For remote MCP servers, user identification **MUST** be derived from credentials acquired via [MCP authorization](../basic/authorization) when possible (e.g. `sub` claim)
-
-<Note>
-  The examples in this section are non-normative and illustrate potential uses
-  of elicitation. Implementers should adapt these patterns to their specific
-  requirements while maintaining security best practices.
-</Note>
-
-### URL Mode Elicitation for Sensitive Data
-
-For servers that interact with external APIs requiring sensitive information (e.g., credentials, payment information), URL mode elicitation provides a secure mechanism for users to provide this information without exposing it to the MCP client.
-
-In this pattern:
-
-1. The server directs users to a secure web page (served over HTTPS)
-2. The page presents a branded form UI on a domain the user trusts
-3. Users enter sensitive credentials directly into the secure form
-4. The server stores credentials securely, bound to the user's identity
-5. Subsequent MCP requests use these stored credentials for API access
-
-This approach ensures that sensitive credentials never pass through the LLM context, MCP client or any intermediate MCP servers, reducing the risk of exposure through client-side logging or other attack vectors.
-
-### URL Mode Elicitation for OAuth Flows
-
-URL mode elicitation enables a pattern where MCP servers act as OAuth clients to third-party resource servers.
-Authorization with external APIs enabled by URL mode elicitation is separate from [MCP authorization](../basic/authorization). MCP servers **MUST NOT** rely on URL mode elicitation to authorize users for themselves.
-
-#### Understanding the Distinction
-
-- **MCP Authorization**: Required OAuth flow between the MCP client and MCP server (covered in the [authorization specification](../basic/authorization))
-- **External (third-party) Authorization**: Optional authorization between the MCP server and a third-party resource server, initiated via URL mode elicitation
-
-In external authorization, the server acts as both:
-
-- An OAuth resource server (to the MCP client)
-- An OAuth client (to the third-party resource server)
-
-Example scenario:
-
-- An MCP client connects to an MCP server
-- The MCP server integrates with various different third-party services
-- When the MCP client calls a tool that requires access to a third-party service, the MCP server needs credentials for that service
-
-The critical security requirements are:
-
-1. **The third-party credentials MUST NOT transit through the MCP client**: The client must never see third-party credentials to protect the security boundary
-2. **The MCP server MUST NOT use the client's credentials for the third-party service**: That would be [token passthrough](../basic/security_best_practices#token-passthrough), which is forbidden
-3. **The user MUST authorize the MCP server directly**: The interaction happens outside the MCP protocol, without involving the MCP client
-4. **The MCP server is responsible for tokens**: The MCP server is responsible for storing and managing the third-party tokens obtained through the URL mode elicitation (in other words, the MCP server must be stateful).
-
-Credentials obtained via URL mode elicitation are distinct from the MCP server credentials used by the MCP client. The MCP server **MUST NOT** transmit credentials obtained through URL mode elicitation to the MCP client.
+- 状态 **不得** 仅与会话 ID 关联
+- 状态存储 **必须** 防止未经授权的访问
+- 对于远程 MCP 服务器，用户标识 **必须** 在可能时从通过 [MCP 授权](../basic/authorization) 获取的凭据中衍生（例如 `sub` 声明）
 
 <Note>
-  For additional background, refer to the [token passthrough
-  section](../basic/security_best_practices#token-passthrough) of the Security
-  Best Practices document to understand why MCP servers cannot act as
-  pass-through proxies.
+  本节中的示例是非规范性的，旨在说明信息收集的潜在用途。实现者应在保持安全最佳实践的同时，根据其特定需求调整这些模式。
 </Note>
 
-#### Implementation Pattern
+### 用于敏感数据的 URL 模式信息收集
 
-When implementing external authorization via URL mode elicitation:
+对于与需要敏感信息（例如，凭据、支付信息）的外部 API 交互的服务器，URL 模式信息收集提供了一种安全机制，让用户提供此信息而不将其暴露给 MCP 客户端。
 
-1. The MCP server generates an authorization URL, acting as an OAuth client to the third-party service
-2. The MCP server stores internal state that associates (binds) the elicitation request with the user's identity.
-3. The MCP server sends a URL mode elicitation request to the client with a URL that can start the authorization flow.
-4. The user completes the OAuth flow directly with the third-party authorization server
-5. The third-party authorization server redirects back to the MCP server
-6. The MCP server securely stores the third-party tokens, bound to the user's identity
-7. Future MCP requests can leverage these stored tokens for API access to the third-party resource server
+在此模式中：
 
-The following is a non-normative example of how this pattern could be implemented:
+1. 服务器将用户引导至安全网页（通过 HTTPS 服务）
+2. 页面在用户信任的域上展示品牌化的表单 UI
+3. 用户直接将敏感凭据输入安全表单
+4. 服务器安全地存储凭据，绑定到用户身份
+5. 后续 MCP 请求使用这些存储的凭据进行 API 访问
+
+这种方法确保敏感凭据永远不会通过 LLM 上下文、MCP 客户端或任何中间 MCP 服务器，减少通过客户端日志记录或其他攻击向量暴露的风险。
+
+### 用于 OAuth 流程的 URL 模式信息收集
+
+URL 模式信息收集启用了一种模式，其中 MCP 服务器充当第三方资源服务器的 OAuth 客户端。
+通过 URL 模式信息收集启用的与外部 API 的授权不同于 [MCP 授权](../basic/authorization)。MCP 服务器 **不得** 依赖 URL 模式信息收集来为用户授权自身。
+
+#### 理解区别
+
+- **MCP 授权**：MCP 客户端和 MCP 服务器之间所需的 OAuth 流程（在 [授权规范](../basic/authorization) 中涵盖）
+- **外部（第三方）授权**：MCP 服务器和第三方资源服务器之间的可选授权，通过 URL 模式信息收集发起
+
+在外部授权中，服务器同时充当：
+
+- OAuth 资源服务器（对 MCP 客户端）
+- OAuth 客户端（对第三方资源服务器）
+
+示例场景：
+
+- MCP 客户端连接到 MCP 服务器
+- MCP 服务器集成各种不同的第三方服务
+- 当 MCP 客户端调用需要访问第三方服务的工具时，MCP 服务器需要该服务的凭据
+
+关键安全要求是：
+
+1. **第三方凭据不得通过 MCP 客户端传输**：客户端永远不应看到第三方凭据以保护安全边界
+2. **MCP 服务器不得将客户端的凭据用于第三方服务**：那将是 [令牌传递](../basic/security_best_practices#token-passthrough)，这是禁止的
+3. **用户必须直接授权 MCP 服务器**：交互发生在 MCP 协议之外，不涉及 MCP 客户端
+4. **MCP 服务器负责令牌**：MCP 服务器负责存储和管理通过 URL 模式信息收集获得的第三方令牌（换句话说，MCP 服务器必须是有状态的）。
+
+通过 URL 模式信息收集获得的凭据不同于 MCP 客户端使用的 MCP 服务器凭据。MCP 服务器 **不得** 将通过 URL 模式信息收集获得的凭据传输给 MCP 客户端。
+
+<Note>
+  有关更多背景信息，请参阅安全最佳实践文档中的 [令牌传递部分](../basic/security_best_practices#token-passthrough)，以了解为什么 MCP 服务器不能充当传递代理。
+</Note>
+
+#### 实现模式
+
+当通过 URL 模式信息收集实现外部授权时：
+
+1. MCP 服务器生成授权 URL，充当第三方服务的 OAuth 客户端
+2. MCP 服务器存储内部状态，将信息收集请求与用户身份关联（绑定）。
+3. MCP 服务器向客户端发送带有可以启动授权流程的 URL 的 URL 模式信息收集请求。
+4. 用户直接与第三方授权服务器完成 OAuth 流程
+5. 第三方授权服务器重定向回 MCP 服务器
+6. MCP 服务器安全地存储第三方令牌，绑定到用户身份
+7. 未来的 MCP 请求可以利用这些存储的令牌访问第三方资源服务器的 API
+
+以下是如何实现此模式的非规范性示例：
 
 ```mermaid
 sequenceDiagram
     participant User
-    participant UserAgent as User Agent (Browser)
-    participant 3AS as 3rd Party AS
-    participant 3RS as 3rd Party RS
-    participant Client as MCP Client
-    participant Server as MCP Server
+    participant UserAgent as 用户代理 (浏览器)
+    participant 3AS as 第三方 AS
+    participant 3RS as 第三方 RS
+    participant Client as MCP 客户端
+    participant Server as MCP 服务器
 
     Client->>Server: tools/call
-    Note over Server: Needs 3rd-party authorization for user
-    Note over Server: Store state (bind the elicitation request to the user)
+    Note over Server: 需要用户的第三方授权
+    Note over Server: 存储状态（将信息收集请求绑定到用户）
     Server->>Client: URLElicitationRequiredError<br> (mode: "url", url: "https://mcp.example.com/connect?...")
-    Note over Client: Client notes the tools/call request can be retried later
-    Client->>User: Present consent to open URL
-    User->>Client: Provide consent
-    Client->>UserAgent: Open URL
-    Client->>Server: Accept response
-    UserAgent->>Server: Load connect route
-    Note over Server: Confirm: user is logged into MCP Server or MCP AS<br>Confirm: elicitation user matches session user
-    Server->>UserAgent: Redirect to third-party authorization endpoint
-    UserAgent->>3AS: Load authorize route
-    Note over 3AS,User: User interaction (OAuth flow):<br>User consents to scoped MCP Server access
-    3AS->>UserAgent: redirect to MCP Server's redirect_uri
-    UserAgent->>Server: load redirect_uri page
-    Note over Server: Confirm: redirect_uri belongs to MCP Server
-    Server->>3AS: Exchange authorization code for  OAuth tokens
-    3AS->>Server: Grants tokens
-    Note over Server: Bind tokens to MCP user identity
+    Note over Client: 客户端注意 tools/call 请求可以稍后重试
+    Client->>User: 展示打开 URL 的同意请求
+    User->>Client: 提供同意
+    Client->>UserAgent: 打开 URL
+    Client->>Server: 接受响应
+    UserAgent->>Server: 加载连接路由
+    Note over Server: 确认：用户已登录 MCP 服务器或 MCP AS<br>确认：信息收集用户与会话用户匹配
+    Server->>UserAgent: 重定向到第三方授权端点
+    UserAgent->>3AS: 加载授权路由
+    Note over 3AS,User: 用户交互 (OAuth 流程):<br>用户同意 scoped MCP 服务器访问
+    3AS->>UserAgent: 重定向到 MCP 服务器的 redirect_uri
+    UserAgent->>Server: 加载 redirect_uri 页面
+    Note over Server: 确认：redirect_uri 属于 MCP 服务器
+    Server->>3AS: 交换授权码以获取 OAuth 令牌
+    3AS->>Server: 授予令牌
+    Note over Server: 将令牌绑定到 MCP 用户身份
     Server-->>Client: notifications/elicitation/complete (optional)
-    Client->>Server: Retry tools/call
-    Note over Server: Retrieve token bound to user identity
-    Server->>3RS: Call 3rd-party API
+    Client->>Server: 重试 tools/call
+    Note over Server: 检索绑定到用户身份的令牌
+    Server->>3RS: 调用第三方 API
 ```
 
-This pattern maintains clear security boundaries while enabling rich integrations with third-party services that require user authorization.
+此模式在保持清晰安全边界的同时，实现了与需要用户授权的第三方服务的丰富集成。
 
-## Error Handling
+## 错误处理
 
-Servers **MUST** return standard JSON-RPC errors for common failure cases:
+服务器 **必须** 为常见失败情况返回标准 JSON-RPC 错误：
 
-- When a request cannot be processed until an elicitation is completed: `-32042` (`URLElicitationRequiredError`)
+- 当请求在完成信息索取之前无法处理时：`-32042`（`URLElicitationRequiredError`）
 
-Clients **MUST** return standard JSON-RPC errors for common failure cases:
+客户端 **必须** 为常见失败情况返回标准 JSON-RPC 错误：
 
-- Server sends an `elicitation/create` request with a mode not declared in client capabilities: `-32602` (Invalid params)
+- 服务器发送的 `elicitation/create` 请求中包含未在客户端能力中声明的模式：`-32602`（无效参数）
 
-## Security Considerations
+## 安全注意事项
 
-1. Servers **MUST** bind elicitation requests to the client and user identity
-1. Clients **MUST** provide clear indication of which server is requesting information
-1. Clients **SHOULD** implement user approval controls
-1. Clients **SHOULD** allow users to decline elicitation requests at any time
-1. Clients **SHOULD** implement rate limiting
-1. Clients **SHOULD** present elicitation requests in a way that makes it clear what information is being requested and why
+1. 服务器 **必须** 将信息索取请求绑定到客户端和用户身份
+1. 客户端 **必须** 提供明确指示，说明是哪个服务器正在请求信息
+1. 客户端 **应该** 实现用户批准控制
+1. 客户端 **应该** 允许用户随时拒绝信息索取请求
+1. 客户端 **应该** 实现速率限制
+1. 客户端 **应该** 以清晰展示所请求信息及其原因的方式呈现信息索取请求
 
-### Safe URL Handling
+### 安全 URL 处理
 
-MCP servers requesting elicitation:
+请求信息索取的 MCP 服务器：
 
-1. **MUST NOT** include sensitive information about the end-user, including credentials, personal identifiable information, etc., in the URL sent to the client in a URL elicitation request.
-2. **MUST NOT** provide a URL which is pre-authenticated to access a protected resource, as the URL could be used to impersonate the user by a malicious client.
-3. **SHOULD NOT** include URLs intended to be clickable in any field of a form mode elicitation request.
-4. **SHOULD** use HTTPS URLs for non-development environments.
+1. **不得** 在 URL 信息索取请求中发送给客户端的 URL 里包含关于最终用户的敏感信息，包括凭证、个人身份信息等。
+2. **不得** 提供预认证即可访问受保护资源的 URL，因为恶意客户端可能利用该 URL 冒充用户。
+3. **不应该** 在表单模式信息索取请求的任何字段中包含旨在可点击的 URL。
+4. **应该** 在非开发环境中使用 HTTPS URL。
 
-These server requirements ensure that client implementations have clear rules about when to present a URL to the user, so that the client-side rules (below) can be consistently applied.
+这些服务器要求确保客户端实现有关何时向用户展示 URL 的明确规则，以便可以一致地应用客户端侧规则（如下）。
 
-Clients implementing URL mode elicitation **MUST** handle URLs carefully to prevent users from unknowingly clicking malicious links.
+实现 URL 模式信息索取的客户端 **必须** 小心处理 URL，以防止用户无意中点击恶意链接。
 
-When handling URL mode elicitation requests, MCP clients:
+处理 URL 模式信息索取请求时，MCP 客户端：
 
-1. **MUST NOT** automatically pre-fetch the URL or any of its metadata.
-2. **MUST NOT** open the URL without explicit consent from the user.
-3. **MUST** show the full URL to the user for examination before consent.
-4. **MUST** open the URL provided by the server in a secure manner that does not enable the client or LLM to inspect the content or user inputs.
-   For example, on iOS, [SFSafariViewController](https://developer.apple.com/documentation/safariservices/sfsafariviewcontroller) is good, but [WkWebView](https://developer.apple.com/documentation/webkit/wkwebview) is not.
-5. **SHOULD** highlight the domain of the URL to mitigate subdomain spoofing.
-6. **SHOULD** have warnings for ambiguous/suspicious URIs (i.e., containing Punycode).
-7. **SHOULD NOT** render URLs as clickable in any field of an elicitation request, except for the `url` field in a URL elicitation request (with the restrictions detailed above).
+1. **不得** 自动预取 URL 或其任何元数据。
+2. **不得** 在未经用户明确同意的情况下打开 URL。
+3. **必须** 在同意前向用户显示完整 URL 以供检查。
+4. **必须** 以安全的方式打开服务器提供的 URL，使得客户端或 LLM 无法检查内容或用户输入。
+   例如，在 iOS 上，[SFSafariViewController](https://developer.apple.com/documentation/safariservices/sfsafariviewcontroller) 是合适的，但 [WkWebView](https://developer.apple.com/documentation/webkit/wkwebview) 不合适。
+5. **应该** 突出显示 URL 的域名以减轻子域名欺骗。
+6. **应该** 对模糊/可疑的 URI（即包含 Punycode 的）发出警告。
+7. **不应该** 在信息索取请求的任何字段中将 URL 渲染为可点击的，除了 URL 信息索取请求中的 `url` 字段（受上述限制）。
 
-### Identifying the User
+### 识别用户
 
-Servers **MUST NOT** rely on client-provided user identification without server verification, as this can be forged.
-Instead, servers **SHOULD** follow [security best practices](../basic/security_best_practices).
+服务器 **不得** 依赖客户端提供的用户身份识别而不进行服务器验证，因为这可能被伪造。
+相反，服务器 **应该** 遵循 [安全最佳实践](../basic/security_best_practices)。
 
-Non-normative examples:
+非规范性示例：
 
-- Incorrect: Treat user input like "I am joe@example.com" as authoritative
-- Correct: Rely on [authorization](../basic/authorization) to identify the user
+- 错误：将用户输入（如 "I am joe@example.com"）视为权威
+- 正确：依赖 [授权](../basic/authorization) 来识别用户
 
-### Form Mode Security
+### 表单模式安全
 
-1. Servers **MUST NOT** request sensitive information (passwords, API keys, etc.) via form mode
-2. Clients **SHOULD** validate all responses against the provided schema
-3. Servers **SHOULD** validate received data matches the requested schema
+1. 服务器 **不得** 通过表单模式请求敏感信息（密码、API 密钥等）
+2. 客户端 **应该** 针对提供的模式验证所有响应
+3. 服务器 **应该** 验证接收到的数据是否与请求的模式匹配
 
-#### Phishing
+#### 网络钓鱼
 
-URL mode elicitation returns a URL that an attacker can use to send to a victim. The MCP Server **MUST** verify the identity of the user who opens the URL before accepting information.
+URL 模式信息索取返回一个攻击者可用于发送给受害者的 URL。MCP 服务器 **必须** 在接受信息之前验证打开 URL 的用户身份。
 
-Typically identity verification is done by leveraging the [MCP authorization server](../basic/authorization) to identify the user, through a session cookie or equivalent in the browser.
+通常身份验证是通过利用 [MCP 授权服务器](../basic/authorization) 来识别用户，通过浏览器中的会话 cookie 或等效方式。
 
-For example, URL mode elicitation may be used to perform OAuth flows where the server acts as an OAuth client of another resource server. Without proper mitigation, the following phishing attack is possible:
+例如，URL 模式信息索取可用于执行 OAuth 流程，其中服务器充当另一个资源服务器的 OAuth 客户端。如果没有适当的缓解措施，可能发生以下网络钓鱼攻击：
 
-1. A malicious user (Alice) connected to a benign server triggers an elicitation request
-2. The benign server generates an authorization URL, acting as an OAuth client of a third-party authorization server
-3. Alice's client displays the URL and asks for consent
-4. Instead of clicking on the link, Alice tricks a victim user (Bob) of the same benign server into clicking it
-5. Bob opens the link and completes the authorization, thinking they are authorizing their own connection to the benign server
-6. The benign server receives a callback/redirect form the third-party authorization server, and assumes it's Alice's request
-7. The tokens for the third-party server are bound to Alice's session and identity, instead of Bob's, resulting in an account takeover
+1. 连接到良性服务器的恶意用户（Alice）触发信息索取请求
+2. 良性服务器生成授权 URL，充当第三方授权服务器的 OAuth 客户端
+3. Alice 的客户端显示 URL 并请求同意
+4. Alice 没有点击链接，而是诱骗同一良性服务器的受害者用户（Bob）点击它
+5. Bob 打开链接并完成授权，认为他们正在授权自己与良性服务器的连接
+6. 良性服务器收到来自第三方授权服务器的回调/重定向，并假设这是 Alice 的请求
+7. 第三方服务器的令牌绑定到 Alice 的会话和身份，而不是 Bob 的，导致账户接管
 
-To prevent this attack, the server **MUST** ensure that the user who started the elicitation request (the end-user who is accessing the server via the MCP client) is the same user who completes the authorization flow.
+为了防止此攻击，服务器 **必须** 确保启动信息索取请求的用户（通过 MCP 客户端访问服务器的最终用户）与完成授权流程的用户是同一人。
 
-There are many ways to achieve this and the best way will depend on the specific implementation.
+实现这一点的方法有很多，最佳方式将取决于具体实现。
 
-As a common, non-normative example, consider a case where the MCP server is accessible via the web and desires to perform a third-party authorization code flow.
-To prevent the phishing attack, the server would create a URL mode elicitation to `https://mcp.example.com/connect?elicitationId=...` rather than the third-party authorization endpoint.
-This "connect URL" must ensure the user who opened the page is the same user who the elicitation was generated for.
-It would, for example, check that the user has a valid session cookie and that the session cookie is for the same user who was using the MCP client to generate the URL mode elicitation.
-This could be done by comparing the authoritative subject (`sub` claim) from the MCP server's authorization server to the subject from the session cookie.
-Once that page ensures the same user, it can send the user to the third-party authorization server at `https://example.com/authorize?...` where a normal OAuth flow can be completed.
+作为一个常见的非规范性示例，考虑 MCP 服务器可通过 Web 访问并希望执行第三方授权代码流程的情况。
+为了防止网络钓鱼攻击，服务器将创建一个 URL 模式信息索取到 `https://mcp.example.com/connect?elicitationId=...` 而不是第三方授权端点。
+此“连接 URL"必须确保打开页面的用户与生成信息索取的用户是同一人。
+例如，它将检查用户是否有有效的会话 cookie，并且该会话 cookie 属于使用 MCP 客户端生成 URL 模式信息索取的同一用户。
+这可以通过比较 MCP 服务器授权服务器中的权威主体（`sub` 声明）与会话 cookie 中的主体来完成。
+一旦该页面确保是同一用户，它可以将用户发送到第三方授权服务器 `https://example.com/authorize?...`，在那里可以完成正常的 OAuth 流程。
 
-In other cases, the server may not be accessible via the web and may not be able to use a session cookie to identify the user.
-In this case, the server must use a different mechanism to identify the user who opens the elicitation URL is the same user who the elicitation was generated for.
+在其他情况下，服务器可能无法通过 Web 访问，并且可能无法使用会话 cookie 来识别用户。
+在这种情况下，服务器必须使用不同的机制来识别打开信息索取 URL 的用户与生成信息索取的用户是同一人。
 
-In all implementations, the server **MUST** ensure that the mechanism to determine the user's identity is resilient to attacks where an attacker can modify the elicitation URL.
+在所有实现中，服务器 **必须** 确保确定用户身份的机制能够抵御攻击者可以修改信息索取 URL 的攻击。

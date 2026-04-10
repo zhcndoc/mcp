@@ -1,13 +1,13 @@
 ---
-title: Publishing Remote Servers
-sidebarTitle: Remote Servers
+title: 发布远程服务器
+sidebarTitle: 远程服务器
 ---
 
 <Note>
-  The MCP Registry is currently in preview. Breaking changes or data resets may occur before general availability. If you encounter any issues, please report them on [GitHub](https://github.com/modelcontextprotocol/registry/issues).
+  MCP Registry 目前处于预览阶段。在正式发布之前可能会发生破坏性变更或数据重置。如果您遇到任何问题，请在 [GitHub](https://github.com/modelcontextprotocol/registry/issues) 上报告。
 </Note>
 
-The MCP Registry supports remote MCP servers via the `remotes` property in `server.json`:
+MCP Registry 通过 `server.json` 中的 `remotes` 属性支持远程 MCP 服务器：
 
 ```json server.json highlight={7-12}
 {
@@ -25,13 +25,13 @@ The MCP Registry supports remote MCP servers via the `remotes` property in `serv
 }
 ```
 
-A remote server **MUST** be publicly accessible at its specified URL.
+远程服务器在其指定 URL 上 **必须** 是公开可访问的。
 
-## Transport Type
+## 传输类型
 
-Remote servers can use the Streamable HTTP transport (recommended) or the SSE transport. Remote servers can also support both transports simultaneously at different URLs.
+远程服务器可以使用 Streamable HTTP 传输（推荐）或 SSE 传输。远程服务器也可以在不同 URL 上同时支持这两种传输。
 
-Specify the transport by setting the `type` property of the `remotes` entry to either `"streamable-http"` or `"sse"`:
+通过将 `remotes` 条目的 `type` 属性设置为 `"streamable-http"` 或 `"sse"` 来指定传输：
 
 ```json server.json highlight={9,13}
 {
@@ -53,9 +53,9 @@ Specify the transport by setting the `type` property of the `remotes` entry to e
 }
 ```
 
-## URL Template Variables
+## URL 模板变量
 
-Remote servers can define URL template variables using `{curly_braces}` notation. This enables multi-tenant deployments where a single server definition can support multiple endpoints with configurable values:
+远程服务器可以使用 `{curly_braces}` 表示法定义 URL 模板变量。这使得多租户部署成为可能，其中单个服务器定义可以支持具有可配置值的多个端点：
 
 ```json server.json highlight={10-17}
 {
@@ -79,9 +79,9 @@ Remote servers can define URL template variables using `{curly_braces}` notation
 }
 ```
 
-When configuring this server, users provide their `tenant_id` value, and the URL template gets resolved to the appropriate endpoint (e.g., `https://us-cell1.analytics.example.com/mcp`).
+配置此服务器时，用户提供其 `tenant_id` 值，URL 模板将被解析为适当的端点（例如 `https://us-cell1.analytics.example.com/mcp`）。
 
-Variables support additional properties like `default`, `choices`, and `isSecret`:
+变量支持额外的属性，如 `default`、`choices` 和 `isSecret`：
 
 ```json server.json highlight={12-22}
 {
@@ -111,9 +111,9 @@ Variables support additional properties like `default`, `choices`, and `isSecret
 }
 ```
 
-## HTTP Headers
+## HTTP 头
 
-MCP clients can be instructed to send specific HTTP headers by adding the `headers` property to the `remotes` entry:
+可以通过向 `remotes` 条目添加 `headers` 属性来指示 MCP 客户端发送特定的 HTTP 头：
 
 ```json server.json highlight={11-18}
 {
@@ -139,9 +139,9 @@ MCP clients can be instructed to send specific HTTP headers by adding the `heade
 }
 ```
 
-## Supporting Remote and Non-remote Installation
+## 支持远程和非远程安装
 
-The `remotes` property can coexist with the `packages` property in `server.json` in order to allow MCP host applications to choose the preferred method of installation.
+`remotes` 属性可以与 `server.json` 中的 `packages` 属性共存，以允许 MCP 宿主应用程序选择首选的安装方法。
 
 ```json server.json highlight={7-22}
 {

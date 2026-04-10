@@ -1,124 +1,124 @@
 ---
-title: "SEP-1024: MCP Client Security Requirements for Local Server Installation"
-sidebarTitle: "SEP-1024: MCP Client Security Requirements for Lo…"
-description: "MCP Client Security Requirements for Local Server Installation"
+title: "SEP-1024：本地服务器安装的 MCP 客户端安全要求"
+sidebarTitle: "SEP-1024：本地服务器安装的 MCP 客户端安全要求…"
+description: "本地服务器安装的 MCP 客户端安全要求"
 ---
 
 <div className="flex items-center gap-2 mb-4">
   <Badge color="green" shape="pill">
-    Final
+    最终版
   </Badge>
   <Badge color="gray" shape="pill">
-    Standards Track
+    标准轨道
   </Badge>
 </div>
 
-| Field         | Value                                                                           |
-| ------------- | ------------------------------------------------------------------------------- |
-| **SEP**       | 1024                                                                            |
-| **Title**     | MCP Client Security Requirements for Local Server Installation                  |
-| **Status**    | Final                                                                           |
-| **Type**      | Standards Track                                                                 |
-| **Created**   | 2025-07-22                                                                      |
-| **Author(s)** | Den Delimarsky                                                                  |
-| **Sponsor**   | None                                                                            |
+| 字段          | 值                                                                            |
+| ------------- | ----------------------------------------------------------------------------- |
+| **SEP**       | 1024                                                                          |
+| **标题**      | 本地服务器安装的 MCP 客户端安全要求                                           |
+| **状态**      | 最终版                                                                        |
+| **类型**      | 标准轨道                                                                      |
+| **创建日期**  | 2025-07-22                                                                    |
+| **作者**      | Den Delimarsky                                                                |
+| **赞助方**    | 无                                                                            |
 | **PR**        | [#1024](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1024) |
 
 ---
 
-## Abstract
+## 摘要
 
-This SEP addresses critical security vulnerabilities in MCP client implementations that support one-click installation of local MCP servers. The current MCP specification lacks explicit security requirements for client-side installation flows, allowing malicious actors to execute arbitrary commands on user systems through crafted MCP server configurations distributed via links or social engineering.
+本 SEP 解决了支持一键安装本地 MCP 服务器的 MCP 客户端实现中的关键安全漏洞。当前的 MCP 规范缺乏针对客户端安装流程的明确安全要求，使得恶意行为者可以通过通过链接或社会工程学传播精心制作的 MCP 服务器配置，在用户系统上执行任意命令。
 
-This proposal establishes a best practice for MCP clients, requiring explicit user consent before executing any local server installation commands and complete command transparency.
+本提案为 MCP 客户端建立了一种最佳实践，要求在执行任何本地服务器安装命令之前获得明确的用户同意，并实现完全的命令透明度。
 
-## Motivation
+## 动机
 
-The existing MCP specification does not address client-side security concerns related to streamlined ("one-click") local server configuration. Current MCP clients that implement these configuration experiences create significant attack vectors:
+现有的 MCP 规范未解决与简化（“一键”）本地服务器配置相关的客户端安全问题。实现这些配置体验的当前 MCP 客户端创造了重大的攻击向量：
 
-1. **Silent Command Execution**: MCP clients can automatically execute embedded commands without user review or consent when installing local servers via one-click flows.
+1. **静默命令执行**：MCP 客户端在通过一键流程安装本地服务器时，可以在未经用户审查或同意的情况下自动执行嵌入的命令。
 
-2. **Lack of Visibility**: Users have no insight into what commands are being executed on their systems, creating opportunities for data exfiltration, system compromise, and privilege escalation.
+2. **缺乏可见性**：用户无法洞察哪些命令正在其系统上执行，从而创造了数据窃取、系统受损和权限提升的机会。
 
-3. **Social Engineering Vulnerabilities**: Users become comfortable executing commands labeled as "MCP servers" without proper scrutiny, making them susceptible to malicious configurations.
+3. **社会工程学漏洞**：用户习惯于执行标记为“MCP 服务器”的命令而未进行适当审查，使他们容易受到恶意配置的攻击。
 
-4. **Arbitrary Code Execution**: Attackers can embed harmful commands in MCP server configurations and distribute them through legitimate channels (repositories, documentation, social media).
+4. **任意代码执行**：攻击者可以将有害命令嵌入 MCP 服务器配置中，并通过合法渠道（仓库、文档、社交媒体）分发它们。
 
-Visual Studio Code [addressed this](https://den.dev/blog/vs-code-mcp-install-consent/) by implementing consent dialogs. Similarly, Cursor also supports a consent dialog for one-click local MCP server installation.
+Visual Studio Code 通过实现同意对话框 [解决了这个问题](https://den.dev/blog/vs-code-mcp-install-consent/)。同样，Cursor 也支持一键本地 MCP 服务器安装的同意对话框。
 
-Without explicit security requirements in the specification, MCP client implementers may unknowingly create vulnerable installation flows, putting end users at risk of system compromise.
+如果规范中没有明确的安全要求，MCP 客户端实现者可能会在不知情的情况下创建易受攻击的安装流程，使最终用户面临系统受损的风险。
 
-## Specification
+## 规范
 
-### Client Security Requirements
+### 客户端安全要求
 
-MCP clients that support one-click local MCP server configuration **MUST** implement the following security controls:
+支持一键本地 MCP 服务器配置的 MCP 客户端 **必须** 实施以下安全控制：
 
-#### Pre-Configuration Consent
+#### 配置前同意
 
-Before executing any command to install or configure a local MCP server, the MCP client **MUST**:
+在执行任何命令来安装或配置本地 MCP 服务器之前，MCP 客户端 **必须**：
 
-1. Display a clear consent dialog that shows:
-   - The exact command that will be executed, without truncation
-   - All arguments and parameters
-   - A clear warning that this operation may be potentially dangerous
-2. Require explicit user approval through an affirmative action (button click, checkbox, etc.)
+1. 显示一个清晰的同意对话框，展示：
+   - 将要执行的确切命令，不得截断
+   - 所有参数和参量
+   - 明确的警告，说明此操作可能具有潜在危险
+2. 要求用户通过肯定操作（按钮点击、复选框等）进行明确批准
 
-3. Provide an option for users to cancel the installation
+3. 为用户提供取消安装的选项
 
-4. Not proceed with installation if consent is denied or not provided
+4. 如果同意被拒绝或未提供，则不得继续安装
 
-## Rationale
+## 理由
 
-### Design Decisions
+### 设计决策
 
-**Mandatory Consent Dialogs**: The requirement for explicit consent dialogs balances security with usability. While this adds friction to the MCP server configuration process, it prevents potential breaches from silent command execution.
+**强制同意对话框**：明确同意对话框的要求平衡了安全性和可用性。虽然这增加了 MCP 服务器配置过程的摩擦，但它防止了静默命令执行导致的潜在泄露。
 
-## Backward Compatibility
+## 向后兼容性
 
-This SEP introduces new **requirements** for MCP client implementations but does not change the core MCP protocol or wire format.
+本 SEP 为 MCP 客户端实现引入了新的 **要求**，但不改变核心 MCP 协议或通信格式。
 
-**Impact Assessment:**
+**影响评估：**
 
-- **Low Impact**: Existing MCP servers and the core protocol remain unchanged
-- **Client Implementation Required**: MCP clients must update their local server installation flows to comply with new security requirements
-- **User Experience Changes**: Users will see consent dialogs where none existed before
+- **低影响**：现有的 MCP 服务器和核心协议保持不变
+- **需要客户端实现**：MCP 客户端必须更新其本地服务器安装流程以符合新的安全要求
+- **用户体验变更**：用户将在以前不存在的地方看到同意对话框
 
-**Migration Path:**
+**迁移路径：**
 
-1. MCP clients can implement these changes in new versions without breaking existing functionality
-2. Existing installed MCP servers continue to work normally
-3. Only new installation flows require the consent mechanisms
+1. MCP 客户端可以在新版本中实施这些更改，而不会破坏现有功能
+2. 现有已安装的 MCP 服务器继续正常工作
+3. 只有新的安装流程需要同意机制
 
-No protocol-level backward compatibility issues exist, as this SEP addresses client behavior rather than the MCP wire protocol.
+不存在协议级的向后兼容性问题，因为本 SEP 解决的是客户端行为而不是 MCP 通信协议。
 
-## Reference Implementation
+## 参考实现
 
-N/A
+不适用
 
-## Security Implications
+## 安全影响
 
-### Security Benefits
+### 安全益处
 
-This SEP directly addresses:
+本 SEP 直接解决了：
 
-- **Arbitrary Code Execution**: Prevents silent execution of malicious commands
-- **Social Engineering**: Forces users to consciously review commands before execution
-- **Supply Chain Attacks**: Creates visibility into MCP server installation commands
-- **Privilege Escalation**: Users can identify and reject commands requesting elevated privileges
+- **任意代码执行**：防止恶意命令的静默执行
+- **社会工程学攻击**：强制用户在执行前有意识地审查命令
+- **供应链攻击**：创建对 MCP 服务器安装命令的可见性
+- **权限提升**：用户可以识别并拒绝请求提升权限的命令
 
-### Residual Risks
+### 剩余风险
 
-Even with these controls, risks remain:
+即使有了这些控制，风险仍然存在：
 
-- **User Override**: Users may approve malicious commands despite warnings
-- **Sophisticated Obfuscation**: Advanced attackers may craft commands that appear legitimate
-- **Implementation Gaps**: Clients may implement controls incorrectly
+- **用户覆盖**：用户可能会无视警告批准恶意命令
+- **复杂混淆**：高级攻击者可能会制作看起来合法的命令
+- **实现缺口**：客户端可能会错误地实现控制
 
-### Risk Mitigation
+### 风险缓解
 
-These residual risks are addressed through:
+这些剩余风险通过以下方式解决：
 
-- Clear warning language in consent dialogs
-- Recommendation for additional security layers (sandboxing, signatures)
-- Ongoing security research and community awareness
+- 同意对话框中清晰的警告语言
+- 建议额外安全层（沙箱、签名）
+- 持续的安全研究和社区意识

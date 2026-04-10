@@ -1,52 +1,52 @@
 ---
-title: "SEP-1319: Decouple Request Payload from RPC Methods Definition"
-sidebarTitle: "SEP-1319: Decouple Request Payload from RPC Metho…"
-description: "Decouple Request Payload from RPC Methods Definition"
+title: "SEP-1319: 将请求负载与 RPC 方法定义解耦"
+sidebarTitle: "SEP-1319: 将请求负载与 RPC 方法定义解耦"
+description: "将请求负载与 RPC 方法定义解耦"
 ---
 
 <div className="flex items-center gap-2 mb-4">
   <Badge color="green" shape="pill">
-    Final
+    最终版
   </Badge>
   <Badge color="gray" shape="pill">
-    Standards Track
+    标准轨道
   </Badge>
 </div>
 
-| Field         | Value                                                                           |
+| 字段         | 值                                                                           |
 | ------------- | ------------------------------------------------------------------------------- |
 | **SEP**       | 1319                                                                            |
-| **Title**     | Decouple Request Payload from RPC Methods Definition                            |
-| **Status**    | Final                                                                           |
-| **Type**      | Standards Track                                                                 |
-| **Created**   | 2025-08-08                                                                      |
-| **Author(s)** | [@kurtisvg](https://github.com/kurtisvg)                                        |
-| **Sponsor**   | None                                                                            |
+| **标题**     | 将请求负载与 RPC 方法定义解耦                            |
+| **状态**    | 最终版                                                                           |
+| **类型**      | 标准轨道                                                                 |
+| **创建日期**   | 2025-08-08                                                                      |
+| **作者** | [@kurtisvg](https://github.com/kurtisvg)                                        |
+| **赞助方**   | 无                                                                            |
 | **PR**        | [#1319](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1319) |
 
 ---
 
-## Abstract
+## 摘要
 
-This SEP proposes a structural refactoring of the Model Context Protocol (MCP) specification. The core change is to define payload of requests (e.g., CallToolRequest) as independent definitions and have the RPC method definitions refer to these models. This decouples the definition of the data payload from the definition of the remote procedure that transports it, leading to a clearer, more modular, and more maintainable specification.
+本 SEP 提议对模型上下文协议 (MCP) 规范进行结构性重构。核心变化是将请求的负载（例如 `CallToolRequest`）定义为独立的定义，并让 RPC 方法定义引用这些模型。这将数据负载的定义与传输它的远程过程定义解耦，从而产生更清晰、更模块化且更易维护的规范。
 
-## Motivation
+## 动机
 
-The current MCP specification tightly couples the data payload of a request with the JSON-RPC method that transports it. This design presents several challenges:
+当前的 MCP 规范将请求的数据负载与传输它的 JSON-RPC 方法紧密耦合。这种设计带来了几个挑战：
 
-- **Reduced Clarity:** It forces developers to mentally parse the JSON-RPC transport structure just to understand the core data being exchanged. This increases cognitive load and makes the specification difficult to read and implement correctly.
-- **Hindered Maintainability:** Defining data structures inline prevents their reuse across different methods, leading to redundancy and making future updates to the protocol more complex and error-prone.
-- **Tightly Coupled to JSON-RPC:** Most critically, this tight coupling to JSON-RPC is the primary blocker for defining bindings for other transport protocols. To support transports like **gRPC** (which is currently a [popular ask from the community](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/966)), a transport-agnostic definition of its request and response messages. The current structure makes this practically impossible.
+- **清晰度降低：** 它迫使开发者在理解交换的核心数据之前，必须在心理上解析 JSON-RPC 传输结构。这增加了认知负荷，使得规范难以阅读和正确实现。
+- **阻碍可维护性：** 内联定义数据结构阻止了它们在不同方法间的复用，导致冗余，并使协议的未来更新更加复杂且容易出错。
+- **与 JSON-RPC 紧密耦合：** 最关键的是，这种与 JSON-RPC 的紧密耦合是为其他传输协议定义绑定的主要障碍。为了支持像 **gRPC** 这样的传输（这是目前 [社区热门需求](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/966)），需要对其请求和响应消息进行与传输无关的定义。当前的结构使得这实际上不可能。
 
-By refactoring the specification to separate the data model (the "what") from the RPC method (the "how"), this proposal will create a clearer, more modular specification. This change will immediately improve the developer experience and, most importantly, pave the way for the future evolution of MCP across multiple transports.
+通过重构规范以分离数据模型（"什么"）和 RPC 方法（"如何"），本提议将创建一个更清晰、更模块化的规范。这一更改将立即改善开发者体验，最重要的是，为 MCP 跨多种传输协议的未来演进铺平道路。
 
-## Specification
+## 规范
 
-The proposal introduces the following principle: All data structures used as parameters (params) or results (result) for RPC methods should be defined as standalone, named schemas. The RPC method definitions will then use references to these schemas.
+该提议引入了以下原则：所有用作 RPC 方法参数 (params) 或结果 (result) 的数据结构应定义为独立的、命名的模式。RPC 方法定义将随后使用对这些模式的引用。
 
-### Current Approach (Inline Definition):
+### 当前方法（内联定义）：
 
-The RPC method definition contains the full structure of its parameters and results.
+RPC 方法定义包含其参数和结果的完整结构。
 
 ```ts
 export interface CallToolRequest extends Request {
@@ -58,13 +58,13 @@ export interface CallToolRequest extends Request {
 }
 ```
 
-### Proposed Approach (Decoupled Definition):
+### 提议方法（解耦定义）：
 
-First, the data models for the request and response are defined as top-level schemas.
+首先，请求和响应的数据模型被定义为顶层模式。
 
 ```ts
 /**
- * Parameters for a `tools/call` request.
+ * `tools/call` 请求的参数。
  *
  * @category tools/call
  */
@@ -74,7 +74,7 @@ export interface CallToolRequestParams extends RequestParams {
 }
 ```
 
-Then, the RPC method definition becomes much simpler, merely referring to these models.
+然后，RPC 方法定义变得简单得多，仅引用这些模型。
 
 ```ts
 export interface CallToolRequest extends Request {
@@ -83,21 +83,21 @@ export interface CallToolRequest extends Request {
 }
 ```
 
-## Rationale
+## 理由
 
-The proposed solution—separating payload definitions from the RPC method—was chosen as the most direct and non-disruptive path to achieving the goals outlined in the motivation.
+所选的提议解决方案——将负载定义与 RPC 方法分离——是实现动机中概述目标的最直接且非破坏性的路径。
 
-This approach establishes a clear architectural boundary between two distinct concerns:
+这种方法在两个不同的关注点之间建立了清晰的架构边界：
 
-1. **The Data Layer:** The transport-agnostic payload definition (e.g., `CallToolRequestParams`), which represents the core information being exchanged.
-2. **The Transport Layer:** The protocol-specific wrapper (e.g., the JSON-RPC `CallToolRequest` object), which describes how the data is sent.
+1. **数据层：** 与传输无关的负载定义（例如 `CallToolRequestParams`），代表交换的核心信息。
+2. **传输层：** 特定于协议的包装器（例如 JSON-RPC `CallToolRequest` 对象），描述数据如何发送。
 
-This architectural separation is superior to maintaining separate, parallel specifications for each transport (e.g., one for JSON-RPC, another for gRPC), which would introduce significant maintenance overhead and risk inconsistencies.
+这种架构分离优于为每种传输维护单独的并行规范（例如，一个用于 JSON-RPC，另一个用于 gRPC），这将引入巨大的维护开销并有不一致的风险。
 
-Crucially, this design refactors the specification document itself but intentionally **leaves the on-the-wire format unchanged**. This makes the proposal fully backward-compatible, requiring no changes from existing, compliant clients and servers. In short, this change is a strategic, foundational improvement that enables future growth without penalizing the current ecosystem.
+至关重要的是，此设计重构了规范文档本身，但有意**保持网络传输格式不变**。这使得提议完全向后兼容，现有的合规客户端和服务器无需任何更改。简而言之，此更改是一项战略性的基础改进，能够在不惩罚当前生态系统的情况下启用未来增长。
 
-## Backward Compatibility
+## 向后兼容性
 
-This proposal is a **non-breaking change** for existing implementations. It is a refactoring of the _specification document itself_ and does not alter the on-the-wire JSON format of the protocol messages. A client or server that is compliant with the old specification structure will remain compliant with the new one, as the resulting JSON payloads are identical.
+本提议对现有实现来说是**非破坏性变更**。它是对_规范文档本身_的重构，并不改变协议消息的网络传输 JSON 格式。符合旧规范结构的客户端或服务器将仍然符合新规范，因为生成的 JSON 负载是相同的。
 
-The primary impact is on developers who read the specification and on tools that parse the specification to generate code or documentation.
+主要影响在于阅读规范的开发者以及解析规范以生成代码或文档的工具。

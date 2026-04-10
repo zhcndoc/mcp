@@ -1,79 +1,79 @@
 ---
-title: "SEP-1577: Sampling With Tools"
-sidebarTitle: "SEP-1577: Sampling With Tools"
-description: "Sampling With Tools"
+title: "SEP-1577：带工具的采样"
+sidebarTitle: "SEP-1577：带工具的采样"
+description: "带工具的采样"
 ---
 
 <div className="flex items-center gap-2 mb-4">
   <Badge color="green" shape="pill">
-    Final
+    最终版
   </Badge>
   <Badge color="gray" shape="pill">
-    Standards Track
+    标准轨道
   </Badge>
 </div>
 
-| Field         | Value                                                                           |
+| 字段         | 值                                                                           |
 | ------------- | ------------------------------------------------------------------------------- |
 | **SEP**       | 1577                                                                            |
-| **Title**     | Sampling With Tools                                                             |
-| **Status**    | Final                                                                           |
-| **Type**      | Standards Track                                                                 |
-| **Created**   | 2025-09-30                                                                      |
-| **Author(s)** | Olivier Chafik ([@ochafik](https://github.com/ochafik))                         |
-| **Sponsor**   | None                                                                            |
+| **标题**     | 带工具的采样                                                             |
+| **状态**    | 最终版                                                                           |
+| **类型**      | 标准轨道                                                                 |
+| **创建日期**   | 2025-09-30                                                                      |
+| **作者** | Olivier Chafik ([@ochafik](https://github.com/ochafik))                         |
+| **赞助方**   | 无                                                                            |
 | **PR**        | [#1577](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1577) |
 
 ---
 
-## Abstract
+## 摘要
 
-This SEP introduces `tools` & `toolChoice` params to `sampling/createMessage` and soft-deprecates `includeContext` (fences `thisServer` & `allServers` under a capability). This allows MCP servers to run their own agentic loops using the client's tokens (still under the user supervision), and reduces the complexity of client implementations (context support becoming explicitly optional).
+本 SEP 引入了 `tools` 和 `toolChoice` 参数到 `sampling/createMessage`，并软弃用 `includeContext`（将 `thisServer` 和 `allServers` 置于某项能力之下进行限制）。这使得 MCP 服务器能够使用客户端的 token 运行自己的代理循环（仍在用户监督之下），并降低了客户端实现的复杂性（上下文支持变为显式可选）。
 
-## Motivation
+## 动机
 
-- [Sampling](https://modelcontextprotocol.io/specification/2025-06-18/client/sampling) doesn't support tool calling, although it's a cornerstone of modern agentic behaviour. Without explicit support for it, MCP servers that use Sampling can either try and emulate tool calling w/ complex prompting / custom parsing of the outputs, or are limited to simpler, non-agentic requests. Adding support for tool calling could unlock many novel use cases in the MCP ecosystem.
+- [采样](https://modelcontextprotocol.io/specification/2025-06-18/client/sampling) 不支持工具调用，尽管它是现代代理行为的基石。如果没有明确的支持，使用采样的 MCP 服务器要么尝试通过复杂的提示/自定义解析输出来模拟工具调用，要么仅限于更简单的非代理请求。添加工具调用支持可以解锁 MCP 生态系统中的许多新颖用例。
 
-- Context inclusion is ambiguously defined (see [this doc](https://docs.google.com/document/d/1KUsloHpsjR4fdXdJuofb9jUuK0XWi88clbRm9sWE510/edit?tab=t.0#heading=h.edw7oyac2e87)): it makes it particularly tricky to fully implement sampling, which along with other precautions needed for sampling (unaffected by this SEP) may have contributed to [low adoption of the feature in clients](https://modelcontextprotocol.io/clients#feature-support-matrix) (feature was introduced in the MCP Nov 2024 spec).
+- 上下文包含定义模糊（参见 [本文档](https://docs.google.com/document/d/1KUsloHpsjR4fdXdJuofb9jUuK0XWi88clbRm9sWE510/edit?tab=t.0#heading=h.edw7oyac2e87)）：这使得完全实现采样变得特别棘手，连同采样所需的其他预防措施（不受本 SEP 影响），可能导致了 [客户端中该功能的采用率较低](https://modelcontextprotocol.io/clients#feature-support-matrix)（该功能是在 2024 年 11 月的 MCP 规范中引入的）。
 
-Please note some related work:
+请注意一些相关工作：
 
-- [MCP Sampling](https://docs.google.com/document/d/1KUsloHpsjR4fdXdJuofb9jUuK0XWi88clbRm9sWE510/edit?tab=t.0#heading=h.5diekssgi3pq) (@jerome3o-anthropic): extremely similar proposal:
-  - Add same tools semantics,
-  - Deprecate `includeContext` (doc explains why its semantics are ambiguous)
-  - (goes further to suggest explicit context sharing, which is out of scope from this proposal)
-- [Allow Prompt/Sampling Messages to contain multiple content blocks. #198](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/198)
-  - In this PR we've made `{CreateMessageResult,SamplingMessage}.content` to accept a single content or an array of contents. The `result.content` change is backwards incompatible but is required to support parallel tool calls. The `SamplingMessage.content` change then makes it much more natural to write a tool loop (see example in reference implementation: [toolLoopSampling.ts](https://github.com/modelcontextprotocol/typescript-sdk/blob/ochafik/sep1577/src/examples/server/toolLoopSampling.ts))
+- [MCP 采样](https://docs.google.com/document/d/1KUsloHpsjR4fdXdJuofb9jUuK0XWi88clbRm9sWE510/edit?tab=t.0#heading=h.5diekssgi3pq) (@jerome3o-anthropic)：极其相似的提案：
+  - 添加相同的工具语义，
+  - 弃用 `includeContext`（文档解释了为何其语义模糊）
+  - （进一步建议显式上下文共享，但这超出了本提案的范围）
+- [允许 Prompt/采样消息包含多个内容块。#198](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/198)
+  - 在此 PR 中，我们使 `{CreateMessageResult,SamplingMessage}.content` 接受单个内容或内容数组。`result.content` 的变更是向后不兼容的，但对于支持并行工具调用是必需的。`SamplingMessage.content` 的变更使得编写工具循环更加自然（参见参考实现中的示例：[toolLoopSampling.ts](https://github.com/modelcontextprotocol/typescript-sdk/blob/ochafik/sep1577/src/examples/server/toolLoopSampling.ts)）
 
-In the "Possible Follow ups" Section below, we give examples of features that were kept out of scope from this SEP but which we took care to make this SEP reasonably compatible with.
+在下方的“后续可能的步骤”部分中，我们列举了一些未纳入本 SEP 范围但我们在设计本 SEP 时已确保合理兼容的功能示例。
 
-## Specification
+## 规范
 
-### Overview
+### 概述
 
-- Add traditional tool call support in [CreateMessageRequest](https://modelcontextprotocol.io/specification/2025-06-18/schema#createmessagerequest) w/ `tools` (w/ JSON schemas) & `toolChoice` params, requiring a server-side tool loop
-  - Sampling may now yield ToolCallBlock responses
-  - Server needs to call tools by itself
-  - Server calls sampling again with ToolResultParamBlock to inject tool results
-  - `toolChoice.mode` can be `“auto" | "required" | "none"` to allow common structured outputs use case (see below for possible follow up improvements)
-  - Fenced by new capability (`sampling { tools {} }`)
-- Fix/update underspecified strings in [CreateMessageResult](https://modelcontextprotocol.io/specification/2025-06-18/schema#createmessageresult):
-  - `stopReason: “endTurn" | "stopSequence" | “toolUse" | “maxToken" | string` (explicit enums + open string for compat)
-  - `role: “assistant”`
-- Soft-deprecate [CreateMessageRequest.params.includeContext](https://modelcontextprotocol.io/specification/2025-06-18/schema#createmessagerequest) != ‘none’ (now fenced by capability)
-  - Incentivize context-free sampling implementation
+- 在 [CreateMessageRequest](https://modelcontextprotocol.io/specification/2025-06-18/schema#createmessagerequest) 中添加传统工具调用支持，包含 `tools`（带 JSON 架构）和 `toolChoice` 参数，需要服务器端工具循环
+  - 采样现在可以产生 ToolCallBlock 响应
+  - 服务器需要自行调用工具
+  - 服务器再次调用采样并传入 ToolResultParamBlock 以注入工具结果
+  - `toolChoice.mode` 可以是 `"auto" | "required" | "none"` 以允许常见的结构化输出用例（见下文可能的后续改进）
+  - 由新能力限制（`sampling { tools {} }`）
+- 修复/更新 [CreateMessageResult](https://modelcontextprotocol.io/specification/2025-06-18/schema#createmessageresult) 中未明确指定的字符串：
+  - `stopReason: "endTurn" | "stopSequence" | "toolUse" | "maxToken" | string`（显式枚举 + 开放字符串以兼容）
+  - `role: "assistant"`
+- 软弃用 [CreateMessageRequest.params.includeContext](https://modelcontextprotocol.io/specification/2025-06-18/schema#createmessagerequest) != 'none'（现在由能力限制）
+  - 激励无上下文采样实现
 
-### Protocol changes
+### 协议变更
 
 - `sampling/createMessage`
-  - ~~MUST throw an error when `includeContext is “thisServer” | “allServers”` but `clientCapabilities.sampling.context` is missing~~
-  - MUST throw an error when `tool` or `toolChoice` are defined but `clientCapabilities.sampling.tools` is missing
-  - Servers SHOULD avoid `[includeContext](https://modelcontextprotocol.io/specification/2025-06-18/schema#createmessagerequest)` != ‘none’`as values`“thisServer”`and`“allServers”` may be removed in future spec releases.
-  - `CreateMessageRequest.messages` MUST balance any “assistant” message w/ a `ToolUseContent` (and `id: $id1`) w/ a “user” message w/ a ToolResultContent (and `tool_result_id: $id1`)
-    - Note: this is a requirement for Claude API implementation (parallel tool call must all be responded to in one go)
-  - SamplingMessage with tool result content blocks MUST NOT contain other content types.
+  - ~~当 `includeContext` 为 `"thisServer" | "allServers"` 但 `clientCapabilities.sampling.context` 缺失时必须抛出错误~~
+  - 当定义了 `tool` 或 `toolChoice` 但 `clientCapabilities.sampling.tools` 缺失时必须抛出错误
+  - 服务器应避免 `[includeContext](https://modelcontextprotocol.io/specification/2025-06-18/schema#createmessagerequest)` != 'none'，因为值 `"thisServer"` 和 `"allServers"` 可能会在未来的规范版本中被移除。
+  - `CreateMessageRequest.messages` 必须平衡任何带有 `ToolUseContent`（及 `id: $id1`）的 "assistant" 消息与带有 ToolResultContent（及 `tool_result_id: $id1`）的 "user" 消息
+    - 注意：这是 Claude API 实现的要求（并行工具调用必须一次性全部响应）
+  - 带有工具结果内容块的 SamplingMessage 不得包含其他内容类型。
 
-### Schema changes
+### 架构变更
 
 - [ClientCapabilities](https://modelcontextprotocol.io/specification/2025-06-18/schema#clientcapabilities)
 
@@ -81,51 +81,51 @@ In the "Possible Follow ups" Section below, we give examples of features that we
   interface ClientCapabilities {
     ...
     sampling?: {
-      context?: object; // NEW: Allows CreateMessageRequest.params.includeContext != "none"
-      tools?: object;   // NEW: Allows CreateMessageRequest.params.{tools,toolChoice}
+      context?: object; // 新增：允许 CreateMessageRequest.params.includeContext != "none"
+      tools?: object;   // 新增：允许 CreateMessageRequest.params.{tools,toolChoice}
     };
   }
   ```
 
-- [CreateMessageRequest](https://modelcontextprotocol.io/specification/2025-06-18/schema#createmessagerequest) (use existing [Tool](https://modelcontextprotocol.io/specification/2025-06-18/schema#tool))
+- [CreateMessageRequest](https://modelcontextprotocol.io/specification/2025-06-18/schema#createmessagerequest) (使用现有 [Tool](https://modelcontextprotocol.io/specification/2025-06-18/schema#tool))
 
   ```typescript
   interface CreateMessageRequest {
-    method: “sampling/createMessage”;
-    params: {
-      ...
-      messages: SamplingMessage[]; // Note: type updated, see below
-      
-      tools?: Tool[] // NEW (existing type)
+   method: "sampling/createMessage";
+   params: {
+     ...
+     messages: SamplingMessage[]; // 注意：类型已更新，见下文
+     
+     tools?: Tool[] // 新增（现有类型）
 
-      toolChoice?: ToolChoice // NEW
-    };
+     toolChoice?: ToolChoice // 新增
+   };
   }
 
-  interface ToolChoice { // NEW
-    mode?: “auto” | "required" | "none";
-    // disable_parallel_tool_use?: boolean; // Update (Nov 10): removed, see below
+  interface ToolChoice { // 新增
+    mode?: "auto" | "required" | "none";
+    // disable_parallel_tool_use?: boolean; // 更新（11 月 10 日）：已移除，见下文
   }
   ```
 
-  - Notes:
-    - OpenAI vs. Anthropic API idioms to avoid parallel tool calls:
-      - OpenAI: `parallel_tool_calls: false` (top-level param)
+  - 注意：
+    - 避免并行工具调用的 OpenAI 与 Anthropic API 习惯用法：
+      - OpenAI: `parallel_tool_calls: false` (顶层参数)
       - Anthropic: `tool_choice.disable_parallel_tool_use: true`
-        - Preferred here as default value if unset is false (e.g. parallel tool calls allowed)
-    - OpenAI vs. Anthropic API re/ `tool_choice` `"none"` vs. `tools`:
-      - OpenAI: `tools: [$Foo], tool_choice: "none"` forbids any tool call
-        - Preferred behaviour here
-      - Anthropic: `tools: [$Foo], tool_choice: {mode: "none"}` may still call tool `Foo`
-    - Gemini vs. OAI / Anthropic re/ `disable_parallel_tool_use`:
-      - Gemini API has no way to disable parallel tool calls atm (unlike OAI / Anthropic APIs). Removing this flag for now, to be reintroduced when Gemini has any way of supporting it. Otherwise clients would get unexpected multiple tool calls (or alternatively if implemented that way, unexpected failures / costly retry until a single tool call is emitted)
-      - Gemini API's [Function calling modes](https://ai.google.dev/gemini-api/docs/function-calling?example=meeting#function_calling_modes) have an `ANY` value that should match the proposed `required`
+        - 此处首选，因为如果未设置，默认值为 false（即允许并行工具调用）
+    - 关于 `tool_choice` `"none"` 与 `tools` 的 OpenAI 与 Anthropic API 对比：
+      - OpenAI: `tools: [$Foo], tool_choice: "none"` 禁止任何工具调用
+        - 此处首选行为
+      - Anthropic: `tools: [$Foo], tool_choice: {mode: "none"}` 仍可能调用工具 `Foo`
+    - 关于 `disable_parallel_tool_use` 的 Gemini 与 OAI / Anthropic 对比：
+      - Gemini API 目前无法禁用并行工具调用（不同于 OAI / Anthropic API）。暂时移除此标志，待 Gemini 支持后再引入。否则客户端会收到意外的多个工具调用（或者如果那样实现，会导致意外失败/代价高昂的重试直到发出单个工具调用）
+      - Gemini API 的 [函数调用模式](https://ai.google.dev/gemini-api/docs/function-calling?example=meeting#function_calling_modes) 有一个 `ANY` 值，应匹配提议的 `required`
 
 - [SamplingMessage](https://modelcontextprotocol.io/specification/2025-06-18/schema#samplingmessage):
 
   ```typescript
   /*
-    BEFORE:
+    之前：
     
     interface SamplingMessage {
       content: TextContent | ImageContent | AudioContent
@@ -133,7 +133,7 @@ In the "Possible Follow ups" Section below, we give examples of features that we
     }
   */
 
-  type SamplingMessage = UserMessage | AssistantMessage; // NEW
+  type SamplingMessage = UserMessage | AssistantMessage; // 新增
 
   type AssistantMessageContent =
     | TextContent
@@ -146,13 +146,13 @@ In the "Possible Follow ups" Section below, we give examples of features that we
     | AudioContent
     | ToolResultContent;
   interface AssistantMessage {
-    // NEW
+    // 新增
     role: "assistant";
     content: AssistantMessageContent | AssistantMessageContent[];
   }
 
   interface ToolUseContent {
-    // NEW
+    // 新增
     type: "tool_use";
     name: string;
     id: string;
@@ -160,13 +160,13 @@ In the "Possible Follow ups" Section below, we give examples of features that we
   }
 
   interface UserMessage {
-    // NEW
+    // 新增
     role: "user";
     content: UserMessageContent | UserMessageContent[];
   }
 
   interface ToolResultContent {
-    // NEW
+    // 新增
     _meta?: { [key: string]: unknown };
     type: "tool_result";
     toolUseId: string;
@@ -176,9 +176,9 @@ In the "Possible Follow ups" Section below, we give examples of features that we
   }
   ```
 
-- Notes:
-  - Differences of role vs. content type when it comes to tool calling between APIs:
-    - OpenAI: `role: “system" | “user" | “assistant" | “tool"` (where tool is for tool results), while tool calls are nested in assistant messages, content is then typically null but some “OpenAI compatible” APIs accept non-null values
+- 注意：
+  - 关于工具调用时 role 与 content 类型在不同 API 之间的差异：
+    - OpenAI: `role: "system" | "user" | "assistant" | "tool"`（其中 tool 用于工具结果），而工具调用嵌套在 assistant 消息中，content 通常为 null，但一些"OpenAI 兼容"API 接受非 null 值
       - ```typescript
         [
           { role: "user", content: "what is the temperature in london?" },
@@ -203,7 +203,7 @@ In the "Possible Follow ups" Section below, we give examples of features that we
           },
         ];
         ```
-    - Claude API: `role: “user" | “assistant"`, tool use and result are passed through specially-typed message content parts:
+    - Claude API: `role: "user" | "assistant"`，工具使用和结果通过特殊类型的消息内容部分传递：
       - ```typescript
         [
           {
@@ -213,7 +213,7 @@ In the "Possible Follow ups" Section below, we give examples of features that we
                 "type": "text",
                 "text": "what is the temperature in london?"
               }
-            },
+            ],
           {
             "role": "assistant",
             "content": [
@@ -242,14 +242,14 @@ In the "Possible Follow ups" Section below, we give examples of features that we
         ]
         ```
     - Gemini API:
-      - `function` role (similar to OAI's `tool` role)
-      - No tool call id concept ([function calling](https://ai.google.dev/gemini-api/docs/function-calling?example=meeting#parallel_function_calling): Gemini requires tool results to be provided in the exact same order as the tool use parts. An implementation could generate the tool call ids and use them to reorder the tool results if needed.
+      - `function` 角色（类似于 OAI 的 `tool` 角色）
+      - 无工具调用 id 概念（[函数调用](https://ai.google.dev/gemini-api/docs/function-calling?example=meeting#parallel_function_calling)：Gemini 要求工具结果的提供顺序与工具使用部分完全一致。实现可以生成工具调用 id 并在需要时使用它们重新排序工具结果。
 
 - [CreateMessageResult](https://modelcontextprotocol.io/specification/2025-06-18/schema#createmessageresult)
 
   ```typescript
   /*
-    BEFORE:
+    之前：
 
     interface CreateMessageResult {
       _meta?: { [key: string]: unknown };
@@ -262,125 +262,125 @@ In the "Possible Follow ups" Section below, we give examples of features that we
   interface CreateMessageResult {
     _meta?: { [key: string]: unknown };
 
-    content: AssistantMessageContent | AssistantMessageContent[] // UPDATED
+    content: AssistantMessageContent | AssistantMessageContent[] // 已更新
 
-    role: "assistant"; // UPDATED
+    role: "assistant"; // 已更新
 
-    stopReason?: “endTurn" | "stopSequence" | “toolUse" | “maxToken" | string // UPDATED
+    stopReason?: "endTurn" | "stopSequence" | "toolUse" | "maxToken" | string // 已更新
 
     [key: string]: unknown;
   }
   ```
 
-  - Notes:
-    - Backwards compatibility issue: returning CreateMessageResult.content as an array of contents OR a single content is problematic, so we propose:
-      - `sampling/createMessage` MUST NOT return an array in `CreateMessageResult.content` before spec version Nov 2025.
-        - This guarantees wire-level backwards-compatibility
-      - Existing code that uses sampling may break w/ new SDK releases as it will need to test content to know if it's an array or a single block, and act accordingly.
-      - This seems reasonable(?)
-    - `CreateMessageResult.stopReason` field is currently defined as an open `string`, and the spec only mentions the `endTurn` as example value.
-    - OpenAI vs. Anthropic API idioms
-      - Finish/stop reason
-        - OpenAI’s [ChatCompletion](https://platform.openai.com/docs/api-reference/chat/object): `finish_reason: “stop” | “length” | “tool_use”` (…?)
-        - [Anthropic](https://docs.claude.com/en/api/handling-stop-reasons): `stop_reason: “end_turn” | “max_tokens” | “stop_sequence” | “tool_use” | “pause_turn” | “refusal”`
+  - 注意：
+    - 向后兼容性问题：将 CreateMessageResult.content 作为内容数组或单个内容返回是有问题的，因此我们建议：
+      - 在规范版本 2025 年 11 月之前，`sampling/createMessage` 不得在 `CreateMessageResult.content` 中返回数组。
+        - 这保证了传输级别的向后兼容性
+      - 使用采样的现有代码可能会在新的 SDK 版本中中断，因为它需要测试 content 是数组还是单个块，并相应处理。
+      - 这似乎是合理的 (?)
+    - `CreateMessageResult.stopReason` 字段目前定义为开放 `string`，规范仅提及 `endTurn` 作为示例值。
+    - OpenAI 与 Anthropic API 习惯用法
+      - 完成/停止原因
+        - OpenAI 的 [ChatCompletion](https://platform.openai.com/docs/api-reference/chat/object): `finish_reason: "stop" | "length" | "tool_use"` (…?)
+        - [Anthropic](https://docs.claude.com/en/api/handling-stop-reasons): `stop_reason: "end_turn" | "max_tokens" | "stop_sequence" | "tool_use" | "pause_turn" | "refusal"`
 
-## Possible Follow ups
+## 可能的后续步骤
 
-Theses are out of scope for this SEP, but care was taken not to preclude them, so where appropriate we give examples of how they could be implemented on top of / after this SEP.
+这些不在本 SEP 的范围内，但已注意不排除它们，因此在适当的地方我们给出了如何在本 SEP 之上/之后实现它们的示例。
 
-### Streaming support
+### 流式支持
 
-See: [Streaming tool use results #117](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/117)
+参见：[流式工具使用结果 #117](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/117)
 
-This could be important for some longer-running use cases or when latency is important, but would play better w/ streaming support in MCP tools.
+这对于某些运行时间较长的用例或当延迟很重要时可能很重要，但如果能与 MCP 工具中的流式支持配合会更好。
 
-A possible way to implement this would be to use notifications w/ payload, and possibly create a new method `sampling/createMessageStreamed`. Both should be orthogonal w/ this SEP (but we'd need to create delta types for results, similar to streaming APIs in inference API such as Claude API and OpenAI API).
+实现这一点的一种可能方法是使用带负载的通知，并可能创建一个新方法 `sampling/createMessageStreamed`。这两者都应与本 SEP 正交（但我们需要为结果创建增量类型，类似于推理 API 中的流式 API，如 Claude API 和 OpenAI API）。
 
-### Cache friendliness updates
+### 缓存友好性更新
 
-Two bits needed here:
+这里需要两点：
 
-- Introduce cache awareness
-  - Implicit caching guidelines phrased as SHOULDs
-  - Explicit cache points and TTL semantics [as in the Claude API](https://docs.claude.com/en/docs/build-with-claude/prompt-caching)? (incl. beta behaviour for longer caching)
-    - Pros: easy to implement _for at least 1 implementor (Anthropic)_
-    - Cons: if hard to implement for others, unlikely to get approval.
-  - “Whole prompt” / prompt-prefix cache w/ an explicit key [as in the OpenAI API](https://platform.openai.com/docs/api-reference/responses/create#responses-create-prompt_cache_key)?
-    - Pros:
-      - simpler for users (no need to think about where the shared prefix stops)
-      - implicitly supports updating the cache (maybe even as subtree)
-    - Cons: possibly harder to implement / more storage inefficient
-- Introduce allowed_tools feature to enable / disable tools w/o breaking context caching
-  - Relevant to this SEP as we may want to merge this feature [under the tool_choice field, similar to what OpenAI did](https://platform.openai.com/docs/guides/function-calling).
+- 引入缓存感知
+  - 隐含的缓存指南，表述为 SHOULD（应该）
+  - 显式缓存点和 TTL 语义 [如 Claude API 中所示](https://docs.claude.com/en/docs/build-with-claude/prompt-caching)?（包括更长缓存的测试行为）
+    - 优点：易于实现 _对于至少 1 个实现者（Anthropic）_
+    - 缺点：如果对其他实现者来说难以实现，则不太可能获得批准。
+  - “整个提示词”/ 带有显式键的提示词前缀缓存 [如 OpenAI API 中所示](https://platform.openai.com/docs/api-reference/responses/create#responses-create-prompt_cache_key)?
+    - 优点：
+      - 对用户更简单（无需考虑共享前缀在哪里停止）
+      - 隐式支持更新缓存（甚至可能作为子树）
+    - 缺点：可能更难实现 / 存储效率更低
+- 引入 allowed_tools 功能以启用/禁用工具而不破坏上下文缓存
+  - 与本 SEP 相关，因为我们可能希望将此功能合并 [到 tool_choice 字段下，类似于 OpenAI 的做法](https://platform.openai.com/docs/guides/function-calling)。
 
     ```typescript
-    interface ToolChoice { // NEW
-      mode?: “auto” | "required";
+    interface ToolChoice { // 新增
+      mode?: "auto" | "required";
       allowed_tools?: string[]
     }
     ```
 
-### Allow client to call the server’s tools by itself in an agentic loop
+### 允许客户端在代理循环中自行调用服务器的工具
 
-From the server’s perspective, that would remove the need to call tools by itself / inject tool results in follow up sampling calls.
+从服务器的角度来看，这将消除自行调用工具/在后续采样调用中注入工具结果的需要。
 
-The MCP server would just allowlist its own tools in the sampling request, w/t a dedicated tool definition such as:
+MCP 服务器只需在采样请求中允许列出其自己的工具，使用专用的工具定义，例如：
 
 ```typescript
 {
-  type: "server-tool"; // MCP tool from same server.
+  type: "server-tool"; // 来自同一服务器的 MCP 工具。
   name: string;
 }
 ```
 
-Pros:
+优点：
 
-- Safe, limited to that server’s tools.
-- If we propagate the mcp-session-id, can leverage keep any server-side session context / caching
+- 安全，仅限于该服务器的工具。
+- 如果我们传播 mcp-session-id，可以利用保持任何服务器端会话上下文/缓存
 
-### Allow client to call any other MCP servers’ tools by itself in an agentic loop
+### 允许客户端在代理循环中自行调用任何其他 MCP 服务器的工具
 
-Although this sounds similar to the previous one (allow only same server’s tools), this option wouldn’t need a protocol change / could be entirely done by the client as an implementation detail of their sampling support.
+虽然这听起来与上一个类似（仅允许同一服务器的工具），但此选项不需要协议更改/可以由客户端完全作为其采样支持的实现细节来完成。
 
-The end user would allowlist tools from any other MCP server for use in a sampling request, without the server having to ask for anything. The client UI would e.g. display a tool selection UI as part of the sampling approval flow, auto enabling tools from same server by default.
+最终用户将允许列出来自任何其他 MCP 服务器的工具以供采样请求使用，而无需服务器请求任何内容。客户端 UI 例如可以在采样批准流程中显示工具选择 UI，默认自动启用来自同一服务器的工具。
 
-Pros:
+优点：
 
-- Technically no spec change needed (if anything, mention this as a freedom clients have)
-- Possibly similar to what [CreateMessageRequest.params.includeContext](https://modelcontextprotocol.io/specification/2025-06-18/schema#createmessagerequest) = thisServer / allServers intended semantics may have meant
-  - `CreateMessageRequest.params.allowImplicitToolCalls = “none” | “thisServer” | “allServers”`
-    (assuming we wanted to give the server any control over this)
+- 技术上不需要规范更改（如果有的话，提及这是客户端拥有的自由）
+- 可能类似于 [CreateMessageRequest.params.includeContext](https://modelcontextprotocol.io/specification/2025-06-18/schema#createmessagerequest) = thisServer / allServers 预期的语义可能意味着
+  - `CreateMessageRequest.params.allowImplicitToolCalls = "none" | "thisServer" | "allServers"`
+    （假设我们想给服务器任何控制权）
 
-Cons:
+缺点：
 
-- Classifier might be needed to avoid High potential for privacy leaks / abuse
-  - If user approves Gmail MCP tool usage / delegation by mistake, server gets access to their private emails through sampling
+- 可能需要分类器以避免高潜在的隐私泄露/滥用
+  - 如果用户错误地批准了 Gmail MCP 工具使用/委托，服务器可以通过采样访问他们的私人电子邮件
 
-### Allow server to list & call clients’ tools (client/server → p2p)
+### 允许服务器列出和调用客户端的工具（客户端/服务器 → p2p）
 
-If we say the client can now expose tools that the server can call, it opens a set of possibilities:
+如果我们说客户端现在可以暴露服务器可以调用的工具，它开启了一系列可能性：
 
-- The client can “forward” other servers’ tools (maybe w/ some namespacing for seamless aggregation)
-  - The server can then call these tools as part of its tool loop.
-- Client & Server semantics start to lose weight, we enter a more peer-to-peer, symmetrical relationship
-  - Client could also ask a server for sampling, while we’re at it
-  - Symmetry at the protocol layer, but still directionality at the transport layer (e.g. for HTTP transport, direction of POST requests still matters)
+- 客户端可以“转发”其他服务器的工具（可能带有一些命名空间以实现无缝聚合）
+  - 然后服务器可以在其工具循环中调用这些工具。
+- 客户端和服务器语义开始失去权重，我们进入更点对点、对称的关系
+  - 客户端也可以在此过程中向服务器请求采样
+  - 协议层的对称性，但传输层仍有方向性（例如对于 HTTP 传输，POST 请求的方向仍然很重要）
 
-### Simplify structured outputs use case
+### 简化结构化输出用例
 
-A major use case of sampling is to get outputs that conform to a given schema.
+采样的一个主要用例是获得符合给定模式的输出。
 
-This is possible in [OpenAI’s API](https://platform.openai.com/docs/guides/structured-outputs) for instance.
+例如，这在 [OpenAI 的 API](https://platform.openai.com/docs/guides/structured-outputs) 中是可能的。
 
-The most common workaround is to give a single tool and set `tool_choice: "required"`, which guarantees the output is a ToolCall containing inputs that conform to the tool’s input schema.
+最常见的变通方法是提供单个工具并设置 `tool_choice: "required"`，这保证输出是一个包含符合工具输入模式的输入的 ToolCall。
 
-While this SEP proposes we enable this `"required"`-based workaround, as a follow up it would be great to provide more explicit / simpler JSON schema support, which would also allow schema types not allowed in tool inputs (which require an object w/ properties, so one has to pick at least a name for their outputs, which requires thinking / interplay w/ the prompting strategy):
+虽然本 SEP 提议我们启用这种基于 `"required"` 的变通方法，但作为后续步骤，最好提供更明确/更简单的 JSON 模式支持，这也允许工具输入中不允许的模式类型（这需要带有属性的对象，因此必须至少为输出选择一个名称，这需要思考/与提示策略的互动）：
 
 ```typescript
 interface CreateMessageRequest {
-  method: “sampling/createMessage”;
-  params: {
-    messages: SamplingMessage[];
+  method: "sampling/createMessage";
+  params: {
+    messages: SamplingMessage[];
     ...
     format: {
       type: "json_schema",

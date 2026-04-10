@@ -1,20 +1,17 @@
 ---
-title: Cancellation
+title: 取消
 ---
 
 <div id="enable-section-numbers" />
 
-The Model Context Protocol (MCP) supports optional cancellation of in-progress requests
-through notification messages. Either side can send a cancellation notification to
-indicate that a previously-issued request should be terminated.
+模型上下文协议 (MCP) 支持通过通知消息可选地取消进行中的请求。任何一方都可以发送取消通知，表明之前发出的请求应该被终止。
 
-## Cancellation Flow
+## 取消流程
 
-When a party wants to cancel an in-progress request, it sends a `notifications/cancelled`
-notification containing:
+当一方想要取消一个进行中的请求时，它会发送一个 `notifications/cancelled` 通知，包含：
 
-- The ID of the request to cancel
-- An optional reason string that can be logged or displayed
+- 要取消的请求的 ID
+- 一个可选的原因字符串，可以被记录或显示
 
 ```json
 {
@@ -27,29 +24,27 @@ notification containing:
 }
 ```
 
-## Behavior Requirements
+## 行为要求
 
-1. Cancellation notifications **MUST** only reference requests that:
-   - Were previously issued in the same direction
-   - Are believed to still be in-progress
-2. The `initialize` request **MUST NOT** be cancelled by clients
-3. Receivers of cancellation notifications **SHOULD**:
-   - Stop processing the cancelled request
-   - Free associated resources
-   - Not send a response for the cancelled request
-4. Receivers **MAY** ignore cancellation notifications if:
-   - The referenced request is unknown
-   - Processing has already completed
-   - The request cannot be cancelled
-5. The sender of the cancellation notification **SHOULD** ignore any response to the
-   request that arrives afterward
+1. 取消通知 **MUST** 仅引用以下请求：
+   - 之前在同一方向发出的
+   - 被认为仍在进行中的
+2. 客户端 **MUST NOT** 取消 `initialize` 请求
+3. 取消通知的接收者 **SHOULD**：
+   - 停止处理被取消的请求
+   - 释放相关资源
+   - 不为被取消的请求发送响应
+4. 如果出现以下情况，接收者 **MAY** 忽略取消通知：
+   - 引用的请求未知
+   - 处理已经完成
+   - 请求无法被取消
+5. 取消通知的发送者 **SHOULD** 忽略随后到达的对该请求的任何响应
 
-## Timing Considerations
+## 时序考虑
 
-Due to network latency, cancellation notifications may arrive after request processing
-has completed, and potentially after a response has already been sent.
+由于网络延迟，取消通知可能在请求处理完成后到达，甚至可能在响应已经发送之后到达。
 
-Both parties **MUST** handle these race conditions gracefully:
+双方 **MUST** 优雅地处理这些竞争条件：
 
 ```mermaid
 sequenceDiagram
@@ -66,18 +61,17 @@ sequenceDiagram
    end
 ```
 
-## Implementation Notes
+## 实现说明
 
-- Both parties **SHOULD** log cancellation reasons for debugging
-- Application UIs **SHOULD** indicate when cancellation is requested
+- 双方 **SHOULD** 记录取消原因以便调试
+- 应用程序 UI **SHOULD** 指示何时请求了取消
 
-## Error Handling
+## 错误处理
 
-Invalid cancellation notifications **SHOULD** be ignored:
+无效的取消通知 **SHOULD** 被忽略：
 
-- Unknown request IDs
-- Already completed requests
-- Malformed notifications
+- 未知的请求 ID
+- 已完成的请求
+- 格式错误的通知
 
-This maintains the "fire and forget" nature of notifications while allowing for race
-conditions in asynchronous communication.
+这保持了通知的“即发即弃”特性，同时允许异步通信中的竞争条件。

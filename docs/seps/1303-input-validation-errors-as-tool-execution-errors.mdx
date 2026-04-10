@@ -1,42 +1,42 @@
 ---
-title: "SEP-1303: Input Validation Errors as Tool Execution Errors"
-sidebarTitle: "SEP-1303: Input Validation Errors as Tool Executi…"
-description: "Input Validation Errors as Tool Execution Errors"
+title: "SEP-1303: 输入验证错误作为工具执行错误"
+sidebarTitle: "SEP-1303: 输入验证错误作为工具执行…"
+description: "输入验证错误作为工具执行错误"
 ---
 
 <div className="flex items-center gap-2 mb-4">
   <Badge color="green" shape="pill">
-    Final
+    最终版
   </Badge>
   <Badge color="gray" shape="pill">
-    Standards Track
+    标准轨道
   </Badge>
 </div>
 
-| Field         | Value                                                                           |
-| ------------- | ------------------------------------------------------------------------------- |
-| **SEP**       | 1303                                                                            |
-| **Title**     | Input Validation Errors as Tool Execution Errors                                |
-| **Status**    | Final                                                                           |
-| **Type**      | Standards Track                                                                 |
-| **Created**   | 2025-08-05                                                                      |
-| **Author(s)** | [@fredericbarthelet](https://github.com/fredericbarthelet)                      |
-| **Sponsor**   | None                                                                            |
+| 字段          | 值                                                                            |
+| ------------- | ----------------------------------------------------------------------------- |
+| **SEP**       | 1303                                                                          |
+| **标题**      | 输入验证错误作为工具执行错误                                                  |
+| **状态**      | 最终版                                                                        |
+| **类型**      | 标准轨道                                                                      |
+| **创建日期**  | 2025-08-05                                                                    |
+| **作者**      | [@fredericbarthelet](https://github.com/fredericbarthelet)                    |
+| **赞助人**    | 无                                                                            |
 | **PR**        | [#1303](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1303) |
 
 ---
 
-## Abstract
+## 摘要
 
-This SEP proposes treating tools input validation errors as Tool Execution Errors rather than Protocol Errors. This change would enable language models to receive validation error feedback in their context window, allowing them to self-correct and successfully complete tasks without human intervention, significantly improving task completion rate.
+本 SEP 提议将工具输入验证错误视为工具执行错误，而不是协议错误。这一变更将使语言模型能够在其上下文窗口中接收验证错误反馈，允许它们自我纠正并成功完成任务而无需人工干预，显著提高任务完成率。
 
-## Motivation
+## 动机
 
-Language models can learn from tool input validation error messages and retry a tools/call with corrected parameters accordingly, but only if they receive the error feedback in their context window. Protocol Errors are catch at the application level by the MCP Client. Only Tool Execution Errors are forwarded back to the model as JSON-RPC responses. With the current specifications, models cannot see these error messages and thus cannot self-correct, leading to repeated failures and poor user experiences.
+语言模型可以从工具输入验证错误消息中学习，并相应地重试带有修正参数的 tools/call，但前提是它们在其上下文窗口中接收到错误反馈。协议错误由 MCP 客户端在应用层捕获。只有工具执行错误才会作为 JSON-RPC 响应转发回模型。根据当前规范，模型无法看到这些错误消息，因此无法自我纠正，导致重复失败和糟糕的用户体验。
 
-### Problem Statement
+### 问题陈述
 
-Consider a flight booking tool that validates departure dates using the following `zod` validation schema:
+考虑一个使用以下 `zod` 验证架构验证出发日期的航班预订工具：
 
 ```typescript
 departureDate: z.string()
@@ -56,77 +56,77 @@ departureDate: z.string()
   .describe("Departure date in dd/mm/yyyy format");
 ```
 
-Tool expected input JSON schema can only describe the regex statement. The actual programmatic check that the date is in the past cannot be expressed here as JSON schema.
-Even when a model provides a syntactically correct date that passes JSON schema validation, there is no guarantee it will be in the future. When a validation error is raised and returned as a Protocol Error:
+工具预期的输入 JSON 架构只能描述正则语句。实际的日期在过去的时间编程检查无法在此处表示为 JSON 架构。
+即使模型提供了语法正确且通过 JSON 架构验证的日期，也无法保证它在未来。当验证错误被引发并作为协议错误返回时：
 
-1. The model doesn't receive the error message explaining why the date was rejected
-2. The model repeats the same mistake multiple times (e.g., Cursor typically consistently sends dates in 2024 when the user only specify day and month or relative date and repeats the same tools/call request 3 times without getting any information as to why the tools call fails)
-3. The task fails despite the model being capable of correcting itself if given proper feedback
-4. Users experience frustration and must manually intervene
+1. 模型没有收到解释日期为何被拒绝的错误消息
+2. 模型多次重复同样的错误（例如，当用户只指定日和月或相对日期时，Cursor 通常一致地发送 2024 年的日期，并重复相同的 tools/call 请求 3 次，而没有获得任何关于工具调用为何失败的信息）
+3. 尽管模型在获得适当反馈的情况下能够自我纠正，但任务仍然失败
+4. 用户感到沮丧并且必须手动干预
 
-### Benefits of This Proposal
+### 本提案的好处
 
-1. **Higher Task Completion Rates**: Models can self-correct validation errors without human intervention
-2. **Better User Experience**: Reduced failures and faster task completion
-3. **Leverages Model Capabilities**: Modern LLMs excel at understanding and responding to error messages
-4. **Reduced API Calls**: Fewer retry attempts as models correct themselves on the first error
+1. **更高的任务完成率**：模型无需人工干预即可自我纠正验证错误
+2. **更好的用户体验**：减少失败并加快任务完成
+3. **利用模型能力**：现代大语言模型擅长理解和响应错误消息
+4. **减少 API 调用**：随着模型在第一个错误上自我纠正，重试尝试减少
 
-## Specification
+## 规范
 
-### Current Behavior
+### 当前行为
 
-The [tool errors specification](https://modelcontextprotocol.io/specification/2025-06-18/server/tools#error-handling) currently provides ambiguous guidance:
+[工具错误规范](https://modelcontextprotocol.io/specification/2025-06-18/server/tools#error-handling) 目前提供了模糊的指导：
 
-- "Invalid arguments" should be treated as Protocol Error
-- "Invalid input data" should be treated as Tool Execution Error
+- “无效参数”应被视为协议错误
+- “无效输入数据”应被视为工具执行错误
 
-This ambiguity leads to inconsistent implementations where valuable error feedback is lost.
+这种模糊性导致不一致的实现，其中有价值的错误反馈丢失。
 
-### Proposed Change
+### 提议的变更
 
-Clarify the specification with the following changes:
+通过以下变更澄清规范：
 
-1. Removes the "invalid argument" category from **Protocol Errors**.
-2. **Tool Execution Errors** should be used for all tool argument validation failures (merging `invalid argument` and `invalid input data` under a new `input validation errors` category)
+1. 从 **协议错误** 中移除“无效参数”类别。
+2. **工具执行错误** 应用于所有工具参数验证失败（将 `无效参数` 和 `无效输入数据` 合并到新的 `输入验证错误` 类别下）
 
-### Specification Text Changes
+### 规范文本变更
 
-Update the error handling section to include:
+更新错误处理部分以包括：
 
 ```
-## Error Handling
+## 错误处理
 
-Tools use two error reporting mechanisms:
+工具使用两种错误报告机制：
 
-1. **Protocol Errors**: Standard JSON-RPC errors for issues like:
+1. **协议错误**：用于以下问题的标准 JSON-RPC 错误：
 
-   - Unknown tools
-   - Server errors
+   - 未知工具
+   - 服务器错误
 
-2. **Tool Execution Errors**: Reported in tool results with `isError: true`:
-   - API failures
-   - Input validation errors
-   - Business logic errors
+2. **工具执行错误**：在工具结果中报告，带有 `isError: true`：
+   - API 失败
+   - 输入验证错误
+   - 业务逻辑错误
 ```
 
-## Implementation
+## 实现
 
-### Before (Protocol Error)
+### 之前（协议错误）
 
 ```typescript
-// Model submits past date
+// 模型提交过去的日期
 request: {
   ...
   method: "tools/call",
   params: {
     name: "book_flight",
     arguments: {
-      departureDate: "12/12/2024"  // Past date
+      departureDate: "12/12/2024"  // 过去的日期
     }
   }
 }
 
-// Server returns Protocol Error
+// 服务器返回协议错误
 response: {
   ...
   error: {
@@ -135,26 +135,26 @@ response: {
   }
 }
 
-// Model retries blindly with another past date
-// This cycle repeats until failure
+// 模型盲目地用另一个过去的日期重试
+// 此循环重复直到失败
 ```
 
-### After (Tool Execution Error)
+### 之后（工具执行错误）
 
 ```typescript
-// Model submits past date
+// 模型提交过去的日期
 request: {
   ...
   method: "tools/call",
   params: {
     name: "book_flight",
     arguments: {
-      departureDate: "12/12/2024"  // Past date
+      departureDate: "12/12/2024"  // 过去的日期
     }
   }
 }
 
-// Server returns Tool Execution Error (visible to model)
+// 服务器返回工具执行错误（对模型可见）
 response: {
   ...
   "result": {
@@ -168,31 +168,31 @@ response: {
   }
 }
 
-// Model understands the error and corrects itself
+// 模型理解错误并自我纠正
 request: {
   method: "tools/call",
   params: {
     name: "book_flight",
     arguments: {
-      departureDate: "12/12/2025"  // Future date
+      departureDate: "12/12/2025"  // 未来的日期
     }
   }
 }
 ```
 
-## Backwards Compatibility
+## 向后兼容性
 
-This change is backwards compatible as it:
+此变更是向后兼容的，因为它：
 
-- Does not alter the protocol structure
-- Only clarifies existing ambiguous behavior
-- Maintains all existing error types and formats
-- Improves behavior without breaking existing implementations
+- 不改变协议结构
+- 仅澄清现有的模糊行为
+- 维持所有现有的错误类型和格式
+- 在不破坏现有实现的情况下改进行为
 
-Servers implementing the clarified behavior will provide better model self-recovery while continuing to work with all existing clients.
+实施澄清行为的服务器将提供更好的模型自我恢复，同时继续与所有现有客户端一起工作。
 
-## References
+## 参考资料
 
-- [MCP Tools Error Handling Specification](https://modelcontextprotocol.io/specification/2025-06-18/server/tools#error-handling)
-- [Better MCP tools/call Error Responses: Help Your AI Recover Gracefully](https://dev.to/alpic/better-mcp-toolscall-error-responses-help-your-ai-recover-gracefully-15c7)
-- Related Issue: https://github.com/modelcontextprotocol/typescript-sdk/pull/824
+- [MCP 工具错误处理规范](https://modelcontextprotocol.io/specification/2025-06-18/server/tools#error-handling)
+- [更好的 MCP tools/call 错误响应：帮助你的 AI 优雅地恢复](https://dev.to/alpic/better-mcp-toolscall-error-responses-help-your-ai-recover-gracefully-15c7)
+- 相关问题：https://github.com/modelcontextprotocol/typescript-sdk/pull/824

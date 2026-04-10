@@ -1,95 +1,94 @@
 ---
-title: Enterprise-Managed Authorization
-description: Centralized access control for MCP in enterprise environments via identity providers
+title: 企业托管授权
+description: 通过身份提供商在企业环境中实现 MCP 的集中式访问控制
 ---
 
-The Enterprise-Managed Authorization extension (`io.modelcontextprotocol/enterprise-managed-authorization`) enables organizations to control MCP server access centrally through their existing identity provider (IdP). Instead of each employee authorizing each MCP server individually, the organization's IT or security team manages access policies in one place.
+Enterprise-Managed Authorization 扩展（`io.modelcontextprotocol/enterprise-managed-authorization`）使组织能够通过现有的身份提供商 (IdP) 集中控制 MCP 服务器访问。组织的 IT 或安全团队可以在一个地方管理访问策略，而不是让每位员工单独授权每个 MCP 服务器。
 
 <Card
-  title="Specification"
+  title="规范"
   icon="file-lines"
   href="https://github.com/modelcontextprotocol/ext-auth/blob/main/specification/draft/enterprise-managed-authorization.mdx"
 >
-  Full technical specification for the Enterprise-Managed Authorization
-  extension.
+  Enterprise-Managed Authorization 扩展的完整技术规范。
 </Card>
 
-## What it is
+## 是什么
 
-In a standard MCP deployment, each user independently authorizes an MCP client to access each MCP server. For consumer applications, this user-driven model is ideal — it gives individuals control over what accesses their data.
+在标准的 MCP 部署中，每个用户独立授权 MCP 客户端访问每个 MCP 服务器。对于消费者应用程序，这种用户驱动的模式是理想的——它让个人控制谁可以访问他们的数据。
 
-In enterprise environments, this model creates friction and security gaps:
+在企业环境中，这种模式会产生摩擦和安全漏洞：
 
-- Employees shouldn't need to understand the authorization details of every MCP server their organization uses
-- Security teams can't enforce consistent access policies if each user authorizes independently
-- Onboarding new employees requires them to manually authorize dozens of services
-- Offboarding requires revoking access across every service individually
+- 员工不需要了解其组织使用的每个 MCP 服务器的授权细节
+- 如果每个用户独立授权，安全团队无法执行一致的访问策略
+- 入职新员工需要他们手动授权数十项服务
+- 离职需要在每项服务中单独撤销访问权限
 
-Enterprise-Managed Authorization solves this by introducing the organization's IdP as the authoritative decision-maker. The IdP (such as Okta, Azure AD, or a corporate SSO system) controls which MCP servers employees can access, and under what conditions. Employees authenticate with their corporate identity — the same credentials they use for email, Slack, and other work tools — and the IdP grants or denies MCP server access based on organizational policy.
+Enterprise-Managed Authorization 通过引入组织的 IdP 作为权威决策者来解决这个问题。IdP（如 Okta、Azure AD 或企业 SSO 系统）控制员工可以访问哪些 MCP 服务器以及在什么条件下访问。员工使用其企业身份（与他们用于电子邮件、Slack 和其他工作工具相同的凭据）进行身份验证，IdP 根据组织策略授予或拒绝 MCP 服务器访问权限。
 
-## When to use it
+## 何时使用
 
-Use Enterprise-Managed Authorization when:
+在以下情况下使用 Enterprise-Managed Authorization：
 
-- **Deploying MCP in a corporate environment** where IT manages access to all business applications
-- **Enforcing organizational access policies** — you need to ensure only authorized employees access specific MCP servers
-- **Centralizing access control** — you want to add or revoke access to MCP servers from a single admin console
-- **Meeting compliance requirements** — your organization needs an auditable authorization trail for all MCP server access
-- **Simplifying employee experience** — employees should access MCP tools with their existing corporate SSO credentials, without per-service authorization flows
+- **在企业环境中部署 MCP**，其中 IT 管理所有业务应用程序的访问权限
+- **执行组织访问策略**——你需要确保只有授权员工才能访问特定的 MCP 服务器
+- **集中访问控制**——你希望从单个管理控制台添加或撤销对 MCP 服务器的访问权限
+- **满足合规性要求**——你的组织需要所有 MCP 服务器访问的可审计授权轨迹
+- **简化员工体验**——员工应使用现有的企业 SSO 凭据访问 MCP 工具，无需每个服务的授权流程
 
-## How it works
+## 工作原理
 
-The extension establishes a delegated authorization flow where the enterprise IdP acts as an intermediary between the MCP client and the MCP server. The MCP Client requests a special type of token from the enterprise IdP called an Identity Assertion JWT Authorization Grant, or ID-JAG. The MCP Client then exchanges the ID-JAG for an access token from the MCP server's Authorization Server:
+该扩展建立了一个委托授权流程，其中企业 IdP 充当 MCP 客户端和 MCP 服务器之间的中介。MCP 客户端向企业 IdP 请求一种特殊类型的令牌，称为身份断言 JWT 授权授予（Identity Assertion JWT Authorization Grant），简称 ID-JAG。然后，MCP 客户端将 ID-JAG 交换为来自 MCP 服务器授权服务器的访问令牌：
 
 ```mermaid
 sequenceDiagram
-    participant UA as Browser
-    participant C as MCP Client
-    participant IdP as Enterprise IdP
-    participant MAS as MCP Authorization Server
-    participant MRS as MCP Resource Server
+    participant UA as 浏览器
+    participant C as MCP 客户端
+    participant IdP as 企业 IdP
+    participant MAS as MCP 授权服务器
+    participant MRS as MCP 资源服务器
 
-    C-->>UA: Redirect to IdP
-    UA->>IdP: Redirect to IdP
-    Note over IdP: User Logs In
-    IdP-->>UA: IdP Authorization Code
-    UA->>C: IdP Authorization Code
-    C->>IdP: Token Request with IdP Authorization Code
-    IdP-->>C: ID Token
+    C-->>UA: 重定向到 IdP
+    UA->>IdP: 重定向到 IdP
+    Note over IdP: 用户登录
+    IdP-->>UA: IdP 授权码
+    UA->>C: IdP 授权码
+    C->>IdP: 带有 IdP 授权码的令牌请求
+    IdP-->>C: ID 令牌
 
-    note over C: User is logged<br/>in to MCP Client.<br/>Client stores ID Token.
+    note over C: 用户已登录<br/>到 MCP 客户端。<br/>客户端存储 ID 令牌。
 
-    C->>IdP: Exchange ID Token for ID-JAG
-    note over IdP: Evaluate Policy
-    IdP-->>C: Responds with ID-JAG
-    C->>MAS: Token Request with ID-JAG
-    note over MAS: Validate ID-JAG
-    MAS-->>C: MCP Access Token
+    C->>IdP: 交换 ID 令牌以获取 ID-JAG
+    note over IdP: 评估策略
+    IdP-->>C: 响应 ID-JAG
+    C->>MAS: 带有 ID-JAG 的令牌请求
+    note over MAS: 验证 ID-JAG
+    MAS-->>C: MCP 访问令牌
 
     loop
-    C->>MRS: Call MCP API with Access Token
-    MRS-->>C: MCP Response with Data
+    C->>MRS: 使用访问令牌调用 MCP API
+    MRS-->>C: 带有数据的 MCP 响应
     end
 
 ```
 
-Key aspects of the flow:
+流程的关键方面：
 
-1. **Centralized policy**: The enterprise IdP maintains a registry of approved MCP servers and the access policies for each. Administrators configure these in their existing identity management tools.
+1. **集中策略**：企业 IdP 维护已批准的 MCP 服务器注册表及每个服务器的访问策略。管理员在其现有的身份管理工具中配置这些内容。
 
-2. **Single sign-on**: Employees authenticate with their corporate credentials once. The IdP issues tokens that grant access to approved MCP servers without additional per-server authorization prompts.
+2. **单点登录**：员工使用企业凭据进行一次身份验证。IdP 颁发令牌，授予对已批准 MCP 服务器的访问权限，无需额外的每服务器授权提示。
 
-3. **Policy enforcement**: The IdP evaluates access policies (group membership, role assignments, conditional access rules) before issuing tokens. Employees who lack authorization receive an appropriate error — the MCP client never receives a token for unauthorized servers.
+3. **策略执行**：IdP 在颁发令牌之前评估访问策略（组成员资格、角色分配、条件访问规则）。缺乏授权的员工将收到适当的错误——MCP 客户端永远不会收到未授权服务器的令牌。
 
-4. **Centralized revocation**: Revoking an employee's access to MCP servers happens at the IdP level, taking effect immediately across all MCP clients. No per-client, per-server revocation needed.
+4. **集中撤销**：撤销员工对 MCP 服务器的访问权限发生在 IdP 级别，立即在所有 MCP 客户端生效。无需每客户端、每服务器撤销。
 
-## Implementation guide
+## 实施指南
 
-### For MCP clients
+### 对于 MCP 客户端
 
-To support Enterprise-Managed Authorization, your client must:
+要支持 Enterprise-Managed Authorization，你的客户端必须：
 
-1. **Declare support** in the `initialize` request:
+1. **在 `initialize` 请求中声明支持**：
 
 ```json
 {
@@ -101,69 +100,69 @@ To support Enterprise-Managed Authorization, your client must:
 }
 ```
 
-2. **Support SSO** — users should authenticate to the MCP Client using the enterprise IdP. Save the Identity Assertion (either an OpenID ID Token or SAML assertion) issued during login for later use.
+2. **支持 SSO** —— 用户应使用企业 IdP 向 MCP 客户端进行身份验证。保存登录期间颁发的身份断言（OpenID ID 令牌或 SAML 断言）以供后续使用。
 
-3. **Handle ID-JAGs** — when the server indicates that enterprise-managed auth is required, request an ID-JAG token from the enterprise IdP's authorization endpoint using the previously obtained Identity Assertion. Exchange this ID-JAG for an access token from the MCP Authorization Server. Do not redirect the user to the MCP Authorization Server's authorization endpoint.
+3. **处理 ID-JAG** —— 当服务器指示需要企业托管授权时，使用之前获得的身份断言向企业 IdP 的授权端点请求 ID-JAG 令牌。将此 ID-JAG 交换为来自 MCP 授权服务器的访问令牌。不要将用户重定向到 MCP 授权服务器的授权端点。
 
-4. **Support organization configuration** — allow administrators to configure the enterprise IdP's endpoints, typically via organization-level settings rather than per-user settings.
+4. **支持组织配置** —— 允许管理员配置企业 IdP 的端点，通常通过组织级设置而不是每用户设置。
 
-5. **Respect token scopes** — tokens issued by enterprise IdPs may have scope restrictions that differ from standard MCP authorization. Handle scope errors gracefully.
+5. **尊重令牌范围** —— 企业 IdP 颁发的令牌可能具有与标准 MCP 授权不同的范围限制。优雅地处理范围错误。
 
-### For MCP servers
+### 对于 MCP 服务器
 
-To require enterprise-managed authorization:
+要要求企业托管授权：
 
-1. **Declare the extension** in your server's authorization metadata, indicating that clients must use the enterprise-managed flow.
+1. **在服务器的授权元数据中声明扩展**，指示客户端必须使用企业托管流程。
 
-2. **Integrate with IdP admin APIs** (optional) — publish your server's resource descriptor so enterprise administrators can configure access policies in their IdP admin console.
+2. **与 IdP 管理 API 集成**（可选）—— 发布服务器的资源描述符，以便企业管理员可以在其 IdP 管理控制台中配置访问策略。
 
-### For MCP Authorization Servers
+### 对于 MCP 授权服务器
 
-1. **Validate ID-JAGs** issued by the enterprise IdP. This typically means validating JWT signatures against the IdP's JWKS endpoint and checking the token's audience, issuer, and expiration.
+1. **验证企业 IdP 颁发的 ID-JAG**。这通常意味着针对 IdP 的 JWKS 端点验证 JWT 签名，并检查令牌的受众、颁发者和过期时间。
 
-2. **Map IdP claims to permissions** — ID-JAG tokens carry claims (scope and resource information) that your server uses to determine who the employee is and what the employee can access. Define your authorization logic based on these claims.
+2. **将 IdP 声明映射到权限** —— ID-JAG 令牌携带声明（范围和资源信息），你的服务器使用这些声明来确定员工是谁以及员工可以访问什么。基于这些声明定义你的授权逻辑。
 
-3. **Handle Account Linking** - ID-JAG tokens will always contain a subject claim and may additionally contain an email claim that can be used to
+3. **处理账户链接** - ID-JAG 令牌将始终包含主题声明，并且可能另外包含一个可用于
 
-## Client support
+## 客户端支持
 
 <Note>
 
-Support for this extension varies by client. Extensions are opt-in and never active by default.
+对此扩展的支持因客户端而异。扩展是可选的，默认情况下从不激活。
 
 </Note>
 
-Check the [client matrix](/extensions/client-matrix) for current implementation status across MCP clients. Enterprise-Managed Authorization typically requires client-level support from the organization's IT team in addition to the MCP client application.
+查看 [客户端矩阵](/extensions/client-matrix) 以了解当前跨 MCP 客户端的实施状态。Enterprise-Managed Authorization 通常除了 MCP 客户端应用程序外，还需要组织的 IT 团队提供客户端级支持。
 
-## Related resources
+## 相关资源
 
 <CardGroup cols={2}>
   <Card
-    title="ext-auth repository"
+    title="ext-auth 仓库"
     icon="github"
     href="https://github.com/modelcontextprotocol/ext-auth"
   >
-    Source code and reference implementations
+    源代码和参考实现
   </Card>
   <Card
-    title="Full specification"
+    title="完整规范"
     icon="file-lines"
     href="https://github.com/modelcontextprotocol/ext-auth/blob/main/specification/draft/enterprise-managed-authorization.mdx"
   >
-    Technical specification with normative requirements
+    带有规范性要求的技术规范
   </Card>
   <Card
     title="SEP-990"
     icon="file-lines"
     href="/seps/990-enable-enterprise-idp-policy-controls-during-mcp-o"
   >
-    Original proposal: Enable Enterprise IdP Policy Controls
+    原始提案：启用企业 IdP 策略控制
   </Card>
   <Card
-    title="MCP Authorization"
+    title="MCP 授权"
     icon="lock"
     href="/specification/latest/basic/authorization"
   >
-    Core MCP authorization specification
+    核心 MCP 授权规范
   </Card>
 </CardGroup>

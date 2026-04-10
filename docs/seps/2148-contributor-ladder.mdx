@@ -1,532 +1,532 @@
 ---
-title: "SEP-2148: MCP Contributor Ladder"
-sidebarTitle: "SEP-2148: MCP Contributor Ladder"
-description: "MCP Contributor Ladder"
+title: "SEP-2148: MCP 贡献者阶梯"
+sidebarTitle: "SEP-2148: MCP 贡献者阶梯"
+description: "MCP 贡献者阶梯"
 ---
 
 <div className="flex items-center gap-2 mb-4">
   <Badge color="green" shape="pill">
-    Final
+    最终版
   </Badge>
   <Badge color="gray" shape="pill">
-    Process
+    流程
   </Badge>
 </div>
 
-| Field         | Value                                                                                                                        |
+| 字段          | 值                                                                                                                         |
 | ------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | **SEP**       | 2148                                                                                                                         |
-| **Title**     | MCP Contributor Ladder                                                                                                       |
-| **Status**    | Final                                                                                                                        |
-| **Type**      | Process                                                                                                                      |
-| **Created**   | 2026-01-15                                                                                                                   |
-| **Author(s)** | David Soria Parra ([@dsp-ant](https://github.com/dsp-ant)), Sarah Novotny ([@sarahnovotny](https://github.com/sarahnovotny)) |
-| **Sponsor**   | David Soria Parra ([@dsp-ant](https://github.com/dsp-ant))                                                                   |
+| **标题**      | MCP 贡献者阶梯                                                                                                               |
+| **状态**      | 最终版                                                                                                                       |
+| **类型**      | 流程                                                                                                                         |
+| **创建日期**  | 2026-01-15                                                                                                                   |
+| **作者**      | David Soria Parra ([@dsp-ant](https://github.com/dsp-ant)), Sarah Novotny ([@sarahnovotny](https://github.com/sarahnovotny)) |
+| **推荐人**    | David Soria Parra ([@dsp-ant](https://github.com/dsp-ant))                                                                   |
 | **PR**        | [#2148](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2148)                                              |
 
 ---
 
-## Abstract
+## 摘要
 
-This SEP establishes a formal contributor ladder for the Model Context Protocol project, defining clear roles, responsibilities, and advancement criteria from first-time contributor through Core Maintainer. The ladder provides transparent pathways for community members to understand how they can grow their involvement and influence within the project.
+本 SEP 为 Model Context Protocol 项目建立了一个正式的贡献者阶梯，定义了从首次贡献者到核心维护者的清晰角色、责任和晋升标准。该阶梯为社区成员提供了透明的路径，使他们能够了解如何在项目中成长其参与度和影响力。
 
-This SEP is a companion to [SEP-2149: MCP Group Governance and Charter Template](./2149-working-group-charter-template.md), which defines how Working Groups and Interest Groups operate. The two SEPs intersect: WG/IG leadership requires Member status on this ladder, and group participation is a recognized pathway to ladder advancement.
+本 SEP 是 [SEP-2149: MCP 工作组治理与章程模板](./2149-working-group-charter-template.md) 的配套文件，后者定义了工作组和兴趣组的运作方式。这两个 SEP 相互交叉：工作组/兴趣组领导需要在此阶梯上具有成员状态，而小组参与是阶梯晋升的认可路径。
 
-## Motivation
+## 动机
 
-As MCP adoption grows, the project needs a clear framework for:
+随着 MCP 采用的增长，项目需要一个清晰的框架来：
 
-1. **Contributor Development**: Community members lack visibility into how to grow their involvement and influence within the MCP project. A defined ladder shows the path from first contribution to project leadership.
+1. **贡献者发展**：社区成员缺乏关于如何在 MCP 项目中成长其参与度和影响力的可见性。定义的阶梯展示了从首次贡献到项目领导的路径。
 
-2. **Trust Building**: Merge rights and other high-privilege responsibilities are earned through demonstrated commitment and good judgment over time. A graduated system ensures contributors are set up for success and are trusted by existing maintainers and broader community before taking on greater ownership of the project.
+2. **建立信任**：合并权限和其他高权限责任是通过随着时间的推移展现出的承诺和良好的判断力而赢得的。分级系统确保贡献者为成功做好准备，并在承担更大的项目所有权之前获得现有维护者和更广泛社区的信任。
 
-3. **Organizational Diversity**: With multiple organizations contributing to MCP, the project needs mechanisms to prevent organizational capture while welcoming participation from outside Anthropic.
+3. **组织多样性**：随着多个组织为 MCP 做出贡献，项目需要机制来防止组织俘获，同时欢迎来自 Anthropic 以外的参与。
 
-4. **Scalability**: Core Maintainer bandwidth is limited. Delegating authority to Maintainers and Working/Interest Group Leads through clear scope definitions enables the project to scale.
+4. **可扩展性**：核心维护者的精力有限。通过明确的范围定义将权力下放给维护者和工作组/兴趣组负责人，使项目能够扩展。
 
-5. **Recognition**: Contributors invest significant effort in MCP. Formal recognition through defined roles acknowledges their contributions and encourages sustained engagement.
+5. **认可**：贡献者在 MCP 上投入了大量精力。通过定义的角色进行正式认可，承认他们的贡献并鼓励持续的参与。
 
-Without a contributor ladder, advancement decisions become ad-hoc, potentially inconsistent, and opaque to the community.
+如果没有贡献者阶梯，晋升决策将变得临时、可能不一致，并且对社区不透明。
 
-## Specification
+## 规范
 
-### Guiding Principles
+### 指导原则
 
-The contributor ladder operates under these principles:
+贡献者阶梯在这些原则下运作：
 
-- **Earned Trust**: Advancement based on demonstrated meaningful contributions that align with the project goals, good judgment, and sustained engagement, not tenure alone
-- **Multiple Growth Pathways**: Code, specification work, documentation, and community building all lead to advancement
-- **Transparency**: Criteria for advancement are explicit and consistently applied
-- **Alignment With MCP Goals**: Individual contributors must demonstrate commitment to advance and evolve MCP project components beyond one's employer's interests
+- **赢得信任**：晋升基于与项目目标一致的有意义的贡献、良好的判断力和持续的参与，而不仅仅是资历
+- **多种成长路径**：代码、规范工作、文档和社区建设都能导致晋升
+- **透明度**：晋升标准是明确的且一致应用的
+- **与 MCP 目标一致**：个人贡献者必须表现出承诺，以推进和发展 MCP 项目组件，超越雇主的利益
 
-### Role Definitions
+### 角色定义
 
-| Role                                             | Summary                                       | Key Privileges                                                            | Minimum Timeline                                      |
+| 角色                                             | 摘要                                       | 关键权限                                                            | 最短时间线                                      |
 | ------------------------------------------------ | --------------------------------------------- | ------------------------------------------------------------------------- | ----------------------------------------------------- |
-| [**Contributor**](#contributor)                  | Anyone who contributes to MCP                 | Submit issues, PRs, participate in discussions                            | Immediate                                             |
-| [**Member**](#member)                            | Established, active contributor               | GitHub org membership, triage rights, eligible for WG/IG leadership       | 2-3 months of meaningful contributions                |
-| [**Maintainer**](#maintainer)                    | Area steward with operational responsibility  | Merge rights, release participation                                       | 6+ months as Member                                   |
-| [**Core Maintainer**](#core-maintainer)          | Technical leadership and protocol stewardship | Final decision authority, governance participation                        | By invitation after sustained Maintainer contribution |
-| [**Lead Maintainer**](#lead-maintainer)          | Ultimate project authority (founders)         | All Core Maintainer privileges, veto authority, appoints Core Maintainers | Reserved for project founders — succession only       |
-| [**Community Moderator**](#community-moderators) | CoC enforcement and community health          | Moderation rights on community platforms, incident handling               | Parallel track — Member status + appointment          |
+| [**贡献者**](#贡献者)                  | 任何为 MCP 做出贡献的人                 | 提交问题、PR、参与讨论                            | 立即                                             |
+| [**成员**](#成员)                            | 既定的、活跃的贡献者               | GitHub 组织成员资格、分类权限、有资格担任工作组/兴趣组领导       | 2-3 个月的有意义贡献                |
+| [**维护者**](#维护者)                    | 具有运营责任的领域守护者  | 合并权限、参与发布                                       | 作为成员 6 个月以上                                   |
+| [**核心维护者**](#核心维护者)          | 技术领导和协议守护 | 最终决策权、参与治理                        | 在持续维护者贡献后通过邀请 |
+| [**首席维护者**](#首席维护者)          | 最终项目权威（创始人）         | 所有核心维护者权限、否决权、任命核心维护者 | 保留给项目创始人 — 仅继任       |
+| [**社区管理员**](#社区管理员) | 行为准则执行和社区健康          | 社区平台管理权限、事件处理               | 并行路径 — 成员状态 + 任命          |
 
-_Timelines listed are minimum contribution periods, not guarantees of advancement. They exist to protect the project from rapid privilege escalation and to ensure a high bar of demonstrated commitment. Actual advancement is discretionary and may take longer in practice; the only guarantee is that advancement will not happen on a shorter timescale than documented. Exceptions require explicit Core Maintainer approval with documented rationale._
+_列出的时间线是最短贡献期，不是晋升保证。它们的存在是为了保护项目免受快速权限升级，并确保展现出高标准的承诺。实际晋升是酌情的，实践中可能需要更长时间；唯一的保证是晋升不会比记录的时间尺度更短发生。例外情况需要核心维护者明确批准并记录理由。_
 
-### Contributor
+### 贡献者
 
-Anyone who has contributed to MCP in any form is a contributor. This includes:
+任何以任何形式为 MCP 做出贡献的人都是贡献者。这包括：
 
-- Opening issues or discussions
-- Submitting pull requests
-- Participating in working group discussions
-- Improving documentation
-- Helping other community members
+- 开启问题或讨论
+- 提交拉取请求
+- 参与工作组讨论
+- 改进文档
+- 帮助其他社区成员
 
-**No formal requirements**, we welcome all contributions.
+**无正式要求**，我们欢迎所有贡献。
 
-**How to get started:**
+**如何开始：**
 
-- Review the [Contributing Guide](https://modelcontextprotocol.io/community/contributing)
-- Join community channels (Discord, GitHub Discussions)
-- Look for issues tagged `good-first-issue` or `help-wanted`
-- Attend working group meetings
+- 查阅 [贡献指南](https://modelcontextprotocol.io/community/contributing)
+- 加入社区渠道（Discord、GitHub 讨论）
+- 寻找标记为 `good-first-issue` 或 `help-wanted` 的问题
+- 参加工作组会议
 
-### Member
+### 成员
 
-Members are established contributors who have demonstrated ongoing commitment to the success and growth of MCP.
+成员是既定的贡献者，他们展示了对 MCP 成功和成长的持续承诺。
 
-**Requirements:**
+**要求：**
 
-- Multiple contributions to MCP (code, documentation, and/or community)
-- At least one merged PR or accepted contribution
-- Ongoing engagement with the MCP community and not just one-off contributions
-- Enabled two-factor authentication on GitHub
-- No objections from existing Members within 7 days
+- 对 MCP 有多次贡献（代码、文档和/或社区）
+- 至少一个合并的 PR 或接受的贡献
+- 与 MCP 社区持续互动，不仅仅是一次性贡献
+- 在 GitHub 上启用了双因素认证
+- 现有成员在 7 天内无异议
 
-**Sponsorship:**
+**推荐：**
 
-- Sponsored by two existing Members or Maintainers from different organizations
-- or sponsored by one Core Maintainer or Lead Maintainer
+- 由来自不同组织的两名现有成员或维护者推荐
+- 或由一名核心维护者或首席维护者推荐
 
-**Minimum timeline:** 2-3 months of active participation
+**最短时间线：** 2-3 个月的活跃参与
 
-**Responsibilities:**
+**职责：**
 
-- Continue contributing in good faith
-- Be responsive to assigned issues and PRs
-- Follow community guidelines and code of conduct
-- Help onboard new contributors when possible
+- 继续诚意贡献
+- 对分配的问题和 PR 做出响应
+- 遵循社区指南和行为准则
+- 在可能的情况下帮助引导新贡献者
 
-**Privileges:**
+**权限：**
 
-- GitHub organization membership with triage rights
-- Can be assigned to issues and PRs
-- Can use shortcut approval or review commands on PRs, such as `/lgtm`
-- Listed in community membership roster
-- Can create PRs in restricted repositories
-- Eligible for Working Group Lead or Interest Group Facilitator roles
+- 具有分类权限的 GitHub 组织成员资格
+- 可以被分配到问题和 PR
+- 可以在 PR 上使用快捷批准或审查命令，例如 `/lgtm`
+- 列入社区成员名单
+- 可以在受限仓库中创建 PR
+- 有资格担任工作组负责人或兴趣组协调员角色
 
-**Inactivity:** Members with no contributions for 3 months may be moved to emeritus status. Re-engagement follows a simplified re-familiarization process.
+**不活跃：** 3 个月无贡献的成员可能会被移至荣誉状态。重新参与遵循简化的重新熟悉流程。
 
-### Maintainer
+### 维护者
 
-Maintainers are trusted stewards who take operational responsibility for specific areas.
+维护者是值得信赖的守护者，对特定领域承担运营责任。
 
-**Requirements:**
+**要求：**
 
-- Member for at least 6 months with sustained, high-quality contributions
-- Demonstrated leadership in working groups or significant initiatives
-- Shown ability to represent MCP's interests above an individual employer's or organization's interests
-- Deep understanding of the MCP vision, roadmap, and design principles
-- Understands how their area impacts real-world AI integration and model interaction patterns
-- Completed security and governance onboarding
+- 成为成员至少 6 个月，具有持续、高质量的贡献
+- 在工作组或重大倡议中展现出领导力
+- 展现出代表 MCP 利益高于个人或组织利益的能力
+- 深刻理解 MCP 愿景、路线图和设计原则
+- 理解其领域如何影响现实世界的 AI 集成和模型交互模式
+- 完成安全和治理引导
 
-**Sponsorship & Approval:**
+**推荐与批准：**
 
-- Sponsored by an existing Maintainer or Core Maintainer
-- Approved by Core Maintainers
+- 由现有维护者或核心维护者推荐
+- 由核心维护者批准
 
-**Responsibilities:**
+**职责：**
 
-- Operational ownership of area health (test stability, documentation currency)
-- Responsible for the release processes and milestone planning of their respective scope
-- Provide timely review of escalated decisions
-- Active participation in governance discussions
-- Mentor Members and develop future Maintainers
-- Represent MCP in external contexts when appropriate
-- Engage with the area ecosystem and stakeholders, understanding real-world usage, and representing community needs
-- Ensure proposals reaching Core Maintainers are refined, well-considered, and account for ecosystem-wide impact
-- Active participation in discussions on communication channels (GitHub issues, Discord)
+- 领域健康的运营所有权（测试稳定性、文档时效性）
+- 负责各自范围的发布流程和里程碑规划
+- 提供升级决策的及时审查
+- 积极参与治理讨论
+- 指导成员并培养未来的维护者
+- 在适当时在外部环境中代表 MCP
+- 参与领域生态系统和利益相关者，了解现实世界的使用情况，并代表社区需求
+- 确保到达核心维护者的提案是经过完善、深思熟虑的，并考虑到生态系统范围的影响
+- 积极参与沟通渠道上的讨论（GitHub 问题、Discord）
 
-**Privileges:**
+**权限：**
 
-- Merge privileges for owned areas
-- Can sponsor new Maintainers
-- Participate in roadmap and prioritization discussions
-- Listed in `MAINTAINERS.md`
-- Release participation
+- 拥有领域的合并权限
+- 可以推荐新维护者
+- 参与路线图和优先级讨论
+- 列入 `MAINTAINERS.md`
+- 参与发布
 
-All pathways can lead to Maintainer, though the specific scope will align with the contribution type.
+所有路径都可以通向维护者，尽管具体范围将与贡献类型保持一致。
 
-**Inactivity:** Maintainers with no contributions for 6 months may be moved to emeritus status following review by Core Maintainers. Merge rights are revoked upon emeritus transition. Re-engagement requires re-completing security and governance onboarding.
+**不活跃：** 6 个月无贡献的维护者可能会在核心维护者审查后移至荣誉状态。合并权限在转为荣誉状态时被撤销。重新参与需要重新完成安全和治理引导。
 
-### Core Maintainer
+### 核心维护者
 
-Core Maintainers hold final decision-making authority for the MCP technical direction. This is the highest level of trust in the community.
+核心维护者拥有对 MCP 技术方向的最终决策权。这是社区中最高级别的信任。
 
-_Note: The Core Maintainer role is intentionally limited to ensure coherent technical vision while the project scales. Core Maintainer bandwidth concerns are addressed through clearer delegation to Maintainers, Working Group Leads, and Interest Group Facilitators, not expansion of Core Maintainer numbers._
+_注意：核心维护者角色故意受限，以确保在项目扩展时技术愿景的连贯性。核心维护者的精力问题通过更清晰地向维护者、工作组负责人和兴趣组协调员下放权力来解决，而不是扩大核心维护者的数量。_
 
-**Requirements:**
+**要求：**
 
-- Sustained contribution as Maintainer or similar roles over at least 6 months
-- Demonstrated judgment on complex, project-wide decisions
-- Trust and respect across organizational boundaries
-- Deep commitment to MCP's long-term success
+- 作为维护者或类似角色持续贡献至少 6 个月
+- 在复杂的、项目范围的决策上展现出判断力
+- 跨越组织边界获得信任和尊重
+- 对 MCP 的长期成功有深刻承诺
 
-**Appointment:**
+**任命：**
 
-- Nominated by majority of Core Maintainers, approved by Lead Maintainers
-- Or direct appointment by Lead Maintainers
+- 由多数核心维护者提名，由首席维护者批准
+- 或由首席维护者直接任命
 
-When evaluating candidates, Core Maintainers should consider whether the current composition adequately represents the breadth of the MCP ecosystem, including enterprise adopters deploying MCP in production domains.
+在评估候选人时，核心维护者应考虑当前的组成是否充分代表了 MCP 生态系统的广度，包括在生产领域部署 MCP 的企业采用者。
 
-**Responsibilities:**
+**职责：**
 
-- Final technical decision authority for contested or cross-cutting issues
-- Stewardship of project vision and design principles
-- Governance and policy decisions
-- External representation of MCP
-- Succession planning and community health
-- Ensure restraint and sustainability in protocol evolution
-- Participation in Core Maintainer meetings and Core Maintainer meetups
+- 对有争议或跨领域问题的最终技术决策权
+- 项目愿景和设计原则的守护
+- 治理和政策决策
+- MCP 的外部代表
+- 继任规划和社区健康
+- 确保协议演进中的克制和可持续性
+- 参与核心维护者会议和核心维护者聚会
 
-**Privileges:**
+**权限：**
 
-- Final approval on breaking changes and major spec revisions
-- Voting rights on [SEPs](https://modelcontextprotocol.io/community/sep-guidelines) (Specification Enhancement Proposals)
-- Approval of Maintainers
-- Governance voting rights / expectation of governance participation
-- Administrative rights to all MCP GitHub repositories
-- Listed in `MAINTAINERS.md` as Core Maintainer
+- 对破坏性变更和主要规范修订的最终批准
+- 对 [SEP](https://modelcontextprotocol.io/community/sep-guidelines)（规范增强提案）的投票权
+- 维护者的批准
+- 治理投票权/期望参与治理
+- 所有 MCP GitHub 仓库的管理权限
+- 在 `MAINTAINERS.md` 中列为核心维护者
 
-**Inactivity:** Core Maintainers with no participation in governance or technical decisions for 6 months may be moved to emeritus status following review by Lead Maintainers. Given the trust and visibility of this role, Core Maintainers are expected to proactively communicate reduced availability.
+**不活跃：** 6 个月未参与治理或技术决策的核心维护者可能会在首席维护者审查后移至荣誉状态。鉴于此角色的信任和可见性，核心维护者应主动沟通减少的可用性。
 
-### Lead Maintainer
+### 首席维护者
 
-Lead Maintainers hold ultimate authority over MCP's direction and governance. This is a lifetime appointment reserved for project founders. There is no defined advancement path to this role; it is only assumed through succession when necessary (see [Succession](#succession)).
+首席维护者拥有对 MCP 方向和治理的最终权威。这是保留给项目创始人的终身任命。没有定义通往此角色的晋升路径；只有在必要时通过继任承担（见 [继任](#继任)）。
 
-**Responsibilities:**
+**职责：**
 
-- All Core Maintainer responsibilities
-- Appointment and removal of Core Maintainers
-- Final authority on contested governance decisions
-- Project-wide strategic direction
+- 所有核心维护者职责
+- 核心维护者的任命和移除
+- 有争议的治理决策的最终权威
+- 项目范围的战略方向
 
-**Privileges:**
+**权限：**
 
-- Can act alone where Core Maintainers require multiple approvals
-- Veto authority over any decision
-- Appointment of successor
+- 在核心维护者需要多次批准的情况下可以单独行动
+- 对任何决策的否决权
+- 任命继任者
 
-### Succession
+### 继任
 
-If a Lead Maintainer leaves their role for any reason, the succession process begins upon their written notice or, if unable to provide notice, upon a determination by the remaining Lead Maintainer(s) or Core Maintainers that the Lead Maintainer is unable to continue serving.
+如果首席维护者因任何原因离开其角色，继任过程在其书面通知时开始，或者如果无法提供通知，则在剩余的首席维护者或核心维护者确定首席维护者无法继续服务时开始。
 
-If one or more Lead Maintainer(s) remain, they shall appoint a successor (by majority vote if multiple), and the remaining Lead Maintainer(s) will continue to govern until a successor is appointed.
+如果仍有一名或多名首席维护者，他们应任命继任者（如果有多人则通过多数投票），剩余的首席维护者将继续治理直到任命继任者。
 
-If no Lead Maintainers remain, the Core Maintainers shall appoint a successor by majority vote within 30 days, and the project operates by two-thirds vote of Core Maintainers until a new Lead Maintainer is appointed.
+如果没有首席维护者剩余，核心维护者应在 30 天内通过多数投票任命继任者，项目在任命新首席维护者之前由核心维护者的三分之二投票运作。
 
-### Advancement Process
+### 晋升流程
 
-#### Self-Nomination vs. Recognition
+#### 自我提名与推荐
 
-Contributors may either:
+贡献者可以：
 
-1. **Self-nominate** when they believe they meet the requirements
-2. **Be nominated** by a sponsor who has observed their contributions
+1. **自我提名**，当他们认为自己满足要求时
+2. **被推荐**，由观察到其贡献的推荐人
 
-Both paths are equally valid. Self-nomination is encouraged and preferred, as it demonstrates initiative and self-awareness of the contribution scope.
+两条路径同样有效。鼓励且偏好自我提名，因为它展示了对贡献范围的主动性和自我意识。
 
-#### Process Steps
+#### 流程步骤
 
-1. **Nomination**: Nominee or sponsor opens an issue using the nomination template, including links to contributions demonstrating requirements and sponsor confirmations
-2. **Community Review**: 7-day period for community input
-3. **Decision**: Approving authority reviews and decides
-4. **Onboarding**: New role-holder receives appropriate access and onboarding
+1. **提名**：被提名者或推荐人使用提名模板开启一个问题，包括展示要求的贡献链接和推荐人确认
+2. **社区审查**：7 天的社区输入期
+3. **决策**：批准机构审查并决定
+4. **引导**：新角色持有者获得适当的访问和引导
 
-| Advancement To      | Approved By                                                                     |
+| 晋升至      | 批准者                                                                     |
 | ------------------- | ------------------------------------------------------------------------------- |
-| Member              | 2 existing Members+ from different organizations, **or** 1 Core/Lead Maintainer |
-| Maintainer          | 1 Maintainer or Core Maintainer sponsor + Core Maintainer approval              |
-| Core Maintainer     | Lead Maintainers                                                                |
-| Community Moderator | 1 Core Maintainer or Lead Maintainer                                            |
+| 成员              | 2 名来自不同组织的现有成员+，**或** 1 名核心/首席维护者 |
+| 维护者          | 1 名维护者或核心维护者推荐人 + 核心维护者批准              |
+| 核心维护者     | 首席维护者                                                                |
+| 社区管理员 | 1 名核心维护者或首席维护者                                            |
 
-Self-nomination is encouraged, but nominees must still secure the required sponsorship. Sponsors confirm support in the nomination issue.
+鼓励自我提名，但被提名者仍必须获得所需的推荐。推荐人在提名问题中确认支持。
 
-### Decision-Making & Escalation
+### 决策与升级
 
-#### Delegation as Default
+#### 默认委托
 
-MCP operates on a principle of delegation: decisions should be made at the lowest appropriate level. This enables the project to move quickly while preserving Core Maintainer bandwidth for cross-cutting concerns.
+MCP 基于委托原则运作：决策应在最低的适当级别做出。这使得项目能够快速移动，同时保留核心维护者的精力用于跨领域关注点。
 
-- **Maintainers, WG Leads, and IG Facilitators** handle day-to-day decisions within scope
-- **Core Maintainers** intervene on escalation, cross-cutting issues, or when required (spec changes, Maintainer approval)
-- **Lead Maintainer** intervenes only on contested governance decisions or when Core Maintainers cannot reach consensus
+- **维护者、工作组负责人和兴趣组协调员** 处理范围内的日常决策
+- **核心维护者** 在升级、跨领域问题或需要时干预（规范变更、维护者批准）
+- **首席维护者** 仅在有争议的治理决策或核心维护者无法达成共识时干预
 
-When in doubt, make the decision at your level and document it. Escalate only when blocked, when the decision has project-wide implications, or when explicitly required by process.
+当有疑问时，在你的级别做出决策并记录它。仅在受阻、决策具有项目范围影响或流程明确要求时升级。
 
-The detailed escalation procedure for Working Group and Interest Group disputes — including the designation of a Core Maintainer without shared organizational affiliation to resolve the issue — is defined in [SEP-2149 §1.5](./2149-working-group-charter-template.md).
+工作组和兴趣组争议的详细升级程序——包括指定一名没有共享组织隶属关系的核心维护者来解决此问题——在 [SEP-2149 §1.5](./2149-working-group-charter-template.md) 中定义。
 
-#### Escalation Matrix
+#### 升级矩阵
 
-| Issue Type                                 | First Escalation    | Second Escalation | Timeline         |
+| 问题类型                                 | 第一升级    | 第二升级 | 时间线         |
 | ------------------------------------------ | ------------------- | ----------------- | ---------------- |
-| Technical disagreement in PR               | Maintainer in scope | Core Maintainer   | 5 business days  |
-| Technical disagreement in WG               | WG Lead             | Core Maintainer   | 5 business days  |
-| Technical disagreement in IG               | IG Facilitator      | Core Maintainer   | 5 business days  |
-| Disagreement with WG Lead / IG Facilitator | Core Maintainer     | Lead Maintainer   | 7 business days  |
-| Disagreement with Maintainer decision      | Core Maintainer     | Lead Maintainer   | 7 business days  |
-| Core Maintainer disagreement               | Lead Maintainer     | N/A               | 10 business days |
-| Code of Conduct violation                  | Community Moderator | Core Maintainer   | Immediate        |
-| Security issue                             | Core Maintainer     | Lead Maintainer   | Immediate        |
+| PR 中的技术分歧               | 范围内的维护者 | 核心维护者   | 5 个工作日  |
+| 工作组中的技术分歧               | 工作组负责人             | 核心维护者   | 5 个工作日  |
+| 兴趣组中的技术分歧               | 兴趣组协调员      | 核心维护者   | 5 个工作日  |
+| 与工作组负责人/兴趣组协调员的分歧 | 核心维护者     | 首席维护者   | 7 个工作日  |
+| 与维护者决策的分歧      | 核心维护者     | 首席维护者   | 7 个工作日  |
+| 核心维护者分歧               | 首席维护者     | N/A               | 10 个工作日 |
+| 行为准则违规                  | 社区管理员 | 核心维护者   | 立即        |
+| 安全问题                             | 核心维护者     | 首席维护者   | 立即        |
 
-**Escalation process:**
+**升级流程：**
 
-1. Document the decision, options considered, and points of disagreement
-2. Present to the escalation authority with a clear ask
-3. Escalation authority either: (a) provides binding guidance, (b) requests more information, or (c) escalates further if needed
+1. 记录决策、考虑的选项和分歧点
+2. 向升级机构提出明确的请求
+3. 升级机构要么：(a) 提供具有约束力的指导，(b) 请求更多信息，或 (c) 如有需要进一步升级
 
-### Contribution Pathways
+### 贡献路径
 
-MCP values diverse contributions. Here are recognized pathways to advancement:
+MCP 重视多样化的贡献。以下是认可的晋升路径：
 
-#### Code Contributions
+#### 代码贡献
 
-- SDK development (TypeScript, Python, etc.)
-- Testing infrastructure
-- Tooling and developer experience
+- SDK 开发（TypeScript、Python 等）
+- 测试基础设施
+- 工具和开发者体验
 
-#### Specification Work
+#### 规范工作
 
-- Drafting or refining spec text
-- [SEP](https://modelcontextprotocol.io/community/sep-guidelines) authorship or co-authorship
-- Protocol design participation
-- Compatibility analysis
+- 起草或完善规范文本
+- [SEP](https://modelcontextprotocol.io/community/sep-guidelines) 作者或合著者
+- 协议设计参与
+- 兼容性分析
 
-#### Documentation
+#### 文档
 
-- User guides and tutorials
-- API documentation
-- Architecture documentation
-- Maintaining content currency
+- 用户指南和教程
+- API 文档
+- 架构文档
+- 维护内容时效性
 
-#### Community Building
+#### 社区建设
 
-- Onboarding new contributors
-- Working group facilitation
-- Community support (Discord, GitHub discussions)
-- Event organization or representation
+- 引导新贡献者
+- 工作组促进
+- 社区支持（Discord、GitHub 讨论）
+- 活动组织或代表
 
-#### Quality & Security
+#### 质量与安全
 
-- Bug triage and reproduction
-- Security review and analysis
-- Test coverage improvement
-- Release validation
+- Bug 分类和复现
+- 安全审查和分析
+- 测试覆盖率改进
+- 发布验证
 
-### Working Group and Interest Group Leadership
+### 工作组与兴趣组领导
 
-Working Group (WG) Leads and Interest Group (IG) Facilitators are a special form of community leadership that doesn't require Maintainer status. WG/IG leadership focuses on facilitation and coordination rather than merge authority. The full governance rules for WGs and IGs — including participation tiers, decision-making process, meeting requirements, and lifecycle — are defined in [SEP-2149: MCP Group Governance and Charter Template](./2149-working-group-charter-template.md).
+工作组 (WG) 负责人和兴趣组 (IG) 协调员是一种不需要维护者状态的特殊社区领导形式。工作组/兴趣组领导侧重于促进和协调，而不是合并权限。工作组和兴趣组的完整治理规则——包括参与层级、决策流程、会议要求和生命周期——在 [SEP-2149: MCP 工作组治理与章程模板](./2149-working-group-charter-template.md) 中定义。
 
-**Requirements:**
+**要求：**
 
-- Member status minimum
-- Demonstrated sustained engagement with the WG/IG's scope
-- Good facilitation and communication skills
-- Ability to represent multiple perspectives fairly
-- Group and its leadership are sponsored by at least two Core Maintainers or one Lead Maintainer
+- 最低成员状态
+- 展示与工作组/兴趣组范围的持续参与
+- 良好的促进和沟通技巧
+- 能够公平地代表多种观点
+- 小组及其领导由至少两名核心维护者或一名首席维护者推荐
 
-**Relationship to Contributor Ladder:**
+**与贡献者阶梯的关系：**
 
-- WG Lead and IG Facilitator experience is valuable for advancement to Maintainer
-- WG Leads and IG Facilitators without Maintainer status work with Maintainers for merge decisions
-- WG Leads and IG Facilitators have authority over group operations but not spec approval
-- WG Leads and Maintainers may sponsor SEPs
-- WG Leads may triage SEPs in their scope area, including closing SEPs that do not fit the WG's roadmap (with documented rationale; authors may appeal to Core Maintainers)
+- 工作组负责人和兴趣组协调员经验对晋升为维护者有价值
+- 没有维护者状态的工作组负责人和兴趣组协调员与维护者合作进行合并决策
+- 工作组负责人和兴趣组协调员对小组运营有权威，但对规范批准没有权威
+- 工作组负责人和维护者可以推荐 SEP
+- 工作组负责人可以在其范围领域内分类 SEP，包括关闭不符合工作组路线图的 SEP（需记录理由；作者可以向核心维护者上诉）
 
-### Community Moderators
+### 社区管理员
 
-Community Moderators are trusted individuals who help keep the MCP community healthy, safe, and welcoming. This is a dedicated community role focused on moderation and Code of Conduct enforcement rather than technical contribution.
+社区管理员是值得信赖的个人，帮助保持 MCP 社区健康、安全和受欢迎。这是一个专注于管理和行为准则执行而不是技术贡献的专用社区角色。
 
-**Requirements:**
+**要求：**
 
-- Member status minimum
-- Demonstrated good judgment and composure in community interactions
-- Understanding of the MCP Code of Conduct and community guidelines
-- Ability to handle sensitive situations with discretion and fairness
+- 最低成员状态
+- 在社区互动中展现出良好的判断力和镇定
+- 理解 MCP 行为准则和社区指南
+- 能够谨慎和公平地处理敏感情况
 
-**Sponsorship:**
+**推荐：**
 
-- Sponsored by a Core Maintainer or Lead Maintainer
+- 由核心维护者或首席维护者推荐
 
-**Responsibilities:**
+**职责：**
 
-- Monitor community channels (Discord, GitHub Discussions, etc.) for adherence to the Code of Conduct
-- Handle Code of Conduct incident reports, including initial triage and response
-- Escalate serious or complex incidents to Core Maintainers
-- Help maintain a welcoming and inclusive environment for all community members
-- Coordinate with other moderators to ensure consistent enforcement
-- Document moderation actions and maintain confidentiality of incident details
-- Recuse from any incident in which they are personally involved; such incidents are handled directly by Core Maintainers
+- 监控社区渠道（Discord、GitHub 讨论等）以遵守行为准则
+- 处理行为准则事件报告，包括初步分类和响应
+- 将严重或复杂事件升级给核心维护者
+- 帮助为所有社区成员维护一个欢迎和包容的环境
+- 与其他管理员协调以确保持续执行
+- 记录管理行动并保持事件细节的保密性
+- 回避任何他们个人涉及的事件；此类事件由核心维护者直接处理
 
-**Privileges:**
+**权限：**
 
-- Moderation rights on community platforms (Discord, GitHub Discussions)
-- Access to moderation tools and private moderation channels
-- Authority to issue warnings, mute, or temporarily ban users for Code of Conduct violations
-- Listed in community moderator roster
+- 社区平台的管理权限（Discord、GitHub 讨论）
+- 访问管理工具和私人管理渠道
+- 有权对违反行为准则的用户发出警告、禁言或暂时封禁
+- 列入社区管理员名单
 
-**Relationship to Contributor Ladder:**
+**与贡献者阶梯的关系：**
 
-- Community Moderator is a parallel track, not a prerequisite for technical advancement
-- Moderator experience is valued for advancement to any role, particularly where community judgment is important
-- Moderators may simultaneously hold other roles (Member, Maintainer, etc.)
+- 社区管理员是并行路径，不是技术晋升的前提
+- 管理员经验对晋升到任何角色都有价值，特别是在社区判断重要的地方
+- 管理员可以同时持有其他角色（成员、维护者等）
 
-**Removal:** Community Moderators may be removed by Core Maintainers for failure to uphold moderation standards or Code of Conduct violations. Moderators may step down voluntarily at any time.
+**移除：** 社区管理员可能因未能维护管理标准或违反行为准则而被核心维护者移除。管理员可以随时自愿辞职。
 
-### Recognition and Visibility
+### 认可与可见性
 
-The community recognizes contributors through:
+社区通过以下方式认可贡献者：
 
-- **Contributor lists** such as `MAINTAINERS.md`
-- **GitHub teams** for appropriate access
-- **Public acknowledgment** in release notes
-- **Speaking opportunities** at community events
-- **Badges** (if implemented) on community platforms
+- **贡献者名单** 如 `MAINTAINERS.md`
+- **GitHub 团队** 用于适当的访问
+- **发布说明中的公开致谢**
+- **社区活动的演讲机会**
+- 社区平台上的 **徽章**（如果实施）
 
-### Stepping Down and Emeritus Status
+### 卸任与荣誉状态
 
-Contributors may step down from roles for any reason. This is normal and healthy.
+贡献者可以因任何原因从角色中卸任。这是正常且健康的。
 
-**Process:**
+**流程：**
 
-1. Notify relevant leadership (WG Lead, IG Facilitator, Maintainer, or Core Maintainer as appropriate)
-2. Help transition any ongoing work
-3. Move to emeritus status
+1. 通知相关领导（工作组负责人、兴趣组协调员、维护者或核心维护者，视情况而定）
+2. 帮助过渡任何正在进行的工作
+3. 移至荣誉状态
 
-**Emeritus:**
+**荣誉：**
 
-- Recognized for past contributions
-- May return to active status with abbreviated re-onboarding
-- No ongoing responsibilities or privileges
+- 因过去的贡献而受到认可
+- 可以通过简化的重新引导返回活跃状态
+- 无持续责任或权限
 
-**Involuntary Removal:** In cases of code of conduct violations or sustained non-participation, roles may be revoked following appropriate review processes.
+**非自愿移除：** 在违反行为准则或持续不参与的情况下，角色可能在适当的审查流程后被撤销。
 
-## Rationale
+## 理由
 
-### Why a Formal Ladder?
+### 为什么需要正式的阶梯？
 
-Informal advancement creates inconsistency and opacity. A formal ladder:
+非正式的晋升会导致不一致和不透明。正式的阶梯：
 
-- Sets clear expectations for all parties
-- Provides a common vocabulary for discussing advancement
-- Creates accountability in advancement decisions
-- Enables self-nomination, reducing gatekeeping
+- 为所有相关方设定清晰的期望
+- 为讨论晋升提供共同的词汇
+- 在晋升决策中建立问责制
+- 支持自我提名，减少人为把关
 
-### Why Minimum Timelines?
+### 为什么需要最低时间线？
 
-Timelines are floors, not targets. They exist for security and trust-building:
+时间线是底线，而非目标。它们存在于安全和信任建立的目的：
 
-- Trust is built through demonstrated behavior over time
-- Security risks increase with rapid privilege escalation
-- Deep project understanding requires sustained engagement
-- Behavior patterns only become visible over longer periods
+- 信任是通过随着时间的推移所表现出的行为建立的
+- 随着权限的快速提升，安全风险也会增加
+- 对项目的深入理解需要持续的参与
+- 行为模式只有在较长的时期内才会显现
 
-Meeting a minimum timeline does not create an entitlement to advancement; it establishes eligibility for consideration. Exceptions to minimums require explicit Core Maintainer approval with documented rationale.
+满足最低时间线并不产生晋升的权利；它确立了被考虑的资格。最低时间的例外情况需要核心维护者的明确批准，并记录理由。
 
-### Why Two-Organization Sponsorship?
+### 为什么需要两个组织的赞助？
 
-Requiring sponsors from different organizations:
+要求来自不同组织的赞助人：
 
-- Prevents organizational capture of the contributor base
-- Ensures contributors are recognized beyond their employer
-- Maintains diverse perspectives in advancement decisions
+- 防止贡献者基础被单一组织俘获
+- 确保贡献者在其雇主之外得到认可
+- 在晋升决策中保持多样化的视角
 
-### Model Inspiration
+### 模型灵感
 
-This ladder is modeled on Kubernetes community membership structures and adapted for MCP's needs and stage of development.
+此阶梯模型基于 Kubernetes 社区成员结构，并根据 MCP 的需求和发展阶段进行了调整。
 
-## Backward Compatibility
+## 向后兼容性
 
-This SEP establishes new processes without modifying existing structures. Current contributors retain their existing access and standing.
+本 SEP 建立了新流程，而未修改现有结构。当前贡献者保留其现有的访问权限和地位。
 
-## Security Implications
+## 安全影响
 
-This SEP directly addresses security through:
+本 SEP 通过以下方式直接解决安全问题：
 
-- Graduated privilege escalation with timeline requirements
-- Two-factor authentication requirement for Members
-- Multi-organization sponsorship to prevent capture
-- Security onboarding requirement for Maintainers
+- 具有时间线要求的分级权限提升
+- 成员的双因素认证要求
+- 多组织赞助以防止俘获
+- 维护者的安全入职要求
 
-## Reference Implementation
+## 参考实现
 
-Upon acceptance, this SEP will be implemented by:
+一旦被接受，本 SEP 将通过以下方式实施：
 
-1. Adding the contributor ladder to `docs/community/contributor-ladder.mdx`
-2. Creating nomination issue templates in `.github/ISSUE_TEMPLATE/` (see Appendix for checklist templates)
-3. Updating `MAINTAINERS.md` format to reflect role distinctions
+1. 将贡献者阶梯添加到 `docs/community/contributor-ladder.mdx`
+2. 在 `.github/ISSUE_TEMPLATE/` 中创建提名问题模板（参见附录中的清单模板）
+3. 更新 `MAINTAINERS.md` 格式以反映角色区别
 
-## Appendix: Checklist Templates
+## 附录：清单模板
 
-### Member Nomination Checklist
+### 成员提名清单
 
 ```
-**Nominee:** [GitHub handle]
-**Sponsors:** [GitHub handles]
-  - **Organizations represented:** [Must be 2+ different orgs among sponsors]
+**被提名人：** [GitHub 用户名]
+**赞助人：** [GitHub 用户名]
+  - **代表组织：** [赞助人中必须包含 2 个以上不同组织]
 
-**Contributions:**
-- [ ] Link to merged PR(s)
-- [ ] Link to issues filed/triaged
-- [ ] Link to discussions participated in
-- [ ] Duration of participation: [X months]
+**贡献：**
+- [ ] 指向已合并 PR 的链接
+- [ ] 指向提交/分类的 issue 的链接
+- [ ] 指向参与讨论的链接
+- [ ] 参与持续时间：[X 个月]
 
-**Sponsor Attestations:**
-Sponsors confirm
-- [ ] Sponsors confirm nominee demonstrates community values
-- [ ] Sponsors confirm nominee demonstrates sustained engagement
+**赞助人证明：**
+赞助人确认
+- [ ] 赞助人确认被提名人展示了社区价值观
+- [ ] 赞助人确认被提名人展示了持续的参与度
 ```
 
-### Maintainer Nomination Checklist
+### 维护者提名清单
 
 ```
-**Nominee:** [GitHub handle]
-**Scope:** [Specific area]
-**Sponsor:** [GitHub handle, must be Maintainer or Core Maintainer]
+**被提名人：** [GitHub 用户名]
+**范围：** [特定领域]
+**赞助人：** [GitHub 用户名，必须是维护者或核心维护者]
 
-**Requirements:**
-- [ ] Member for 6+ months with sustained, high-quality contributions
-- [ ] Links to demonstrated leadership in WG, IG, or significant initiatives
-- [ ] Evidence of representing MCP's interests above employer/organization interests
-- [ ] Deep understanding of MCP vision, roadmap, and design principles
-- [ ] Security and governance onboarding completed (or scheduled)
+**要求：**
+- [ ] 成为成员 6 个月以上，并具有持续、高质量的贡献
+- [ ] 指向在 WG、IG 或重大倡议中展示领导力的链接
+- [ ] 证明将 MCP 的利益置于雇主/组织利益之上的证据
+- [ ] 深入理解 MCP 愿景、路线图和设计原则
+- [ ] 安全和治理入职已完成（或已安排）
 
-**Core Maintainer Approval:**
-- [ ] Approved by Core Maintainers
+**核心维护者批准：**
+- [ ] 已获核心维护者批准
 ```
 
-### Community Moderator Nomination Checklist
+### 社区协调员提名清单
 
 ```
-**Nominee:** [GitHub handle]
-**Sponsor:** [GitHub handle, must be Core Maintainer or Lead Maintainer]
+**被提名人：** [GitHub 用户名]
+**赞助人：** [GitHub 用户名，必须是核心维护者或首席维护者]
 
-**Requirements:**
-- [ ] Member status
-- [ ] Links to demonstrated good judgment and composure in community interactions
-- [ ] Confirmed understanding of the MCP Code of Conduct and community guidelines
+**要求：**
+- [ ] 成员状态
+- [ ] 指向在社区互动中展示良好判断力和镇定表现的链接
+- [ ] 确认理解 MCP 行为准则和社区指南
 
-**Sponsor Attestation:**
-- [ ] Sponsor confirms nominee can handle sensitive situations with discretion and fairness
+**赞助人证明：**
+- [ ] 赞助人确认被提名人能够谨慎且公平地处理敏感情况
 ```

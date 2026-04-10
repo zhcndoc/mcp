@@ -1,39 +1,30 @@
 ---
-title: Tools
+title: 工具
 ---
 
-The Model Context Protocol (MCP) allows servers to expose tools that can be invoked by
-language models. Tools enable models to interact with external systems, such as querying
-databases, calling APIs, or performing computations. Each tool is uniquely identified by
-a name and includes metadata describing its schema.
+模型上下文协议 (MCP) 允许服务器暴露工具，以便由语言模型调用。工具使模型能够与外部系统交互，例如查询数据库、调用 API 或执行计算。每个工具都由一个名称唯一标识，并包含描述其模式的元数据。
 
-## User Interaction Model
+## 用户交互模型
 
-Tools in MCP are designed to be **model-controlled**, meaning that the language model can
-discover and invoke tools automatically based on its contextual understanding and the
-user's prompts.
+MCP 中的工具设计为**模型控制**，这意味着语言模型可以根据其上下文理解和用户的提示自动发现和调用工具。
 
-However, implementations are free to expose tools through any interface pattern that
-suits their needs&mdash;the protocol itself does not mandate any specific user
-interaction model.
+然而，实现可以自由地通过任何适合其需求的界面模式暴露工具&mdash;协议本身不强制任何特定的用户交互模型。
 
 <Warning>
 
-For trust & safety and security, there **SHOULD** always
-be a human in the loop with the ability to deny tool invocations.
+为了信任、安全和安保，**应该**始终有人类参与循环，能够拒绝工具调用。
 
-Applications **SHOULD**:
+应用程序**应该**：
 
-- Provide UI that makes clear which tools are being exposed to the AI model
-- Insert clear visual indicators when tools are invoked
-- Present confirmation prompts to the user for operations, to ensure a human is in the
-  loop
+- 提供 UI，明确哪些工具被暴露给 AI 模型
+- 在调用工具时插入清晰的视觉指示
+- 向用户呈现操作确认提示，以确保人类参与循环
 
 </Warning>
 
-## Capabilities
+## 能力
 
-Servers that support tools **MUST** declare the `tools` capability:
+支持工具的服务器**必须**声明 `tools` 能力：
 
 ```json
 {
@@ -45,17 +36,15 @@ Servers that support tools **MUST** declare the `tools` capability:
 }
 ```
 
-`listChanged` indicates whether the server will emit notifications when the list of
-available tools changes.
+`listChanged` 指示服务器是否会在可用工具列表更改时发出通知。
 
-## Protocol Messages
+## 协议消息
 
-### Listing Tools
+### 列出工具
 
-To discover available tools, clients send a `tools/list` request. This operation supports
-[pagination](/specification/2025-03-26/server/utilities/pagination).
+要发现可用工具，客户端发送 `tools/list` 请求。此操作支持 [分页](/specification/2025-03-26/server/utilities/pagination)。
 
-**Request:**
+**请求：**
 
 ```json
 {
@@ -68,7 +57,7 @@ To discover available tools, clients send a `tools/list` request. This operation
 }
 ```
 
-**Response:**
+**响应：**
 
 ```json
 {
@@ -96,11 +85,11 @@ To discover available tools, clients send a `tools/list` request. This operation
 }
 ```
 
-### Calling Tools
+### 调用工具
 
-To invoke a tool, clients send a `tools/call` request:
+要调用工具，客户端发送 `tools/call` 请求：
 
-**Request:**
+**请求：**
 
 ```json
 {
@@ -116,7 +105,7 @@ To invoke a tool, clients send a `tools/call` request:
 }
 ```
 
-**Response:**
+**响应：**
 
 ```json
 {
@@ -134,10 +123,9 @@ To invoke a tool, clients send a `tools/call` request:
 }
 ```
 
-### List Changed Notification
+### 列表更改通知
 
-When the list of available tools changes, servers that declared the `listChanged`
-capability **SHOULD** send a notification:
+当可用工具列表更改时，声明了 `listChanged` 能力的服务器**应该**发送通知：
 
 ```json
 {
@@ -146,7 +134,7 @@ capability **SHOULD** send a notification:
 }
 ```
 
-## Message Flow
+## 消息流
 
 ```mermaid
 sequenceDiagram
@@ -172,29 +160,28 @@ sequenceDiagram
     Server-->>Client: Updated tools
 ```
 
-## Data Types
+## 数据类型
 
-### Tool
+### 工具
 
-A tool definition includes:
+工具定义包括：
 
-- `name`: Unique identifier for the tool
-- `description`: Human-readable description of functionality
-- `inputSchema`: JSON Schema defining expected parameters
-- `annotations`: optional properties describing tool behavior
+- `name`: 工具的唯一标识符
+- `description`: 功能的可读描述
+- `inputSchema`: 定义预期参数的 JSON Schema
+- `annotations`: 描述工具行为的可选属性
 
 <Warning>
 
-For trust & safety and security, clients **MUST** consider
-tool annotations to be untrusted unless they come from trusted servers.
+为了信任、安全和安保，客户端**必须**认为工具注释是不可信的，除非它们来自受信任的服务器。
 
 </Warning>
 
-### Tool Result
+### 工具结果
 
-Tool results can contain multiple content items of different types:
+工具结果可以包含不同类型的多个内容项：
 
-#### Text Content
+#### 文本内容
 
 ```json
 {
@@ -203,7 +190,7 @@ Tool results can contain multiple content items of different types:
 }
 ```
 
-#### Image Content
+#### 图像内容
 
 ```json
 {
@@ -213,7 +200,7 @@ Tool results can contain multiple content items of different types:
 }
 ```
 
-#### Audio Content
+#### 音频内容
 
 ```json
 {
@@ -223,10 +210,9 @@ Tool results can contain multiple content items of different types:
 }
 ```
 
-#### Embedded Resources
+#### 嵌入资源
 
-[Resources](/specification/2025-03-26/server/resources) **MAY** be embedded, to provide additional context
-or data, behind a URI that can be subscribed to or fetched again by the client later:
+[资源](/specification/2025-03-26/server/resources) **可以** 被嵌入，以提供额外的上下文或数据，位于一个 URI 之后，客户端可以订阅该 URI 或稍后再次获取：
 
 ```json
 {
@@ -239,21 +225,21 @@ or data, behind a URI that can be subscribed to or fetched again by the client l
 }
 ```
 
-## Error Handling
+## 错误处理
 
-Tools use two error reporting mechanisms:
+工具使用两种错误报告机制：
 
-1. **Protocol Errors**: Standard JSON-RPC errors for issues like:
-   - Unknown tools
-   - Invalid arguments
-   - Server errors
+1. **协议错误**：标准 JSON-RPC 错误，用于此类问题：
+   - 未知工具
+   - 无效参数
+   - 服务器错误
 
-2. **Tool Execution Errors**: Reported in tool results with `isError: true`:
-   - API failures
-   - Invalid input data
-   - Business logic errors
+2. **工具执行错误**：在工具结果中报告，`isError: true`：
+   - API 失败
+   - 无效输入数据
+   - 业务逻辑错误
 
-Example protocol error:
+协议错误示例：
 
 ```json
 {
@@ -266,7 +252,7 @@ Example protocol error:
 }
 ```
 
-Example tool execution error:
+工具执行错误示例：
 
 ```json
 {
@@ -284,18 +270,17 @@ Example tool execution error:
 }
 ```
 
-## Security Considerations
+## 安全考量
 
-1. Servers **MUST**:
-   - Validate all tool inputs
-   - Implement proper access controls
-   - Rate limit tool invocations
-   - Sanitize tool outputs
+1. 服务器**必须**：
+   - 验证所有工具输入
+   - 实施适当的访问控制
+   - 限制工具调用速率
+   - 清理工具输出
 
-2. Clients **SHOULD**:
-   - Prompt for user confirmation on sensitive operations
-   - Show tool inputs to the user before calling the server, to avoid malicious or
-     accidental data exfiltration
-   - Validate tool results before passing to LLM
-   - Implement timeouts for tool calls
-   - Log tool usage for audit purposes
+2. 客户端**应该**：
+   - 在敏感操作上提示用户确认
+   - 在调用服务器前向用户显示工具输入，以避免恶意或意外的数据泄露
+   - 在传递给 LLM 之前验证工具结果
+   - 为工具调用实施超时
+   - 记录工具使用情况以用于审计目的

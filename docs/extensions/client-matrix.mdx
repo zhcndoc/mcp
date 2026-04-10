@@ -1,6 +1,6 @@
 ---
-title: Extension Support Matrix
-description: Which MCP clients implement which official extensions
+title: 扩展支持矩阵
+description: 哪些 MCP 客户端实现了哪些官方扩展
 ---
 
 {/* prettier-ignore-start */}
@@ -13,48 +13,48 @@ export const CHECK = () => (
 
 {/* prettier-ignore-end */}
 
-This matrix shows which MCP clients support each [official extension](/extensions/overview). Extensions are always opt-in — a client only uses an extension if both client and server declare support during the [initialization handshake](/extensions/overview#negotiation).
+此矩阵展示了哪些 MCP 客户端支持每个 [官方扩展](/extensions/overview)。扩展始终需要主动启用——只有当客户端和服务器在 [初始化握手](/extensions/overview#negotiation) 期间都声明支持时，客户端才会使用扩展。
 
 <Note>
 
-This list is maintained by the community. If you notice any inaccuracies or would like to add or update information, please [submit a pull request](https://github.com/modelcontextprotocol/modelcontextprotocol/pulls).
+此列表由社区维护。如果您发现任何不准确之处或希望添加或更新信息，请 [提交拉取请求](https://github.com/modelcontextprotocol/modelcontextprotocol/pulls)。
 
 </Note>
 
-## Extension overview
+## 扩展概述
 
-| Extension                                                                             | Identifier                                                 | Description                                                     |
-| ------------------------------------------------------------------------------------- | ---------------------------------------------------------- | --------------------------------------------------------------- |
-| [MCP Apps](/extensions/apps/overview)                                                 | `io.modelcontextprotocol/ui`                               | Interactive HTML interfaces rendered inline in the conversation |
-| [OAuth Client Credentials](/extensions/auth/oauth-client-credentials)                 | `io.modelcontextprotocol/oauth-client-credentials`         | Machine-to-machine auth without interactive user login          |
-| [Enterprise-Managed Authorization](/extensions/auth/enterprise-managed-authorization) | `io.modelcontextprotocol/enterprise-managed-authorization` | Centralized access control via enterprise IdP                   |
+| 扩展                                                                                   | 标识符                                                   | 描述                                                     |
+| -------------------------------------------------------------------------------------- | -------------------------------------------------------- | -------------------------------------------------------- |
+| [MCP Apps](/extensions/apps/overview)                                                  | `io.modelcontextprotocol/ui`                             | 在对话中内联渲染的交互式 HTML 界面                       |
+| [OAuth 客户端凭证](/extensions/auth/oauth-client-credentials)                          | `io.modelcontextprotocol/oauth-client-credentials`       | 无需交互式用户登录的机器到机器认证                       |
+| [企业托管授权](/extensions/auth/enterprise-managed-authorization)                      | `io.modelcontextprotocol/enterprise-managed-authorization` | 通过企业 IdP 进行集中访问控制                            |
 
-## Support matrix
+## 支持矩阵
 
-| Client                                                   | [MCP Apps](/extensions/apps/overview) | [OAuth Client Credentials](/extensions/auth/oauth-client-credentials) | [Enterprise Auth](/extensions/auth/enterprise-managed-authorization) |
-| -------------------------------------------------------- | :-----------------------------------: | :-------------------------------------------------------------------: | :------------------------------------------------------------------: |
-| [Claude (web)](https://claude.ai)                        |               <CHECK />               |                                                                       |                                                                      |
-| [Claude Desktop](https://claude.ai/download)             |               <CHECK />               |                                                                       |                                                                      |
-| [VS Code GitHub Copilot](https://code.visualstudio.com/) |               <CHECK />               |                                                                       |                                                                      |
-| [Goose](https://block.github.io/goose/)                  |               <CHECK />               |                                                                       |                                                                      |
-| [Postman](https://postman.com)                           |               <CHECK />               |                                                                       |                                                                      |
-| [MCPJam](https://www.mcpjam.com/)                        |               <CHECK />               |                                                                       |                                                                      |
-| [ChatGPT](https://chatgpt.com/)                          |               <CHECK />               |                                                                       |                                                                      |
-| [Cursor](https://cursor.com/)                            |               <CHECK />               |                                                                       |                                                                      |
+| 客户端                                                 | [MCP Apps](/extensions/apps/overview) | [OAuth 客户端凭证](/extensions/auth/oauth-client-credentials) | [企业认证](/extensions/auth/enterprise-managed-authorization) |
+| ------------------------------------------------------ | :-----------------------------------: | :-----------------------------------------------------------: | :-----------------------------------------------------------: |
+| [Claude (web)](https://claude.ai)                      |               <CHECK />               |                                                               |                                                               |
+| [Claude Desktop](https://claude.ai/download)           |               <CHECK />               |                                                               |                                                               |
+| [VS Code GitHub Copilot](https://code.visualstudio.com/) |               <CHECK />               |                                                               |                                                               |
+| [Goose](https://block.github.io/goose/)                |               <CHECK />               |                                                               |                                                               |
+| [Postman](https://postman.com)                         |               <CHECK />               |                                                               |                                                               |
+| [MCPJam](https://www.mcpjam.com/)                      |               <CHECK />               |                                                               |                                                               |
+| [ChatGPT](https://chatgpt.com/)                        |               <CHECK />               |                                                               |                                                               |
+| [Cursor](https://cursor.com/)                          |               <CHECK />               |                                                               |                                                               |
 
 <Note>
 
-Auth extension support (OAuth Client Credentials and Enterprise-Managed Authorization) is tracked separately from the core MCP authorization features (DCR, CIMD) shown on the [clients page](/clients). Check each extension's specification and the [ext-auth repository](https://github.com/modelcontextprotocol/ext-auth) for the latest implementation status.
+认证扩展支持（OAuth 客户端凭证和企业托管授权）与 [客户端页面](/clients) 上显示的核心 MCP 授权功能（DCR, CIMD）分开跟踪。请查看每个扩展的规范以及 [ext-auth 仓库](https://github.com/modelcontextprotocol/ext-auth) 以获取最新的实现状态。
 
 </Note>
 
-## Adding extension support to your client
+## 为您的客户端添加扩展支持
 
-If you're building an MCP client and want to implement extension support:
+如果您正在构建 MCP 客户端并希望实现扩展支持：
 
-1. Review the extension specification (e.g., in the [ext-auth](https://github.com/modelcontextprotocol/ext-auth) or [ext-apps](https://github.com/modelcontextprotocol/ext-apps) repository)
-2. Declare support in the `extensions` field of your `initialize` capabilities
-3. Implement the extension's protocol requirements
-4. Submit a pull request to update this matrix
+1. 查阅扩展规范（例如在 [ext-auth](https://github.com/modelcontextprotocol/ext-auth) 或 [ext-apps](https://github.com/modelcontextprotocol/ext-apps) 仓库中）
+2. 在 `initialize` 能力的 `extensions` 字段中声明支持
+3. 实现扩展的协议要求
+4. 提交拉取请求以更新此矩阵
 
-See [Extensions Overview](/extensions/overview#negotiation) for details on the capability negotiation mechanism.
+请参阅 [扩展概述](/extensions/overview#negotiation) 以了解能力协商机制的详细信息。

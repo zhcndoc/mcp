@@ -1,177 +1,177 @@
 ---
-title: "SEP-1330: Elicitation Enum Schema Improvements and Standards Compliance"
-sidebarTitle: "SEP-1330: Elicitation Enum Schema Improvements an…"
-description: "Elicitation Enum Schema Improvements and Standards Compliance"
+title: "SEP-1330: 询问枚举模式改进与标准合规性"
+sidebarTitle: "SEP-1330: 询问枚举模式改进与…"
+description: "询问枚举模式改进与标准合规性"
 ---
 
 <div className="flex items-center gap-2 mb-4">
   <Badge color="green" shape="pill">
-    Final
+    最终版
   </Badge>
   <Badge color="gray" shape="pill">
-    Standards Track
+    标准轨道
   </Badge>
 </div>
 
-| Field         | Value                                                                           |
+| 字段          | 值                                                                            |
 | ------------- | ------------------------------------------------------------------------------- |
 | **SEP**       | 1330                                                                            |
-| **Title**     | Elicitation Enum Schema Improvements and Standards Compliance                   |
-| **Status**    | Final                                                                           |
-| **Type**      | Standards Track                                                                 |
-| **Created**   | 2025-08-11                                                                      |
-| **Author(s)** | chughtapan                                                                      |
-| **Sponsor**   | None                                                                            |
+| **标题**      | 询问枚举模式改进与标准合规性                                                    |
+| **状态**      | 最终版                                                                          |
+| **类型**      | 标准轨道                                                                        |
+| **创建日期**  | 2025-08-11                                                                      |
+| **作者**      | chughtapan                                                                      |
+| **赞助人**    | 无                                                                              |
 | **PR**        | [#1330](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1330) |
 
 ---
 
-## Abstract
+## 摘要
 
-This SEP proposes improvements to enum schema definitions in MCP, deprecating the non-standard `enumNames` property in favor of JSON Schema-compliant patterns, and introducing additional support for multi-select enum schemas in addition to single choice schemas. The new schemas have been validated against the JSON specification.
+本 SEP 提议改进 MCP 中的枚举模式定义，弃用非标准的 `enumNames` 属性，转而采用符合 JSON 模式的模式，并除了单选模式外，引入对多选枚举模式的额外支持。新模式已针对 JSON 规范进行了验证。
 
-**Schema Changes:** https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1148
-Typescript SDK Changes: https://github.com/modelcontextprotocol/typescript-sdk/pull/1077
-Python SDK Changes: https://github.com/modelcontextprotocol/python-sdk/pull/1246
-**Client Implementation:** https://github.com/evalstate/fast-agent/pull/324/files
-**Working Demo:** https://asciinema.org/a/anBvJdqEmTjw0JkKYOooQa5Ta
+**模式变更：** https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1148
+Typescript SDK 变更：https://github.com/modelcontextprotocol/typescript-sdk/pull/1077
+Python SDK 变更：https://github.com/modelcontextprotocol/python-sdk/pull/1246
+**客户端实现：** https://github.com/evalstate/fast-agent/pull/324/files
+**工作演示：** https://asciinema.org/a/anBvJdqEmTjw0JkKYOooQa5Ta
 
-## Motivation
+## 动机
 
-The existing schema for enums uses a non-standard approach to adding titles to enumerated values. It also limits use of enums in Elicitation (and any other schema object that should adopt `EnumSchema` in the future) to a single selection model. It is a common pattern to ask the user to select multiple entries. In the UI, this amounts to the difference between using checkboxes or radio buttons.
+现有的枚举模式使用了一种非标准的方法来为枚举值添加标题。它还限制了枚举在询问（Elicitation）（以及未来任何应采用 `EnumSchema` 的模式对象）中的使用，仅限于单选模型。要求用户选择多个条目是一种常见模式。在 UI 中，这相当于使用复选框或单选按钮的区别。
 
-For these reasons, we propose the following non-breaking minor improvements to the `EnumSchema` for improving user and developer experience.
+出于这些原因，我们提议对 `EnumSchema` 进行以下非破坏性的次要改进，以改善用户和开发者体验。
 
-- Keep the existing `EnumSchema` as "Legacy"
-  - It uses a non-standard approach for adding titles to enumerated values
-  - Mark it as Legacy but still support it for now.
-  - As per @dsp-ant When we have a proper deprecation strategy, we'll mark it deprecated
-- Introduce the distinction between Untitled and Titled enums.
-  - If the enumerated values are sufficient, no separate title need be specified for each value.
-  - If the enumerated values are not optimal for display, a title may be specified for each value.
-- Introduce the distinction between Single and Multi-select enums.
-  - If only one value can be selected, a Single select schema can be used
-  - If more than one value can be selected, a Multi-select schema can be used
-- In `ElicitResponse`, add array as an `additionalProperty` type
-  - Allows multiple selection of enumerated values to be returned to the server
+- 将现有的 `EnumSchema` 保留为“遗留”
+  - 它使用一种非标准的方法来为枚举值添加标题
+  - 将其标记为遗留，但目前仍支持它。
+  - 根据 @dsp-ant 的说法，当我们有了适当的弃用策略时，我们将标记它为已弃用
+- 引入无标题枚举和有标题枚举的区别。
+  - 如果枚举值已足够，则无需为每个值指定单独的标题。
+  - 如果枚举值不适合显示，则可以为每个值指定标题。
+- 引入单选和多选枚举的区别。
+  - 如果只能选择一个值，可以使用单选模式
+  - 如果可以选择多个值，可以使用多选模式
+- 在 `ElicitResponse` 中，将数组添加为 `additionalProperty` 类型
+  - 允许将多个枚举值的选择返回给服务器
 
-## Specification
+## 规范
 
-### 1. Mark Current `EnumSchema` with Non-Standard `enumNames` Property as "Legacy"
+### 1. 将带有非标准 `enumNames` 属性的当前 `EnumSchema` 标记为“遗留”
 
-The current MCP specification uses a non-standard `enumNames` property for providing display names for enum values. We propose to mark `enumNames` property as legacy, suggest using `TitledSingleSelectEnum`, a standards compliant enum type we define below.
+当前的 MCP 规范使用非标准的 `enumNames` 属性来提供枚举值的显示名称。我们提议将 `enumNames` 属性标记为遗留，建议使用 `TitledSingleSelectEnum`，这是我们下面定义的一种符合标准的枚举类型。
 
 ```typescript
-// Continue to support the current EnumSchema as Legacy
+// 继续支持当前的 EnumSchema 作为遗留版本
 
 /**
- * Legacy: Use TitledSingleSelectEnumSchema instead.
- * This interface will be removed in a future version.
+ * 遗留：请改用 TitledSingleSelectEnumSchema。
+ * 此接口将在未来版本中移除。
  */
 export interface LegacyEnumSchema {
   type: "string";
   title?: string;
   description?: string;
   enum: string[];
-  enumNames?: string[]; // Titles for enum values (non-standard, legacy)
+  enumNames?: string[]; // 枚举值的标题（非标准，遗留）
 }
 ```
 
-### 2. Define Single Selection Enums (with Titled and Untitled varieties)
+### 2. 定义单选枚举（带有有标题和无标题变体）
 
-Enums may or may not need titles. The enumerated values may be human readable and fine for display. In which case an untitled implementation using the JSON Schema keyword `enum` is simpler. Adding titles requires the `enum` array to be replaced with an array of objects using `const` and `title`.
+枚举可能需要也可能不需要标题。枚举值可能是人类可读的并且适合显示。在这种情况下，使用 JSON 模式关键字 `enum` 的无标题实现更简单。添加标题需要使用 `const` 和 `title` 将 `enum` 数组替换为对象数组。
 
 ```typescript
-// Single select enum without titles
+// 不带标题的单选枚举
 export type UntitledSingleSelectEnumSchema = {
   type: "string";
   title?: string;
   description?: string;
-  enum: string[]; // Plain enum without titles
+  enum: string[]; // 不带标题的普通枚举
 };
 
-// Single select enum with titles
+// 带标题的单选枚举
 export type TitledSingleSelectEnumSchema = {
   type: "string";
   title?: string;
   description?: string;
   oneOf: Array<{
-    const: string; // Enum value
-    title: string; // Display name for enum value
+    const: string; // 枚举值
+    title: string; // 枚举值的显示名称
   }>;
 };
 
-// Combined single selection enumeration
+// 组合单选枚举
 export type SingleSelectEnumSchema =
   | UntitledSingleSelectEnumSchema
   | TitledSingleSelectEnumSchema;
 ```
 
-### 3. Introduce Multiple Selection Enums (with Titled and Untitled varieties)
+### 3. 引入多选枚举（带有有标题和无标题变体）
 
-While elicitation does not support arbitrary JSON types like arrays and objects so clients can display the selection choice easily, multiple selection enumerations can be easily implemented.
+虽然询问不支持任意 JSON 类型（如数组和对象），以便客户端可以轻松显示选择项，但可以轻松实现多选枚举。
 
 ```typescript
-// Multiple select enums without titles
+// 不带标题的多选枚举
 export type UntitledMultiSelectEnumSchema = {
   type: "array";
   title?: string;
   description?: string;
-  minItems?: number; // Minimum number of items to choose
-  maxItems?: number; // Maximum number of items to choose
+  minItems?: number; // 要选择的最小项目数
+  maxItems?: number; // 要选择的最大项目数
   items: {
     type: "string";
-    enum: string[]; // Plain enum without titles
+    enum: string[]; // 不带标题的普通枚举
   };
 };
 
-// Multiple select enums with titles
+// 带标题的多选枚举
 export type TitledMultiSelectEnumSchema = {
   type: "array";
   title?: string;
   description?: string;
-  minItems?: number; // Minimum number of items to choose
-  maxItems?: number; // Maximum number of items to choose
+  minItems?: number; // 要选择的最小项目数
+  maxItems?: number; // 要选择的最大项目数
   items: {
     oneOf: Array<{
-      const: string; // Enum value
-      title: string; // Display name for enum value
+      const: string; // 枚举值
+      title: string; // 枚举值的显示名称
     }>;
   };
 };
 
-// Combined Multiple select enumeration
+// 组合多选枚举
 export type MultiSelectEnumSchema =
   | UntitledMultiSelectEnumSchema
   | TitledMultiSelectEnumSchema;
 ```
 
-### 4. Combine All Varieties as `EnumSchema`
+### 4. 将所有变体组合为 `EnumSchema`
 
-The final `EnumSchema` rolls up the legacy, multi-select, and single-select schemas as one, defined as:
+最终的 `EnumSchema` 将遗留、多选和单选模式汇总为一个，定义如下：
 
 ```typescript
-// Combined legacy, multiple, and single select enumeration
+// 组合遗留、多选和单选枚举
 export type EnumSchema =
   | SingleSelectEnumSchema
   | MultiSelectEnumSchema
   | LegacyEnumSchema;
 ```
 
-### 5. Extend ElicitResult
+### 5. 扩展 ElicitResult
 
-The current elicitation result schema only allows returning primitive types. We extend this to include string arrays for MultiSelectEnums:
+当前的询问结果模式仅允许返回原始类型。我们扩展此内容以包含用于 MultiSelectEnums 的字符串数组：
 
 ```typescript
 export interface ElicitResult extends Result {
   action: "accept" | "decline" | "cancel";
-  content?: { [key: string]: string | number | boolean | string[] }; // string[] is new
+  content?: { [key: string]: string | number | boolean | string[] }; // string[] 是新增的
 }
 ```
 
-## Instance Schema Examples
+## 实例模式示例
 
-### Single-Select Without Titles (No change)
+### 不带标题的单选（无变更）
 
 ```json
 {
@@ -183,7 +183,7 @@ export interface ElicitResult extends Result {
 }
 ```
 
-### Legacy Single Select With Titles
+### 带标题的遗留单选
 
 ```json
 {
@@ -191,12 +191,12 @@ export interface ElicitResult extends Result {
   "title": "Color Selection",
   "description": "Choose your favorite color",
   "enum": ["#FF0000", "#00FF00", "#0000FF"],
-  “enumNames”: ["Red", "Green", "Blue"],
+  "enumNames": ["Red", "Green", "Blue"],
   "default": "Green"
 }
 ```
 
-### Single-Select with Titles
+### 带标题的单选
 
 ```json
 {
@@ -212,7 +212,7 @@ export interface ElicitResult extends Result {
 }
 ```
 
-### Multi-Select Without Titles
+### 不带标题的多选
 
 ```json
 {
@@ -229,7 +229,7 @@ export interface ElicitResult extends Result {
 }
 ```
 
-### Multi-Select with Titles
+### 带标题的多选
 
 ```json
 {
@@ -249,70 +249,70 @@ export interface ElicitResult extends Result {
 }
 ```
 
-## Rationale
+## 理由
 
-1. **Standards Compliance**: Aligns with official JSON Schema specification. Standard patterns work with existing JSON Schema validators
-2. **Flexibility**: Supports both plain enums and enums with display names for single and multiple choice enums.
-3. **Client Implementation:** shows that the additional overhead of implementing a group of checkboxes v/s a single checkbox is minimal: https://github.com/evalstate/fast-agent/pull/324/files
+1. **标准合规性**：与官方 JSON 模式规范保持一致。标准模式可与现有的 JSON 模式验证器一起工作
+2. **灵活性**：支持普通枚举和带有显示名称的枚举，适用于单选和多选枚举。
+3. **客户端实现：** 表明实现一组复选框与单个复选框的额外开销是最小的：https://github.com/evalstate/fast-agent/pull/324/files
 
-## Backwards Compatibility
+## 向后兼容性
 
-The `LegacyEnumSchema` type maintains backwards compatible during the migration period. Existing implementations using `enumNames` will continue to work until a protocol-wide deprecation strategy is implemented, and this schema is removed.
+`LegacyEnumSchema` 类型在迁移期间保持向后兼容。使用 `enumNames` 的现有实现将继续工作，直到实施协议范围的弃用策略，并且此模式被移除。
 
-## Reference Implementation
+## 参考实现
 
-**Schema Changes:** https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1148
-Typescript SDK Changes: https://github.com/modelcontextprotocol/typescript-sdk/pull/1077
-Python SDK Changes: https://github.com/modelcontextprotocol/python-sdk/pull/1246
-**Client Implementation:** https://github.com/evalstate/fast-agent/pull/324/files
-**Working Demo:** https://asciinema.org/a/anBvJdqEmTjw0JkKYOooQa5Ta
+**模式变更：** https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1148
+Typescript SDK 变更：https://github.com/modelcontextprotocol/typescript-sdk/pull/1077
+Python SDK 变更：https://github.com/modelcontextprotocol/python-sdk/pull/1246
+**客户端实现：** https://github.com/evalstate/fast-agent/pull/324/files
+**工作演示：** https://asciinema.org/a/anBvJdqEmTjw0JkKYOooQa5Ta
 
-## Security Considerations
+## 安全考虑
 
-No security implications identified. This change is purely about schema structure and standards compliance.
+未发现安全隐患。此变更纯粹是关于模式结构和标准合规性。
 
-## Appendix
+## 附录
 
-### Validations
+### 验证
 
-Using stored validations in the JSON Schema Validator at https://www.jsonschemavalidator.net/ we validate:
+使用存储在 https://www.jsonschemavalidator.net/ 的 JSON Schema Validator 中的验证，我们验证：
 
-- All of the example instance schemas from this document against the proposed JSON meta-schema `EnumSchema` in the next section.
-- Valid and invalid values against the example instance schemas from this document.
+- 本文档中的所有示例实例模式针对下一节中提出的 JSON 元模式 `EnumSchema` 进行验证。
+- 针对本文档中的示例实例模式验证有效和无效的值。
 
-#### Legacy Single Selection
+#### 遗留单选
 
-- `EnumSchema` validating a [legacy single select instance schema with titles](https://www.jsonschemavalidator.net/s/lsK7Bn0C)
-- The legacy titled single select instance schema validating [a correct single selection](https://www.jsonschemavalidator.net/s/GSk7rnRe)
-- The legacy titled single select instance schema validating [an incorrect single selection](https://www.jsonschemavalidator.net/s/3kYvxsVP)
+- `EnumSchema` 验证一个 [带有标题的遗留单选实例模式](https://www.jsonschemavalidator.net/s/lsK7Bn0C)
+- 遗留带标题单选实例模式验证 [一个正确的单选](https://www.jsonschemavalidator.net/s/GSk7rnRe)
+- 遗留带标题单选实例模式验证 [一个错误的单选](https://www.jsonschemavalidator.net/s/3kYvxsVP)
 
-#### Single Selection
+#### 单选
 
-- `EnumSchema` validating a [single select instance schema without titles](https://www.jsonschemavalidator.net/s/MBlHW5IQ)
-- `EnumSchema` validating a [single select instance schema with titles](https://www.jsonschemavalidator.net/s/s38xt4JV)
-- The untitled single select instance schema validating [a correct single selection](https://www.jsonschemavalidator.net/s/M0hkYoeG)
-- The untitled single select instance schema invalidating [an incorrect single selection](https://www.jsonschemavalidator.net/s/3Try4BCt)
-- The titled single select instance schema validating [a correct single selection](https://www.jsonschemavalidator.net/s/4oDbv9yt)
-- The titled single select instance schema invalidating [an incorrect single selection](https://www.jsonschemavalidator.net/s/A2KlNzLH)
+- `EnumSchema` 验证一个 [无标题的单选实例模式](https://www.jsonschemavalidator.net/s/MBlHW5IQ)
+- `EnumSchema` 验证一个 [带有标题的单选实例模式](https://www.jsonschemavalidator.net/s/s38xt4JV)
+- 无标题单选实例模式验证 [一个正确的单选](https://www.jsonschemavalidator.net/s/M0hkYoeG)
+- 无标题单选实例模式使 [一个错误的单选] 无效 (https://www.jsonschemavalidator.net/s/3Try4BCt)
+- 带标题单选实例模式验证 [一个正确的单选](https://www.jsonschemavalidator.net/s/4oDbv9yt)
+- 带标题单选实例模式使 [一个错误的单选] 无效 (https://www.jsonschemavalidator.net/s/A2KlNzLH)
 
-#### Multiple Selection
+#### 多选
 
-- `EnumSchema` validating the [multi-select instance schema without titles](https://www.jsonschemavalidator.net/s/4uc3Ndsq)
-- `EnumSchema` validating the [multi-select instance schema with titles](https://www.jsonschemavalidator.net/s/TmkIqqXI)
-- The untitled multi-select instance schema validating [a correct multiple selection](https://www.jsonschemavalidator.net/s/IE8Bkvtg)
-  The untitled multi-select instance schema validating invalidating[ an incorrect multiple selection](https://www.jsonschemavalidator.net/s/8tlqjUgW)
-  The titled multi-select instance schema validating [a correct multiple selection](https://www.jsonschemavalidator.net/s/Nb1Rw1qa)
-  The titled multi-select instance schema validating invalidating [an incorrect multiple selection](https://www.jsonschemavalidator.net/s/MRfyqrVC)
+- `EnumSchema` 验证 [无标题的多选实例模式](https://www.jsonschemavalidator.net/s/4uc3Ndsq)
+- `EnumSchema` 验证 [带有标题的多选实例模式](https://www.jsonschemavalidator.net/s/TmkIqqXI)
+- 无标题多选实例模式验证 [一个正确的多选](https://www.jsonschemavalidator.net/s/IE8Bkvtg)
+  无标题多选实例模式验证使 [ 一个错误的多选] 无效 (https://www.jsonschemavalidator.net/s/8tlqjUgW)
+  带标题多选实例模式验证 [一个正确的多选](https://www.jsonschemavalidator.net/s/Nb1Rw1qa)
+  带标题多选实例模式验证使 [一个错误的多选] 无效 (https://www.jsonschemavalidator.net/s/MRfyqrVC)
 
-### JSON meta-schema
+### JSON 元模式
 
-This is our proposal for the replacement of the current `EnumSchema` in the specification’s `schema.json`.
+这是我们提出的用于替换规范中 `schema.json` 内当前 `EnumSchema` 的方案。
 
 ```json
 {
   "$schema": "https://json-schema.org/draft-07/schema",
   "definitions": {
-    // New Definitions Follow
+    // 新定义如下
     "UntitledSingleSelectEnumSchema": {
       "type": "object",
       "properties": {

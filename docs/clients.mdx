@@ -1,6 +1,6 @@
 ---
-title: "Example Clients"
-description: "A list of applications that support MCP integrations"
+title: "示例客户端"
+description: "支持 MCP 集成的应用程序列表"
 ---
 
 {/* prettier-ignore-start */}
@@ -281,32 +281,32 @@ export const McpClient = ({ name, homepage, supports, sourceCode, instructions, 
 
 {/* prettier-ignore-end */}
 
-This page showcases applications that support the Model Context Protocol (MCP). Each client may support different MCP features:
+本页面展示了支持模型上下文协议 (MCP) 的应用程序。每个客户端可能支持不同的 MCP 功能：
 
-| Feature                                                     | Description                                                                                                  |
+| 功能                                                      | 描述                                                                                                     |
 | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| <FeatureBadge feature="Resources" />                        | Server-exposed data and content                                                                              |
-| <FeatureBadge feature="Prompts" />                          | Pre-defined templates for LLM interactions                                                                   |
-| <FeatureBadge feature="Tools" />                            | Executable functions that LLMs can invoke                                                                    |
-| <FeatureBadge feature="Discovery" />                        | Support for tools/prompts/resources changed notifications                                                    |
-| <FeatureBadge feature="Instructions" />                     | Server-provided guidance for LLMs                                                                            |
-| <FeatureBadge feature="Sampling" />                         | Server-initiated LLM completions                                                                             |
-| <FeatureBadge feature="Roots" />                            | Filesystem boundary definitions                                                                              |
-| <FeatureBadge feature="Elicitation" />                      | User information requests                                                                                    |
-| <FeatureBadge feature="CIMD" />                             | [Client ID Metadata Document](specification/latest/basic/authorization#client-id-metadata-documents) support |
-| <FeatureBadge feature="DCR" />                              | [Dynamic Client Registration](specification/latest/basic/authorization#dynamic-client-registration) support  |
-| <FeatureBadge feature="OAuth Client Credentials" />         | [OAuth Client Credentials](/extensions/auth/oauth-client-credentials) extension support                      |
-| <FeatureBadge feature="Enterprise-Managed Authorization" /> | [Enterprise-Managed Authorization](/extensions/auth/enterprise-managed-authorization) extension support      |
-| <FeatureBadge feature="Tasks" />                            | Long-running operation tracking                                                                              |
-| <FeatureBadge feature="Apps" />                             | Interactive HTML interfaces                                                                                  |
+| <FeatureBadge feature="Resources" />                        | 服务器暴露的数据和内容                                                                              |
+| <FeatureBadge feature="Prompts" />                          | 用于 LLM 交互的预定义模板                                                                   |
+| <FeatureBadge feature="Tools" />                            | LLM 可以调用的可执行函数                                                                    |
+| <FeatureBadge feature="Discovery" />                        | 支持工具/提示词/资源变更通知                                                    |
+| <FeatureBadge feature="Instructions" />                     | 服务器为 LLM 提供的指导                                                                            |
+| <FeatureBadge feature="Sampling" />                         | 服务器发起的 LLM 补全                                                                             |
+| <FeatureBadge feature="Roots" />                            | 文件系统边界定义                                                                              |
+| <FeatureBadge feature="Elicitation" />                      | 用户信息请求                                                                                    |
+| <FeatureBadge feature="CIMD" />                             | [客户端 ID 元数据文档](specification/latest/basic/authorization#client-id-metadata-documents) 支持 |
+| <FeatureBadge feature="DCR" />                              | [动态客户端注册](specification/latest/basic/authorization#dynamic-client-registration) 支持  |
+| <FeatureBadge feature="OAuth Client Credentials" />         | [OAuth 客户端凭证](/extensions/auth/oauth-client-credentials) 扩展支持                      |
+| <FeatureBadge feature="Enterprise-Managed Authorization" /> | [企业托管授权](/extensions/auth/enterprise-managed-authorization) 扩展支持      |
+| <FeatureBadge feature="Tasks" />                            | 长时间运行操作跟踪                                                                              |
+| <FeatureBadge feature="Apps" />                             | 交互式 HTML 界面                                                                                  |
 
 <Note>
 
-This list is maintained by the community. If you notice any inaccuracies or would like to add or update information about MCP support in your application, please [submit a pull request](https://github.com/modelcontextprotocol/modelcontextprotocol/pulls).
+此列表由社区维护。如果您发现任何不准确之处，或者想要添加或更新有关您的应用程序中 MCP 支持的信息，请 [提交拉取请求](https://github.com/modelcontextprotocol/modelcontextprotocol/pulls)。
 
 </Note>
 
-## Client details
+## 客户端详情
 
 <ClientFilter />
 
@@ -316,14 +316,14 @@ This list is maintained by the community. If you notice any inaccuracies or woul
   supports="Tools"
 >
 
-5ire is an open source cross-platform desktop AI assistant that supports tools through MCP servers.
+5ire 是一个开源跨平台桌面 AI 助手，支持通过 MCP 服务器使用工具。
 
-**Key features:**
+**主要功能：**
 
-- Built-in MCP servers can be quickly enabled and disabled.
-- Users can add more servers by modifying the configuration file.
-- It is open-source and user-friendly, suitable for beginners.
-- Future support for MCP will be continuously improved.
+- 内置 MCP 服务器可以快速启用和禁用。
+- 用户可以通过修改配置文件添加更多服务器。
+- 它是开源且用户友好的，适合初学者。
+- 未来对 MCP 的支持将持续改进。
 
 </McpClient>
 
@@ -333,17 +333,17 @@ This list is maintained by the community. If you notice any inaccuracies or woul
   supports="Tools"
 >
 
-AgentAI is a Rust library designed to simplify the creation of AI agents. The library includes seamless integration with MCP Servers.
+AgentAI 是一个旨在简化 AI 代理创建的 Rust 库。该库包含与 MCP 服务器的无缝集成。
 
-**Key features:**
+**主要功能：**
 
-- Multi-LLM – We support most LLM APIs (OpenAI, Anthropic, Gemini, Ollama, and all OpenAI API Compatible).
-- Built-in support for MCP Servers.
-- Create agentic flows in a type- and memory-safe language like Rust.
+- 多 LLM 支持 – 我们支持大多数 LLM API（OpenAI、Anthropic、Gemini、Ollama 以及所有兼容 OpenAI API 的服务）。
+- 内置支持 MCP 服务器。
+- 在像 Rust 这样类型安全和内存安全的语言中创建代理流程。
 
-**Learn more:**
+**了解更多：**
 
-- [Example of MCP Server integration](https://github.com/AdamStrojek/rust-agentai/blob/master/examples/tools_mcp.rs)
+- [MCP 服务器集成示例](https://github.com/AdamStrojek/rust-agentai/blob/master/examples/tools_mcp.rs)
 
 </McpClient>
 
@@ -353,18 +353,18 @@ AgentAI is a Rust library designed to simplify the creation of AI agents. The li
   supports="Resources, Prompts, Tools, Discovery"
 >
 
-AgenticFlow is a no-code AI platform that helps you build agents that handle sales, marketing, and creative tasks around the clock. Connect 2,500+ APIs and 10,000+ tools securely via MCP.
+AgenticFlow 是一个无代码 AI 平台，帮助您构建全天候处理销售、营销和创意任务的代理。通过 MCP 安全地连接 2,500+ API 和 10,000+ 工具。
 
-**Key features:**
+**主要功能：**
 
-- No-code AI agent creation and workflow building.
-- Access a vast library of 10,000+ tools and 2,500+ APIs through MCP.
-- Simple 3-step process to connect MCP servers.
-- Securely manage connections and revoke access anytime.
+- 无代码 AI 代理创建和工作流构建。
+- 通过 MCP 访问庞大的 10,000+ 工具和 2,500+ API 库。
+- 连接 MCP 服务器的简单 3 步流程。
+- 安全管理连接并随时撤销访问权限。
 
-**Learn more:**
+**了解更多：**
 
-- [AgenticFlow MCP Integration](https://agenticflow.ai/mcp)
+- [AgenticFlow MCP 集成](https://agenticflow.ai/mcp)
 
 </McpClient>
 
@@ -374,21 +374,21 @@ AgenticFlow is a no-code AI platform that helps you build agents that handle sal
   supports="Resources, Prompts, Tools, Discovery, Sampling, Elicitation"
 >
 
-AIQL TUUI is a native, cross-platform desktop AI chat application with MCP support. It supports multiple AI providers (e.g., Anthropic, Cloudflare, Deepseek, OpenAI, Qwen), local AI models (via vLLM, Ray, etc.), and aggregated API platforms (such as Deepinfra, Openrouter, and more).
+AIQL TUUI 是一个原生跨平台桌面 AI 聊天应用程序，支持 MCP。它支持多个 AI 提供商（例如 Anthropic、Cloudflare、Deepseek、OpenAI、Qwen）、本地 AI 模型（通过 vLLM、Ray 等）和聚合 API 平台（如 Deepinfra、Openrouter 等）。
 
-**Key features:**
+**主要功能：**
 
-- **Dynamic LLM API & Agent Switching**: Seamlessly toggle between different LLM APIs and agents on the fly.
-- **Comprehensive Capabilities Support**: Built-in support for tools, prompts, resources, and sampling methods.
-- **Configurable Agents**: Enhanced flexibility with selectable and customizable tools via agent settings.
-- **Advanced Sampling Control**: Modify sampling parameters and leverage multi-round sampling for optimal results.
-- **Cross-Platform Compatibility**: Fully compatible with macOS, Windows, and Linux.
-- **Free & Open-Source (FOSS)**: Permissive licensing allows modifications and custom app bundling.
+- **动态 LLM API 和代理切换**：无缝切换不同的 LLM API 和代理。
+- **全面的功能支持**：内置支持工具、提示词、资源和采样方法。
+- **可配置的代理**：通过代理设置提供可选择和可自定义的工具，增强灵活性。
+- **高级采样控制**：修改采样参数并利用多轮采样以获得最佳结果。
+- **跨平台兼容性**：完全兼容 macOS、Windows 和 Linux。
+- **免费且开源 (FOSS)**：宽松的许可允许修改和自定义应用程序捆绑。
 
-**Learn more:**
+**了解更多：**
 
-- [TUUI document](https://www.tuui.com/)
-- [AIQL GitHub repository](https://github.com/AI-QL)
+- [TUUI 文档](https://www.tuui.com/)
+- [AIQL GitHub 仓库](https://github.com/AI-QL)
 
 </McpClient>
 
@@ -398,17 +398,17 @@ AIQL TUUI is a native, cross-platform desktop AI chat application with MCP suppo
   supports="Prompts, Tools"
 >
 
-Amazon Q CLI is an open-source, agentic coding assistant for terminals.
+Amazon Q CLI 是一个开源的、用于终端的代理编码助手。
 
-**Key features:**
+**主要功能：**
 
-- Full support for MCP servers.
-- Edit prompts using your preferred text editor.
-- Access saved prompts instantly with `@`.
-- Control and organize AWS resources directly from your terminal.
-- Tools, profiles, context management, auto-compact, and so much more!
+- 全面支持 MCP 服务器。
+- 使用您喜欢的文本编辑器编辑提示词。
+- 使用 `@` 即时访问保存的提示词。
+- 直接从终端控制和组织 AWS 资源。
+- 工具、配置文件、上下文管理、自动压缩等等！
 
-**Get Started**
+**开始使用**
 
 ```bash
 brew install amazon-q
@@ -423,13 +423,13 @@ brew install amazon-q
   instructions="https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/mcp-ide.html"
 >
 
-Amazon Q IDE is an open-source, agentic coding assistant for IDEs.
+Amazon Q IDE 是一个开源的、用于 IDE 的代理编码助手。
 
-**Key features:**
+**主要功能：**
 
-- Support for the VSCode, JetBrains, Visual Studio, and Eclipse IDEs.
-- Control and organize AWS resources directly from your IDE.
-- Manage permissions for each MCP tool via the IDE user interface.
+- 支持 VSCode、JetBrains、Visual Studio 和 Eclipse IDE。
+- 直接从 IDE 控制和组织 AWS 资源。
+- 通过 IDE 用户界面管理每个 MCP 工具的权限。
 
 </McpClient>
 
@@ -440,12 +440,12 @@ Amazon Q IDE is an open-source, agentic coding assistant for IDEs.
   instructions="https://ampcode.com/manual#mcp"
 >
 
-Amp is an agentic coding tool built by Sourcegraph. It runs in VS Code (and compatible forks like Cursor, Windsurf, and VSCodium), JetBrains IDEs, Neovim, and as a command-line tool. It's also multiplayer — you can share threads and collaborate with your team.
+Amp 是由 Sourcegraph 构建的代理编码工具。它在 VS Code（以及兼容的分支如 Cursor、Windsurf 和 VSCodium）、JetBrains IDEs、Neovim 中运行，也可作为命令行工具使用。它还支持多人协作——您可以共享线程并与团队协作。
 
-**Key features:**
+**主要功能：**
 
-- Granular control over enabled tools and permissions
-- Support for MCP servers defined in VS Code `mcp.json`
+- 对启用的工具和权限进行细粒度控制
+- 支持在 VS Code `mcp.json` 中定义的 MCP 服务器
 
 </McpClient>
 
@@ -456,14 +456,14 @@ Amp is an agentic coding tool built by Sourcegraph. It runs in VS Code (and comp
   instructions="https://docs.apidog.com/mcp-client-1930835m0"
 >
 
-Apidog, an all-in-one API development and testing platform, features a built-in MCP Client designed for debugging and testing MCP Servers.
+Apidog 是一个多合一的 API 开发和测试平台，具有内置的 MCP 客户端，专为调试和测试 MCP 服务器而设计。
 
-**Key features:**
+**主要功能：**
 
-- **Full Feature Support**: Debug Tools, Prompts, and Resources of MCP servers with a user-friendly GUI.
-- **Dual Transport Modes**: Supports both STDIO for local processes and HTTP for remote servers.
-- **Easy Setup**: Automatically parses MCP configuration files and supports direct command or URL input.
-- **Authentication**: Supports OAuth 2.0, API Key, Bearer Token, and other methods for secure connections.
+- **全功能支持**：通过用户友好的 GUI 调试 MCP 服务器的工具、提示词和资源。
+- **双传输模式**：支持本地进程的 STDIO 和远程服务器的 HTTP。
+- **易于设置**：自动解析 MCP 配置文件，支持直接命令或 URL 输入。
+- **身份验证**：支持 OAuth 2.0、API Key、Bearer Token 等方法以确保安全连接。
 
 </McpClient>
 
@@ -473,15 +473,15 @@ Apidog, an all-in-one API development and testing platform, features a built-in 
   supports="Tools, Discovery"
 >
 
-Apify MCP Tester is an open-source client that connects to any MCP server using Server-Sent Events (SSE).
-It is a standalone Apify Actor designed for testing MCP servers over SSE, with support for Authorization headers.
-It uses plain JavaScript (old-school style) and is hosted on Apify, allowing you to run it without any setup.
+Apify MCP Tester 是一个开源客户端，使用服务器发送事件 (SSE) 连接到任何 MCP 服务器。
+它是一个独立的 Apify Actor，专为通过 SSE 测试 MCP 服务器而设计，支持 Authorization 头。
+它使用纯 JavaScript（老式风格）并托管在 Apify 上，允许您在无需任何设置的情况下运行它。
 
-**Key features:**
+**主要功能：**
 
-- Connects to any MCP server via SSE.
-- Works with the [Apify MCP Server](https://mcp.apify.com) to interact with one or more Apify [Actors](https://apify.com/store).
-- Dynamically utilizes tools based on context and user queries (if supported by the server).
+- 通过 SSE 连接到任何 MCP 服务器。
+- 与 [Apify MCP 服务器](https://mcp.apify.com) 配合使用，与一个或多个 Apify [Actors](https://apify.com/store) 交互。
+- 根据上下文和用户查询动态利用工具（如果服务器支持）。
 
 </McpClient>
 
@@ -492,18 +492,18 @@ It uses plain JavaScript (old-school style) and is hosted on Apify, allowing you
   instructions="https://docs.apigene.ai/user-guide/copilot"
 >
 
-Apigene MCP Client is an AI-powered conversational interface that enables seamless interaction with multiple applications, APIs, and MCP servers through natural language. It provides a unified interface for deploying agents across different AI platforms with optimized performance and governance.
+Apigene MCP 客户端是一个 AI 驱动的对话界面，通过自然语言实现与多个应用程序、API 和 MCP 服务器的无缝交互。它提供了一个统一的界面，用于在不同的 AI 平台上部署代理，具有优化的性能和治理。
 
-**Key features:**
+**主要功能：**
 
-- **Multi-LLM Compatibility**: Works seamlessly with all leading AI platforms including Claude, OpenAI (ChatGPT), Gemini, xAI, and OpenRouter. Deploy the same agent across different platforms without modification.
-- **Optimized for Cost & Performance**: Dynamic tool loading loads tools only when needed, enabling thousands of tools without context bloat. Tool output optimization provides up to 99% payload reduction via compact JSON representation. Parallel execution runs multiple tool calls simultaneously for 10x faster responses.
-- **Unified Multi-Tool Interface**: Mesh multiple APIs and MCP servers into a single agent. Interact with all tools seamlessly from one Copilot interface without glue code or framework-specific logic.
-- **Governed Access & Audit**: Fine-grained access control defines exactly which operations each user or agent can perform. Complete audit trail tracks every tool call with timestamps, inputs, and outputs for compliance.
+- **多 LLM 兼容性**：与所有领先的 AI 平台无缝协作，包括 Claude、OpenAI (ChatGPT)、Gemini、xAI 和 OpenRouter。无需修改即可在不同平台上部署相同的代理。
+- **针对成本和性能优化**：动态工具加载仅在需要时加载工具， enabling 数千个工具而不会导致上下文膨胀。工具输出优化通过紧凑的 JSON 表示提供高达 99% 的有效负载减少。并行执行同时运行多个工具调用，响应速度提高 10 倍。
+- **统一的多工具界面**：将多个 API 和 MCP 服务器 mesh 到一个代理中。从一个 Copilot 界面无缝地与所有工具交互，无需胶水代码或特定于框架的逻辑。
+- **受控访问和审计**：细粒度访问控制定义每个用户或代理可以执行的确切操作。完整的审计跟踪记录每个工具调用的时间戳、输入和输出以符合合规性。
 
-**Learn more:**
+**了解更多：**
 
-- [Apigene Copilot Documentation](https://docs.apigene.ai/user-guide/copilot)
+- [Apigene Copilot 文档](https://docs.apigene.ai/user-guide/copilot)
 
 </McpClient>
 
@@ -513,16 +513,16 @@ Apigene MCP Client is an AI-powered conversational interface that enables seamle
   supports="Tools, Apps, CIMD, DCR, Enterprise-Managed Authorization"
 >
 
-Archestra is an enterprise AI platform that combines an LLM proxy, MCP registry/orchestrator, MCP gateway, agent runtime, and chat UI into a single control plane for building, routing, and securing AI workflows.
+Archestra 是一个企业级 AI 平台，将 LLM 代理、MCP 注册表/编排器、MCP 网关、代理运行时和聊天 UI 结合到一个单一的控制平面中，用于构建、路由和保护 AI 工作流。
 
-**Key features:**
+**主要功能：**
 
-- Unified MCP gateway that exposes a single endpoint for orchestrating tools across remote and self-hosted MCP servers.
-- Supports MCP Apps for inline, interactive tool UIs in chat.
-- Supports DCR and CIMD for MCP-native OAuth 2.1 client registration.
-- Supports the Enterprise-Managed Authorization extension for centrally managed enterprise identity flows.
-- Includes an LLM proxy with deterministic, context-aware tool guardrails to reduce prompt-injection and data-exfiltration risk.
-- Adds per-team cost tracking, usage limits, and optimization controls for model traffic.
+- 统一的 MCP 网关，暴露单个端点用于编排远程和自托管 MCP 服务器上的工具。
+- 支持 MCP Apps，用于聊天中的内联交互式工具 UI。
+- 支持 DCR 和 CIMD 用于 MCP 原生 OAuth 2.1 客户端注册。
+- 支持企业托管授权扩展，用于集中管理的企业身份流程。
+- 包括具有确定性、上下文感知工具护栏的 LLM 代理，以减少提示注入和数据泄露风险。
+- 添加每团队成本跟踪、使用限制和模型流量优化控制。
 
 </McpClient>
 
@@ -533,14 +533,14 @@ Archestra is an enterprise AI platform that combines an LLM proxy, MCP registry/
   instructions="https://docs.augmentcode.com/setup-augment/mcp"
 >
 
-Augment Code is an AI-powered coding platform for VS Code and JetBrains with autonomous agents, chat, and completions. Both local and remote agents are backed by full codebase awareness and native support for MCP, enabling enhanced context through external sources and tools.
+Augment Code 是一个用于 VS Code 和 JetBrains 的 AI 驱动编码平台，具有自主代理、聊天和补全功能。本地和远程代理都 backed by 完整的代码库感知和对 MCP 的原生支持，通过外部来源和工具增强上下文。
 
-**Key features:**
+**主要功能：**
 
-- Full MCP support in local and remote agents.
-- Add additional context through MCP servers.
-- Automate your development workflows with MCP tools.
-- Works in VS Code and JetBrains IDEs.
+- 本地和远程代理中的完整 MCP 支持。
+- 通过 MCP 服务器添加额外上下文。
+- 使用 MCP 工具自动化您的开发工作流。
+- 适用于 VS Code 和 JetBrains IDEs。
 
 </McpClient>
 
@@ -550,14 +550,14 @@ Augment Code is an AI-powered coding platform for VS Code and JetBrains with aut
   supports="Resources, Tools"
 >
 
-Avatar-Shell is an electron-based MCP client application that prioritizes avatar conversations and media output such as images.
+Avatar-Shell 是一个基于 electron 的 MCP 客户端应用程序，优先考虑头像对话和媒体输出（如图像）。
 
-**Key features:**
+**主要功能：**
 
-- MCP tools and resources can be used
-- Supports avatar-to-avatar communication via socket.io.
-- Supports the mixed use of multiple LLM APIs.
-- The daemon mechanism allows for flexible scheduling.
+- 可以使用 MCP 工具和资源
+- 支持通过 socket.io 进行头像到头像的通信。
+- 支持混合使用多个 LLM API。
+- 守护进程机制允许灵活的调度。
 
 </McpClient>
 
@@ -568,17 +568,17 @@ Avatar-Shell is an electron-based MCP client application that prioritizes avatar
   supports="Tools"
 >
 
-BeeAI Framework is an open-source framework for building, deploying, and serving powerful agentic workflows at scale. The framework includes the **MCP Tool**, a native feature that simplifies the integration of MCP servers into agentic workflows.
+BeeAI Framework 是一个开源框架，用于大规模构建、部署和服务强大的代理工作流。该框架包括 **MCP Tool**，这是一个原生功能，简化了将 MCP 服务器集成到代理工作流中。
 
-**Key features:**
+**主要功能：**
 
-- Seamlessly incorporate MCP tools into agentic workflows.
-- Quickly instantiate framework-native tools from connected MCP client(s).
-- Planned future support for agentic MCP capabilities.
+- 无缝地将 MCP 工具纳入代理工作流。
+- 从连接的 MCP 客户端快速实例化框架原生工具。
+- 计划未来支持代理 MCP 功能。
 
-**Learn more:**
+**了解更多：**
 
-- [Example of using MCP tools in agentic workflow](https://i-am-bee.github.io/beeai-framework/#/typescript/tools?id=using-the-mcptool-class)
+- [在代理工作流中使用 MCP 工具的示例](https://i-am-bee.github.io/beeai-framework/#/typescript/tools?id=using-the-mcptool-class)
 
 </McpClient>
 
@@ -588,19 +588,19 @@ BeeAI Framework is an open-source framework for building, deploying, and serving
   supports="Tools"
 >
 
-BoltAI is a native, all-in-one AI chat client with MCP support. BoltAI supports multiple AI providers (OpenAI, Anthropic, Google AI...), including local AI models (via Ollama, LM Studio or LMX)
+BoltAI 是一个原生、多合一的 AI 聊天客户端，支持 MCP。BoltAI 支持多个 AI 提供商（OpenAI、Anthropic、Google AI...），包括本地 AI 模型（通过 Ollama、LM Studio 或 LMX）
 
-**Key features:**
+**主要功能：**
 
-- MCP Tool integrations: once configured, user can enable individual MCP server in each chat
-- MCP quick setup: import configuration from Claude Desktop app or Cursor editor
-- Invoke MCP tools inside any app with AI Command feature
-- Integrate with remote MCP servers in the mobile app
+- MCP 工具集成：配置后，用户可以在每个聊天中启用单个 MCP 服务器
+- MCP 快速设置：从 Claude Desktop 应用程序或 Cursor 编辑器导入配置
+- 在任何应用程序中使用 AI 命令功能调用 MCP 工具
+- 在移动应用程序中集成远程 MCP 服务器
 
-**Learn more:**
+**了解更多：**
 
-- [BoltAI docs](https://boltai.com/docs/plugins/mcp-servers)
-- [BoltAI website](https://boltai.com)
+- [BoltAI 文档](https://boltai.com/docs/plugins/mcp-servers)
+- [BoltAI 网站](https://boltai.com)
 
 </McpClient>
 
@@ -610,13 +610,13 @@ BoltAI is a native, all-in-one AI chat client with MCP support. BoltAI supports 
   supports="Prompts, Tools"
 >
 
-Call Chirp uses AI to capture every critical detail from your business conversations, automatically syncing insights to your CRM and project tools so you never miss another deal-closing moment.
+Call Chirp 使用 AI 捕获业务对话中的每个关键细节，自动将见解同步到您的 CRM 和项目工具中，这样您就不会再错过任何达成交易的时刻。
 
-**Key features:**
+**主要功能：**
 
-- Save transcriptions from Zoom, Google Meet, and more
-- MCP Tools for voice AI agents
-- Remote MCP servers support
+- 保存来自 Zoom、Google Meet 等的转录
+- 用于语音 AI 代理的 MCP 工具
+- 支持远程 MCP 服务器
 
 </McpClient>
 
@@ -628,13 +628,13 @@ Call Chirp uses AI to capture every critical detail from your business conversat
   instructions="https://docs.chatboxai.app/guides/mcp"
 >
 
-Chatbox is a better UI and desktop app for ChatGPT, Claude, and other LLMs, available on Windows, Mac, Linux, and the web. It's open-source and has garnered 37K stars on GitHub.
+Chatbox 是一个更好的 UI 和桌面应用程序，适用于 ChatGPT、Claude 和其他 LLM，可在 Windows、Mac、Linux 和 Web 上使用。它是开源的，并在 GitHub 上获得了 37K 星。
 
-**Key features:**
+**主要功能：**
 
-- Tools support for MCP servers
-- Support both local and remote MCP servers
-- Built-in MCP servers marketplace
+- 支持 MCP 服务器的工具
+- 支持本地和远程 MCP 服务器
+- 内置 MCP 服务器市场
 
 </McpClient>
 
@@ -644,14 +644,14 @@ Chatbox is a better UI and desktop app for ChatGPT, Claude, and other LLMs, avai
   supports="Tools"
 >
 
-ChatFrame is a cross-platform desktop chatbot that unifies access to multiple AI language models, supports custom tool integration via MCP servers, and enables RAG conversations with your local files—all in a single, polished app for macOS and Windows.
+ChatFrame 是一个跨平台桌面聊天机器人，统一访问多个 AI 语言模型，支持通过 MCP 服务器自定义工具集成，并支持与本地文件进行 RAG 对话—— all in a single, polished app for macOS and Windows.
 
-**Key features:**
+**主要功能：**
 
-- Unified access to top LLM providers (OpenAI, Anthropic, DeepSeek, xAI, and more) in one interface
-- Built-in retrieval-augmented generation (RAG) for instant, private search across your PDFs, text, and code files
-- Plug-in system for custom tools via Model Context Protocol (MCP) servers
-- Multimodal chat: supports images, text, and live interactive artifacts
+- 在一个界面中统一访问顶级 LLM 提供商（OpenAI、Anthropic、DeepSeek、xAI 等）
+- 内置检索增强生成 (RAG)，用于在您的 PDF、文本和代码文件中进行即时、私密的搜索
+- 通过模型上下文协议 (MCP) 服务器自定义工具的插件系统
+- 多模态聊天：支持图像、文本和实时交互式工件
 
 </McpClient>
 
@@ -662,14 +662,14 @@ ChatFrame is a cross-platform desktop chatbot that unifies access to multiple AI
   instructions="https://platform.openai.com/docs/guides/developer-mode"
 >
 
-ChatGPT is OpenAI's AI assistant that provides MCP support for remote servers to conduct deep research and to power MCP-based apps.
+ChatGPT 是 OpenAI 的 AI 助手，为远程服务器提供 MCP 支持以进行深度研究并为基于 MCP 的应用程序提供支持。
 
-**Key features:**
+**主要功能：**
 
-- Support for MCP via connections UI in settings
-- Access to search tools from configured MCP servers for deep research
-- Support for MCP Apps, allowing ChatGPT to connect to MCP-based applications
-- Enterprise-grade security and compliance features
+- 通过设置中的连接 UI 支持 MCP
+- 访问配置的 MCP 服务器中的搜索工具以进行深度研究
+- 支持 MCP Apps，允许 ChatGPT 连接到基于 MCP 的应用程序
+- 企业级安全和合规功能
 
 </McpClient>
 
@@ -679,12 +679,12 @@ ChatGPT is OpenAI's AI assistant that provides MCP support for remote servers to
   supports="Tools"
 >
 
-ChatWise is a desktop-optimized, high-performance chat application that lets you bring your own API keys. It supports a wide range of LLMs and integrates with MCP to enable tool workflows.
+ChatWise 是一个桌面优化、高性能的聊天应用程序，让您可以使用自己的 API 密钥。它支持广泛的 LLM 并与 MCP 集成以启用工具工作流。
 
-**Key features:**
+**主要功能：**
 
-- Tools support for MCP servers
-- Offer built-in tools like web search, artifacts and image generation.
+- 支持 MCP 服务器的工具
+- 提供内置工具，如 Web 搜索、工件和图像生成。
 
 </McpClient>
 
@@ -694,15 +694,15 @@ ChatWise is a desktop-optimized, high-performance chat application that lets you
   supports="Tools"
 >
 
-Chorus is a native Mac app for chatting with AIs. Chat with multiple models at once, run tools and MCPs, create projects, quick chat, bring your own key, all in a blazing fast, keyboard shortcut friendly app.
+Chorus 是一个用于与 AI 聊天的原生 Mac 应用程序。同时与多个模型聊天，运行工具和 MCP，创建项目，快速聊天，使用自己的密钥， all in a blazing fast, keyboard shortcut friendly app.
 
-**Key features:**
+**主要功能：**
 
-- MCP support with one-click install
-- Built in tools, like web search, terminal, and image generation
-- Chat with multiple models at once (cloud or local)
-- Create projects with scoped memory
-- Quick chat with an AI that can see your screen
+- 一键安装支持 MCP
+- 内置工具，如 Web 搜索、终端和图像生成
+- 同时与多个模型聊天（云或本地）
+- 创建具有范围记忆的项目
+- 与可以看到您屏幕的 AI 快速聊天
 
 </McpClient>
 
@@ -713,12 +713,12 @@ Chorus is a native Mac app for chatting with AIs. Chat with multiple models at o
   instructions="https://code.claude.com/docs/en/mcp"
 >
 
-Claude Code is an interactive agentic coding tool from Anthropic that helps you code faster through natural language commands. It supports MCP integration for resources, prompts, tools, and roots, and also functions as an MCP server to integrate with other clients.
+Claude Code 是 Anthropic 的交互式代理编码工具，通过自然语言命令帮助您更快地编码。它支持资源、提示词、工具和 roots 的 MCP 集成，并且还可以作为 MCP 服务器与其他客户端集成。
 
-**Key features:**
+**主要功能：**
 
-- Full support for resources, prompts, tools, and roots from MCP servers
-- Offers its own tools through an MCP server for integrating with other MCP clients
+- 全面支持来自 MCP 服务器的资源、提示词、工具和 roots
+- 通过 MCP 服务器提供自己的工具，以便与其他 MCP 客户端集成
 
 </McpClient>
 
@@ -727,19 +727,19 @@ Claude Code is an interactive agentic coding tool from Anthropic that helps you 
   homepage="https://claude.ai/download"
   supports="Resources, Prompts, Tools, Roots, Apps, DCR"
   instructions={[
-    ["Local servers", "https://support.claude.com/en/articles/10949351-getting-started-with-local-mcp-servers-on-claude-desktop"],
-    ["Remote servers", "https://support.claude.com/en/articles/11175166-getting-started-with-custom-connectors-using-remote-mcp"]
+    ["本地服务器", "https://support.claude.com/en/articles/10949351-getting-started-with-local-mcp-servers-on-claude-desktop"],
+    ["远程服务器", "https://support.claude.com/en/articles/11175166-getting-started-with-custom-connectors-using-remote-mcp"]
   ]}
 >
 
-Claude Desktop provides comprehensive support for MCP, enabling deep integration with local tools and data sources.
+Claude Desktop 提供对 MCP 的全面支持，实现与本地工具和数据源的深度集成。
 
-**Key features:**
+**主要功能：**
 
-- Full support for resources, allowing attachment of local files and data
-- Support for prompt templates
-- Tool integration for executing commands and scripts
-- Local server connections for enhanced privacy and security
+- 全面支持资源，允许附加本地文件和数据
+- 支持提示词模板
+- 工具集成用于执行命令和脚本
+- 本地服务器连接以增强隐私和安全性
 
 </McpClient>
 
@@ -749,14 +749,14 @@ Claude Desktop provides comprehensive support for MCP, enabling deep integration
   supports="Resources, Prompts, Tools, Apps, CIMD, DCR"
 >
 
-Claude.ai is Anthropic's web-based AI assistant that provides MCP support for remote servers.
+Claude.ai 是 Anthropic 的基于 Web 的 AI 助手，为远程服务器提供 MCP 支持。
 
-**Key features:**
+**主要功能：**
 
-- Support for remote MCP servers via integrations UI in settings
-- Access to tools, prompts, and resources from configured MCP servers
-- Seamless integration with Claude's conversational interface
-- Enterprise-grade security and compliance features
+- 通过设置中的集成 UI 支持远程 MCP 服务器
+- 访问配置的 MCP 服务器中的工具、提示词和资源
+- 与 Claude 的对话界面无缝集成
+- 企业级安全和合规功能
 
 </McpClient>
 
@@ -767,13 +767,13 @@ Claude.ai is Anthropic's web-based AI assistant that provides MCP support for re
   instructions="https://docs.cline.bot/mcp/configuring-mcp-servers"
 >
 
-Cline is an autonomous coding agent in VS Code that edits files, runs commands, uses a browser, and more–with your permission at each step.
+Cline 是 VS Code 中的自主编码代理，可以编辑文件、运行命令、使用浏览器等——每一步都需要您的许可。
 
-**Key features:**
+**主要功能：**
 
-- Create and add tools through natural language (e.g. "add a tool that searches the web")
-- Share custom MCP servers Cline creates with others via the `~/Documents/Cline/MCP` directory
-- Displays configured MCP servers along with their tools, resources, and any error logs
+- 通过自然语言创建和添加工具（例如“添加一个搜索 Web 的工具”）
+- 通过 `~/Documents/Cline/MCP` 目录与他人共享 Cline 创建的自定义 MCP 服务器
+- 显示配置的 MCP 服务器及其工具、资源和任何错误日志
 
 </McpClient>
 
@@ -783,17 +783,17 @@ Cline is an autonomous coding agent in VS Code that edits files, runs commands, 
   supports="Tools"
 >
 
-CodeGPT is a popular VS Code and Jetbrains extension that brings AI-powered coding assistance to your editor. It supports integration with MCP servers for tools, allowing users to leverage external AI capabilities directly within their development workflow.
+CodeGPT 是一个流行的 VS Code 和 Jetbrains 扩展，将 AI 驱动的编码助手带到您的编辑器中。它支持与 MCP 服务器集成工具，允许用户在开发工作流中直接利用外部 AI 功能。
 
-**Key features:**
+**主要功能：**
 
-- Use MCP tools from any configured MCP server
-- Seamless integration with VS Code and Jetbrains UI
-- Supports multiple LLM providers and custom endpoints
+- 使用任何配置的 MCP 服务器中的 MCP 工具
+- 与 VS Code 和 Jetbrains UI 无缝集成
+- 支持多个 LLM 提供商和自定义端点
 
-**Learn more:**
+**了解更多：**
 
-- [CodeGPT Documentation](https://docs.codegpt.co/)
+- [CodeGPT 文档](https://docs.codegpt.co/)
 
 </McpClient>
 
@@ -804,15 +804,15 @@ CodeGPT is a popular VS Code and Jetbrains extension that brings AI-powered codi
   instructions="https://developers.openai.com/codex/mcp/"
 >
 
-Codex is a lightweight AI-powered coding agent from OpenAI that runs in your terminal.
+Codex 是 OpenAI 的一个轻量级 AI 驱动编码代理，在您的终端中运行。
 
-**Key features:**
+**主要功能：**
 
-- Support for MCP tools (listing and invocation)
-- Support for MCP resources (list, read, and templates)
-- Elicitation support (routes requests to TUI for user input)
-- Supports STDIO and HTTP streaming transports with OAuth
-- Also available as VS Code extension
+- 支持 MCP 工具（列表和调用）
+- 支持 MCP 资源（列表、读取和模板）
+- 支持 Elicitation（将请求路由到 TUI 以获取用户输入）
+- 支持带有 OAuth 的 STDIO 和 HTTP 流传输
+- 也可作为 VS Code 扩展使用
 
 </McpClient>
 
@@ -823,15 +823,15 @@ Codex is a lightweight AI-powered coding agent from OpenAI that runs in your ter
   instructions="https://docs.continue.dev/customize/deep-dives/mcp"
 >
 
-Continue is an open-source AI code assistant, with built-in support for MCP Tools, Resource, Prompts, and Apps
+Continue 是一个开源 AI 代码助手，内置支持 MCP 工具、资源、提示词和 Apps
 
-**Key features:**
+**主要功能：**
 
-- Type "@" to mention MCP resources
-- Prompt templates surface as slash commands
-- Use both built-in and MCP tools directly in chat
-- Limited MCP Apps support for displaying MCP UIs
-- Supports VS Code and JetBrains IDEs, with any LLM
+- 输入 "@" 提及 MCP 资源
+- 提示词模板显示为斜杠命令
+- 直接在聊天中使用内置和 MCP 工具
+- 有限的 MCP Apps 支持用于显示 MCP UI
+- 支持 VS Code 和 JetBrains IDEs，以及任何 LLM
 
 </McpClient>
 
@@ -841,13 +841,13 @@ Continue is an open-source AI code assistant, with built-in support for MCP Tool
   supports="Resources, Tools"
 >
 
-Copilot-MCP enables AI coding assistance via MCP.
+Copilot-MCP 通过 MCP 启用 AI 编码助手。
 
-**Key features:**
+**主要功能：**
 
-- Support for MCP tools and resources
-- Integration with development workflows
-- Extensible AI capabilities
+- 支持 MCP 工具和资源
+- 与开发工作流集成
+- 可扩展的 AI 功能
 
 </McpClient>
 
@@ -858,15 +858,15 @@ Copilot-MCP enables AI coding assistance via MCP.
   instructions="https://docs.cursor.com/context/model-context-protocol"
 >
 
-Cursor is an AI code editor.
+Cursor 是一个 AI 代码编辑器。
 
-**Key features:**
+**主要功能：**
 
-- Support for MCP tools in Cursor Composer
-- Support for roots
-- Support for prompts
-- Support for elicitation
-- Support for both STDIO and SSE
+- 支持 Cursor Composer 中的 MCP 工具
+- 支持 roots
+- 支持提示词
+- 支持 elicitation
+- 支持 STDIO 和 SSE
 
 </McpClient>
 
@@ -876,12 +876,12 @@ Cursor is an AI code editor.
   supports="Resources, Prompts, Tools"
 >
 
-Daydreams is a generative agent framework for executing anything onchain
+Daydreams 是一个用于在链上执行任何操作的生成代理框架
 
-**Key features:**
+**主要功能：**
 
-- Supports MCP Servers in config
-- Exposes MCP Client
+- 在配置中支持 MCP 服务器
+- 暴露 MCP 客户端
 
 </McpClient>
 
@@ -892,17 +892,17 @@ Daydreams is a generative agent framework for executing anything onchain
   supports="Resources, Prompts, Tools, Roots"
 >
 
-ECA is a Free and open-source editor-agnostic tool that aims to easily link LLMs and Editors, giving the best UX possible for AI pair programming using a well-defined protocol
+ECA 是一个免费且开源的编辑器无关工具，旨在轻松链接 LLM 和编辑器，使用定义良好的协议为 AI 结对编程提供最佳 UX
 
-**Key features:**
+**主要功能：**
 
-- **Editor-agnostic**: protocol for any editor to integrate.
-- **Single configuration**: Configure eca making it work the same in any editor via global or local configs.
-- **Chat** interface: ask questions, review code, work together to code.
-- **Agentic**: let LLM work as an agent with its native tools and MCPs you can configure.
-- **Context**: support: giving more details about your code to the LLM, including MCP resources and prompts.
-- **Multi models**: Login to OpenAI, Anthropic, Copilot, Ollama local models and many more.
-- **OpenTelemetry**: Export metrics of tools, prompts, server usage.
+- **编辑器无关**：任何编辑器集成的协议。
+- **单一配置**：配置 eca 使其通过全局或本地配置在任何编辑器中同样工作。
+- **聊天** 界面：提问、审查代码、共同编码。
+- **代理**：让 LLM 作为代理工作，使用其原生工具和您可以配置的 MCP。
+- **上下文** 支持：向 LLM 提供有关您的代码的更多详细信息，包括 MCP 资源和提示词。
+- **多模型**：登录 OpenAI、Anthropic、Copilot、Ollama 本地模型等。
+- **OpenTelemetry**：导出工具、提示词、服务器使用情况的指标。
 
 </McpClient>
 
@@ -912,11 +912,11 @@ ECA is a Free and open-source editor-agnostic tool that aims to easily link LLMs
   supports="Tools"
 >
 
-Emacs Mcp is an Emacs client designed to interface with MCP servers, enabling seamless connections and interactions. It provides MCP tool invocation support for AI plugins like [gptel](https://github.com/karthink/gptel) and [llm](https://github.com/ahyatt/llm), adhering to Emacs' standard tool invocation format. This integration enhances the functionality of AI tools within the Emacs ecosystem.
+Emacs Mcp 是一个旨在与 MCP 服务器接口的 Emacs 客户端，实现无缝连接和交互。它为 [gptel](https://github.com/karthink/gptel) 和 [llm](https://github.com/ahyatt/llm) 等 AI 插件提供 MCP 工具调用支持，遵循 Emacs 的标准工具调用格式。此集成增强了 Emacs 生态系统中 AI 工具的功能。
 
-**Key features:**
+**主要功能：**
 
-- Provides MCP tool support for Emacs.
+- 为 Emacs 提供 MCP 工具支持。
 
 </McpClient>
 
@@ -926,14 +926,14 @@ Emacs Mcp is an Emacs client designed to interface with MCP servers, enabling se
   supports="Resources, Prompts, Tools, Discovery, Sampling, Roots, Elicitation, Instructions"
 >
 
-fast-agent is a Python Agent framework, with simple declarative support for creating Agents and Workflows, with full multi-modal support for Anthropic and OpenAI models.
+fast-agent 是一个 Python 代理框架，具有用于创建代理和工作流的简单声明性支持，并对 Anthropic 和 OpenAI 模型提供完整的多模态支持。
 
-**Key features:**
+**主要功能：**
 
-- PDF and Image support, based on MCP Native types
-- Interactive front-end to develop and diagnose Agent applications, including passthrough and playback simulators
-- Built in support for "Building Effective Agents" workflows.
-- Deploy Agents as MCP Servers
+- 基于 MCP 原生类型的 PDF 和图像支持
+- 用于开发和诊断代理应用程序的交互式前端，包括直通和播放模拟器
+- 内置支持“构建有效代理”工作流。
+- 将代理部署为 MCP 服务器
 
 </McpClient>
 
@@ -944,14 +944,14 @@ fast-agent is a Python Agent framework, with simple declarative support for crea
   instructions="https://docs.firebender.com/context/mcp"
 >
 
-Firebender is an IntelliJ plugin that offers a world-class coding agent with MCP integration for tool calling.
+Firebender 是一个 IntelliJ 插件，提供世界级的编码代理，具有用于工具调用的 MCP 集成。
 
-**Key features:**
+**主要功能：**
 
-- Tool integration for executing commands and scripts via STDIO, SSE indirectly supported via mcp-remote npm package.
-- Local server connections for enhanced privacy and security
-- MCPs can be installed via project rules or local workstation rules files.
-- Individual tools within MCPs can be turned off.
+- 工具集成用于通过 STDIO 执行命令和脚本，通过 mcp-remote npm 包间接支持 SSE。
+- 本地服务器连接以增强隐私和安全性
+- 可以通过项目规则或本地工作站规则文件安装 MCP。
+- 可以关闭 MCP 中的单个工具。
 
 </McpClient>
 
@@ -961,20 +961,20 @@ Firebender is an IntelliJ plugin that offers a world-class coding agent with MCP
   supports="Tools"
 >
 
-FlowDown is a blazing fast and smooth client app for using AI/LLM, with a strong emphasis on privacy and user experience. It supports MCP servers to extend its capabilities with external tools, allowing users to build powerful, customized workflows.
+FlowDown 是一个用于使用 AI/LLM 的极速流畅客户端应用程序，强调隐私和用户体验。它支持 MCP 服务器以通过外部工具扩展其功能，允许用户构建强大的自定义工作流。
 
-**Key features:**
+**主要功能：**
 
-- **Seamless MCP Integration**: Easily connect to MCP servers to utilize a wide range of external tools.
-- **Privacy-First Design**: Your data stays on your device. We don't collect any user data, ensuring complete privacy.
-- **Lightweight & Efficient**: A compact and optimized design ensures a smooth and responsive experience with any AI model.
-- **Broad Compatibility**: Works with all OpenAI-compatible service providers and supports local offline models through MLX.
-- **Rich User Experience**: Features beautifully formatted Markdown, blazing-fast text rendering, and intelligent, automated chat titling.
+- **无缝 MCP 集成**：轻松连接到 MCP 服务器以利用各种外部工具。
+- **隐私优先设计**：您的数据保留在您的设备上。我们不收集任何用户数据，确保完全隐私。
+- **轻量级且高效**：紧凑且优化的设计确保与任何 AI 模型都能获得流畅且响应迅速的体验。
+- **广泛的兼容性**：适用于所有兼容 OpenAI 的服务提供商，并通过 MLX 支持本地离线模型。
+- **丰富的用户体验**：具有格式精美的 Markdown、极速文本渲染和智能自动聊天标题。
 
-**Learn more:**
+**了解更多：**
 
-- [FlowDown website](https://flowdown.ai/)
-- [FlowDown documentation](https://apps.qaq.wiki/docs/flowdown/)
+- [FlowDown 网站](https://flowdown.ai/)
+- [FlowDown 文档](https://apps.qaq.wiki/docs/flowdown/)
 
 </McpClient>
 
@@ -984,15 +984,15 @@ FlowDown is a blazing fast and smooth client app for using AI/LLM, with a strong
   supports="Tools"
 >
 
-Think n8n + ChatGPT. FLUJO is a desktop application that integrates with MCP to provide a workflow-builder interface for AI interactions. Built with Next.js and React, it supports both online and offline (ollama) models, it manages API Keys and environment variables centrally and can install MCP Servers from GitHub. FLUJO has a ChatCompletions endpoint and flows can be executed from other AI applications like Cline, Roo or Claude.
+Think n8n + ChatGPT。FLUJO 是一个桌面应用程序，与 MCP 集成，为 AI 交互提供工作流构建器界面。使用 Next.js 和 React 构建，支持在线和离线 (ollama) 模型，集中管理 API 密钥和环境变量，并可以从 GitHub 安装 MCP 服务器。FLUJO 有一个 ChatCompletions 端点，流程可以从其他 AI 应用程序（如 Cline、Roo 或 Claude）执行。
 
-**Key features:**
+**主要功能：**
 
-- Environment & API Key Management
-- Model Management
-- MCP Server Integration
-- Workflow Orchestration
-- Chat Interface
+- 环境和 API 密钥管理
+- 模型管理
+- MCP 服务器集成
+- 工作流编排
+- 聊天界面
 
 </McpClient>
 
@@ -1003,7 +1003,7 @@ Think n8n + ChatGPT. FLUJO is a desktop application that integrates with MCP to 
   instructions="https://geminicli.com/docs/tools/mcp-server/"
 >
 
-Gemini CLI is an open-source AI agent that brings the power of Gemini directly into your terminal.
+Gemini CLI 是一个开源 AI 代理，将 Gemini 的力量直接带入您的终端。
 
 </McpClient>
 
@@ -1014,13 +1014,13 @@ Gemini CLI is an open-source AI agent that brings the power of Gemini directly i
   supports="Resources, Tools"
 >
 
-Programmatically assemble prompts for LLMs using GenAIScript (in JavaScript). Orchestrate LLMs, tools, and data in JavaScript.
+使用 GenAIScript（在 JavaScript 中）以编程方式组装 LLM 提示词。在 JavaScript 中编排 LLM、工具和数据。
 
-**Key features:**
+**主要功能：**
 
-- JavaScript toolbox to work with prompts
-- Abstraction to make it easy and productive
-- Seamless Visual Studio Code integration
+- 用于处理提示词的 JavaScript 工具箱
+- 抽象化使其易于且富有成效
+- 无缝 Visual Studio Code 集成
 
 </McpClient>
 
@@ -1030,14 +1030,14 @@ Programmatically assemble prompts for LLMs using GenAIScript (in JavaScript). Or
   supports="Resources (partial), Prompts, Tools"
 >
 
-Genkit is a cross-language SDK for building and integrating GenAI features into applications. The [genkitx-mcp](https://github.com/firebase/genkit/tree/main/js/plugins/mcp) plugin enables consuming MCP servers as a client or creating MCP servers from Genkit tools and prompts.
+Genkit 是一个跨语言 SDK，用于在应用程序中构建和集成 GenAI 功能。[genkitx-mcp](https://github.com/firebase/genkit/tree/main/js/plugins/mcp) 插件支持将 MCP 服务器作为客户端使用，或从 Genkit 工具和提示词创建 MCP 服务器。
 
-**Key features:**
+**主要功能：**
 
-- Client support for tools and prompts (resources partially supported)
-- Rich discovery with support in Genkit's Dev UI playground
-- Seamless interoperability with Genkit's existing tools and prompts
-- Works across a wide variety of GenAI models from top providers
+- 支持工具和提示词的客户端（资源部分支持）
+- 在 Genkit 的 Dev UI playground 中支持丰富的发现
+- 与 Genkit 现有工具和提示词的无缝互操作性
+- 适用于来自顶级提供商的各种 GenAI 模型
 
 </McpClient>
 
@@ -1047,13 +1047,13 @@ Genkit is a cross-language SDK for building and integrating GenAI features into 
   supports="Tools, DCR"
 >
 
-Delegate tasks to GitHub Copilot coding agent and let it work in the background while you stay focused on the highest-impact and most interesting work
+将任务委托给 GitHub Copilot 编码代理，让它后台工作，而您专注于最高影响和最有趣的工作
 
-**Key features:**
+**主要功能：**
 
-- Delegate tasks to Copilot from GitHub Issues, Visual Studio Code, GitHub Copilot Chat or from your favorite MCP host using the GitHub MCP Server
-- Tailor Copilot to your project by [customizing the agent's development environment](https://docs.github.com/en/enterprise-cloud@latest/copilot/how-tos/agents/copilot-coding-agent/customizing-the-development-environment-for-copilot-coding-agent#preinstalling-tools-or-dependencies-in-copilots-environment) or [writing custom instructions](https://docs.github.com/en/enterprise-cloud@latest/copilot/how-tos/agents/copilot-coding-agent/best-practices-for-using-copilot-to-work-on-tasks#adding-custom-instructions-to-your-repository)
-- [Augment Copilot's context and capabilities with MCP tools](https://docs.github.com/en/enterprise-cloud@latest/copilot/how-tos/agents/copilot-coding-agent/extending-copilot-coding-agent-with-mcp), with support for both local and remote MCP servers
+- 从 GitHub Issues、Visual Studio Code、GitHub Copilot Chat 或使用 GitHub MCP 服务器的您喜欢的 MCP 主机将任务委托给 Copilot
+- 通过 [自定义代理的开发环境](https://docs.github.com/en/enterprise-cloud@latest/copilot/how-tos/agents/copilot-coding-agent/customizing-the-development-environment-for-copilot-coding-agent#preinstalling-tools-or-dependencies-in-copilots-environment) 或 [编写自定义指令](https://docs.github.com/en/enterprise-cloud@latest/copilot/how-tos/agents/copilot-coding-agent/best-practices-for-using-copilot-to-work-on-tasks#adding-custom-instructions-to-your-repository)  tailored Copilot 到您的项目
+- [使用 MCP 工具增强 Copilot 的上下文和功能](https://docs.github.com/en/enterprise-cloud@latest/copilot/how-tos/agents/copilot-coding-agent/extending-copilot-coding-agent-with-mcp)，支持本地和远程 MCP 服务器
 
 </McpClient>
 
@@ -1063,16 +1063,16 @@ Delegate tasks to GitHub Copilot coding agent and let it work in the background 
   supports="Discovery, Elicitation, Instructions, Prompts, Resources, Sampling, Tasks, Tools"
 >
 
-Glama is a comprehensive AI workspace and integration platform that offers a unified interface to leading LLM providers, including OpenAI, Anthropic, and others. It supports the Model Context Protocol (MCP) ecosystem, enabling developers and enterprises to easily discover, build, and manage MCP servers.
+Glama 是一个全面的 AI 工作区和集成平台，提供统一界面访问领先的 LLM 提供商，包括 OpenAI、Anthropic 等。它支持模型上下文协议 (MCP) 生态系统，使开发者和企业能够轻松发现、构建和管理 MCP 服务器。
 
-**Key features:**
+**主要功能：**
 
-- Integrated [MCP Server Directory](https://glama.ai/mcp/servers)
-- Integrated [MCP Tool Directory](https://glama.ai/mcp/tools)
-- Host MCP servers and access them via the Chat or SSE endpoints
-  – Ability to chat with multiple LLMs and MCP servers at once
-- Upload and analyze local files and data
-- Full-text search across all your chats and data
+- 集成 [MCP 服务器目录](https://glama.ai/mcp/servers)
+- 集成 [MCP 工具目录](https://glama.ai/mcp/tools)
+- 托管 MCP 服务器并通过聊天或 SSE 端点访问它们
+  – 能够同时与多个 LLM 和 MCP 服务器聊天
+- 上传和分析本地文件和数据
+- 在所有聊天和数据中进行全文搜索
 
 </McpClient>
 
@@ -1083,14 +1083,14 @@ Glama is a comprehensive AI workspace and integration platform that offers a uni
   instructions="https://block.github.io/goose/docs/getting-started/using-extensions/"
 >
 
-goose is an open source AI agent that supercharges your software development by automating coding tasks.
+goose 是一个开源 AI 代理，通过自动化编码任务增强您的软件开发。
 
-**Key features:**
+**主要功能：**
 
-- Expose MCP functionality to goose through tools.
-- MCPs can be installed directly via the [extensions directory](https://block.github.io/goose/v1/extensions/), CLI, or UI.
-- goose allows you to extend its functionality by [building your own MCP servers](https://block.github.io/goose/docs/tutorials/custom-extensions).
-- Includes built-in extensions for development, memory, computer control, and auto-visualization.
+- 通过工具向 goose 暴露 MCP 功能。
+- 可以直接通过 [扩展目录](https://block.github.io/goose/v1/extensions/)、CLI 或 UI 安装 MCP。
+- goose 允许您通过 [构建自己的 MCP 服务器](https://block.github.io/goose/docs/tutorials/custom-extensions) 扩展其功能。
+- 包括用于开发、记忆、计算机控制和自动可视化的内置扩展。
 
 </McpClient>
 
@@ -1100,14 +1100,14 @@ goose is an open source AI agent that supercharges your software development by 
   supports="Tools"
 >
 
-gptme is a open-source terminal-based personal AI assistant/agent, designed to assist with programming tasks and general knowledge work.
+gptme 是一个开源的基于终端的个人 AI 助手/代理，旨在协助编程任务和一般知识工作。
 
-**Key features:**
+**主要功能：**
 
-- CLI-first design with a focus on simplicity and ease of use
-- Rich set of built-in tools for shell commands, Python execution, file operations, and web browsing
-- Local-first approach with support for multiple LLM providers
-- Open-source, built to be extensible and easy to modify
+- 以 CLI 为先的设计，注重简单易用
+- 丰富的内置工具集，用于 shell 命令、Python 执行、文件操作和 Web 浏览
+- 本地优先的方法，支持多个 LLM 提供商
+- 开源，旨在可扩展且易于修改
 
 </McpClient>
 
@@ -1118,15 +1118,15 @@ gptme is a open-source terminal-based personal AI assistant/agent, designed to a
   instructions="https://hyperbrowser.ai/docs/hyperagent/mcp"
 >
 
-HyperAgent is Playwright supercharged with AI. With HyperAgent, you no longer need brittle scripts, just powerful natural language commands. Using MCP servers, you can extend the capability of HyperAgent, without having to write any code.
+HyperAgent 是 Playwright 的 AI 增强版。使用 HyperAgent，您不再需要脆弱的脚本，只需强大的自然语言命令。使用 MCP 服务器，您可以扩展 HyperAgent 的功能，而无需编写任何代码。
 
-**Key features:**
+**主要功能：**
 
-- AI Commands: Simple APIs like page.ai(), page.extract() and executeTask() for any AI automation
-- Fallback to Regular Playwright: Use regular Playwright when AI isn't needed
-- Stealth Mode – Avoid detection with built-in anti-bot patches
-- Cloud Ready – Instantly scale to hundreds of sessions via [Hyperbrowser](https://www.hyperbrowser.ai/)
-- MCP Client – Connect to tools like Composio for full workflows (e.g. writing web data to Google Sheets)
+- AI 命令：简单的 API，如 page.ai()、page.extract() 和 executeTask() 用于任何 AI 自动化
+- 回退到常规 Playwright：当不需要 AI 时使用常规 Playwright
+- 隐身模式 – 通过内置的防机器人补丁避免检测
+- 云就绪 – 通过 [Hyperbrowser](https://www.hyperbrowser.ai/)  instant 扩展到数百个会话
+- MCP 客户端 – 连接到 Composio 等工具以进行完整工作流（例如将 Web 数据写入 Google Sheets）
 
 </McpClient>
 <McpClient
@@ -1136,18 +1136,18 @@ HyperAgent is Playwright supercharged with AI. With HyperAgent, you no longer ne
   instructions="https://bob.ibm.com/docs/ide/configuration/mcp/mcp-in-bob"
 >
 
-IBM Bob is an AI SDLC partner that enables AI coding assistance via MCP. Built with security-first principles and enterprise-grade deployment flexibility, Bob integrates security into development workflows through shift-left practices, helping accelerate modernization while maintaining governance and compliance.
+IBM Bob 是一个 AI SDLC 合作伙伴，通过 MCP 启用 AI 编码助手。Bob  built with 安全优先原则和企业级部署灵活性，通过左移实践将安全集成到开发工作流中，帮助加速现代化同时保持治理和合规性。
 
-**Key features:**
+**主要功能：**
 
-- Support for MCP tools and resources with fine-grained control
-- Global and project-level MCP server configuration
-- STDIO and SSE transport support for local and remote servers
-- Individual tool enable/disable for optimized context usage
-- Auto-approval capabilities for trusted tools
-- Built-in MCP server creation through natural language
-- Enterprise-grade security with shift-left integration
-- Integration with development workflows
+- 支持具有细粒度控制的 MCP 工具和资源
+- 全局和项目级 MCP 服务器配置
+- 支持本地和远程服务器的 STDIO 和 SSE 传输
+- 单独工具启用/禁用以优化上下文使用
+- 受信任工具的自动批准功能
+- 通过自然语言内置 MCP 服务器创建
+- 具有左移集成的企业级安全
+- 与开发工作流集成
 
 </McpClient>
 
@@ -1158,14 +1158,14 @@ IBM Bob is an AI SDLC partner that enables AI coding assistance via MCP. Built w
   instructions="https://tryinspector.com/docs"
 >
 
-Inspector is a visual editor for your codebase. It connects to Cursor, Claude Code, and Codex so you can edit your frontend visually. Move elements, change text, and ship real code without touching CSS.
+Inspector 是一个用于代码库的可视化编辑器。它连接到 Cursor、Claude Code 和 Codex，以便您可以可视化地编辑前端。移动元素、更改文本并发布真实代码，而无需触碰 CSS。
 
-**Key features:**
+**主要功能：**
 
-- Design Mode: Move elements, edit text, and zoom in to interact with your front-end like Figma.
-- Agent Connect: Plug in Cursor, Claude Code, or Codex.
-- Version Control: Stage changes and open PRs from Inspector.
-- MCP Client: Connect any MCP Server you want!
+- 设计模式：移动元素、编辑文本并放大以像 Figma 一样与前端交互。
+- 代理连接：插入 Cursor、Claude Code 或 Codex。
+- 版本控制：从 Inspector 暂存更改并打开 PR。
+- MCP 客户端：连接任何您想要的 MCP 服务器！
 
 </McpClient>
 
@@ -1175,17 +1175,17 @@ Inspector is a visual editor for your codebase. It connects to Cursor, Claude Co
   supports="Tools, Discovery"
 >
 
-Jenova is the best MCP client for non-technical users, especially on mobile.
+Jenova 是非技术用户的最佳 MCP 客户端，尤其是在移动端。
 
-**Key features:**
+**主要功能：**
 
-- 30+ pre-integrated MCP servers with one-click integration of custom servers
-- MCP recommendation capability that suggests the best servers for specific tasks
-- Multi-agent architecture with leading tool use reliability and scalability, supporting unlimited concurrent MCP server connections through RAG-powered server metadata
-- Model agnostic platform supporting any leading LLMs (OpenAI, Anthropic, Google, etc.)
-- Unlimited chat history and global persistent memory powered by RAG
-- Easy creation of custom agents with custom models, instructions, knowledge bases, and MCP servers
-- Local MCP server (STDIO) support coming soon with desktop apps
+- 30+ 预集成 MCP 服务器，一键集成自定义服务器
+- MCP 推荐功能，为特定任务建议最佳服务器
+- 多代理架构，具有领先的工具使用可靠性和可扩展性，通过 RAG 驱动的服务器元数据支持无限并发 MCP 服务器连接
+- 模型无关平台，支持任何领先的 LLM（OpenAI、Anthropic、Google 等）
+- 无限聊天历史和由 RAG 驱动的全局持久记忆
+- 轻松创建具有自定义模型、指令、知识库和 MCP 服务器的自定义代理
+- 本地 MCP 服务器 (STDIO) 支持即将通过桌面应用程序推出
 
 </McpClient>
 
@@ -1196,15 +1196,15 @@ Jenova is the best MCP client for non-technical users, especially on mobile.
   instructions="https://www.jetbrains.com/help/ai-assistant/mcp.html"
 >
 
-JetBrains AI Assistant plugin provides AI-powered features for software development available in all JetBrains IDEs.
+JetBrains AI Assistant 插件为所有 JetBrains IDE 中可用的软件开发提供 AI 驱动的功能。
 
-**Key features:**
+**主要功能：**
 
-- Unlimited code completion powered by Mellum, JetBrains' proprietary AI model.
-- Context-aware AI chat that understands your code and helps you in real time.
-- Access to top-tier models from OpenAI, Anthropic, and Google.
-- Offline mode with connected local LLMs via Ollama or LM Studio.
-- Deep integration into IDE workflows, including code suggestions in the editor, VCS assistance, runtime error explanation, and more.
+- 由 Mellum（JetBrains 的专有 AI 模型）驱动的无限代码补全。
+- 上下文感知的 AI 聊天，理解您的代码并实时帮助您。
+- 访问来自 OpenAI、Anthropic 和 Google 的顶级模型。
+- 通过 Ollama 或 LM Studio 连接本地 LLM 的离线模式。
+- 深度集成到 IDE 工作流中，包括编辑器中的代码建议、VCS 协助、运行时错误解释等。
 
 </McpClient>
 
@@ -1215,13 +1215,13 @@ JetBrains AI Assistant plugin provides AI-powered features for software developm
   instructions="https://www.jetbrains.com/help/junie/model-context-protocol-mcp.html"
 >
 
-Junie is JetBrains' AI coding agent for JetBrains IDEs and Android Studio.
+Junie 是 JetBrains 用于 JetBrains IDEs 和 Android Studio 的 AI 编码代理。
 
-**Key features:**
+**主要功能：**
 
-- Connects to MCP servers over **stdio** to use external tools and data sources.
-- Per-command approval with an optional allowlist.
-- Config via `mcp.json` (global `~/.junie/mcp.json` or project `.junie/mcp/`).
+- 通过 **stdio** 连接到 MCP 服务器以使用外部工具和数据源。
+- 每命令批准，带有可选的允许列表。
+- 通过 `mcp.json` 配置（全局 `~/.junie/mcp.json` 或项目 `.junie/mcp/`）。
 
 </McpClient>
 
@@ -1232,15 +1232,15 @@ Junie is JetBrains' AI coding agent for JetBrains IDEs and Android Studio.
   supports="Prompts, Tools, Sampling, Elicitation, Apps"
 >
 
-Joey is a mobile-first MCP client for **iOS and Android** (also available on macOS, Windows, and Linux) that connects to AI models via OpenRouter and remote MCP servers over Streamable HTTP.
+Joey 是一个面向移动端的 MCP 客户端，适用于 **iOS 和 Android**（也可在 macOS、Windows 和 Linux 上使用），通过 OpenRouter 和远程 MCP 服务器 over Streamable HTTP 连接到 AI 模型。
 
-**Key features:**
+**主要功能：**
 
-- **Mobile MCP support** — use MCP servers directly from your phone or tablet on iOS and Android.
-- Connects to remote MCP servers over **Streamable HTTP** with OAuth support.
-- Supports multiple MCP servers per conversation with tool calling.
-- MCP sampling and elicitation support for interactive server-initiated workflows.
-- Image and audio attachments with SSE streaming responses.
+- **移动 MCP 支持** — 直接在 iOS 和 Android 手机或平板电脑上使用 MCP 服务器。
+- 通过 **Streamable HTTP** 连接到远程 MCP 服务器，支持 OAuth。
+- 支持每次对话多个 MCP 服务器，带有工具调用。
+- 支持 MCP 采样和 elicitation 用于交互式服务器发起的工作流。
+- 带有 SSE 流响应的图像和音频附件。
 
 </McpClient>
 
@@ -1251,14 +1251,14 @@ Joey is a mobile-first MCP client for **iOS and Android** (also available on mac
   instructions="https://kilo.ai/docs/features/mcp/using-mcp-in-kilo-code"
 >
 
-Kilo Code is an autonomous coding AI dev team in VS Code that edits files, runs commands, uses a browser, and more.
+Kilo Code 是 VS Code 中的自主编码 AI 开发团队，可以编辑文件、运行命令、使用浏览器等。
 
-**Key features:**
+**主要功能：**
 
-- Create and add tools through natural language (e.g. "add a tool that searches the web")
-- Discover MCP servers via the MCP Marketplace
-- One click MCP server installs via MCP Marketplace
-- Displays configured MCP servers along with their tools, resources, and any error logs
+- 通过自然语言创建和添加工具（例如“添加一个搜索 Web 的工具”）
+- 通过 MCP 市场发现 MCP 服务器
+- 通过 MCP 市场一键安装 MCP 服务器
+- 显示配置的 MCP 服务器及其工具、资源和任何错误日志
 
 </McpClient>
 
@@ -1269,18 +1269,18 @@ Kilo Code is an autonomous coding AI dev team in VS Code that edits files, runs 
   supports="Resources, Tools"
 >
 
-Klavis AI is an Open-Source Infra to Use, Build & Scale MCPs with ease.
+Klavis AI 是一个开源基础设施，用于轻松使用、构建和扩展 MCP。
 
-**Key features:**
+**主要功能：**
 
-- Slack/Discord/Web MCP clients for using MCPs directly
-- Simple web UI dashboard for easy MCP configuration
-- Direct OAuth integration with Slack & Discord Clients and MCP Servers for secure user authentication
-- SSE transport support
+- 用于直接使用 MCP 的 Slack/Discord/Web MCP 客户端
+- 用于轻松 MCP 配置的简单 Web UI 仪表板
+- 与 Slack & Discord 客户端和 MCP 服务器直接 OAuth 集成，用于安全用户身份验证
+- 支持 SSE 传输
 
-**Learn more:**
+**了解更多：**
 
-- [Demo video showing MCP usage in Slack/Discord](https://youtu.be/9-QQAhrQWw8)
+- [展示 Slack/Discord 中 MCP 用法的演示视频](https://youtu.be/9-QQAhrQWw8)
 
 </McpClient>
 
@@ -1291,13 +1291,13 @@ Klavis AI is an Open-Source Infra to Use, Build & Scale MCPs with ease.
   instructions="https://docs.langdock.com/resources/integrations/mcp"
 >
 
-Langdock is the enterprise-ready solution for rolling out AI to all of your employees while enabling your developers to build and deploy custom AI workflows on top.
+Langdock 是一个企业级解决方案，用于向所有员工推出 AI，同时使开发人员能够在其上构建和部署自定义 AI 工作流。
 
-**Key features:**
+**主要功能：**
 
-- Remote MCP Server (SSE & Streamable HTTP) support, connect to any MCP server via OAuth, API Key, or without authentication.
-- MCP Tool discovery and management, including tool confirmation UI.
-- Enterprise-grade security and compliance features
+- 远程 MCP 服务器（SSE & Streamable HTTP）支持，通过 OAuth、API 密钥或 without authentication 连接到任何 MCP 服务器。
+- MCP 工具发现和管理，包括工具确认 UI。
+- 企业级安全和合规功能
 
 </McpClient>
 
@@ -1308,17 +1308,17 @@ Langdock is the enterprise-ready solution for rolling out AI to all of your empl
   instructions="https://docs.langflow.org/mcp-client"
 >
 
-Langflow is an open-source visual builder that lets developers rapidly prototype and build AI applications, it integrates with the Model Context Protocol (MCP) as both an MCP server and an MCP client.
+Langflow 是一个开源可视化构建器，让开发人员能够快速原型化和构建 AI 应用程序，它作为 MCP 服务器和 MCP 客户端与模型上下文协议 (MCP) 集成。
 
-**Key features:**
+**主要功能：**
 
-- Full support for using MCP server tools to build agents and flows.
-- Export agents and flows as MCP server
-- Local & remote server connections for enhanced privacy and security
+- 全面支持使用 MCP 服务器工具构建代理和工作流。
+- 将代理和工作流导出为 MCP 服务器
+- 本地和远程服务器连接以增强隐私和安全性
 
-**Learn more:**
+**了解更多：**
 
-- [Demo video showing how to use Langflow as both an MCP client & server](https://www.youtube.com/watch?v=pEjsaVVPjdI)
+- [展示如何将 Langflow 用作 MCP 客户端和服务器的演示视频](https://www.youtube.com/watch?v=pEjsaVVPjdI)
 
 </McpClient>
 
@@ -1329,14 +1329,14 @@ Langflow is an open-source visual builder that lets developers rapidly prototype
   instructions="https://www.librechat.ai/docs/features/mcp"
 >
 
-LibreChat is an open-source, customizable AI chat UI that supports multiple AI providers, now including MCP integration.
+LibreChat 是一个开源、可定制的 AI 聊天 UI，支持多个 AI 提供商，现在包括 MCP 集成。
 
-**Key features:**
+**主要功能：**
 
-- Extend current tool ecosystem, including [Code Interpreter](https://www.librechat.ai/docs/features/code_interpreter) and Image generation tools, through MCP servers
-- Add tools to customizable [Agents](https://www.librechat.ai/docs/features/agents), using a variety of LLMs from top providers
-- Open-source and self-hostable, with secure multi-user support
-- Future roadmap includes expanded MCP feature support
+- 通过 MCP 服务器扩展当前工具生态系统，包括 [代码解释器](https://www.librechat.ai/docs/features/code_interpreter) 和图像生成工具
+- 使用来自顶级提供商的各种 LLM 将工具添加到可定制的 [代理](https://www.librechat.ai/docs/features/agents)
+- 开源且可自托管，具有安全的多用户支持
+- 未来路线图包括扩展的 MCP 功能支持
 
 </McpClient>
 
@@ -1347,21 +1347,21 @@ LibreChat is an open-source, customizable AI chat UI that supports multiple AI p
   instructions="https://lmstudio.ai/docs/app/mcp"
 >
 
-LM Studio is a cross-platform desktop app for discovering, downloading, and running open-source LLMs locally. You can now connect local models to tools via Model Context Protocol (MCP).
+LM Studio 是一个跨平台桌面应用程序，用于本地发现、下载和运行开源 LLM。您现在可以通过模型上下文协议 (MCP) 将本地模型连接到工具。
 
-**Key features:**
+**主要功能：**
 
-- Use MCP servers with local models on your computer. Add entries to `mcp.json` and save to get started.
-- Tool confirmation UI: when a model calls a tool, you can confirm the call in the LM Studio app.
-- Cross-platform: runs on macOS, Windows, and Linux, one-click installer with no need to fiddle in the command line
-- Supports GGUF (llama.cpp) or MLX models with GPU acceleration
-- GUI & terminal mode: use the LM Studio app or CLI (lms) for scripting and automation
+- 在您的计算机上将 MCP 服务器与本地模型一起使用。将条目添加到 `mcp.json` 并保存以开始。
+- 工具确认 UI：当模型调用工具时，您可以在 LM Studio 应用程序中确认调用。
+- 跨平台：运行于 macOS、Windows 和 Linux，一键安装程序，无需在命令行中摆弄
+- 支持带有 GPU 加速的 GGUF (llama.cpp) 或 MLX 模型
+- GUI 和终端模式：使用 LM Studio 应用程序或 CLI (lms) 进行脚本编写和自动化
 
-**Learn more:**
+**了解更多：**
 
-- [Docs: Using MCP in LM Studio](https://lmstudio.ai/docs/app/plugins/mcp)
-- [Create a 'Add to LM Studio' button for your server](https://lmstudio.ai/docs/app/plugins/mcp/deeplink)
-- [Announcement blog: LM Studio + MCP](https://lmstudio.ai/blog/mcp)
+- [文档：在 LM Studio 中使用 MCP](https://lmstudio.ai/docs/app/plugins/mcp)
+- [为您的服务器创建“添加到 LM Studio"按钮](https://lmstudio.ai/docs/app/plugins/mcp/deeplink)
+- [公告博客：LM Studio + MCP](https://lmstudio.ai/blog/mcp)
 
 </McpClient>
 
@@ -1371,19 +1371,19 @@ LM Studio is a cross-platform desktop app for discovering, downloading, and runn
   supports="Tools"
 >
 
-LM-Kit.NET is a local-first Generative AI SDK for .NET (C# / VB.NET) that can act as an **MCP client**. Current MCP support: **Tools only**.
+LM-Kit.NET 是一个本地优先的 .NET (C# / VB.NET) 生成式 AI SDK，可以作为 **MCP 客户端**。当前 MCP 支持：**仅限工具**。
 
-**Key features:**
+**主要功能：**
 
-- Consume MCP server tools over HTTP/JSON-RPC 2.0 (initialize, list tools, call tools).
-- Programmatic tool discovery and invocation via `McpClient`.
-- Easy integration in .NET agents and applications.
+- 通过 HTTP/JSON-RPC 2.0 使用 MCP 服务器工具（初始化、列出工具、调用工具）。
+- 通过 `McpClient`  programmatically 工具发现和调用。
+- 易于集成到 .NET 代理和应用程序中。
 
-**Learn more:**
+**了解更多：**
 
-- [Docs: Using MCP in LM-Kit.NET](https://docs.lm-kit.com/lm-kit-net/api/LMKit.Mcp.Client.McpClient.html)
-- [Creating AI agents](https://lm-kit.com/solutions/ai-agents)
-- Product page: [LM-Kit.NET](https://lm-kit.com/products/lm-kit-net/)
+- [文档：在 LM-Kit.NET 中使用 MCP](https://docs.lm-kit.com/lm-kit-net/api/LMKit.Mcp.Client.McpClient.html)
+- [创建 AI 代理](https://lm-kit.com/solutions/ai-agents)
+- 产品页面：[LM-Kit.NET](https://lm-kit.com/products/lm-kit-net/)
 
 </McpClient>
 
@@ -1393,18 +1393,18 @@ LM-Kit.NET is a local-first Generative AI SDK for .NET (C# / VB.NET) that can ac
   supports="Resources, Prompts, Tools"
 >
 
-Lutra is an AI agent that transforms conversations into actionable, automated workflows.
+Lutra 是一个 AI 代理，将对话转换为可操作的自动化工作流。
 
-**Key features:**
+**主要功能：**
 
-- Easy MCP Integration: Connecting Lutra to MCP servers is as simple as providing the server URL; Lutra handles the rest behind the scenes.
-- Chat to Take Action: Lutra understands your conversational context and goals, automatically integrating with your existing apps to perform tasks.
-- Reusable Playbooks: After completing a task, save the steps as reusable, automated workflows—simplifying repeatable processes and reducing manual effort.
-- Shareable Automations: Easily share your saved playbooks with teammates to standardize best practices and accelerate collaborative workflows.
+- 简单的 MCP 集成：将 Lutra 连接到 MCP 服务器就像提供服务器 URL 一样简单；Lutra 在后台处理其余部分。
+- 聊天以采取行动：Lutra 理解您的对话上下文和目标，自动与您的现有应用程序集成以执行任务。
+- 可重用的剧本：完成任务后，将步骤保存为可重用的自动化工作流——简化可重复的流程并减少手动工作。
+- 可共享的自动化：轻松与团队成员共享您保存的剧本，以标准化最佳实践并加速协作工作流。
 
-**Learn more:**
+**了解更多：**
 
-- [Lutra AI agent explained (video)](https://www.youtube.com/watch?v=W5ZpN0cMY70)
+- [Lutra AI 代理解释（视频）](https://www.youtube.com/watch?v=W5ZpN0cMY70)
 
 </McpClient>
 
@@ -1414,19 +1414,19 @@ Lutra is an AI agent that transforms conversations into actionable, automated wo
   supports="Resources, Prompts, Tools"
 >
 
-MCP Bundler is perfect local proxy for your MCP workflow. The app centralizes all your MCP servers — toggle, group, turn off capabilities instantly. Switch bundles on the fly inside the MCP Bundler.
+MCP Bundler 是您的 MCP 工作流的完美本地代理。该应用程序集中所有您的 MCP 服务器——瞬间切换、分组、关闭功能。在 MCP Bundler 内瞬间切换捆绑包。
 
-**Key features:**
+**主要功能：**
 
-- Unified Control Panel: Manage all your MCP servers — both Local STDIO and Remote HTTP/SSE — from one clear macOS window. Start, stop, or edit them instantly without touching configs.
-- One Click, All Connected: Launch or disable entire MCP setups with one toggle. Switch bundles per project or workspace and keep your AI tools synced automatically.
-- Per-Tool Control: Enable or hide individual tools inside each server. Keep your bundles clean, lightweight, and tailored for every AI workflow.
-- Instant Health & Logs: Real-time health indicators and request logs show exactly what's running. Diagnose and fix connection issues without leaving the app.
-- Auto-Generate MCP Config: Copy a ready-made JSON snippet for any client in seconds. No manual wiring — connect your Bundler as a single MCP endpoint.
+- 统一控制面板：从一个清晰的 macOS 窗口管理所有您的 MCP 服务器——本地 STDIO 和远程 HTTP/SSE。瞬间启动、停止或编辑它们，无需触碰配置。
+- 一键，全部连接：通过一个切换启动或禁用整个 MCP 设置。按项目或工作区切换捆绑包，并保持您的 AI 工具自动同步。
+- 每工具控制：启用或隐藏每个服务器内的单个工具。保持您的捆绑包干净、轻量级，并为每个 AI 工作流量身定制。
+- 即时健康和日志：实时健康指标和请求日志准确显示正在运行的内容。无需离开应用程序即可诊断和修复连接问题。
+- 自动生成 MCP 配置：在几秒钟内为任何客户端复制现成的 JSON 片段。无需手动接线——将您的 Bundler 连接为单个 MCP 端点。
 
-**Learn more:**
+**了解更多：**
 
-- [MCP Bundler in action (video)](https://www.youtube.com/watch?v=CEHVSShw_NU)
+- [MCP Bundler 实战（视频）](https://www.youtube.com/watch?v=CEHVSShw_NU)
 
 </McpClient>
 
@@ -1436,15 +1436,15 @@ MCP Bundler is perfect local proxy for your MCP workflow. The app centralizes al
   supports="Resources, Prompts, Tools, Discovery"
 >
 
-MCPBundles provides MCPBundle Studio, a browser-based MCP client for testing and executing MCP tools on remote MCP servers.
+MCPBundles 提供 MCPBundle Studio，一个基于浏览器的 MCP 客户端，用于在远程 MCP 服务器上测试和执行 MCP 工具。
 
-**Key features:**
+**主要功能：**
 
-- Discover and inspect available tools with parameter schemas and descriptions
-- Supports OAuth and API key authentication for secure provider connections
-- Execute MCP tools with form-based and chat based input
-- Implements Apps for rendering interactive UI responses from tools
-- Streamable HTTP transport for remote MCP server connections
+- 发现和检查可用工具，带有参数模式和描述
+- 支持 OAuth 和 API 密钥身份验证以确保安全的提供商连接
+- 使用基于表单和基于聊天的输入执行 MCP 工具
+- 实现 Apps 用于渲染来自工具的交互式 UI 响应
+- 用于远程 MCP 服务器连接的 Streamable HTTP 传输
 
 </McpClient>
 
@@ -1455,14 +1455,14 @@ MCPBundles provides MCPBundle Studio, a browser-based MCP client for testing and
   instructions="https://docs.mcp-agent.com/reference/configuration"
 >
 
-mcp-agent is a simple, composable framework to build agents using Model Context Protocol.
+mcp-agent 是一个简单、可组合的框架，用于使用模型上下文协议构建代理。
 
-**Key features:**
+**主要功能：**
 
-- Automatic connection management of MCP servers.
-- Expose tools from multiple servers to an LLM.
-- Implements every pattern defined in [Building Effective Agents](https://www.anthropic.com/research/building-effective-agents).
-- Supports workflow pause/resume signals, such as waiting for human feedback.
+- 自动管理 MCP 服务器的连接。
+- 向 LLM 暴露来自多个服务器的工具。
+- 实现 [构建有效代理](https://www.anthropic.com/research/building-effective-agents) 中定义的每种模式。
+- 支持工作流暂停/恢复信号，例如等待人类反馈。
 
 </McpClient>
 
@@ -1472,13 +1472,13 @@ mcp-agent is a simple, composable framework to build agents using Model Context 
   supports="Tools"
 >
 
-mcp-client-chatbot is a local-first chatbot built with Vercel's Next.js, AI SDK, and Shadcn UI.
+mcp-client-chatbot 是一个使用 Vercel 的 Next.js、AI SDK 和 Shadcn UI 构建的本地优先聊天机器人。
 
-**Key features:**
+**主要功能：**
 
-- It supports standard MCP tool calling and includes both a custom MCP server and a standalone UI for testing MCP tools outside the chat flow.
-- All MCP tools are provided to the LLM by default, but the project also includes an optional `@toolname` mention feature to make tool invocation more explicit—particularly useful when connecting to multiple MCP servers with many tools.
-- Visual workflow builder that lets you create custom tools by chaining LLM nodes and MCP tools together. Published workflows become callable as `@workflow_name` tools in chat, enabling complex multi-step automation sequences.
+- 它支持标准 MCP 工具调用，并包括一个自定义 MCP 服务器和一个独立 UI，用于在聊天流之外测试 MCP 工具。
+- 所有 MCP 工具默认提供给 LLM，但该项目还包括一个可选的 `@toolname` 提及功能，使工具调用更加明确——特别是在连接到具有许多工具的多个 MCP 服务器时非常有用。
+- 可视化工作流构建器，让您可以通过链接 LLM 节点和 MCP 工具创建自定义工具。发布的工作流可作为聊天中的 `@workflow_name` 工具调用，实现复杂的多步自动化序列。
 
 </McpClient>
 
@@ -1488,15 +1488,15 @@ mcp-client-chatbot is a local-first chatbot built with Vercel's Next.js, AI SDK,
   supports="Resources, Prompts, Tools, Discovery, Sampling, Elicitation"
 >
 
-mcp-use is an open source python library to very easily connect any LLM to any MCP server both locally and remotely.
+mcp-use 是一个开源 python 库，用于非常轻松地将任何 LLM 连接到任何本地和远程的 MCP 服务器。
 
-**Key features:**
+**主要功能：**
 
-- Very simple interface to connect any LLM to any MCP.
-- Support the creation of custom agents, workflows.
-- Supports connection to multiple MCP servers simultaneously.
-- Supports all langchain supported models, also locally.
-- Offers efficient tool orchestration and search functionalities.
+- 非常简单的界面，将任何 LLM 连接到任何 MCP。
+- 支持创建自定义代理、工作流。
+- 支持同时连接到多个 MCP 服务器。
+- 支持所有 langchain 支持的模型，也包括本地。
+- 提供高效的工具编排和搜索功能。
 
 </McpClient>
 
@@ -1506,15 +1506,15 @@ mcp-use is an open source python library to very easily connect any LLM to any M
   supports="Resources, Prompts, Tools, Discovery, Instructions"
 >
 
-`mcpc` is a universal CLI client for MCP that maps MCP operations to intuitive commands for interactive shell use, scripts, and AI coding agents.
+`mcpc` 是一个用于 MCP 的通用 CLI 客户端，将 MCP 操作映射到直观的命令，用于交互式 shell 使用、脚本和 AI 编码代理。
 
-**Key features:**
+**主要功能：**
 
-- Swiss Army knife for MCP: supports stdio and streamable HTTP, server config files and zero config, OAuth 2.1, HTTP headers, and main MCP features.
-- Persistent sessions for interaction with multiple servers simultaneously.
-- Structured text output enables AI agents to explore and interact with MCP servers.
-- JSON output and schema validation allow stable integration with other CLI tools, scripting, and MCP **code mode** in a shell.
-- Proxy MCP server to provide AI code sandboxes with secure access to authenticated MCP sessions.
+- MCP 的瑞士军刀：支持 stdio 和 streamable HTTP、服务器配置文件和零配置、OAuth 2.1、HTTP 头以及主要 MCP 功能。
+- 用于同时与多个服务器交互的持久会话。
+- 结构化文本输出使 AI 代理能够探索并与 MCP 服务器交互。
+- JSON 输出和模式验证允许与其他 CLI 工具、脚本和 shell 中的 MCP **代码模式** 稳定集成。
+- 代理 MCP 服务器，为 AI 代码沙箱提供对经过身份验证的 MCP 会话的安全访问。
 
 </McpClient>
 
@@ -1524,14 +1524,14 @@ mcp-use is an open source python library to very easily connect any LLM to any M
   supports="Resources, Prompts, Tools"
 >
 
-MCPHub is a powerful Neovim plugin that integrates MCP (Model Context Protocol) servers into your workflow.
+MCPHub 是一个强大的 Neovim 插件，将 MCP (模型上下文协议) 服务器集成到您的工作流中。
 
-**Key features:**
+**主要功能：**
 
-- Install, configure and manage MCP servers with an intuitive UI.
-- Built-in Neovim MCP server with support for file operations (read, write, search, replace), command execution, terminal integration, LSP integration, buffers, and diagnostics.
-- Create Lua-based MCP servers directly in Neovim.
-- Integrates with popular Neovim chat plugins Avante.nvim and CodeCompanion.nvim
+- 使用直观的 UI 安装、配置和管理 MCP 服务器。
+- 内置 Neovim MCP 服务器，支持文件操作（读取、写入、搜索、替换）、命令执行、终端集成、LSP 集成、缓冲区和诊断。
+- 直接在 Neovim 中创建基于 Lua 的 MCP 服务器。
+- 与流行的 Neovim 聊天插件 Avante.nvim 和 CodeCompanion.nvim 集成
 
 </McpClient>
 
@@ -1542,15 +1542,15 @@ MCPHub is a powerful Neovim plugin that integrates MCP (Model Context Protocol) 
   instructions="https://docs.mcpjam.com/getting-started"
 >
 
-MCPJam Inspector is the local development client for ChatGPT apps, MCP ext-apps, and MCP servers.
+MCPJam Inspector 是用于 ChatGPT 应用、MCP 扩展应用和 MCP 服务器的本地开发客户端。
 
-**Key features:**
+**主要功能：**
 
-- Local emulator for ChatGPT Apps SDK and MCP ext-apps. No more ChatGPT subscription or ngrok needed.
-- OAuth debugger to visually inspect MCP server OAuth at every step.
-- LLM playground to chat with your MCP server against any LLM. We provide our own API tokens for free.
-- Connect, test, and inspect any MCP server that's local or remote. Manually invoke MCP tools, resource, prompts, etc. View all JSON-RPC logs.
-- Supports all transports - STDIO, SSE, and Streamable HTTP.
+- ChatGPT Apps SDK 和 MCP 扩展应用的本地模拟器。不再需要 ChatGPT 订阅或 ngrok。
+- OAuth 调试器，可视化检查 MCP 服务器 OAuth 的每一步。
+- LLM  playground，可使用任何 LLM 与您的 MCP 服务器聊天。我们免费提供自己的 API 令牌。
+- 连接、测试和检查任何本地或远程的 MCP 服务器。手动调用 MCP 工具、资源、提示词等。查看所有 JSON-RPC 日志。
+- 支持所有传输方式 - STDIO、SSE 和 Streamable HTTP。
 
 </McpClient>
 
@@ -1560,16 +1560,16 @@ MCPJam Inspector is the local development client for ChatGPT apps, MCP ext-apps,
   supports="Resources, Prompts, Tools, Sampling"
 >
 
-MCPOmni-Connect is a versatile command-line interface (CLI) client designed to connect to various Model Context Protocol (MCP) servers using both stdio and SSE transport.
+MCPOmni-Connect 是一个多功能命令行界面 (CLI) 客户端，旨在通过 stdio 和 SSE 传输连接到各种模型上下文协议 (MCP) 服务器。
 
-**Key features:**
+**主要功能：**
 
-- Support for resources, prompts, tools, and sampling
-- Agentic mode with ReAct and orchestrator capabilities
-- Seamless integration with OpenAI models and other LLMs
-- Dynamic tool and resource management across multiple servers
-- Support for both stdio and SSE transport protocols
-- Comprehensive tool orchestration and resource analysis capabilities
+- 支持资源、提示词、工具和采样
+- 具有 ReAct 和编排器能力的代理模式
+- 与 OpenAI 模型和其他 LLM 无缝集成
+- 跨多个服务器动态管理工具和资源
+- 支持 stdio 和 SSE 传输协议
+- 全面的工具编排和资源分析能力
 
 </McpClient>
 
@@ -1579,19 +1579,19 @@ MCPOmni-Connect is a versatile command-line interface (CLI) client designed to c
   supports="Resources, Prompts, Tools"
 >
 
-Memex is the first MCP client and MCP server builder - all-in-one desktop app. Unlike traditional MCP clients that only consume existing servers, Memex can create custom MCP servers from natural language prompts, immediately integrate them into its toolkit, and use them to solve problems—all within a single conversation.
+Memex 是首款 MCP 客户端和 MCP 服务器构建器——多合一桌面应用。与仅消耗现有服务器的传统 MCP 客户端不同，Memex 可以从自然语言提示词创建自定义 MCP 服务器，立即将它们集成到其工具包中，并使用它们解决问题—— all within a single conversation.
 
-**Key features:**
+**主要功能：**
 
-- **Prompt-to-MCP Server**: Generate fully functional MCP servers from natural language descriptions
-- **Self-Testing & Debugging**: Autonomously test, debug, and improve created MCP servers
-- **Universal MCP Client**: Works with any MCP server through intuitive, natural language integration
-- **Curated MCP Directory**: Access to tested, one-click installable MCP servers (Neon, Netlify, GitHub, Context7, and more)
-- **Multi-Server Orchestration**: Leverage multiple MCP servers simultaneously for complex workflows
+- **提示词到 MCP 服务器**：从自然语言描述生成功能齐全的 MCP 服务器
+- **自测试与调试**：自动测试、调试和改进创建的 MCP 服务器
+- **通用 MCP 客户端**：通过直观的自然语言集成与任何 MCP 服务器配合工作
+- **精选 MCP 目录**：访问经过测试、一键安装的 MCP 服务器（Neon、Netlify、GitHub、Context7 等）
+- **多服务器编排**：同时利用多个 MCP 服务器处理复杂工作流
 
-**Learn more:**
+**了解更多：**
 
-- [Memex Launch 2: MCP Teams and Agent API](https://memex.tech/blog/memex-launch-2-mcp-teams-and-agent-api-private-preview-125f)
+- [Memex Launch 2: MCP 团队和代理 API](https://memex.tech/blog/memex-launch-2-mcp-teams-and-agent-api-private-preview-125f)
 
 </McpClient>
 
@@ -1602,20 +1602,20 @@ Memex is the first MCP client and MCP server builder - all-in-one desktop app. U
   instructions="https://memgraph.com/docs/memgraph-lab/features/graphchat#mcp-servers"
 >
 
-[Memgraph Lab](https://memgraph.com/lab) is a visualization and management tool for Memgraph graph databases. Its [GraphChat](https://memgraph.com/docs/memgraph-lab/features/graphchat) feature lets you query graph data using natural language, with MCP server integrations to extend your AI workflows.
+[Memgraph Lab](https://memgraph.com/lab) 是 Memgraph 图数据库的可视化管理工具。其 [GraphChat](https://memgraph.com/docs/memgraph-lab/features/graphchat) 功能让您可以使用自然语言查询图数据，并通过 MCP 服务器集成扩展您的 AI 工作流。
 
-**Key features:**
+**主要功能：**
 
-- Build GraphRAG workflows powered by knowledge graphs as the data backbone
-- Connect remote MCP servers via `SSE` or `Streamable HTTP`
-- Support for MCP resources, prompts, tools, sampling, elicitation, and instructions
-- Create multiple agents with different configurations for easy comparison and debugging
-- Works with various LLM providers (OpenAI, Azure OpenAI, Anthropic, Gemini, Ollama, DeepSeek)
-- Available as a Desktop app or Docker container
+- 构建由知识图谱作为数据骨干支持的 GraphRAG 工作流
+- 通过 `SSE` 或 `Streamable HTTP` 连接远程 MCP 服务器
+- 支持 MCP 资源、提示词、工具、采样、诱导和指令
+- 创建具有不同配置的多个代理，便于比较和调试
+- 适用于各种 LLM 提供商（OpenAI、Azure OpenAI、Anthropic、Gemini、Ollama、DeepSeek）
+- 可作为桌面应用或 Docker 容器使用
 
-**Learn more:**
+**了解更多：**
 
-- [Memgraph Lab: MCP integration](https://memgraph.com/docs/memgraph-lab/features/graphchat#mcp-servers)
+- [Memgraph Lab: MCP 集成](https://memgraph.com/docs/memgraph-lab/features/graphchat#mcp-servers)
 
 </McpClient>
 
@@ -1625,13 +1625,13 @@ Memex is the first MCP client and MCP server builder - all-in-one desktop app. U
   supports="Resources, Tools, Discovery"
 >
 
-Microsoft Copilot Studio is a robust SaaS platform designed for building custom AI-driven applications and intelligent agents, empowering developers to create, deploy, and manage sophisticated AI solutions.
+Microsoft Copilot Studio 是一个强大的 SaaS 平台，专为构建自定义 AI 驱动的应用程序和智能代理而设计，使开发人员能够创建、部署和管理复杂的 AI 解决方案。
 
-**Key features:**
+**主要功能：**
 
-- Support for MCP tools
-- Extend Copilot Studio agents with MCP servers
-- Leveraging Microsoft unified, governed, and secure API management solutions
+- 支持 MCP 工具
+- 使用 MCP 服务器扩展 Copilot Studio 代理
+- 利用 Microsoft 统一、受监管且安全的 API 管理解决方案
 
 </McpClient>
 
@@ -1641,19 +1641,19 @@ Microsoft Copilot Studio is a robust SaaS platform designed for building custom 
   supports="Tools"
 >
 
-MindPal is a no-code platform for building and running AI agents and multi-agent workflows for business processes.
+MindPal 是一个用于构建和运行业务流程 AI 代理和多代理工作流的无代码平台。
 
-**Key features:**
+**主要功能：**
 
-- Build custom AI agents with no-code
-- Connect any SSE MCP server to extend agent tools
-- Create multi-agent workflows for complex business processes
-- User-friendly for both technical and non-technical professionals
-- Ongoing development with continuous improvement of MCP support
+- 无代码构建自定义 AI 代理
+- 连接任何 SSE MCP 服务器以扩展代理工具
+- 为复杂业务流程创建多代理工作流
+- 对技术和非技术人员都友好
+- 持续开发，不断改进 MCP 支持
 
-**Learn more:**
+**了解更多：**
 
-- [MindPal MCP Documentation](https://docs.mindpal.io/agent/mcp)
+- [MindPal MCP 文档](https://docs.mindpal.io/agent/mcp)
 
 </McpClient>
 
@@ -1664,17 +1664,17 @@ MindPal is a no-code platform for building and running AI agents and multi-agent
   instructions="https://help.mistral.ai/en/articles/393572-configuring-a-custom-connector"
 >
 
-Mistral AI: Le Chat is Mistral AI assistant with MCP support for remote servers and enterprise workflows.
+Mistral AI: Le Chat 是 Mistral AI 助手，支持远程服务器和企业工作流的 MCP。
 
-**Key features:**
+**主要功能：**
 
-- Remote MCP server integration
-- Enterprise-grade security
-- Low-latency, high-throughput interactions with structured data
+- 远程 MCP 服务器集成
+- 企业级安全
+- 与结构化数据的低延迟、高吞吐量交互
 
-**Learn more:**
+**了解更多：**
 
-- [Mistral MCP Documentation](https://help.mistral.ai/en/collections/911943-connectors)
+- [Mistral MCP 文档](https://help.mistral.ai/en/collections/911943-connectors)
 
 </McpClient>
 
@@ -1684,15 +1684,15 @@ Mistral AI: Le Chat is Mistral AI assistant with MCP support for remote servers 
   supports="Tools"
 >
 
-modelcontextchat.com is a web-based MCP client designed for working with remote MCP servers, featuring comprehensive authentication support and integration with OpenRouter.
+modelcontextchat.com 是一个基于网页的 MCP 客户端，专为使用远程 MCP 服务器而设计，具有全面的身份验证支持并与 OpenRouter 集成。
 
-**Key features:**
+**主要功能：**
 
-- Web-based interface for remote MCP server connections
-- Header-based Authorization support for secure server access
-- OAuth authentication integration
-- OpenRouter API Key support for accessing various LLM providers
-- No installation required - accessible from any web browser
+- 用于远程 MCP 服务器连接的基于网页的界面
+- 支持基于 Header 的授权以安全访问服务器
+- OAuth 身份验证集成
+- 支持 OpenRouter API Key 以访问各种 LLM 提供商
+- 无需安装 - 可从任何网页浏览器访问
 
 </McpClient>
 
@@ -1702,15 +1702,15 @@ modelcontextchat.com is a web-based MCP client designed for working with remote 
   supports="Tools, Sampling"
 >
 
-MooPoint is a web-based AI chat platform built for developers and advanced users, letting you interact with multiple large language models (LLMs) through a single, unified interface. Connect your own API keys (OpenAI, Anthropic, and more) and securely manage custom MCP server integrations.
+MooPoint 是一个为开发者和高级用户构建的基于网页的 AI 聊天平台，让您可以通过单个统一界面与多个大型语言模型 (LLM) 交互。连接您自己的 API 密钥（OpenAI、Anthropic 等）并安全管理自定义 MCP 服务器集成。
 
-**Key features:**
+**主要功能：**
 
-- Accessible from any PC or smartphone—no installation required
-- Choose your preferred LLM provider
-- Supports `SSE`, `Streamable HTTP`, `npx`, and `uvx` MCP servers
-- OAuth and sampling support
-- New features added daily
+- 可从任何 PC 或智能手机访问—无需安装
+- 选择您首选的 LLM 提供商
+- 支持 `SSE`、`Streamable HTTP`、`npx` 和 `uvx` MCP 服务器
+- 支持 OAuth 和采样
+- 每天添加新功能
 
 </McpClient>
 
@@ -1720,18 +1720,18 @@ MooPoint is a web-based AI chat platform built for developers and advanced users
   supports="Tools"
 >
 
-Msty Studio is a privacy-first AI productivity platform that seamlessly integrates local and online language models (LLMs) into customizable workflows. Designed for both technical and non-technical users, Msty Studio offers a suite of tools to enhance AI interactions, automate tasks, and maintain full control over data and model behavior.
+Msty Studio 是一个隐私优先的 AI 生产力平台，无缝集成本地和在线语言模型 (LLM) 到可定制的工作流中。Msty Studio 专为技术和非技术人员设计，提供一套工具来增强 AI 交互、自动化任务并保持对数据和模型行为的完全控制。
 
-**Key features:**
+**主要功能：**
 
-- **Toolbox & Toolsets**: Connect AI models to local tools and scripts using MCP-compliant configurations. Group tools into Toolsets to enable dynamic, multi-step workflows within conversations.
-- **Turnstiles**: Create automated, multi-step AI interactions, allowing for complex data processing and decision-making flows.
-- **Real-Time Data Integration**: Enhance AI responses with up-to-date information by integrating real-time web search capabilities.
-- **Split Chats & Branching**: Engage in parallel conversations with multiple models simultaneously, enabling comparative analysis and diverse perspectives.
+- **工具箱和工具集**：使用符合 MCP 的配置将 AI 模型连接到本地工具和脚本。将工具分组到工具集中，以便在对话中启用动态的多步工作流。
+- **Turnstiles**：创建自动化的多步 AI 交互，允许复杂的数据处理和决策流。
+- **实时数据集成**：通过集成实时网页搜索功能，使用最新信息增强 AI 响应。
+- **拆分聊天和分支**：同时与多个模型进行并行对话，实现比较分析和多样化视角。
 
-**Learn more:**
+**了解更多：**
 
-- [Msty Studio Documentation](https://docs.msty.studio/features/toolbox/tools)
+- [Msty Studio 文档](https://docs.msty.studio/features/toolbox/tools)
 
 </McpClient>
 
@@ -1742,18 +1742,18 @@ Msty Studio is a privacy-first AI productivity platform that seamlessly integrat
   instructions="https://docs.needle.app/docs/guides/mcp/getting-started/"
 >
 
-Needle is a RAG workflow platform that also works as an MCP client, letting you connect and use MCP servers in seconds.
+Needle 是一个 RAG 工作流平台，也可作为 MCP 客户端，让您可以在几秒钟内连接和使用 MCP 服务器。
 
-**Key features:**
+**主要功能：**
 
-- **Instant MCP integration:** Connect any remote MCP server to your collection in seconds
-- **Built-in RAG:** Automatically get retrieval-augmented generation out of the box
-- **Secure OAuth:** Safe, token-based authorization when connecting to servers
-- **Smart previews:** See what each MCP server can do and selectively enable the tools you need
+- **即时 MCP 集成：** 在几秒钟内将任何远程 MCP 服务器连接到您的集合
+- **内置 RAG：** 自动获得开箱即用的检索增强生成
+- **安全 OAuth：** 连接服务器时安全、基于令牌的身份验证
+- **智能预览：** 查看每个 MCP 服务器的功能并有选择地启用您需要的工具
 
-**Learn more:**
+**了解更多：**
 
-- [Getting Started](https://docs.needle.app/docs/guides/hello-needle/getting-started/)
+- [入门指南](https://docs.needle.app/docs/guides/hello-needle/getting-started/)
 
 </McpClient>
 
@@ -1763,18 +1763,18 @@ Needle is a RAG workflow platform that also works as an MCP client, letting you 
   supports="Tools"
 >
 
-NVIDIA Agent Intelligence (AIQ) toolkit is a flexible, lightweight, and unifying library that allows you to easily connect existing enterprise agents to data sources and tools across any framework.
+NVIDIA Agent Intelligence (AIQ) toolkit 是一个灵活、轻量且统一的库，允许您轻松地将现有企业代理连接到任何框架中的数据源和工具。
 
-**Key features:**
+**主要功能：**
 
-- Acts as an MCP **client** to consume remote tools
-- Acts as an MCP **server** to expose tools
-- Framework agnostic and compatible with LangChain, CrewAI, Semantic Kernel, and custom agents
-- Includes built-in observability and evaluation tools
+- 作为 MCP **客户端** 使用远程工具
+- 作为 MCP **服务器** 暴露工具
+- 框架无关，兼容 LangChain、CrewAI、Semantic Kernel 和自定义代理
+- 包含内置的可观察性和评估工具
 
-**Learn more:**
+**了解更多：**
 
-- [AIQ toolkit MCP documentation](https://docs.nvidia.com/aiqtoolkit/latest/workflows/mcp/index.html)
+- [AIQ toolkit MCP 文档](https://docs.nvidia.com/aiqtoolkit/latest/workflows/mcp/index.html)
 
 </McpClient>
 
@@ -1786,13 +1786,13 @@ NVIDIA Agent Intelligence (AIQ) toolkit is a flexible, lightweight, and unifying
   instructions="https://opencode.ai/docs/mcp-servers/"
 >
 
-OpenCode is an open source AI coding agent. It’s available as a terminal-based interface, desktop app, or IDE extension.
+OpenCode 是一个开源 AI 编码代理。它可用作基于终端的界面、桌面应用或 IDE 扩展。
 
-**Key features:**
+**主要功能：**
 
-- Support for MCP tools
-- Support for MCP resources in the cli using `@` prefix
-- Support for MCP prompts in the cli as slash commands using `/` prefix
+- 支持 MCP 工具
+- 在 cli 中使用 `@` 前缀支持 MCP 资源
+- 在 cli 中使用 `/` 前缀支持 MCP 提示词作为斜杠命令
 
 </McpClient>
 
@@ -1802,12 +1802,12 @@ OpenCode is an open source AI coding agent. It’s available as a terminal-based
   supports="Tools"
 >
 
-OpenSumi is a framework helps you quickly build AI Native IDE products.
+OpenSumi 是一个帮助您快速构建 AI Native IDE 产品的框架。
 
-**Key features:**
+**主要功能：**
 
-- Supports MCP tools in OpenSumi
-- Supports built-in IDE MCP servers and custom MCP servers
+- 在 OpenSumi 中支持 MCP 工具
+- 支持内置 IDE MCP 服务器和自定义 MCP 服务器
 
 </McpClient>
 
@@ -1817,12 +1817,12 @@ OpenSumi is a framework helps you quickly build AI Native IDE products.
   supports="Prompts, Tools, Sampling"
 >
 
-oterm is a terminal client for Ollama allowing users to create chats/agents.
+oterm 是 Ollama 的终端客户端，允许用户创建聊天/代理。
 
-**Key features:**
+**主要功能：**
 
-- Support for multiple fully customizable chat sessions with Ollama connected with tools.
-- Support for MCP tools.
+- 支持多个完全可定制的聊天会话，与 Ollama 连接并使用工具。
+- 支持 MCP 工具。
 
 </McpClient>
 
@@ -1832,14 +1832,14 @@ oterm is a terminal client for Ollama allowing users to create chats/agents.
   supports="Resources, Prompts, Tools, Discovery, Sampling, Elicitation, Apps"
 >
 
-Postman is the most popular API client and now supports MCP server testing and debugging.
+Postman 是最受欢迎的 API 客户端，现在支持 MCP 服务器测试和调试。
 
-**Key features:**
+**主要功能：**
 
-- Full support of all major MCP features (tools, prompts, resources, and subscriptions)
-- Fast, seamless UI for debugging MCP capabilities
-- MCP config integration (Claude, VSCode, etc.) for fast first-time experience in testing MCPs
-- Integration with history, variables, and collections for reuse and collaboration
+- 全面支持所有主要 MCP 功能（工具、提示词、资源和订阅）
+- 用于调试 MCP 功能的快速、无缝 UI
+- MCP 配置集成（Claude、VSCode 等），用于快速首次体验测试 MCP
+- 与历史记录、变量和集合集成，以便重用和协作
 
 </McpClient>
 
@@ -1850,20 +1850,20 @@ Postman is the most popular API client and now supports MCP server testing and d
   instructions="https://docs.proxyman.com/mcp"
 >
 
-Proxyman is a native macOS app for HTTP debugging and network monitoring. It now includes an MCP Server that enables AI assistants (Claude, Cursor, and other MCP-compatible tools) to directly interact with Proxyman for inspecting HTTP traffic, creating debugging rules, and controlling the app through natural language.
+Proxyman 是一个用于 HTTP 调试和网络监控的原生 macOS 应用。它现在包含一个 MCP 服务器，使 AI 助手（Claude、Cursor 和其他兼容 MCP 的工具）能够直接与 Proxyman 交互，以检查 HTTP 流量、创建调试规则并通过自然语言控制应用。
 
-**Key features:**
+**主要功能：**
 
-- **AI-Powered Debugging**: Ask AI to analyze captured traffic, find specific requests, or explain API responses
-- **Hands-Free Rule Creation**: Create breakpoints, map local/remote rules through conversation
-- **Traffic Inspection Tools**: Get flows, flow details, export cURL commands, and filter traffic with multiple criteria
-- **Session Control**: Clear sessions, toggle recording, and manage SSL proxying domains
-- **Secure by Design**: Localhost-only server with per-session token authentication
+- **AI 驱动调试**：要求 AI 分析捕获的流量、查找特定请求或解释 API 响应
+- **免手动规则创建**：通过对话创建断点、映射本地/远程规则
+- **流量检查工具**：获取流、流详情、导出 cURL 命令，并使用多个标准过滤流量
+- **会话控制**：清除会话、切换录制和管理 SSL 代理域
+- **安全设计**：仅限本地主机服务器，具有每会话令牌身份验证
 
-**Learn more:**
+**了解更多：**
 
-- [Proxyman MCP Documentation](https://docs.proxyman.com/mcp)
-- [Proxyman Website](https://proxyman.com)
+- [Proxyman MCP 文档](https://docs.proxyman.com/mcp)
+- [Proxyman 网站](https://proxyman.com)
 
 </McpClient>
 
@@ -1874,15 +1874,15 @@ Proxyman is a native macOS app for HTTP debugging and network monitoring. It now
   instructions="https://docs.qoder.com/user-guide/chat/model-context-protocol"
 >
 
-Qoder is a next-generation agentic coding platform by Alibaba, engineered for real-world software development. By combining enhanced context engineering with autonomous agents, it provides deep awareness of very large codebases and can support workflows ranging from co-pilot assistance to fully autonomous coding.
+Qoder 是阿里巴巴推出的下一代代理编码平台，专为现实世界的软件开发而设计。通过结合增强的上下文工程与自主代理，它提供对超大型代码库的深度感知，并可以支持从副驾驶辅助到完全自主编码的工作流。
 
-**Key features:**
+**主要功能：**
 
-- **Agent Mode**: High-efficiency single-agent collaboration that autonomously decides actions from project context, including cross-file refactoring, debugging, and feature iteration.
-- **Experts Mode**: Multi-agent orchestration that decomposes complex requirements and delegates to a virtual expert team (Design, Implementation, Testing, QA) for parallel execution.
-- **Quest Mode**: Fully autonomous end-to-end coding from goal definition through requirement clarification, planning, execution, and validation with a comprehensive final report.
-- **Engineering Knowledge Engine**: Repo Wiki-powered architecture understanding that gives agents full codebase awareness and alignment with project standards.
-- **Memory Engine**: Persistent memory for developer preferences, project conventions, and historical interactions to improve alignment over time.
+- **代理模式**：高效单代理协作，根据项目上下文自主决定操作，包括跨文件重构、调试和功能迭代。
+- **专家模式**：多代理编排，分解复杂需求并委托给虚拟专家团队（设计、实现、测试、QA）进行并行执行。
+- **任务模式**：完全自主的端到端编码，从目标定义到需求澄清、规划、执行和验证，并提供全面的最终报告。
+- **工程知识引擎**：由 Repo Wiki 驱动的架构理解，使代理具有完整的代码库感知并与项目标准保持一致。
+- **记忆引擎**：持久记忆开发者偏好、项目约定和历史交互，以随时间提高一致性。
 
 </McpClient>
 
@@ -1892,17 +1892,17 @@ Qoder is a next-generation agentic coding platform by Alibaba, engineered for re
   supports="Tools"
 >
 
-RecurseChat is a powerful, fast, local-first chat client with MCP support. RecurseChat supports multiple AI providers including LLaMA.cpp, Ollama, and OpenAI, Anthropic.
+RecurseChat 是一个强大、快速、本地优先的聊天客户端，支持 MCP。RecurseChat 支持多种 AI 提供商，包括 LLaMA.cpp、Ollama 和 OpenAI、Anthropic。
 
-**Key features:**
+**主要功能：**
 
-- Local AI: Support MCP with Ollama models.
-- MCP Tools: Individual MCP server management. Easily visualize the connection states of MCP servers.
-- MCP Import: Import configuration from Claude Desktop app or JSON
+- 本地 AI：支持使用 Ollama 模型的 MCP。
+- MCP 工具：单个 MCP 服务器管理。轻松可视化 MCP 服务器的连接状态。
+- MCP 导入：从 Claude Desktop 应用或 JSON 导入配置
 
-**Learn more:**
+**了解更多：**
 
-- [RecurseChat docs](https://recurse.chat/docs/features/mcp/)
+- [RecurseChat 文档](https://recurse.chat/docs/features/mcp/)
 
 </McpClient>
 
@@ -1912,12 +1912,12 @@ RecurseChat is a powerful, fast, local-first chat client with MCP support. Recur
   supports="Tools, DCR"
 >
 
-Replit Agent is an AI-powered software development tool that builds and deploys applications through natural language. It supports MCP integration, enabling users to extend the agent's capabilities with custom tools and data sources.
+Replit Agent 是一个 AI 驱动的软件开发工具，通过自然语言构建和部署应用程序。它支持 MCP 集成，使用户能够通过自定义工具和数据源扩展代理的功能。
 
-**Learn more:**
+**了解更多：**
 
-- [Replit MCP Documentation](https://docs.replit.com/replitai/mcp/overview)
-- [MCP Install Links](https://docs.replit.com/replitai/mcp/install-links)
+- [Replit MCP 文档](https://docs.replit.com/replitai/mcp/overview)
+- [MCP 安装链接](https://docs.replit.com/replitai/mcp/install-links)
 
 </McpClient>
 
@@ -1928,13 +1928,13 @@ Replit Agent is an AI-powered software development tool that builds and deploys 
   instructions="https://docs.roocode.com/features/mcp/using-mcp-in-roo"
 >
 
-Roo Code enables AI coding assistance via MCP.
+Roo Code 通过 MCP 实现 AI 编码辅助。
 
-**Key features:**
+**主要功能：**
 
-- Support for MCP tools and resources
-- Integration with development workflows
-- Extensible AI capabilities
+- 支持 MCP 工具和资源
+- 与开发工作流集成
+- 可扩展的 AI 功能
 
 </McpClient>
 
@@ -1944,14 +1944,14 @@ Roo Code enables AI coding assistance via MCP.
   supports="Tools"
   instructions="https://www.rtrvr.ai/docs/tool-calling"
 >
-[rtrvr.ai](https://rtrvr.ai) is AI Web Agent Chrome Extension that autonomously runs complex browser workflows, retrieves data to Sheets, and calls API's/MCP Servers – all with just prompting and within your own browser!
+[rtrvr.ai](https://rtrvr.ai) 是 AI Web 代理 Chrome 扩展，可自主运行复杂的浏览器工作流，将数据检索到 Sheets，并调用 API/MCP 服务器——只需提示并在您自己的浏览器内即可完成！
 
-**Key features:**
+**主要功能：**
 
-- Easy MCP Integration within your browser: Just open the Chrome Extension, add the server URL, and prompt server calls with the web as context!
-- Remote control your browser by turning your browser into MCP Server: Just copy/paste MCP URL into any MCP Client (no npx needed), and trigger agentic browser workflows!
-- Prompt our agent to execute workflows combining web agentic actions with MCP tool calls; find someone's email on the web and then send them an email with Zapier MCP.
-- Reusable and Schedulable Automations: After running a workflow, easily rerun or put on a schedule to execute in the background while you do other tasks in your browser.
+- 浏览器内轻松的 MCP 集成：只需打开 Chrome 扩展，添加服务器 URL，并以网页为背景提示服务器调用！
+- 通过将浏览器转变为 MCP 服务器来远程控制您的浏览器：只需将 MCP URL 复制/粘贴到任何 MCP 客户端（无需 npx），并触发代理浏览器工作流！
+- 提示我们的代理执行结合 Web 代理操作与 MCP 工具调用的工作流；在 Web 上找到某人的电子邮件，然后通过 Zapier MCP 给他们发送电子邮件。
+- 可重用和可调度的自动化：运行工作流后，轻松重新运行或安排计划在后台执行，而您可以在浏览器中执行其他任务。
 
 </McpClient>
 <McpClient
@@ -1960,14 +1960,14 @@ Roo Code enables AI coding assistance via MCP.
   supports="Tools"
 >
 
-Shortwave is an AI-powered email client that supports MCP tools to enhance email productivity and workflow automation.
+Shortwave 是一个 AI 驱动的电子邮件客户端，支持 MCP 工具以增强电子邮件生产力和工作流自动化。
 
-**Key features:**
+**主要功能：**
 
-- MCP tool integration for enhanced email workflows
-- Rich UI for adding, managing and interacting with a wide range of MCP servers
-- Support for both remote (Streamable HTTP and SSE) and local (Stdio) MCP servers
-- AI assistance for managing your emails, calendar, tasks and other third-party services
+- 用于增强电子邮件工作流的 MCP 工具集成
+- 丰富的 UI，用于添加、管理和与各种 MCP 服务器交互
+- 支持远程（Streamable HTTP 和 SSE）和本地（Stdio）MCP 服务器
+- AI 辅助管理您的电子邮件、日历、任务和其他第三方服务
 
 </McpClient>
 
@@ -1977,20 +1977,20 @@ Shortwave is an AI-powered email client that supports MCP tools to enhance email
   supports="Resources, Prompts, Tools, Discovery"
 >
 
-Simtheory is an agentic AI workspace that unifies multiple AI models, tools, and capabilities under a single subscription. It provides comprehensive MCP support through its MCP Store, allowing users to extend their workspace with productivity tools and integrations.
+Simtheory 是一个代理 AI 工作空间，在单个订阅下统一多个 AI 模型、工具和功能。它通过其 MCP Store 提供全面的 MCP 支持，允许用户使用生产力工具和集成扩展其工作空间。
 
-**Key features:**
+**主要功能：**
 
-- **MCP Store**: Marketplace for productivity tools and MCP server integrations
-- **Parallel Tasking**: Run multiple AI tasks simultaneously with MCP tool support
-- **Model Catalogue**: Access to frontier models with MCP tool integration
-- **Hosted MCP Servers**: Plug-and-play MCP integrations with no technical setup
-- **Advanced MCPs**: Specialized tools like Tripo3D (3D creation), Podcast Maker, and Video Maker
-- **Enterprise Ready**: Flexible workspaces with granular access control for MCP tools
+- **MCP Store**：生产力工具和 MCP 服务器集成的市场
+- **并行任务**：在 MCP 工具支持下同时运行多个 AI 任务
+- **模型目录**：访问具有 MCP 工具集成的前沿模型
+- **托管 MCP 服务器**：即插即用 MCP 集成，无需技术设置
+- **高级 MCP**：专用工具，如 Tripo3D（3D 创作）、播客制作器和视频制作器
+- **企业就绪**：具有 MCP 工具细粒度访问控制的灵活工作空间
 
-**Learn more:**
+**了解更多：**
 
-- [Simtheory website](https://simtheory.ai)
+- [Simtheory 网站](https://simtheory.ai)
 
 </McpClient>
 
@@ -2000,13 +2000,13 @@ Simtheory is an agentic AI workspace that unifies multiple AI models, tools, and
   supports="Tools"
 >
 
-Slack MCP Client acts as a bridge between Slack and Model Context Protocol (MCP) servers. Using Slack as the interface, it enables large language models (LLMs) to connect and interact with various MCP servers through standardized MCP tools.
+Slack MCP Client 充当 Slack 和模型上下文协议 (MCP) 服务器之间的桥梁。使用 Slack 作为界面，它使大型语言模型 (LLM) 能够通过标准化 MCP 工具连接并与各种 MCP 服务器交互。
 
-**Key features:**
+**主要功能：**
 
-- **Supports Popular LLM Providers:** Integrates seamlessly with leading large language model providers such as OpenAI, Anthropic, and Ollama, allowing users to leverage advanced conversational AI and orchestration capabilities within Slack.
-- **Dynamic and Secure Integration:** Supports dynamic registration of MCP tools, works in both channels and direct messages and manages credentials securely via environment variables or Kubernetes secrets.
-- **Easy Deployment and Extensibility:** Offers official Docker images, a Helm chart for Kubernetes, and Docker Compose for local development, making it simple to deploy, configure, and extend with additional MCP servers or tools.
+- **支持流行的 LLM 提供商：** 与领先的的大型语言模型提供商（如 OpenAI、Anthropic 和 Ollama）无缝集成，允许用户在 Slack 内利用先进的对话 AI 和编排能力。
+- **动态和安全集成：** 支持动态注册 MCP 工具，适用于频道和直接消息，并通过环境变量或 Kubernetes 密钥安全管理凭据。
+- **易于部署和扩展：** 提供官方 Docker 镜像、Kubernetes 的 Helm chart 和用于本地开发的 Docker Compose，使其易于部署、配置和扩展其他 MCP 服务器或工具。
 
 </McpClient>
 
@@ -2016,15 +2016,15 @@ Slack MCP Client acts as a bridge between Slack and Model Context Protocol (MCP)
   supports="Resources, Prompts, Tools"
 >
 
-Smithery Playground is a developer-first MCP client for exploring, testing and debugging MCP servers against LLMs. It provides detailed traces of MCP RPCs to help troubleshoot implementation issues.
+Smithery Playground 是一个开发者优先的 MCP 客户端，用于探索、测试和针对 LLM 调试 MCP 服务器。它提供详细的 MCP RPC 跟踪以帮助排查实现问题。
 
-**Key features:**
+**主要功能：**
 
-- One-click connect to MCP servers via URL or from Smithery's registry
-- Develop MCP servers that are running on localhost
-- Inspect tools, prompts, resources, and sampling configurations with live previews
-- Run conversational or raw tool calls to verify MCP behavior before shipping
-- Full OAuth MCP-spec support
+- 通过 URL 或从 Smithery 的注册表一键连接到 MCP 服务器
+- 开发在 localhost 上运行的 MCP 服务器
+- 检查工具、提示词、资源和采样配置，并提供实时预览
+- 运行对话或原始工具调用以在发布前验证 MCP 行为
+- 全面支持 OAuth MCP 规范
 
 </McpClient>
 
@@ -2034,14 +2034,14 @@ Smithery Playground is a developer-first MCP client for exploring, testing and d
   supports="Tools"
 >
 
-SpinAI is an open-source TypeScript framework for building observable AI agents. The framework provides native MCP compatibility, allowing agents to seamlessly integrate with MCP servers and tools.
+SpinAI 是一个用于构建可观察 AI 代理的开源 TypeScript 框架。该框架提供原生 MCP 兼容性，允许代理无缝集成 MCP 服务器和工具。
 
-**Key features:**
+**主要功能：**
 
-- Built-in MCP compatibility for AI agents
-- Open-source TypeScript framework
-- Observable agent architecture
-- Native support for MCP tools integration
+- 为 AI 代理内置 MCP 兼容性
+- 开源 TypeScript 框架
+- 可观察的代理架构
+- 原生支持 MCP 工具集成
 
 </McpClient>
 
@@ -2051,13 +2051,13 @@ SpinAI is an open-source TypeScript framework for building observable AI agents.
   supports="Tools"
 >
 
-Superinterface is AI infrastructure and a developer platform to build in-app AI assistants with support for MCP, interactive components, client-side function calling and more.
+Superinterface 是 AI 基础设施和开发者平台，用于构建应用内 AI 助手，支持 MCP、交互式组件、客户端函数调用等。
 
-**Key features:**
+**主要功能：**
 
-- Use tools from MCP servers in assistants embedded via React components or script tags
-- SSE transport support
-- Use any AI model from any AI provider (OpenAI, Anthropic, Ollama, others)
+- 在通过 React 组件或脚本标签嵌入的助手中使用来自 MCP 服务器的工具
+- 支持 SSE 传输
+- 使用来自任何 AI 提供商的任何 AI 模型（OpenAI、Anthropic、Ollama、其他）
 
 </McpClient>
 
@@ -2067,14 +2067,14 @@ Superinterface is AI infrastructure and a developer platform to build in-app AI 
   supports="Tools"
 >
 
-Superjoin brings the power of MCP directly into Google Sheets extension. With Superjoin, users can access and invoke MCP tools and agents without leaving their spreadsheets, enabling powerful AI workflows and automation right where their data lives.
+Superjoin 将 MCP 的力量直接带入 Google Sheets 扩展。使用 Superjoin，用户无需离开电子表格即可访问和调用 MCP 工具和代理，从而在数据所在之处实现强大的 AI 工作流和自动化。
 
-**Key features:**
+**主要功能：**
 
-- Native Google Sheets add-on providing effortless access to MCP capabilities
-- Supports OAuth 2.1 and header-based authentication for secure and flexible connections
-- Compatible with both SSE and Streamable HTTP transport for efficient, real-time streaming communication
-- Fully web-based, cross-platform client requiring no additional software installation
+- 原生 Google Sheets 加载项，提供对 MCP 功能的轻松访问
+- 支持 OAuth 2.1 和基于 header 的身份验证，以实现安全和灵活的连接
+- 兼容 SSE 和 Streamable HTTP 传输，以实现高效的实时流式通信
+- 完全基于网页、跨平台的客户端，无需额外软件安装
 
 </McpClient>
 
@@ -2084,19 +2084,19 @@ Superjoin brings the power of MCP directly into Google Sheets extension. With Su
   supports="Tools, Discovery"
 >
 
-Swarms is a production-grade multi-agent orchestration framework that supports MCP integration for dynamic tool discovery and execution.
+Swarms 是一个生产级多代理编排框架，支持 MCP 集成以实现动态工具发现和执行。
 
-**Key features:**
+**主要功能：**
 
-- Connects to MCP servers via SSE transport for real-time tool integration
-- Automatic tool discovery and loading from MCP servers
-- Support for distributed tool functionality across multiple agents
-- Enterprise-ready with high availability and observability features
-- Modular architecture supporting multiple AI model providers
+- 通过 SSE 传输连接到 MCP 服务器以实现实时工具集成
+- 自动从 MCP 服务器发现和加载工具
+- 支持跨多个代理的分布式工具功能
+- 企业就绪，具有高可用性和可观察性功能
+- 支持多个 AI 模型提供商的模块化架构
 
-**Learn more:**
+**了解更多：**
 
-- [Swarms MCP Integration Documentation](https://docs.swarms.world/en/latest/swarms/tools/tools_examples/)
+- [Swarms MCP 集成文档](https://docs.swarms.world/en/latest/swarms/tools/tools_examples/)
 
 </McpClient>
 
@@ -2106,13 +2106,13 @@ Swarms is a production-grade multi-agent orchestration framework that supports M
   supports="Resources, Prompts, Tools, Sampling"
 >
 
-systemprompt is a voice-controlled mobile app that manages your MCP servers. Securely leverage MCP agents from your pocket. Available on iOS and Android.
+systemprompt 是一个语音控制的移动应用，用于管理您的 MCP 服务器。安全地从口袋中利用 MCP 代理。适用于 iOS 和 Android。
 
-**Key features:**
+**主要功能：**
 
-- **Native Mobile Experience**: Access and manage your MCP servers anytime, anywhere on both Android and iOS devices
-- **Advanced AI-Powered Voice Recognition**: Sophisticated voice recognition engine enhanced with cutting-edge AI and Natural Language Processing (NLP), specifically tuned to understand complex developer terminology and command structures
-- **Unified Multi-MCP Server Management**: Effortlessly manage and interact with multiple Model Context Protocol (MCP) servers from a single, centralized mobile application
+- **原生移动体验**：随时随地在 Android 和 iOS 设备上访问和管理您的 MCP 服务器
+- **高级 AI 驱动语音识别**：复杂的语音识别引擎，通过尖端 AI 和自然语言处理 (NLP) 增强，专门 tuned 以理解复杂的开发者术语和命令结构
+- **统一多 MCP 服务器管理**：轻松地从单个集中式移动应用管理和交互多个模型上下文协议 (MCP) 服务器
 
 </McpClient>
 
@@ -2122,15 +2122,15 @@ systemprompt is a voice-controlled mobile app that manages your MCP servers. Sec
   supports="Prompts, Tools, Discovery, Sampling, Elicitation"
 >
 
-Tambo is a platform for building custom chat experiences in React, with integrated custom user interface components.
+Tambo 是一个用于在 React 中构建自定义聊天体验的平台，具有集成的自定义用户界面组件。
 
-**Key features:**
+**主要功能：**
 
-- Hosted platform with React SDK for integrating chat or other LLM-based experiences into your own app.
-- Support for selection of arbitrary React components in the chat experience, with state management and tool calling.
-- Support for MCP servers, from Tambo's servers or directly from the browser.
-- Supports OAuth 2.1 and custom header-based authentication.
-- Support for MCP tools and sampling, with additional MCP features coming soon.
+- 托管平台，带有 React SDK，用于将聊天或其他基于 LLM 的体验集成到您自己的应用中。
+- 支持在聊天体验中选择任意 React 组件，具有状态管理和工具调用。
+- 支持 MCP 服务器，来自 Tambo 的服务器或直接来自浏览器。
+- 支持 OAuth 2.1 和自定义基于 header 的身份验证。
+- 支持 MCP 工具和采样，更多 MCP 功能即将推出。
 
 </McpClient>
 
@@ -2140,13 +2140,13 @@ Tambo is a platform for building custom chat experiences in React, with integrat
   supports="Tools"
 >
 
-Tencent CloudBase AI DevKit is a tool for building AI agents in minutes, featuring zero-code tools, secure data integration, and extensible plugins via MCP.
+Tencent CloudBase AI DevKit 是一个用于在几分钟内构建 AI 代理的工具，具有零代码工具、安全数据集成和通过 MCP 扩展的插件。
 
-**Key features:**
+**主要功能：**
 
-- Support for MCP tools
-- Extend agents with MCP servers
-- MCP servers hosting: serverless hosting and authentication support
+- 支持 MCP 工具
+- 使用 MCP 服务器扩展代理
+- MCP 服务器托管：无服务器托管和身份验证支持
 
 </McpClient>
 
@@ -2156,20 +2156,20 @@ Tencent CloudBase AI DevKit is a tool for building AI agents in minutes, featuri
   supports="Tools"
 >
 
-Theia AI is a framework for building AI-enhanced tools and IDEs. The [AI-powered Theia IDE](https://eclipsesource.com/blogs/2024/10/08/introducting-ai-theia-ide/) is an open and flexible development environment built on Theia AI.
+Theia AI 是一个用于构建 AI 增强工具和 IDE 的框架。[AI 驱动的 Theia IDE](https://eclipsesource.com/blogs/2024/10/08/introducting-ai-theia-ide/) 是一个基于 Theia AI 构建的开放灵活的开发环境。
 
-**Key features:**
+**主要功能：**
 
-- **Tool Integration**: Theia AI enables AI agents, including those in the Theia IDE, to utilize MCP servers for seamless tool interaction.
-- **Customizable Prompts**: The Theia IDE allows users to define and adapt prompts, dynamically integrating MCP servers for tailored workflows.
-- **Custom agents**: The Theia IDE supports creating custom agents that leverage MCP capabilities, enabling users to design dedicated workflows on the fly.
+- **工具集成**：Theia AI 使 AI 代理（包括 Theia IDE 中的代理）能够利用 MCP 服务器进行无缝工具交互。
+- **可定制提示词**：Theia IDE 允许用户定义和调整提示词，动态集成 MCP 服务器以定制工作流。
+- **自定义代理**：Theia IDE 支持创建利用 MCP 功能的自定义代理，使用户能够即时设计专用工作流。
 
-Theia AI and Theia IDE's MCP integration provide users with flexibility, making them powerful platforms for exploring and adapting MCP.
+Theia AI 和 Theia IDE 的 MCP 集成为用户提供灵活性，使其成为探索和适应 MCP 的强大平台。
 
-**Learn more:**
+**了解更多：**
 
-- [Theia IDE and Theia AI MCP Announcement](https://eclipsesource.com/blogs/2024/12/19/theia-ide-and-theia-ai-support-mcp/)
-- [Download the AI-powered Theia IDE](https://theia-ide.org/)
+- [Theia IDE 和 Theia AI MCP 公告](https://eclipsesource.com/blogs/2024/12/19/theia-ide-and-theia-ai-support-mcp/)
+- [下载 AI 驱动的 Theia IDE](https://theia-ide.org/)
 
 </McpClient>
 
@@ -2179,13 +2179,13 @@ Theia AI and Theia IDE's MCP integration provide users with flexibility, making 
   supports="Tools"
 >
 
-Tome is an open source cross-platform desktop app designed for working with local LLMs and MCP servers. It is designed to be beginner friendly and abstract away the nitty gritty of configuration for people getting started with MCP.
+Tome 是一个开源跨平台桌面应用，专为使用本地 LLM 和 MCP 服务器而设计。它旨在对初学者友好，并为刚开始使用 MCP 的人抽象掉配置的繁琐细节。
 
-**Key features:**
+**主要功能：**
 
-- MCP servers are managed by Tome so there is no need to install uv or npm or configure JSON
-- Users can quickly add or remove MCP servers via UI
-- Any tool-supported local model on Ollama is compatible
+- MCP 服务器由 Tome 管理，因此无需安装 uv 或 npm 或配置 JSON
+- 用户可以通过 UI 快速添加或删除 MCP 服务器
+- 任何支持工具的 Ollama 本地模型都兼容
 
 </McpClient>
 
@@ -2194,23 +2194,23 @@ Tome is an open source cross-platform desktop app designed for working with loca
   homepage="https://www.typingmind.com"
   supports="Tools"
   instructions={[
-    ["Public servers", "https://docs.typingmind.com/model-context-protocol-(mcp)-in-typingmind"],
-    ["Private servers", "https://docs.typingmind.com/model-context-protocol-(mcp)-in-typingmind/use-mcp-with-private-mcp-connector"]
+    ["公共服务器", "https://docs.typingmind.com/model-context-protocol-(mcp)-in-typingmind"],
+    ["私有服务器", "https://docs.typingmind.com/model-context-protocol-(mcp)-in-typingmind/use-mcp-with-private-mcp-connector"]
   ]}
 >
 
-TypingMind is an advanced frontend for LLMs with MCP support. TypingMind supports all popular LLM providers like OpenAI, Gemini, Claude, and users can use with their own API keys.
+TypingMind 是一个具有 MCP 支持的 LLM 高级前端。TypingMind 支持所有流行的 LLM 提供商，如 OpenAI、Gemini、Claude，用户可以使用自己的 API 密钥。
 
-**Key features:**
+**主要功能：**
 
-- **MCP Tool Integration**: Once MCP is configured, MCP tools will show up as plugins that can be enabled/disabled easily via the main app interface.
-- **Assign MCP Tools to Agents**: TypingMind allows users to create AI agents that have a set of MCP servers assigned.
-- **Remote MCP servers**: Allows users to customize where to run the MCP servers via its MCP Connector configuration, allowing the use of MCP tools across multiple devices (laptop, mobile devices, etc.) or control MCP servers from a remote private server.
+- **MCP 工具集成**：配置 MCP 后，MCP 工具将显示为插件，可以通过主应用界面轻松启用/禁用。
+- **将 MCP 工具分配给代理**：TypingMind 允许用户创建分配了一组 MCP 服务器的 AI 代理。
+- **远程 MCP 服务器**：允许用户通过其 MCP 连接器配置自定义运行 MCP 服务器的位置，允许跨多个设备（笔记本电脑、移动设备等）使用 MCP 工具或从远程私有服务器控制 MCP 服务器。
 
-**Learn more:**
+**了解更多：**
 
-- [TypingMind MCP Document](https://www.typingmind.com/mcp)
-- [Download TypingMind (PWA)](https://www.typingmind.com/)
+- [TypingMind MCP 文档](https://www.typingmind.com/mcp)
+- [下载 TypingMind (PWA)](https://www.typingmind.com/)
 
 </McpClient>
 
@@ -2221,20 +2221,20 @@ TypingMind is an advanced frontend for LLMs with MCP support. TypingMind support
   instructions="https://v0.app/docs/MCP"
 >
 
-v0 turns your ideas into fullstack apps, no code required. Describe what you want with natural language, and v0 builds it for you. v0 can search the web, inspect sites, automatically fix errors, and integrate with external tools.
+v0 将您的想法转化为全栈应用，无需代码。用自然语言描述您想要的内容，v0 为您构建。v0 可以搜索网页、检查站点、自动修复错误并与外部工具集成。
 
-**Key features:**
+**主要功能：**
 
-- **Visual to Code**: Create high-fidelity UIs from your wireframes or mockups
-- **One-Click Deploy**: Deploy with one click to a secure, scalable infrastructure
-- **Web Search**: Search the web for current information and get cited results
-- **Site Inspector**: Inspect websites to understand their structure and content
-- **Auto Error Fixing**: Automatically fix errors in your code with intelligent diagnostics
-- **MCP Integrations**: Connect to MCP servers from the Vercel Marketplace for zero-config setup, or add your own custom MCP servers
+- **视觉到代码**：从您的线框图或模型创建高保真 UI
+- **一键部署**：一键部署到安全、可扩展的基础设施
+- **网页搜索**：搜索网页获取当前信息并获得引用结果
+- **站点检查器**：检查网站以了解其结构和内容
+- **自动错误修复**：通过智能诊断自动修复代码中的错误
+- **MCP 集成**：从 Vercel Marketplace 连接 MCP 服务器以实现零配置设置，或添加您自己的自定义 MCP 服务器
 
-**Learn more:**
+**了解更多：**
 
-- [v0 Website](https://v0.app)
+- [v0 网站](https://v0.app)
 
 </McpClient>
 
@@ -2245,15 +2245,15 @@ v0 turns your ideas into fullstack apps, no code required. Describe what you wan
   instructions="https://code.visualstudio.com/docs/copilot/customization/mcp-servers"
 >
 
-VS Code integrates MCP with GitHub Copilot through [agent mode](https://code.visualstudio.com/docs/copilot/chat/chat-agent-mode), allowing direct interaction with MCP-provided tools within your agentic coding workflow. Configure servers in Claude Desktop, workspace or user settings, with guided MCP installation and secure handling of keys in input variables to avoid leaking hard-coded keys.
+VS Code 通过 [代理模式](https://code.visualstudio.com/docs/copilot/chat/chat-agent-mode) 将 MCP 与 GitHub Copilot 集成，允许在您的代理编码工作流中直接与 MCP 提供的工具交互。在 Claude Desktop、工作区或用户设置中配置服务器，具有 guided MCP 安装并在输入变量中安全处理密钥以避免泄露硬编码密钥。
 
-**Key features:**
+**主要功能：**
 
-- Support for stdio and server-sent events (SSE) transport
-- Per-session selection of tools per agent session for optimal performance
-- Easy server debugging with restart commands and output logging
-- Tool calls with editable inputs and always-allow toggle
-- Integration with existing VS Code extension system to register MCP servers from extensions
+- 支持 stdio 和服务器发送事件 (SSE) 传输
+- 每个代理会话每会话选择工具以获得最佳性能
+- 简单的服务器调试，具有重启命令和输出日志
+- 具有可编辑输入和始终允许切换的工具调用
+- 与现有 VS Code 扩展系统集成，从扩展注册 MCP 服务器
 
 </McpClient>
 
@@ -2263,17 +2263,17 @@ VS Code integrates MCP with GitHub Copilot through [agent mode](https://code.vis
   supports="Resources, Prompts, Tools, Discovery, Sampling (partial), Roots, Elicitation"
 >
 
-VT Code is a terminal coding agent that integrates with Model Context Protocol (MCP) servers, focusing on predictable tool permissions and robust transport controls.
+VT Code 是一个终端编码代理，与模型上下文协议 (MCP) 服务器集成，专注于可预测的工具权限和强大的传输控制。
 
-**Key features:**
+**主要功能：**
 
-- Connect to MCP servers over stdio; optional experimental RMCP/streamable HTTP support
-- Configurable per-provider concurrency, startup/tool timeouts, and retries via `vtcode.toml`
-- Pattern-based allowlists for tools, resources, and prompts with provider-level overrides
+- 通过 stdio 连接到 MCP 服务器；可选实验性 RMCP/streamable HTTP 支持
+- 通过 `vtcode.toml` 配置每个提供商的并发性、启动/工具超时和重试
+- 基于模式的工具、资源和提示词允许列表，具有提供商级覆盖
 
-**Learn more:**
+**了解更多：**
 
-- [MCP Integration Guide](https://github.com/vinhnx/vtcode/blob/main/docs/guides/mcp-integration.md)
+- [MCP 集成指南](https://github.com/vinhnx/vtcode/blob/main/docs/guides/mcp-integration.md)
 
 </McpClient>
 
@@ -2284,14 +2284,14 @@ VT Code is a terminal coding agent that integrates with Model Context Protocol (
   instructions="https://docs.warp.dev/knowledge-and-collaboration/mcp"
 >
 
-Warp is the intelligent terminal with AI and your dev team's knowledge built-in. With natural language capabilities integrated directly into an agentic command line, Warp enables developers to code, automate, and collaborate more efficiently -- all within a terminal that features a modern UX.
+Warp 是智能终端，内置 AI 和您的开发团队的知识。通过将自然语言功能直接集成到代理命令行中，Warp 使开发人员能够更高效地编码、自动化和协作——所有都在具有现代 UX 的终端内。
 
-**Key features:**
+**主要功能：**
 
-- **Agent Mode with MCP support**: invoke tools and access data from MCP servers using natural language prompts
-- **Flexible server management**: add and manage CLI or SSE-based MCP servers via Warp's built-in UI
-- **Live tool/resource discovery**: view tools and resources from each running MCP server
-- **Configurable startup**: set MCP servers to start automatically with Warp or launch them manually as needed
+- **支持 MCP 的代理模式**：使用自然语言提示词调用工具并访问来自 MCP 服务器的数据
+- **灵活的服务器管理**：通过 Warp 的内置 UI 添加和管理基于 CLI 或 SSE 的 MCP 服务器
+- **实时工具/资源发现**：查看每个运行中的 MCP 服务器的工具和资源
+- **可配置启动**：设置 MCP 服务器随 Warp 自动启动或根据需要手动启动
 
 </McpClient>
 
@@ -2301,16 +2301,16 @@ Warp is the intelligent terminal with AI and your dev team's knowledge built-in.
   supports="Tools"
 >
 
-WhatsMCP is an MCP client for WhatsApp. WhatsMCP lets you interact with your AI stack from the comfort of a WhatsApp chat.
+WhatsMCP 是 WhatsApp 的 MCP 客户端。WhatsMCP 让您可以在 WhatsApp 聊天的舒适环境中与您的 AI 栈交互。
 
-**Key features:**
+**主要功能：**
 
-- Supports MCP tools
-- SSE transport, full OAuth2 support
-- Chat flow management for WhatsApp messages
-- One click setup for connecting to your MCP servers
-- In chat management of MCP servers
-- Oauth flow natively supported in WhatsApp
+- 支持 MCP 工具
+- SSE 传输，全面支持 OAuth2
+- WhatsApp 消息的聊天流管理
+- 一键设置连接到您的 MCP 服务器
+- 聊天内管理 MCP 服务器
+- WhatsApp 中原生支持 OAuth 流
 
 </McpClient>
 
@@ -2319,18 +2319,18 @@ WhatsMCP is an MCP client for WhatsApp. WhatsMCP lets you interact with your AI 
   homepage="https://codeium.com/windsurf"
   supports="Tools, Discovery"
   instructions={[
-    ["Guide", "https://docs.windsurf.com/windsurf/cascade/mcp"],
-    ["Video tutorial", "https://windsurf.com/university/tutorials/configuring-first-mcp-server"]
+    ["指南", "https://docs.windsurf.com/windsurf/cascade/mcp"],
+    ["视频教程", "https://windsurf.com/university/tutorials/configuring-first-mcp-server"]
   ]}
 >
 
-Windsurf Editor is an agentic IDE that combines AI assistance with developer workflows. It features an innovative AI Flow system that enables both collaborative and independent AI interactions while maintaining developer control.
+Windsurf Editor 是一个代理 IDE，将 AI 辅助与开发者工作流相结合。它具有创新的 AI Flow 系统，可在保持开发者控制的同时实现协作和独立的 AI 交互。
 
-**Key features:**
+**主要功能：**
 
-- Revolutionary AI Flow paradigm for human-AI collaboration
-- Intelligent code generation and understanding
-- Rich development tools with multi-model support
+- 用于人机协作的革命性 AI Flow 范式
+- 智能代码生成和理解
+- 具有多模型支持的丰富开发工具
 
 </McpClient>
 
@@ -2340,15 +2340,15 @@ Windsurf Editor is an agentic IDE that combines AI assistance with developer wor
   supports="Tools"
 >
 
-Witsy is an AI desktop assistant, supporting Anthropic models and MCP servers as LLM tools.
+Witsy 是一个 AI 桌面助手，支持 Anthropic 模型和 MCP 服务器作为 LLM 工具。
 
-**Key features:**
+**主要功能：**
 
-- Multiple MCP servers support
-- Tool integration for executing commands and scripts
-- Local server connections for enhanced privacy and security
-- Easy-install from Smithery.ai
-- Open-source, available for macOS, Windows and Linux
+- 支持多个 MCP 服务器
+- 用于执行命令和脚本的工具集成
+- 本地服务器连接以增强隐私和安全
+- 从 Smithery.ai 轻松安装
+- 开源，适用于 macOS、Windows 和 Linux
 
 </McpClient>
 
@@ -2359,14 +2359,14 @@ Witsy is an AI desktop assistant, supporting Anthropic models and MCP servers as
   instructions="https://zed.dev/docs/ai/mcp"
 >
 
-Zed is a high-performance code editor with built-in MCP support, focusing on prompt templates and tool integration.
+Zed 是一个高性能代码编辑器，内置 MCP 支持，专注于提示词模板和工具集成。
 
-**Key features:**
+**主要功能：**
 
-- Prompt templates surface as slash commands in the editor
-- Tool integration for enhanced coding workflows
-- Tight integration with editor features and workspace context
-- Does not support MCP resources
+- 提示词模板在编辑器中显示为斜杠命令
+- 用于增强编码工作流的工具集成
+- 与编辑器功能和工作区上下文紧密集成
+- 不支持 MCP 资源
 
 </McpClient>
 
@@ -2377,31 +2377,31 @@ Zed is a high-performance code editor with built-in MCP support, focusing on pro
   instructions="https://docs.zencoder.ai/features/integrations-and-mcp#model-context-protocol-mcp"
 >
 
-Zencoder is a coding agent that's available as an extension for VS Code and JetBrains family of IDEs, meeting developers where they already work. It comes with RepoGrokking (deep contextual codebase understanding), agentic pipeline, and the ability to create and share custom agents.
+Zencoder 是一个编码代理，可作为 VS Code 和 JetBrains 系列 IDE 的扩展使用，满足开发人员在其 already work 的地方。它带有 RepoGrokking（深度上下文代码库理解）、代理管道，以及创建和共享自定义代理的能力。
 
-**Key features:**
+**主要功能：**
 
-- RepoGrokking - deep contextual understanding of codebases
-- Agentic pipeline - runs, tests, and executes code before outputting it
-- Zen Agents platform - ability to build and create custom agents and share with the team
-- Integrated MCP tool library with one-click installations
-- Specialized agents for Unit and E2E Testing
+- RepoGrokking - 代码库的深度上下文理解
+- 代理管道 - 在输出代码之前运行、测试和执行代码
+- Zen Agents 平台 - 能够构建和创建自定义代理并与团队共享
+- 集成 MCP 工具库，一键安装
+- 用于单元和 E2E 测试的专用代理
 
-**Learn more:**
+**了解更多：**
 
-- [Zencoder Documentation](https://docs.zencoder.ai)
+- [Zencoder 文档](https://docs.zencoder.ai)
 
 </McpClient>
 
-## Adding MCP support to your application
+## 向您的应用程序添加 MCP 支持
 
-If you've added MCP support to your application, we encourage you to submit a pull request to add it to this list. MCP integration can provide your users with powerful contextual AI capabilities and make your application part of the growing MCP ecosystem.
+如果您已向应用程序添加了 MCP 支持，我们鼓励您提交拉取请求以将其添加到此列表中。MCP 集成可以为用户提供强大的上下文 AI 能力，并使您的应用程序成为不断成长的 MCP 生态系统的一部分。
 
-Benefits of adding MCP support:
+添加 MCP 支持的好处：
 
-- Enable users to bring their own context and tools
-- Join a growing ecosystem of interoperable AI applications
-- Provide users with flexible integration options
-- Support local-first AI workflows
+- 使用户能够自带上下文和工具
+- 加入一个不断成长的可互操作 AI 应用程序生态系统
+- 为用户提供灵活的集成选项
+- 支持本地优先的 AI 工作流
 
-To get started with implementing MCP in your application, check out our [Python](https://github.com/modelcontextprotocol/python-sdk) or [TypeScript SDK Documentation](https://github.com/modelcontextprotocol/typescript-sdk)
+要开始在您的应用程序中实现 MCP，请查看我们的 [Python](https://github.com/modelcontextprotocol/python-sdk) 或 [TypeScript SDK 文档](https://github.com/modelcontextprotocol/typescript-sdk)

@@ -1,164 +1,123 @@
 ---
-title: "SEP-1865: MCP Apps - Interactive User Interfaces for MCP"
-sidebarTitle: "SEP-1865: MCP Apps - Interactive User Interfaces…"
-description: "MCP Apps - Interactive User Interfaces for MCP"
+title: "SEP-1865: MCP Apps - MCP 的交互式用户界面"
+sidebarTitle: "SEP-1865: MCP Apps - 交互式用户界面…"
+description: "MCP Apps - MCP 的交互式用户界面"
 ---
 
 <div className="flex items-center gap-2 mb-4">
   <Badge color="green" shape="pill">
-    Final
+    最终版
   </Badge>
   <Badge color="gray" shape="pill">
-    Extensions Track
+    扩展轨道
   </Badge>
 </div>
 
-| Field         | Value                                                                                                                                                                             |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **SEP**       | 1865                                                                                                                                                                              |
-| **Title**     | MCP Apps - Interactive User Interfaces for MCP                                                                                                                                    |
-| **Status**    | Final                                                                                                                                                                             |
-| **Type**      | Extensions Track                                                                                                                                                                  |
-| **Created**   | 2025-11-21                                                                                                                                                                        |
+| 字段          | 值                                                                                                                                                                              |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **SEP**       | 1865                                                                                                                                                                            |
+| **Title**     | MCP Apps - MCP 的交互式用户界面                                                                                                                                                 |
+| **Status**    | 最终版                                                                                                                                                                          |
+| **Type**      | 扩展轨道                                                                                                                                                                        |
+| **Created**   | 2025-11-21                                                                                                                                                                      |
 | **Author(s)** | Ido Salomon ([@idosal](https://github.com/idosal)), Liad Yosef ([@liadyosef](https://github.com/liadyosef)), Olivier Chafik ([@olivierchafik](https://github.com/olivierchafik)), |
-| **Sponsor**   | None (seeking sponsor)                                                                                                                                                            |
-| **PR**        | [#1865](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1865)                                                                                                   |
+| **Sponsor**   | 无（正在寻找赞助者）                                                                                                                                                            |
+| **PR**        | [#1865](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1865)                                                                                                 |
 
 ---
 
-## Abstract
+## 摘要
 
-This SEP proposes an extension to MCP (per SEP-1724) that enables servers to deliver interactive
-user interfaces to hosts. MCP Apps introduces a standardized pattern for declaring UI resources via
-the `ui://` URI scheme, associating them with tools through metadata, and facilitating
-bi-directional communication between the UI and the host using MCP's JSON-RPC base protocol. This
-extension addresses the growing community need for rich, interactive experiences in MCP-enabled
-applications, maintaining security, auditability, and alignment with MCP's core architecture. The
-initial specification focuses on HTML resources (`text/html;profile=mcp-app`) with a clear path for
-future extensions.
+本 SEP 提议对 MCP 进行扩展（根据 SEP-1724），使服务器能够向主机交付交互式用户界面。MCP Apps 引入了一种通过 `ui://` URI 方案声明 UI 资源、通过元数据将它们与工具关联，并使用 MCP 的 JSON-RPC 基础协议促进 UI 与主机之间双向通信的标准模式。此扩展解决了 MCP 赋能应用程序中对丰富、交互式体验日益增长的社区需求，同时保持了安全性、可审计性并与 MCP 的核心架构保持一致。初始规范侧重于 HTML 资源（`text/html;profile=mcp-app`），并为未来扩展提供了清晰的路径。
 
-## Motivation
+## 动机
 
-MCP lacks a standardized way for servers to deliver rich, interactive user interfaces to hosts.
-This gap blocks many use cases that require visual presentation and interactivity that go beyond
-plain text or structured data. As more hosts adopt this capability, the risk of fragmentation and
-interoperability challenges grows.
+MCP 缺乏一种标准化的方式，让服务器向主机交付丰富的交互式用户界面。这一缺口阻碍了许多需要视觉呈现和交互性的用例，这些用例超出了纯文本或结构化数据的范畴。随着更多主机采用此功能，碎片化和互操作性挑战的风险也在增加。
 
-[MCP-UI](https://mcpui.dev/) has demonstrated the viability and value of MCP apps built on UI
-resources and serves as a community playground for the UI spec and SDK. Fueled by a dedicated
-community, it developed the bi-directional communication model and the HTML, external URL, and
-remote DOM content types. MCP-UI's adopters, including hosts and providers such as Postman,
-HuggingFace, Shopify, Goose, and ElevenLabs, have provided critical insights and contributions to
-the community.
+[MCP-UI](https://mcpui.dev/) 已经证明了基于 UI 资源构建 MCP 应用程序的可行性和价值，并作为 UI 规范和 SDK 的社区试验场。在专用社区的推动下，它开发了双向通信模型以及 HTML、外部 URL 和远程 DOM 内容类型。MCP-UI 的采用者，包括主机和提供商如 Postman、HuggingFace、Shopify、Goose 和 ElevenLabs，为社区提供了关键的见解和贡献。
 
-OpenAI's [Apps SDK](https://developers.openai.com/apps-sdk/), launched in November 2025, further
-validated the demand for rich UI experiences within conversational AI interfaces. The Apps SDK
-enables developers to build rich, interactive applications inside ChatGPT using MCP as its
-backbone.
+OpenAI 的 [Apps SDK](https://developers.openai.com/apps-sdk/) 于 2025 年 11 月推出，进一步验证了在对话式 AI 界面内对丰富 UI 体验的需求。Apps SDK 使开发人员能够使用 MCP 作为骨干在 ChatGPT 内构建丰富的交互式应用程序。
 
-The architecture of both the Apps SDK and MCP-UI has significantly informed the design of this
-specification.
+Apps SDK 和 MCP-UI 的架构都为本规范的设计提供了重要参考。
 
-However, without formal standardization:
+然而，如果没有正式标准化：
 
-- Servers cannot reliably expect UI support via MCP
-- Each host may implement slightly different behaviors
-- Security and auditability patterns are inconsistent
-- Developers must maintain separate implementations or adapters for different hosts (e.g., MCP-UI
-  vs. Apps SDK)
+- 服务器无法可靠地期望通过 MCP 获得 UI 支持
+- 每个主机可能会实现略有不同的行为
+- 安全性和可审计性模式不一致
+- 开发人员必须为不同的主机维护单独的实现或适配器（例如，MCP-UI 与 Apps SDK）
 
-This SEP addresses the current limitations through an optional, backwards-compatible extension that
-unifies the approaches pioneered by MCP-UI and the Apps SDK into a single, open standard.
+本 SEP 通过一个可选的、向后兼容的扩展解决了当前的限制，该扩展将 MCP-UI 和 Apps SDK 开创的方法统一为一个单一的开放标准。
 
-## Specification
+## 规范
 
-The full specification can be found at
-[modelcontextprotocol/ext-apps](https://github.com/modelcontextprotocol/ext-apps/blob/main/specification/draft/apps.mdx).
+完整规范可在 [modelcontextprotocol/ext-apps](https://github.com/modelcontextprotocol/ext-apps/blob/main/specification/draft/apps.mdx) 找到。
 
-At a high level, MCP Apps extends the Model Context Protocol to enable servers to deliver
-interactive user interfaces to hosts. This extension introduces:
+高层次上，MCP Apps 扩展了模型上下文协议，使服务器能够向主机交付交互式用户界面。此扩展引入了：
 
-- **UI Resources:** Predeclared resources using the `ui://` URI scheme
-- **Resource Discovery:** Tools reference UI resources via metadata
-- **Bi-directional Communication:** UI iframes communicate with hosts using standard MCP JSON-RPC
-  protocol
-- **Security Model:** Mandatory iframe sandboxing with auditable communication
+- **UI 资源：** 使用 `ui://` URI 方案预声明的资源
+- **资源发现：** 工具通过元数据引用 UI 资源
+- **双向通信：** UI iframes 使用标准 MCP JSON-RPC 协议与主机通信
+- **安全模型：** 强制 iframe 沙箱化与可审计的通信
 
-This specification focuses on HTML content (`text/html;profile=mcp-app`) as the initial content
-type, with extensibility for future formats.
+本规范侧重于 HTML 内容（`text/html;profile=mcp-app`）作为初始内容类型，并为未来格式提供了可扩展性。
 
-As an extension, MCP Apps is optional and must be explicitly negotiated between clients and servers
-through the extension capabilities mechanism (see Capability Negotiation section in the
-[full specification](https://github.com/modelcontextprotocol/ext-apps/blob/main/specification/draft/apps.mdx)).
+作为一个扩展，MCP Apps 是可选的，必须通过扩展能力机制在客户端和服务器之间明确协商（参见[完整规范](https://github.com/modelcontextprotocol/ext-apps/blob/main/specification/draft/apps.mdx)中的能力协商部分）。
 
-## Rationale
+## 理由
 
-### Predeclared resources vs. inline embedding
+### 预声明资源与内联嵌入
 
-UI is modeled as predeclared resources (`ui://`), referenced by tools via metadata. This allows:
+UI 被建模为预声明资源（`ui://`），由工具通过元数据引用。这允许：
 
-- Hosts to prefetch templates before tool execution, improving performance
-- Separation of presentation (template) from data (tool results), facilitating caching
-- Security review of UI resources
+- 主机在工具执行前预取模板，提高性能
+- 将展示层（模板）与数据（工具结果）分离，便于缓存
+- 对 UI 资源进行安全审查
 
-**Alternatives considered:**
+**考虑的替代方案：**
 
-- **Embedded resources:** Current MCP-UI approach, where resources are returned in tool results.
-  Although it's more convenient for server development, it was deferred due to the gaps in
-  performance optimization and the challenges in the UI review process.
-- **Resource links:** Predeclare the resources but return links in tool results. Deferred due to
-  the gaps in performance optimization.
+- **嵌入资源：** 当前的 MCP-UI 方法，资源在工具结果中返回。虽然这对服务器开发更方便，但由于性能优化方面的差距以及 UI 审查流程的挑战，此方案被推迟。
+- **资源链接：** 预声明资源但在工具结果中返回链接。由于性能优化方面的差距而被推迟。
 
-### Reusing MCP JSON-RPC instead of a custom protocol
+### 复用 MCP JSON-RPC 而非自定义协议
 
-Reuses existing MCP infrastructure (type definitions, SDKs, etc.). JSON-RPC offers advanced
-capabilities (timeouts, errors, etc.).
+复用现有的 MCP 基础设施（类型定义、SDK 等）。JSON-RPC 提供高级功能（超时、错误等）。
 
-**Alternatives considered:**
+**考虑的替代方案：**
 
-- **Custom message protocol:** Current MCP-UI approach with message types like tool, intent,
-  prompt, etc. These message types can be translated to a subset of the proposed JSON-RPC messages.
-- **Global API object:** Rejected because it requires host-specific injection and doesn't work with
-  external iframe sources. Syntactic sugar may still be added on the server/UI side.
+- **自定义消息协议：** 当前的 MCP-UI 方法，带有工具、意图、提示等消息类型。这些消息类型可以翻译为提议的 JSON-RPC 消息的子集。
+- **全局 API 对象：** 被拒绝，因为它需要特定于主机的注入，并且不适用于外部 iframe 源。语法糖仍可在服务器/UI 端添加。
 
-### HTML-only MVP
+### 仅 HTML 的 MVP
 
-- HTML is universally supported and well-understood
-- Simplest security model (standard iframe sandbox)
-- Allows screenshot/preview generation (e.g., via html2canvas)
-- Sufficient for most observed use cases
-- Provides a clear baseline for future extensions
+- HTML 被普遍支持且易于理解
+- 最简单的安全模型（标准 iframe 沙箱）
+- 允许生成截图/预览（例如，通过 html2canvas）
+- 足以满足大多数观察到的用例
+- 为未来扩展提供清晰的基线
 
-**Alternatives considered:**
+**考虑的替代方案：**
 
-- **Include external URLs in MVP:** This is one of the easiest content types for servers to adopt,
-  as it's possible to embed regular apps. However, it was deferred due to concerns around model
-  visibility, inability to screenshot content, and review process. It may effectively be supported
-  with the SEP's new `externalIframes` capability.
+- **在 MVP 中包含外部 URL：** 这是服务器最容易采用的内容类型之一，因为可以嵌入常规应用程序。然而，由于模型可见性、无法截取内容截图以及审查流程的担忧，此方案被推迟。它实际上可以通过 SEP 的新 `externalIframes` 能力得到支持。
 
-## Backward Compatibility
+## 向后兼容性
 
-The proposal is an optional extension to the core protocol. Existing implementations continue
-working without changes.
+该提议是核心协议的一个可选扩展。现有实现无需更改即可继续工作。
 
-## Security Implications
+## 安全影响
 
-Hosting interactive UI content from potentially untrusted MCP servers requires careful security
-consideration.
+托管来自潜在不可信 MCP 服务器的交互式 UI 内容需要仔细的安全考虑。
 
-Based on the threat model, MCP Apps proposes the following mitigations:
+基于威胁模型，MCP Apps 提出了以下缓解措施：
 
-- **Iframe sandboxing**: All UI content runs in sandboxed iframes with restricted permissions
-- **Predeclared templates**: Hosts can review HTML content before rendering
-- **Auditable messages**: All UI-to-host communication goes through loggable JSON-RPC
-- **User consent**: Hosts can require explicit approval for UI-initiated tool calls
+- **Iframe 沙箱化**：所有 UI 内容都在具有受限权限的沙箱 iframes 中运行
+- **预声明模板**：主机可以在渲染前审查 HTML 内容
+- **可审计消息**：所有 UI 到主机的通信都通过可记录日志的 JSON-RPC 进行
+- **用户同意**：主机可以要求对 UI 发起的工具调用进行明确批准
 
-A full threat model analysis and mitigations are available in the
-[full specification](https://github.com/modelcontextprotocol/ext-apps/blob/main/specification/draft/apps.mdx).
+完整的威胁模型分析和缓解措施可在[完整规范](https://github.com/modelcontextprotocol/ext-apps/blob/main/specification/draft/apps.mdx)中找到。
 
-## Reference Implementation
+## 参考实现
 
-- [MCP-UI](https://github.com/idosal/mcp-ui) client and server SDKs support the patterns proposed
-  in this spec.
-- [ext-apps](https://github.com/modelcontextprotocol/ext-apps) repository contains a prototype
-  implementation by Olivier Chafik.
+- [MCP-UI](https://github.com/idosal/mcp-ui) 客户端和服务器 SDK 支持本规范中提出的模式。
+- [ext-apps](https://github.com/modelcontextprotocol/ext-apps) 仓库包含由 Olivier Chafik 编写的原型实现。

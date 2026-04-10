@@ -1,116 +1,116 @@
 ---
-title: "SEP-985: Align OAuth 2.0 Protected Resource Metadata with RFC 9728"
-sidebarTitle: "SEP-985: Align OAuth 2.0 Protected Resource Meta…"
-description: "Align OAuth 2.0 Protected Resource Metadata with RFC 9728"
+title: "SEP-985: 使 OAuth 2.0 受保护资源元数据与 RFC 9728 保持一致"
+sidebarTitle: "SEP-985: 使 OAuth 2.0 受保护资源元数据…"
+description: "使 OAuth 2.0 受保护资源元数据与 RFC 9728 保持一致"
 ---
 
 <div className="flex items-center gap-2 mb-4">
   <Badge color="green" shape="pill">
-    Final
+    最终版
   </Badge>
   <Badge color="gray" shape="pill">
-    Standards Track
+    标准轨道
   </Badge>
 </div>
 
-| Field         | Value                                                                         |
+| 字段          | 值                                                                            |
 | ------------- | ----------------------------------------------------------------------------- |
 | **SEP**       | 985                                                                           |
-| **Title**     | Align OAuth 2.0 Protected Resource Metadata with RFC 9728                     |
-| **Status**    | Final                                                                         |
-| **Type**      | Standards Track                                                               |
-| **Created**   | 2025-07-16                                                                    |
-| **Author(s)** | sunishsheth2009                                                               |
-| **Sponsor**   | None                                                                          |
+| **标题**      | 使 OAuth 2.0 受保护资源元数据与 RFC 9728 保持一致                             |
+| **状态**      | 最终版                                                                        |
+| **类型**      | 标准轨道                                                                      |
+| **创建日期**  | 2025-07-16                                                                    |
+| **作者**      | sunishsheth2009                                                               |
+| **赞助人**    | 无                                                                            |
 | **PR**        | [#985](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/985) |
 
 ---
 
-## Abstract
+## 摘要
 
-This proposal brings the MCP spec's handling of OAuth 2.0 Protected Resource Metadata in line with [RFC 9728](https://datatracker.ietf.org/doc/html/rfc9728#name-obtaining-protected-resourc).
+本提案使 MCP 规范中处理 OAuth 2.0 受保护资源元数据的方式与 [RFC 9728](https://datatracker.ietf.org/doc/html/rfc9728#name-obtaining-protected-resourc) 保持一致。
 
-Currently, the MCP spec requires the use of the HTTP WWW-Authenticate header when returning a 401 Unauthorized to indicate the location of the protected resource metadata. However, [RFC 9728, Section 5](https://datatracker.ietf.org/doc/html/rfc9728#section-5) states:
+目前，MCP 规范要求在使用 401 Unauthorized 响应时通过 HTTP WWW-Authenticate 头来指示受保护资源元数据的位置。然而，[RFC 9728，第 5 节](https://datatracker.ietf.org/doc/html/rfc9728#section-5) 指出：
 
-“A protected resource MAY use the WWW-Authenticate HTTP response header field, as discussed in RFC 9110, to return a URL to its protected resource metadata to the client.”
+“受保护资源可以使用 WWW-Authenticate HTTP 响应头字段（如 RFC 9110 中所述），向客户端返回其受保护资源元数据的 URL。”
 
-This suggests that the MCP spec could be made more flexible while still maintaining RFC compliance.
+这表明 MCP 规范可以在保持符合 RFC 的同时变得更加灵活。
 
-## Rationale
+## 理由
 
-Many large-scale, dynamic, multi-tenant environments rely on a centralized authentication service separate from the backend resource servers. In such deployments, injecting WWW-Authenticate headers from backend services is non-trivial due to separation of concerns and infrastructure complexity.
+许多大规模、动态、多租户环境依赖于与后端资源服务器分离的集中式身份验证服务。在这样的部署中，由于关注点分离和基础设施复杂性，从后端服务注入 WWW-Authenticate 头并非易事。
 
-In these scenarios, having the option to discover metadata via a well-known URL provides a practical path forward for easier MCP adoption. Requiring only the header would impose significant communication overhead between components, especially when hundreds or thousands of MCP instances are created and destroyed dynamically. Also if there are specific managed MCP servers, adopting headers across centralized system would add significant overhead.
+在这些场景中，提供通过知名 URL 发现元数据的选项为更容易采用 MCP 提供了一条实用路径。仅要求头信息将在组件之间施加巨大的通信开销，特别是当数百或数千个 MCP 实例动态创建和销毁时。此外，如果有特定的托管 MCP 服务器，在集中式系统中采用头信息将增加巨大的开销。
 
-While this increases complexity for clients—who must now implement logic to probe metadata endpoints—it reduces friction for server deployments and may encourage broader adoption. There are tradeoffs:
+虽然这增加了客户端的复杂性——客户端现在必须实现探测元数据端点的逻辑——但它减少了服务器部署的摩擦，并可能鼓励更广泛的采用。存在权衡：
 
-Pros for Server Developers: Avoid complex header injection; simplifies integration in distributed environments.
+服务器开发者的优点：避免复杂的头信息注入；简化分布式环境中的集成。
 
-Cons for Client Developers: Clients must fall back to metadata discovery logic when the header is absent, increasing client complexity.
+客户端开发者的缺点：当头信息缺失时，客户端必须回退到元数据发现逻辑，增加了客户端复杂性。
 
-## Proposed State
+## 提议状态
 
-Update the MCP spec to:
+更新 MCP 规范以：
 
 ```
-Clients MUST interpret the WWW-Authenticate header, and fallback to probing for metadata if not present.
-Servers SHOULD return the WWW-Authenticate header
+客户端必须解释 WWW-Authenticate 头，如果不存在则回退到探测元数据。
+服务器应该返回 WWW-Authenticate 头
 ```
 
-**The reason for deviating a bit on the RFC:**
-Go with SHOULD over MAY for WWW-Authenticate is that it makes supporting other features, such as incremental authorization easier (e.g. you make a request for a tool, but need additional scopes, and receive a WWW-Authenticate challenge indicating the scopes).
+**偏离 RFC 一点的原因：**
+对 WWW-Authenticate 使用 SHOULD 而不是 MAY 的原因是，这使得支持其他功能（例如增量授权）更容易（例如，你请求一个工具，但需要额外的作用域，并收到指示作用域的 WWW-Authenticate 挑战）。
 
-Based on the above, following the updated flow:
+基于上述，遵循更新后的流程：
 
-- Attempt the MCP request without a token.
-- If a 401 Unauthorized response is received: Check for a WWW-Authenticate header. If present and includes the resource_metadata parameter, use it to locate the resource metadata.
-- If the header is absent or does not include resource_metadata, fallback to requesting /.well-known/oauth-protected-resource.
+- 尝试不带令牌发起 MCP 请求。
+- 如果收到 401 Unauthorized 响应：检查 WWW-Authenticate 头。如果存在且包含 resource_metadata 参数，使用它来定位资源元数据。
+- 如果头不存在或不包含 resource_metadata，回退到请求 /.well-known/oauth-protected-resource。
 
-This change allows more flexible deployment models without removing existing capabilities.
+此更改允许更灵活的部署模型，而无需移除现有功能。
 
 ```mermaid
 sequenceDiagram
-    participant C as Client
-    participant M as MCP Server (Resource Server)
-    participant A as Authorization Server
+    participant C as 客户端
+    participant M as MCP 服务器 (资源服务器)
+    participant A as 授权服务器
 
-    Note over C: Attempt unauthenticated MCP request
-    C->>M: MCP request without token
-    M-->>C: HTTP 401 Unauthorized (may include WWW-Authenticate header)
+    Note over C: 尝试未经认证的 MCP 请求
+    C->>M: 不带令牌的 MCP 请求
+    M-->>C: HTTP 401 Unauthorized (可能包含 WWW-Authenticate 头)
 
-    alt Header includes resource_metadata
-        Note over C: Extract resource_metadata URL from header
+    alt 头包含 resource_metadata
+        Note over C: 从头中提取 resource_metadata URL
         C->>M: GET resource_metadata URI
-        M-->>C: Resource metadata with authorization server URL
-    else No resource_metadata in header
-        Note over C: Fallback to metadata probing
+        M-->>C: 包含授权服务器 URL 的资源元数据
+    else 头中没有 resource_metadata
+        Note over C: 回退到元数据探测
         C->>M: GET /.well-known/oauth-protected-resource
-        alt Metadata found
-            M-->>C: Resource metadata with authorization server URL
-        else Metadata not found
-            Note over C: Abort or use pre-configured values
+        alt 找到元数据
+            M-->>C: 包含授权服务器 URL 的资源元数据
+        else 未找到元数据
+            Note over C: 中止或使用预配置值
         end
     end
 
-    Note over C: Validate RS metadata,<br />build AS metadata URL
+    Note over C: 验证 RS 元数据，<br />构建 AS 元数据 URL
 
     C->>A: GET /.well-known/oauth-authorization-server
-    A-->>C: Authorization server metadata
+    A-->>C: 授权服务器元数据
 
-    Note over C,A: OAuth 2.1 authorization flow happens here
+    Note over C,A: OAuth 2.1 授权流程在此发生
 
-    C->>A: Token request
-    A-->>C: Access token
+    C->>A: 令牌请求
+    A-->>C: 访问令牌
 
-    C->>M: MCP request with access token
-    M-->>C: MCP response
-    Note over C,M: MCP communication continues with valid token
+    C->>M: 带访问令牌的 MCP 请求
+    M-->>C: MCP 响应
+    Note over C,M: MCP 通信继续使用有效令牌进行
 ```
 
-## Backward Compatibility
+## 向后兼容性
 
-This proposal is fully backward-compatible.
+本提案完全向后兼容。
 
-It retains support for the WWW-Authenticate header (already in the spec) and introduces a fallback mechanism using the .well-known metadata path, which is already defined in MCP as a MUST-support location.
+它保留了对 WWW-Authenticate 头的支持（已在规范中），并引入了使用 .well-known 元数据路径的回退机制，这在 MCP 中已定义为必须支持的位置。
 
-Clients that already support metadata probing benefit from improved interoperability. Servers are not required to emit the WWW-Authenticate header if it is infeasible, but doing so is still encouraged to reduce client complexity and enable future extensibility.
+已经支持元数据探测的客户端将受益于改进的互操作性。如果不可行，服务器不需要发出 WWW-Authenticate 头，但仍鼓励这样做以减少客户端复杂性并启用未来的可扩展性。

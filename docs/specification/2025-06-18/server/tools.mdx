@@ -1,41 +1,32 @@
 ---
-title: Tools
+title: 工具
 ---
 
 <div id="enable-section-numbers" />
 
-The Model Context Protocol (MCP) allows servers to expose tools that can be invoked by
-language models. Tools enable models to interact with external systems, such as querying
-databases, calling APIs, or performing computations. Each tool is uniquely identified by
-a name and includes metadata describing its schema.
+模型上下文协议 (MCP) 允许服务器暴露可由语言模型调用的工具。工具使模型能够与外部系统交互，例如查询数据库、调用 API 或执行计算。每个工具都通过名称唯一标识，并包含描述其模式的元数据。
 
-## User Interaction Model
+## 用户交互模型
 
-Tools in MCP are designed to be **model-controlled**, meaning that the language model can
-discover and invoke tools automatically based on its contextual understanding and the
-user's prompts.
+MCP 中的工具设计为 **模型控制**，这意味着语言模型可以根据其上下文理解和用户的提示自动发现并调用工具。
 
-However, implementations are free to expose tools through any interface pattern that
-suits their needs&mdash;the protocol itself does not mandate any specific user
-interaction model.
+然而，实现者可以自由地通过任何适合其需求的界面模式暴露工具——协议本身并不强制任何特定的用户交互模型。
 
 <Warning>
 
-For trust & safety and security, there **SHOULD** always
-be a human in the loop with the ability to deny tool invocations.
+为了信任、安全和安全性，**应该**始终有人类参与循环，并能够拒绝工具调用。
 
-Applications **SHOULD**:
+应用程序 **应该**：
 
-- Provide UI that makes clear which tools are being exposed to the AI model
-- Insert clear visual indicators when tools are invoked
-- Present confirmation prompts to the user for operations, to ensure a human is in the
-  loop
+- 提供 UI，明确哪些工具正暴露给 AI 模型
+- 在调用工具时插入清晰的视觉指示
+- 向用户展示操作确认提示，以确保人类参与循环
 
 </Warning>
 
-## Capabilities
+## 能力
 
-Servers that support tools **MUST** declare the `tools` capability:
+支持工具的服务器 **必须** 声明 `tools` 能力：
 
 ```json
 {
@@ -47,17 +38,15 @@ Servers that support tools **MUST** declare the `tools` capability:
 }
 ```
 
-`listChanged` indicates whether the server will emit notifications when the list of
-available tools changes.
+`listChanged` 指示服务器是否在可用工具列表变更时发出通知。
 
-## Protocol Messages
+## 协议消息
 
-### Listing Tools
+### 列出工具
 
-To discover available tools, clients send a `tools/list` request. This operation supports
-[pagination](/specification/2025-06-18/server/utilities/pagination).
+要发现可用工具，客户端发送 `tools/list` 请求。此操作支持 [分页](/specification/2025-06-18/server/utilities/pagination)。
 
-**Request:**
+**请求：**
 
 ```json
 {
@@ -70,7 +59,7 @@ To discover available tools, clients send a `tools/list` request. This operation
 }
 ```
 
-**Response:**
+**响应：**
 
 ```json
 {
@@ -99,11 +88,11 @@ To discover available tools, clients send a `tools/list` request. This operation
 }
 ```
 
-### Calling Tools
+### 调用工具
 
-To invoke a tool, clients send a `tools/call` request:
+要调用工具，客户端发送 `tools/call` 请求：
 
-**Request:**
+**请求：**
 
 ```json
 {
@@ -119,7 +108,7 @@ To invoke a tool, clients send a `tools/call` request:
 }
 ```
 
-**Response:**
+**响应：**
 
 ```json
 {
@@ -137,10 +126,9 @@ To invoke a tool, clients send a `tools/call` request:
 }
 ```
 
-### List Changed Notification
+### 列表变更通知
 
-When the list of available tools changes, servers that declared the `listChanged`
-capability **SHOULD** send a notification:
+当可用工具列表变更时，声明了 `listChanged` 能力的服务器 **应该** 发送通知：
 
 ```json
 {
@@ -149,7 +137,7 @@ capability **SHOULD** send a notification:
 }
 ```
 
-## Message Flow
+## 消息流
 
 ```mermaid
 sequenceDiagram
@@ -157,59 +145,58 @@ sequenceDiagram
     participant Client
     participant Server
 
-    Note over Client,Server: Discovery
+    Note over Client,Server: 发现
     Client->>Server: tools/list
-    Server-->>Client: List of tools
+    Server-->>Client: 工具列表
 
-    Note over Client,LLM: Tool Selection
-    LLM->>Client: Select tool to use
+    Note over Client,LLM: 工具选择
+    LLM->>Client: 选择要使用的工具
 
-    Note over Client,Server: Invocation
+    Note over Client,Server: 调用
     Client->>Server: tools/call
-    Server-->>Client: Tool result
-    Client->>LLM: Process result
+    Server-->>Client: 工具结果
+    Client->>LLM: 处理结果
 
-    Note over Client,Server: Updates
+    Note over Client,Server: 更新
     Server--)Client: tools/list_changed
     Client->>Server: tools/list
-    Server-->>Client: Updated tools
+    Server-->>Client: 更新后的工具
 ```
 
-## Data Types
+## 数据类型
 
-### Tool
+### 工具
 
-A tool definition includes:
+工具定义包括：
 
-- `name`: Unique identifier for the tool
-- `title`: Optional human-readable name of the tool for display purposes.
-- `description`: Human-readable description of functionality
-- `inputSchema`: JSON Schema defining expected parameters
-- `outputSchema`: Optional JSON Schema defining expected output structure
-- `annotations`: optional properties describing tool behavior
+- `name`：工具的唯一标识符
+- `title`：工具的可选人类可读名称，用于显示目的。
+- `description`：功能的人类可读描述
+- `inputSchema`：定义预期参数的 JSON Schema
+- `outputSchema`：定义预期输出结构的可选 JSON Schema
+- `annotations`：描述工具行为的可选属性
 
 <Warning>
 
-For trust & safety and security, clients **MUST** consider
-tool annotations to be untrusted unless they come from trusted servers.
+为了信任、安全和安全性，客户端 **必须** 将工具注解视为不可信，除非它们来自受信任的服务器。
 
 </Warning>
 
-### Tool Result
+### 工具结果
 
-Tool results may contain [**structured**](#structured-content) or **unstructured** content.
+工具结果可能包含 [**结构化**](#structured-content) 或 **非结构化** 内容。
 
-**Unstructured** content is returned in the `content` field of a result, and can contain multiple content items of different types:
+**非结构化** 内容在结果的 `content` 字段中返回，并且可以包含多种不同类型的内容项：
 
 <Note>
-  All content types (text, image, audio, resource links, and embedded resources)
-  support optional
-  [annotations](/specification/2025-06-18/server/resources#annotations) that
-  provide metadata about audience, priority, and modification times. This is the
-  same annotation format used by resources and prompts.
+  所有内容类型（文本、图像、音频、资源链接和嵌入资源）
+  都支持可选的
+  [注解](/specification/2025-06-18/server/resources#annotations)，
+  提供有关受众、优先级和修改时间的元数据。这是
+  资源和提示使用的相同注解格式。
 </Note>
 
-#### Text Content
+#### 文本内容
 
 ```json
 {
@@ -218,7 +205,7 @@ Tool results may contain [**structured**](#structured-content) or **unstructured
 }
 ```
 
-#### Image Content
+#### 图像内容
 
 ```json
 {
@@ -233,9 +220,9 @@ Tool results may contain [**structured**](#structured-content) or **unstructured
 }
 ```
 
-This example demonstrates the use of an optional Annotation.
+此示例演示了可选注解的使用。
 
-#### Audio Content
+#### 音频内容
 
 ```json
 {
@@ -245,10 +232,10 @@ This example demonstrates the use of an optional Annotation.
 }
 ```
 
-#### Resource Links
+#### 资源链接
 
-A tool **MAY** return links to [Resources](/specification/2025-06-18/server/resources), to provide additional context
-or data. In this case, the tool will return a URI that can be subscribed to or fetched by the client:
+工具 **可以** 返回指向 [资源](/specification/2025-06-18/server/resources) 的链接，以提供额外的上下文
+或数据。在这种情况下，工具将返回一个 URI，客户端可以订阅或获取该 URI：
 
 ```json
 {
@@ -264,17 +251,17 @@ or data. In this case, the tool will return a URI that can be subscribed to or f
 }
 ```
 
-Resource links support the same [Resource annotations](/specification/2025-06-18/server/resources#annotations) as regular resources to help clients understand how to use them.
+资源链接支持与常规资源相同的 [资源注解](/specification/2025-06-18/server/resources#annotations)，以帮助客户端了解如何使用它们。
 
 <Info>
-  Resource links returned by tools are not guaranteed to appear in the results
-  of a `resources/list` request.
+  工具返回的资源链接不保证出现在
+  `resources/list` 请求的结果中。
 </Info>
 
-#### Embedded Resources
+#### 嵌入资源
 
-[Resources](/specification/2025-06-18/server/resources) **MAY** be embedded to provide additional context
-or data using a suitable [URI scheme](./resources#common-uri-schemes). Servers that use embedded resources **SHOULD** implement the `resources` capability:
+[资源](/specification/2025-06-18/server/resources) **可以** 被嵌入以提供额外的上下文
+或数据，使用合适的 [URI 方案](./resources#common-uri-schemes)。使用嵌入资源的服务器 **应该** 实现 `resources` 能力：
 
 ```json
 {
@@ -292,23 +279,23 @@ or data using a suitable [URI scheme](./resources#common-uri-schemes). Servers t
 }
 ```
 
-Embedded resources support the same [Resource annotations](/specification/2025-06-18/server/resources#annotations) as regular resources to help clients understand how to use them.
+嵌入资源支持与常规资源相同的 [资源注解](/specification/2025-06-18/server/resources#annotations)，以帮助客户端了解如何使用它们。
 
-#### Structured Content
+#### 结构化内容
 
-**Structured** content is returned as a JSON object in the `structuredContent` field of a result.
+**结构化** 内容作为结果中 `structuredContent` 字段的 JSON 对象返回。
 
-For backwards compatibility, a tool that returns structured content SHOULD also return the serialized JSON in a TextContent block.
+为了向后兼容，返回结构化内容的工具还应该在一个 TextContent 块中返回序列化的 JSON。
 
-#### Output Schema
+#### 输出模式
 
-Tools may also provide an output schema for validation of structured results.
-If an output schema is provided:
+工具还可以提供输出模式以验证结构化结果。
+如果提供了输出模式：
 
-- Servers **MUST** provide structured results that conform to this schema.
-- Clients **SHOULD** validate structured results against this schema.
+- 服务器 **必须** 提供符合此模式的结构化结果。
+- 客户端 **应该** 针对此模式验证结构化结果。
 
-Example tool with output schema:
+带有输出模式的工具示例：
 
 ```json
 {
@@ -346,7 +333,7 @@ Example tool with output schema:
 }
 ```
 
-Example valid response for this tool:
+此工具的有效响应示例：
 
 ```json
 {
@@ -368,28 +355,28 @@ Example valid response for this tool:
 }
 ```
 
-Providing an output schema helps clients and LLMs understand and properly handle structured tool outputs by:
+提供输出模式通过以下方式帮助客户端和 LLM 理解并正确处理结构化工具输出：
 
-- Enabling strict schema validation of responses
-- Providing type information for better integration with programming languages
-- Guiding clients and LLMs to properly parse and utilize the returned data
-- Supporting better documentation and developer experience
+- 启用对响应的严格模式验证
+- 提供类型信息以便更好地与编程语言集成
+- 指导客户端和 LLM 正确解析和利用返回的数据
+- 支持更好的文档和开发者体验
 
-## Error Handling
+## 错误处理
 
-Tools use two error reporting mechanisms:
+工具使用两种错误报告机制：
 
-1. **Protocol Errors**: Standard JSON-RPC errors for issues like:
-   - Unknown tools
-   - Invalid arguments
-   - Server errors
+1. **协议错误**：标准 JSON-RPC 错误，用于此类问题：
+   - 未知工具
+   - 无效参数
+   - 服务器错误
 
-2. **Tool Execution Errors**: Reported in tool results with `isError: true`:
-   - API failures
-   - Invalid input data
-   - Business logic errors
+2. **工具执行错误**：在工具结果中报告，`isError: true`：
+   - API 失败
+   - 无效输入数据
+   - 业务逻辑错误
 
-Example protocol error:
+协议错误示例：
 
 ```json
 {
@@ -402,7 +389,7 @@ Example protocol error:
 }
 ```
 
-Example tool execution error:
+工具执行错误示例：
 
 ```json
 {
@@ -420,18 +407,18 @@ Example tool execution error:
 }
 ```
 
-## Security Considerations
+## 安全考量
 
-1. Servers **MUST**:
-   - Validate all tool inputs
-   - Implement proper access controls
-   - Rate limit tool invocations
-   - Sanitize tool outputs
+1. 服务器 **必须**：
+   - 验证所有工具输入
+   - 实施适当的访问控制
+   - 限制工具调用速率
+   - 清理工具输出
 
-2. Clients **SHOULD**:
-   - Prompt for user confirmation on sensitive operations
-   - Show tool inputs to the user before calling the server, to avoid malicious or
-     accidental data exfiltration
-   - Validate tool results before passing to LLM
-   - Implement timeouts for tool calls
-   - Log tool usage for audit purposes
+2. 客户端 **应该**：
+   - 在敏感操作上提示用户确认
+   - 在调用服务器前向用户显示工具输入，以避免恶意或
+     意外数据泄露
+   - 在传递给 LLM 之前验证工具结果
+   - 为工具调用实施超时
+   - 记录工具使用情况以用于审计目的

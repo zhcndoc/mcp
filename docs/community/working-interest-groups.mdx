@@ -1,293 +1,293 @@
 ---
-title: Working and Interest Groups
-description: Governance rules for the two forms of collaborative groups within the Model Context Protocol community — Working Groups and Interest Groups.
+title: 工作组与兴趣组
+description: Model Context Protocol 社区内两种协作形式的治理规则——工作组和兴趣组。
 ---
 
-Within the MCP contributor community we maintain two types of collaboration formats: **Interest Groups (IGs)** and **Working Groups (WGs)**.
+在 MCP 贡献者社区内，我们维持两种协作格式：**兴趣组 (IG)** 和 **工作组 (WG)**。
 
-## Quick Reference
+## 快速参考
 
-|                | Interest Group (IG)                                | Working Group (WG)                                     |
+|                | 兴趣组 (IG)                                | 工作组 (WG)                                     |
 | -------------- | -------------------------------------------------- | ------------------------------------------------------ |
-| **Purpose**    | Identify and discuss problems                      | Build concrete solutions                               |
-| **Output**     | Problem statements, use cases, recommendations     | SEPs, implementations, code                            |
-| **Commitment** | Active contribution expected                       | Active contribution expected                           |
-| **Duration**   | Ongoing as long as topic is relevant               | Until deliverables complete                            |
-| **Leadership** | Facilitator(s)                                     | Lead(s)                                                |
-| **Decisions**  | Rough consensus, non-binding                       | Binding (lazy consensus → vote → escalation)           |
-| **Example**    | "Security in MCP" — discussing security challenges | "Server Identity" — implementing identity verification |
+| **目的**    | 识别并讨论问题                      | 构建具体的解决方案                               |
+| **产出**     | 问题陈述、用例、建议     | SEP、实现、代码                            |
+| **承诺** | 期望积极贡献                       | 期望积极贡献                           |
+| **持续时间**   | 只要主题相关则持续               | 直到交付物完成                            |
+| **领导层** | 协调人                                     | 负责人                                                |
+| **决策**  | 大致共识，无约束力                       | 具有约束力（懒惰共识 → 投票 → 升级）           |
+| **示例**    | "MCP 中的安全”——讨论安全挑战 | "服务器身份”——实现身份验证 |
 
-## When to Use Which
+## 何时使用哪种
 
-**Join an Interest Group when you:**
+**在以下情况时加入兴趣组：**
 
-- Have a problem but aren't sure of the solution
-- Want to explore whether an idea has community support
-- Are new to MCP and want to learn about a topic area
-- Want to share use cases and requirements
+- 有问题但不确定解决方案
+- 想要探索某个想法是否有社区支持
+- 是 MCP 的新手，想要了解某个主题领域
+- 想要分享用例和需求
 
-**Join a Working Group when you:**
+**在以下情况时加入工作组：**
 
-- Have a specific solution to implement
-- Are ready to write code or a SEP
-- Can commit regular time to active development
-- Want to help build a particular feature
+- 有具体的解决方案需要实施
+- 准备好编写代码或 SEP
+- 能够承诺定期时间进行主动开发
+- 想要帮助构建特定功能
 
-**Typical flow**: Discuss a problem in an IG → Validate that it's worth solving → Form or join a WG to build the solution → Submit a SEP → Implement
+**典型流程**：在 IG 中讨论问题 → 验证是否值得解决 → 组建或加入 WG 来构建解决方案 → 提交 SEP → 实施
 
-## Interest Groups (IGs)
+## 兴趣组 (IG)
 
-**Goal:** Facilitate discussion and knowledge-sharing among MCP contributors who share interests in a specific topic. The focus is on identifying problems worth solving and gathering requirements — not building solutions.
+**目标：** 促进对特定主题感兴趣的 MCP 贡献者之间的讨论和知识共享。重点是识别值得解决的问题并收集需求——而不是构建解决方案。
 
-**What IGs do:**
+**兴趣组的工作内容：**
 
-- Host discussions in Discord channels
-- Run regular meetings to share use cases
-- Document problem statements and requirements
-- Build consensus on what should be prioritized
-- Provide input to Working Groups and SEPs
+- 在 Discord 频道中主持讨论
+- 召开定期会议分享用例
+- 记录问题陈述和需求
+- 就优先事项建立共识
+- 为工作组和 SEP 提供输入
 
-**Examples:**
+**示例：**
 
-- Security in MCP
-- Auth in MCP
-- Using MCP in enterprise settings
-- Tooling and practices for hosting MCP clients
+- MCP 中的安全
+- MCP 中的认证
+- 在企业环境中使用 MCP
+- 托管 MCP 客户端的工具和实践
 
-## Working Groups (WGs)
+## 工作组 (WG)
 
-**Goal:** Collaborate on a SEP, a series of related SEPs, or an officially endorsed project. WGs produce concrete deliverables.
+**目标：** 协作处理 SEP、一系列相关的 SEP 或官方认可的项目。工作组产生具体的交付物。
 
-**What WGs do:**
+**工作组的工作内容：**
 
-- Write and iterate on SEPs
-- Build reference implementations
-- Maintain ongoing projects (Inspector, Registry, SDKs)
-- Drive features from proposal to specification
+- 编写和迭代 SEP
+- 构建参考实现
+- 维护正在进行的项目（Inspector、Registry、SDKs）
+- 推动功能从提案到规范
 
-**Examples:**
+**示例：**
 
 - Registry
 - Inspector
-- Tool Filtering
-- Server Identity
+- 工具过滤
+- 服务器身份
 
-## Governance
+## 治理
 
-The following rules apply to all MCP Working Groups and Interest Groups. Individual group charters cannot override these requirements. Where rules differ between WGs and IGs, this is noted explicitly.
+以下规则适用于所有 MCP 工作组和兴趣组。个别组的章程不能覆盖这些要求。在 WG 和 IG 之间规则不同的地方，会明确注明。
 
-### Leadership
+### 领导层
 
-Each group has one or more **Leads** (referred to as **Facilitators** for Interest Groups).
+每个组都有一个或多个 **负责人**（对于兴趣组称为 **协调人**）。
 
-**Requirements for all Leads and Facilitators:**
+**所有负责人和协调人的要求：**
 
-- Hold at least Member status on the MCP Contributor Ladder — see [Governance](/community/governance) for role definitions
-- Demonstrated sustained engagement with the group's scope area
-- Ability to facilitate across organizational boundaries
-- Commitment to running the group's operations
-- Group and its leadership sponsored by at least two Core Maintainers or one Lead Maintainer
+- 在 MCP 贡献者阶梯上至少持有成员身份——参见 [治理](/community/governance) 了解角色定义
+- 证明与该组范围领域有持续的参与
+- 能够跨组织边界进行协调
+- 承诺运行组的运营
+- 组及其领导层由至少两名核心维护者或一名首席维护者担保
 
-**Additional requirements for WG Leads:**
+**工作组负责人的额外要求：**
 
-- Commitment to 2-3 hours/week for WG activities
+- 承诺每周 2-3 小时用于工作组活动
 
-**All Leads are responsible for:**
+**所有负责人负责：**
 
-- Schedule and facilitate regular meetings
-- Set agendas in collaboration with participants and publish them in advance
-- Ensure meeting notes are published within 48 hours
-- Maintain the group's documentation
-- Maintain a members list and respective access list in the [access repository](https://github.com/modelcontextprotocol/access)
-- Proactively recruit and retain broad, representative membership across organizations and perspectives
+- 安排和主持定期会议
+- 与参与者协作设置议程并提前发布
+- 确保会议笔记在 48 小时内发布
+- 维护组的文档
+- 在 [access 仓库](https://github.com/modelcontextprotocol/access) 中维护成员列表和相应的访问列表
+- 主动招募和保留跨组织和观点的广泛、代表性成员
 
-**WG Leads are additionally responsible for:**
+**工作组负责人还负责：**
 
-- Drive proposals through the [SEP process](/community/sep-guidelines) to resolution
-- Triage SEPs in the WG's scope area, including closing SEPs that do not fit the roadmap (with documented rationale; authors may appeal to Core Maintainers)
-- Escalate blocked decisions to Core Maintainers with clear context
-- Maintain the working group's roadmap
-- Solicit feedback from one or more Core Maintainers on the general direction of the group on a continuous basis
-- Provide quarterly status updates to the Community and Core Maintainer Group
+- 通过 [SEP 流程](/community/sep-guidelines) 推动提案直至解决
+- 处理工作组范围内的 SEP，包括关闭不符合路线图的 SEP（需有文档记录的理由；作者可向核心维护者上诉）
+- 将受阻的决策升级给核心维护者，并提供清晰的背景
+- 维护工作组的路线图
+- 持续向一名或多名核心维护者征求关于组总体方向的反馈
+- 向社区和核心维护者组提供季度状态更新
 
-### Participation Levels
+### 参与层级
 
-All groups use the following participation tiers. Note that **WG Member** is a group-specific participation level distinct from the org-wide **Member** role — an individual may be a WG Member in a specific group without holding org-wide Member status, and vice versa.
+所有组使用以下参与层级。请注意，**工作组成员** 是特定于组的参与层级，不同于组织范围的 **成员** 角色——个人可以在特定组中成为工作组成员而不持有组织范围的成员身份，反之亦然。
 
-| Level                | Description                                       | Privileges                                                         |
+| 层级                | 描述                                       | 权限                                                         |
 | -------------------- | ------------------------------------------------- | ------------------------------------------------------------------ |
-| **Observer**         | Anyone interested in following the group's work   | Read access, may attend meetings, limited discussion participation |
-| **Participant**      | Active contributor to group discussions           | Can propose agenda items, participate in async votes               |
-| **WG Member**        | Sustained contributor with demonstrated expertise | Counted for quorum (WGs only)                                      |
-| **Lead/Facilitator** | Operational leadership of the group               | Sets agenda, facilitates, escalates                                |
+| **观察者**         | 任何有兴趣关注组工作的人   | 读取权限，可参加会议，有限的讨论参与 |
+| **参与者**      | 组讨论的积极贡献者           | 可提议议程项目，参与异步投票               |
+| **工作组成员**        | 具有证明专业知识的持续贡献者 | 计入法定人数（仅限工作组）                                      |
+| **负责人/协调人** | 组的运营领导               | 设置议程、协调、升级                                |
 
-Interest Groups primarily operate with Observers, Participants, and Facilitators. IGs may adopt the WG Member tier if their work warrants formal decision-making, but are not required to.
+兴趣组主要与观察者、参与者和协调人一起运作。如果兴趣组的工作需要正式决策，可以采用工作组成员层级，但不是必须的。
 
-**Becoming a WG Member** (WGs, and IGs that adopt the WG Member tier):
+**成为工作组成员**（工作组，以及采用工作组成员层级的兴趣组）：
 
-- Sustained participation over 3 months
-- Meaningful contributions (code, spec text, reviews, or documentation)
-- Nomination by existing WG Member or Lead
-- No objections from Leads, Core Maintainers, or Lead Maintainers within 7 days
+- 持续参与超过 3 个月
+- 有意义的贡献（代码、规范文本、审查或文档）
+- 由现有工作组成员或负责人提名
+- 7 天内负责人、核心维护者或首席维护者无异议
 
-**WG Member Responsibilities:**
+**工作组成员职责：**
 
-- Continue contributing in good faith
-- Maintain name, organization, and Discord name in the respective group's member list
+- 继续诚信贡献
+- 在相应组的成员列表中维护姓名、组织和 Discord 名称
 
-**Active vs. Emeritus:** WG Members who do not participate for 3 consecutive months are moved to emeritus status and may return by demonstrating renewed participation.
+**活跃与名誉**：连续 3 个月未参与的工作组成员将转为名誉状态，并可通过证明重新参与而回归。
 
-### Decision-Making Process
+### 决策流程
 
-This section applies primarily to Working Groups, which make binding decisions (consensus on technical designs, spec changes, etc.). Interest Groups typically operate by rough consensus in discussions and do not make binding decisions — their output is recommendations, problem statements, and use cases. IGs that adopt the WG Member tier may use this process for internal decisions.
+本节主要适用于工作组，工作组做出具有约束力的决策（关于技术设计、规范变更等的共识）。兴趣组通常在讨论中通过大致共识运作，不做具有约束力的决策——他们的产出是建议、问题陈述和用例。采用工作组成员层级的兴趣组可以使用此流程进行内部决策。
 
-**WG Consensus** is achieved through the following progression. Each step is attempted before moving to the next.
+**工作组共识** 通过以下 progression 达成。在进入下一步之前尝试每一步。
 
 <Steps>
-  <Step title="Lazy Consensus (default)">
-    - Proposals announced with clear deadline (5 days minimum for minor items, 10 days for significant items)
-    - Silence is consent
-    - Any WG Member may block with documented objection
-    - Blocks must propose alternatives or clear criteria for resolution
-    - If no blocks are raised by the deadline, the proposal is accepted
+  <Step title="懒惰共识（默认）">
+    - 提案宣布明确的截止日期（次要事项最少 5 天，重要事项 10 天）
+    - 沉默即同意
+    - 任何工作组成员均可通过记录异议进行阻止
+    - 阻止必须提出替代方案或清晰的解决标准
+    - 如果在截止日期前未提出阻止，则提案被接受
   </Step>
-  <Step title="Formal Vote (when lazy consensus is blocked)">
-    A formal vote is triggered when a WG Member blocks during the lazy consensus period, or when a Lead or three or more WG Members request one.
+  <Step title="正式投票（当懒惰共识被阻止时）">
+    当工作组成员在懒惰共识期间阻止，或当负责人或三名或更多工作组成员请求时，触发正式投票。
 
-    - Quorum: 50% of active WG Members
-    - Passage: simple majority for routine matters; 2/3 majority for scope changes
-    - Core Maintainer feedback is advisory unless explicitly stated as binding
-    - All votes documented with rationale
+    - 法定人数：50% 的活跃工作组成员
+    - 通过：常规事项简单多数；范围变更 2/3 多数
+    - 核心维护者反馈是咨询性的，除非明确说明为具有约束力
+    - 所有投票均记录理由
 
   </Step>
-  <Step title="Escalation (when voting does not resolve)">
-    If a vote fails to resolve the matter (no quorum, does not pass, or the result is contested), the Lead escalates to Core Maintainers following the escalation path below.
+  <Step title="升级（当投票无法解决时）">
+    如果投票无法解决事项（无法定人数、未通过或结果有争议），负责人按照下面的升级路径升级给核心维护者。
   </Step>
 </Steps>
 
-### Escalation Path
+### 升级路径
 
-For technical and design disagreements within a group's scope, groups should resolve disagreements locally before involving Core Maintainers. For WGs, this means using the decision-making progression above. For IGs, the Facilitator should attempt to find rough consensus before escalating.
+对于组范围内的技术和设计分歧，组应在涉及核心维护者之前在本地解决分歧。对于工作组，这意味着使用上述决策流程。对于兴趣组，协调人应在升级前尝试找到大致共识。
 
-Some disagreements are not appropriate for group-level resolution and should be escalated directly to Core Maintainers:
+有些分歧不适合组级解决，应直接升级给核心维护者：
 
-- Scope disputes (whether a topic falls within the group's charter)
-- Authority disputes (whether the group has the right to decide a matter)
-- Cross-group conflicts (disagreements spanning multiple WGs or IGs)
-- Code of conduct or behavioral concerns
-- Membership or participation disputes
+- 范围争议（主题是否属于组的章程范围）
+- 权限争议（组是否有权决定事项）
+- 跨组冲突（跨越多个工作组或兴趣组的分歧）
+- 行为准则或行为问题
+- 成员资格或参与争议
 
-When escalation is necessary:
+当需要升级时：
 
-1. Lead documents the decision, options considered, and points of disagreement
-2. Lead presents the escalation to the Core Maintainer group with a clear ask
-3. The Core Maintainer group designates a CM — who should not share organizational affiliation with the parties involved — to resolve the issue and report back to the group
-4. The designated CM either: (a) provides binding guidance, (b) requests more information, or (c) recommends the full Core Maintainer group deliberate
-5. Timeline: escalations should receive initial response within 5 business days
+1. 负责人记录决策、考虑的选项和分歧点
+2. 负责人向核心维护者组提出升级，并提出明确的请求
+3. 核心维护者组指定一名核心维护者——该人员不应与涉及方有组织隶属关系——以解决问题并向组报告
+4. 指定的核心维护者要么：(a) 提供具有约束力的指导，(b) 请求更多信息，或 (c) 建议全体核心维护者组审议
+5. 时间表：升级应在 5 个工作日内收到初步响应
 
-### Meeting Requirements
+### 会议要求
 
-Leads determine meeting frequency, format, and duration based on the group's current needs and lifecycle stage. There is no fixed cadence requirement — a WG near a specification release may meet weekly, while an IG in early exploration may meet monthly or work primarily asynchronously.
+负责人根据组的当前需求和生命周期阶段确定会议频率、格式和持续时间。没有固定的节奏要求——接近规范发布的工作组可能每周开会，而早期探索阶段的兴趣组可能每月开会或主要异步工作。
 
-Regardless of format or frequency, all group meetings must:
+无论格式或频率如何，所有组会议必须：
 
-- Be open to all community participants (no closed or organization-internal meetings)
-- Be published on [meet.modelcontextprotocol.io](https://meet.modelcontextprotocol.io) at least 7 days in advance
-- Have agendas published and publicly available. The agenda or a link to the agenda should be published as a [GitHub Discussion in the Meeting Notes category](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions/)
-- Have notes published within 48 hours to the same discussion
+- 向所有社区参与者开放（无封闭或组织内部会议）
+- 至少提前 7 天发布在 [meet.modelcontextprotocol.io](https://meet.modelcontextprotocol.io)
+- 议程已发布并公开可用。议程或议程链接应作为 [GitHub 讨论中的会议笔记类别](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions/) 发布
+- 笔记在 48 小时内发布到同一讨论
 
-Leads should actively involve WG Members and Participants in operational duties such as preparing agendas, taking meeting notes, and facilitating discussions.
+负责人应积极让工作组成员和参与者参与运营职责，如准备议程、记录会议笔记和主持讨论。
 
-### Communication Channels
+### 沟通渠道
 
-All groups use the following channels:
+所有组使用以下渠道：
 
-| Channel                              | Purpose                        | Response Expectation |
+| 渠道                              | 目的                        | 响应期望 |
 | ------------------------------------ | ------------------------------ | -------------------- |
-| Discord `#{name}-wg` or `#{name}-ig` | Quick questions, coordination  | Best effort          |
-| GitHub Discussions                   | Long-form technical discussion | Weekly triage        |
+| Discord `#{name}-wg` 或 `#{name}-ig` | 快速问题、协调  | 尽力而为          |
+| GitHub 讨论                   | 长篇技术讨论 | 每周处理        |
 
-In addition to Discord, groups can establish a discussion category in [GitHub Discussions](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions/). Leads will be granted the appropriate roles to manage and moderate discussions.
+除了 Discord，组还可以在 [GitHub 讨论](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions/) 中建立讨论类别。负责人将获得适当的角色来管理和 moderating 讨论。
 
-### Reporting
+### 报告
 
-**Working Groups** provide quarterly updates (end of January, April, July, October) including:
+**工作组** 提供季度更新（1 月、4 月、7 月、10 月底），包括：
 
-- Progress against deliverables
-- Blocked items and escalations
-- Membership changes
-- Upcoming priorities
-- Resource needs
+- 针对交付物的进度
+- 受阻事项和升级
+- 成员变更
+- 即将到来的优先事项
+- 资源需求
 
-The quarterly updates are provided as a document posted in the [GitHub Discussions](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions/) category of the Working Group. They are optionally discussed with the Core Maintainers in a core maintainer meeting.
+季度更新作为文档发布在工作组的 [GitHub 讨论](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions/) 类别中。它们可选择在核心维护者会议上与核心维护者讨论。
 
-**Interest Groups** do not have formal reporting requirements but should keep their charter and member list current.
+**兴趣组** 没有正式的报告要求，但应保持其章程和成员列表最新。
 
-### Lifecycle
+### 生命周期
 
-**Working Group Formation:**
+**工作组成立：**
 
-- There must be a widely acknowledged concern requiring coordination
-- PR for creation of WG into `docs/community/<name>/overview.mdx`, gated by CODEOWNERS requiring approval by Maintainers
-- PR for charter into `docs/community/<name>/charter.mdx`, gated by CODEOWNERS requiring approval from Core Maintainers
-- Initial member list approved by WG Lead
+- 必须存在需要协调的广泛认可的关注点
+- 将工作组创建为 `docs/community/<name>/overview.mdx` 的 PR，由 CODEOWNERS  gating，需要维护者批准
+- 将章程创建为 `docs/community/<name>/charter.mdx` 的 PR，由 CODEOWNERS gating，需要核心维护者批准
+- 初始成员列表由工作组负责人批准
 
-**Interest Group Formation:**
+**兴趣组成立：**
 
-- Fill out the creation template in the `#wg-ig-group-creation` channel on [Discord](https://discord.gg/6CSzBmMkjX)
-- A Core Maintainer reviews the proposal; the IG and its Facilitator(s) must be sponsored by at least two Core Maintainers or one Lead Maintainer
-- Once sponsored, the Facilitator(s) organize the IG and create a charter
+- 在 [Discord](https://discord.gg/6CSzBmMkjX) 的 `#wg-ig-group-creation` 频道中填写创建模板
+- 核心维护者审查提案；兴趣组及其协调人必须由至少两名核心维护者或一名首席维护者担保
+- 一旦担保，协调人组织兴趣组并创建章程
 
-**Retirement:**
+**退休：**
 
-- **WGs**: WG Lead or Core Maintainer proposes retirement with rationale; Core Maintainer or Lead Maintainer approval required. WGs are also retired when they have no active work for a sustained period or have completed all planned deliverables.
-- **IGs**: Core Maintainers or Lead Maintainers may retire an IG that is no longer active or needed.
-- In both cases, documentation is archived and channels are marked inactive.
+- **工作组**：工作组负责人或核心维护者提出退休理由；需要核心维护者或首席维护者批准。当工作组在很长一段时间内没有活跃工作或已完成所有计划的交付物时，也会退休。
+- **兴趣组**：核心维护者或首席维护者可以退休不再活跃或不再需要的兴趣组。
+- 在这两种情况下，文档被归档，渠道被标记为非活动。
 
-### Charter Amendments
+### 章程修订
 
-Changes to a group's charter (WG or IG) require:
+更改组的章程（工作组或兴趣组）需要：
 
-- Proposal by Lead/Facilitator or Core Maintainer
-- Approval by Core Maintainers
+- 由负责人/协调人或核心维护者提出提案
+- 由核心维护者批准
 
-## Charters
+## 章程
 
-Every MCP Working Group and Interest Group must maintain a charter document that captures its specific mission, scope, leadership, membership, and operations. The governance rules above apply automatically and do not need to be repeated in the charter.
+每个 MCP 工作组（Working Group）和兴趣小组（Interest Group）都必须维护一份章程文件，记录其特定的使命、范围、领导层、成员和运作方式。上述治理规则自动适用，无需在章程中重复。
 
-See the [Group Charter Template](/community/charter-template) for the required structure and a copyable template.
+请参阅 [小组章程模板](/community/charter-template) 以了解所需结构和可复制的模板。
 
-## FAQ
+## 常见问题
 
-### How do I get involved contributing to MCP?
+### 如何参与贡献 MCP？
 
-These groups provide an on-ramp:
+这些小组提供了入门途径：
 
-1. [Join Discord](https://discord.gg/6CSzBmMkjX) and follow IGs relevant to you. Attend [live calls](https://meet.modelcontextprotocol.io/). Participate in discussions.
-2. Offer to help with operational duties — facilitating calls, preparing agendas, taking notes. Share your use cases in SEP discussions.
-3. When ready for hands-on work, contribute to WG deliverables.
-4. Sustained contribution is a recognized pathway to WG Member status and contributor ladder advancement.
+1. [加入 Discord](https://discord.gg/6CSzBmMkjX) 并关注与您相关的 IG。参加 [在线会议](https://meet.modelcontextprotocol.io/)。参与讨论。
+2. 主动协助运营职责——主持会议、准备议程、做笔记。在 SEP 讨论中分享您的用例。
+3. 当准备好进行实际工作时，为 WG 交付物做出贡献。
+4. 持续贡献是获得 WG 成员身份和贡献者层级晋升的认可途径。
 
-### Where can I find a list of all current WGs and IGs?
+### 在哪里可以找到所有当前 WG 和 IG 的列表？
 
-On the [MCP Contributor Discord](https://discord.gg/6CSzBmMkjX), there is a section of channels for each Working and Interest Group. Chartered groups also have documentation under `docs/community/` in the [modelcontextprotocol repository](https://github.com/modelcontextprotocol/modelcontextprotocol).
+在 [MCP 贡献者 Discord](https://discord.gg/6CSzBmMkjX) 上，每个工作组和兴趣小组都有一部分频道。拥有章程的小组在 [modelcontextprotocol 仓库](https://github.com/modelcontextprotocol/modelcontextprotocol) 的 `docs/community/` 下也有文档。
 
-### Do I need to join an IG before starting a WG?
+### 在启动 WG 之前我需要加入 IG 吗？
 
-No. IG participation can help validate ideas and build support, but it's not required. You can propose a WG directly if you have a clear deliverable in mind and can secure Core Maintainer sponsorship.
+不需要。参与 IG 可以帮助验证想法并获得支持，但这不是必需的。如果您心中有明确的交付物并能获得核心维护者的赞助，您可以直接提议成立 WG。
 
-### Do I need to be in a WG to submit a SEP?
+### 提交 SEP 我需要身在 WG 中吗？
 
-No. Anyone can submit a SEP. However, WG collaboration can strengthen your proposal and help it find a sponsor.
+不需要。任何人都可以提交 SEP。但是，WG 协作可以加强您的提案并帮助其找到赞助者。
 
-### What if my IG discussion leads to a concrete solution?
+### 如果我的 IG 讨论导致了具体的解决方案怎么办？
 
-You can either:
+您可以：
 
-- Form a new WG to build the solution
-- Join an existing WG if one covers the area
-- Submit a SEP directly if the solution is well-defined
+- 成立一个新的 WG 来构建解决方案
+- 如果已有覆盖该领域的 WG，加入现有的 WG
+- 如果解决方案定义明确，直接提交 SEP
 
-### Can one person be in multiple IGs/WGs?
+### 一个人可以加入多个 IG/WG 吗？
 
-Yes. Participate in as many groups as your time allows.
+可以。根据您的时间允许，参与尽可能多的小组。

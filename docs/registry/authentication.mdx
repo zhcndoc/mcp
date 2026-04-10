@@ -1,67 +1,67 @@
 ---
-title: How to Authenticate When Publishing to the Official MCP Registry
-sidebarTitle: Authentication
+title: 如何认证发布到官方 MCP 注册表
+sidebarTitle: 认证
 ---
 
 <Note>
-  The MCP Registry is currently in preview. Breaking changes or data resets may occur before general availability. If you encounter any issues, please report them on [GitHub](https://github.com/modelcontextprotocol/registry/issues).
+  MCP 注册表目前处于预览阶段。在普遍可用之前，可能会发生破坏性更改或数据重置。如果遇到任何问题，请在 [GitHub](https://github.com/modelcontextprotocol/registry/issues) 上报告。
 </Note>
 
-You must authenticate before publishing to the official MCP Registry. The MCP Registry supports different authentication methods. Which authentication method you choose determines the namespace of your server's name.
+在发布到官方 MCP 注册表之前，您必须进行认证。MCP 注册表支持不同的认证方法。您选择的认证方法决定了服务器名称的命名空间。
 
-If you choose GitHub-based authentication, your server's name in `server.json` **MUST** be of the form `io.github.username/*` (or `io.github.orgname/*`). For example, `io.github.alice/weather-server`.
+如果您选择基于 GitHub 的认证，`server.json` 中的服务器名称 **必须** 为 `io.github.username/*` (或 `io.github.orgname/*`) 格式。例如，`io.github.alice/weather-server`。
 
-If you choose domain-based authentication, your server's name in `server.json` **MUST** be of the form `com.example.*/*`, where `com.example` is the reverse-DNS form of your domain name. For example, `io.modelcontextprotocol/everything`.
+如果您选择基于域名的认证，`server.json` 中的服务器名称 **必须** 为 `com.example.*/*` 格式，其中 `com.example` 是您域名的反向 DNS 形式。例如，`io.modelcontextprotocol/everything`。
 
-| Authentication | Name Format                                     | Example Name                         |
+| 认证 | 名称格式                                     | 示例名称                         |
 | -------------- | ----------------------------------------------- | ------------------------------------ |
-| GitHub-based   | `io.github.username/*` or `io.github.orgname/*` | `io.github.alice/weather-server`     |
-| domain-based   | `com.example.*/*`                               | `io.modelcontextprotocol/everything` |
+| 基于 GitHub   | `io.github.username/*` 或 `io.github.orgname/*` | `io.github.alice/weather-server`     |
+| 基于域名   | `com.example.*/*`                               | `io.modelcontextprotocol/everything` |
 
-## GitHub Authentication
+## GitHub 认证
 
-GitHub authentication uses an OAuth flow initiated by the `mcp-publisher` CLI tool.
+GitHub 认证使用由 `mcp-publisher` CLI 工具发起的 OAuth 流程。
 
-To perform GitHub authentication, navigate to your server project directory and run:
+要执行 GitHub 认证，请导航到您的服务器项目目录并运行：
 
 ```bash
 mcp-publisher login github
 ```
 
-You should see output like:
+您应该看到如下输出：
 
 ```text Output
-Logging in with github...
+正在使用 github 登录...
 
-To authenticate, please:
-1. Go to: https://github.com/login/device
-2. Enter code: ABCD-1234
-3. Authorize this application
-Waiting for authorization...
+要进行认证，请：
+1. 前往：https://github.com/login/device
+2. 输入代码：ABCD-1234
+3. 授权此应用程序
+正在等待授权...
 ```
 
-Visit the link, follow the prompts, and enter the authorization code that was printed in the terminal (e.g., `ABCD-1234` in the above output). Once complete, go back to the terminal, and you should see output like:
+访问链接，按照提示操作，并输入终端中打印的授权代码（例如，上述输出中的 `ABCD-1234`）。完成后，返回终端，您应该看到如下输出：
 
 ```text Output
-Successfully authenticated!
-✓ Successfully logged in
+认证成功！
+✓ 成功登录
 ```
 
-## DNS Authentication
+## DNS 认证
 
-DNS authentication is a domain-based authentication method that relies on a DNS TXT record.
+DNS 认证是一种基于域名的认证方法，依赖于 DNS TXT 记录。
 
-To perform DNS authentication using the `mcp-publisher` CLI tool, run the following commands in your server project directory to generate a TXT record based on a public/private key pair:
+要使用 `mcp-publisher` CLI 工具执行 DNS 认证，请在您的服务器项目目录中运行以下命令，以基于公钥/私钥对生成 TXT 记录：
 
 <CodeGroup>
 
 ```bash Ed25519
 MY_DOMAIN="example.com"
 
-# Generate public/private key pair using Ed25519
+# 使用 Ed25519 生成公钥/私钥对
 openssl genpkey -algorithm Ed25519 -out key.pem
 
-# Generate TXT record
+# 生成 TXT 记录
 PUBLIC_KEY="$(openssl pkey -in key.pem -pubout -outform DER | tail -c 32 | base64)"
 echo "${MY_DOMAIN}. IN TXT \"v=MCPv1; k=ed25519; p=${PUBLIC_KEY}\""
 ```
@@ -69,10 +69,10 @@ echo "${MY_DOMAIN}. IN TXT \"v=MCPv1; k=ed25519; p=${PUBLIC_KEY}\""
 ```bash ECDSA P-384
 MY_DOMAIN="example.com"
 
-# Generate public/private key pair using ECDSA P-384
+# 使用 ECDSA P-384 生成公钥/私钥对
 openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:secp384r1 -out key.pem
 
-# Generate TXT record
+# 生成 TXT 记录
 PUBLIC_KEY="$(openssl ec -in key.pem -text -noout -conv_form compressed | grep -A4 "pub:" | tail -n +2 | tr -d ' :\n' | xxd -r -p | base64)"
 echo "${MY_DOMAIN}. IN TXT \"v=MCPv1; k=ecdsap384; p=${PUBLIC_KEY}\""
 ```
@@ -83,25 +83,25 @@ MY_PROJECT="myproject"
 MY_KEYRING="mykeyring"
 MY_KEY_NAME="mykey"
 
-# Log in using gcloud CLI (https://cloud.google.com/sdk/docs/install)
+# 使用 gcloud CLI 登录 (https://cloud.google.com/sdk/docs/install)
 gcloud auth login
 
-# Set default project
+# 设置默认项目
 gcloud config set project "${MY_PROJECT}"
 
-# Create a keyring in your project
+# 在您的项目中创建密钥环
 gcloud kms keyrings create "${MY_KEYRING}" --location global
 
-# Create an Ed25519 signing key
+# 创建 Ed25519 签名密钥
 gcloud kms keys create "${MY_KEY_NAME}" --default-algorithm=ec-sign-ed25519 --purpose=asymmetric-signing --keyring="${MY_KEYRING}" --location=global
 
-# Enable Application Default Credentials (ADC) so the publisher tool can sign
+# 启用应用默认凭据 (ADC) 以便发布工具可以签名
 gcloud auth application-default login
 
-# Attempt login to show the public key
+# 尝试登录以显示公钥
 mcp-publisher login dns google-kms --domain="${MY_DOMAIN}" --resource="projects/${MY_PROJECT}/locations/global/keyRings/${MY_KEYRING}/cryptoKeys/${MY_KEY_NAME}/cryptoKeyVersions/1"
 
-# Copy the "Expected proof record":
+# 复制“预期证明记录”：
 # ${MY_DOMAIN}. IN TXT "v=MCPv1; k=ed25519; p=${PUBLIC_KEY}"
 ```
 
@@ -112,31 +112,31 @@ MY_RESOURCE_GROUP="MyResourceGroup"
 MY_KEY_VAULT="MyKeyVault"
 MY_KEY_NAME="MyKey"
 
-# Log in using Azure CLI (https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
+# 使用 Azure CLI 登录 (https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
 az login
 
-# Set default subscription
+# 设置默认订阅
 az account set --subscription "${MY_SUBSCRIPTION}"
 
-# Create a resource group
+# 创建资源组
 az group create --location westus --resource-group "${MY_RESOURCE_GROUP}"
 
-# Create a key vault
+# 创建密钥保管库
 az keyvault create --name "${MY_KEY_VAULT}" --location westus --resource-group "${MY_RESOURCE_GROUP}"
 
-# Create an ECDSA P-384 signing key
+# 创建 ECDSA P-384 签名密钥
 az keyvault key create --name "${MY_KEY_NAME}" --vault-name "${MY_KEY_VAULT}" --curve P-384
 
-# Attempt login to show the public key
+# 尝试登录以显示公钥
 mcp-publisher login dns azure-key-vault --domain="${MY_DOMAIN}" --vault "${MY_KEY_VAULT}" --key "${MY_KEY_NAME}"
 
-# Copy the "Expected proof record":
+# 复制“预期证明记录”：
 # ${MY_DOMAIN}. IN TXT "v=MCPv1; k=ecdsap384; p=${PUBLIC_KEY}"
 ```
 
 </CodeGroup>
 
-Then add the TXT record using your DNS provider's control panel. It may take several minutes for the TXT record to propagate. After the TXT record has propagated, log in using the `mcp-publisher login` command:
+然后使用您的 DNS 提供商的控制面板添加 TXT 记录。TXT 记录可能需要几分钟才能传播。TXT 记录传播后，使用 `mcp-publisher login` 命令登录：
 
 <CodeGroup>
 
@@ -173,28 +173,28 @@ mcp-publisher login dns azure-key-vault --domain="${MY_DOMAIN}" --vault "${MY_KE
 
 </CodeGroup>
 
-## HTTP Authentication
+## HTTP 认证
 
-HTTP authentication is a domain-based authentication method that relies on a `/.well-known/mcp-registry-auth` file hosted on your domain. For example, `https://example.com/.well-known/mcp-registry-auth`.
+HTTP 认证是一种基于域名的认证方法，依赖于托管在您域上的 `/.well-known/mcp-registry-auth` 文件。例如，`https://example.com/.well-known/mcp-registry-auth`。
 
-To perform HTTP authentication using the `mcp-publisher` CLI tool, run the following commands in your server project directory to generate an `mcp-registry-auth` file based on a public/private key pair:
+要使用 `mcp-publisher` CLI 工具执行 HTTP 认证，请在您的服务器项目目录中运行以下命令，以基于公钥/私钥对生成 `mcp-registry-auth` 文件：
 
 <CodeGroup>
 
 ```bash Ed25519
-# Generate public/private key pair using Ed25519
+# 使用 Ed25519 生成公钥/私钥对
 openssl genpkey -algorithm Ed25519 -out key.pem
 
-# Generate mcp-registry-auth file
+# 生成 mcp-registry-auth 文件
 PUBLIC_KEY="$(openssl pkey -in key.pem -pubout -outform DER | tail -c 32 | base64)"
 echo "v=MCPv1; k=ed25519; p=${PUBLIC_KEY}" > mcp-registry-auth
 ```
 
 ```bash ECDSA P-384
-# Generate public/private key pair using ECDSA P-384
+# 使用 ECDSA P-384 生成公钥/私钥对
 openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:secp384r1 -out key.pem
 
-# Generate mcp-registry-auth file
+# 生成 mcp-registry-auth 文件
 PUBLIC_KEY="$(openssl ec -in key.pem -text -noout -conv_form compressed | grep -A4 "pub:" | tail -n +2 | tr -d ' :\n' | xxd -r -p | base64)"
 echo "v=MCPv1; k=ecdsap384; p=${PUBLIC_KEY}" > mcp-registry-auth
 ```
@@ -205,25 +205,25 @@ MY_PROJECT="myproject"
 MY_KEYRING="mykeyring"
 MY_KEY_NAME="mykey"
 
-# Log in using gcloud CLI (https://cloud.google.com/sdk/docs/install)
+# 使用 gcloud CLI 登录 (https://cloud.google.com/sdk/docs/install)
 gcloud auth login
 
-# Set default project
+# 设置默认项目
 gcloud config set project "${MY_PROJECT}"
 
-# Create a keyring in your project
+# 在您的项目中创建密钥环
 gcloud kms keyrings create "${MY_KEYRING}" --location global
 
-# Create an Ed25519 signing key
+# 创建 Ed25519 签名密钥
 gcloud kms keys create "${MY_KEY_NAME}" --default-algorithm=ec-sign-ed25519 --purpose=asymmetric-signing --keyring="${MY_KEYRING}" --location=global
 
-# Enable Application Default Credentials (ADC) so the publisher tool can sign
+# 启用应用默认凭据 (ADC) 以便发布工具可以签名
 gcloud auth application-default login
 
-# Attempt login to show the public key
+# 尝试登录以显示公钥
 mcp-publisher login http google-kms --domain="${MY_DOMAIN}" --resource="projects/${MY_PROJECT}/locations/global/keyRings/${MY_KEYRING}/cryptoKeys/${MY_KEY_NAME}/cryptoKeyVersions/1"
 
-# Copy the "Expected proof record" to `./mcp-registry-auth`:
+# 将“预期证明记录”复制到 `./mcp-registry-auth`：
 # v=MCPv1; k=ed25519; p=${PUBLIC_KEY}
 ```
 
@@ -234,31 +234,31 @@ MY_RESOURCE_GROUP="MyResourceGroup"
 MY_KEY_VAULT="MyKeyVault"
 MY_KEY_NAME="MyKey"
 
-# Log in using Azure CLI (https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
+# 使用 Azure CLI 登录 (https://learn.microsoft.com/en-us/cli/azure/install-azure-cli)
 az login
 
-# Set default subscription
+# 设置默认订阅
 az account set --subscription "${MY_SUBSCRIPTION}"
 
-# Create a resource group
+# 创建资源组
 az group create --location westus --resource-group "${MY_RESOURCE_GROUP}"
 
-# Create a key vault
+# 创建密钥保管库
 az keyvault create --name "${MY_KEY_VAULT}" --location westus --resource-group "${MY_RESOURCE_GROUP}"
 
-# Create an ECDSA P-384 signing key
+# 创建 ECDSA P-384 签名密钥
 az keyvault key create --name "${MY_KEY_NAME}" --vault-name "${MY_KEY_VAULT}" --curve P-384
 
-# Attempt login to show the public key
+# 尝试登录以显示公钥
 mcp-publisher login http azure-key-vault --domain="${MY_DOMAIN}" --vault "${MY_KEY_VAULT}" --key "${MY_KEY_NAME}"
 
-# Copy the "Expected proof record" to `./mcp-registry-auth`:
+# 将“预期证明记录”复制到 `./mcp-registry-auth`：
 # v=MCPv1; k=ecdsap384; p=${PUBLIC_KEY}
 ```
 
 </CodeGroup>
 
-Then host the `mcp-registry-auth` file at `/.well-known/mcp-registry-auth` on your domain. After the file is hosted, log in using the `mcp-publisher login` command:
+然后将 `mcp-registry-auth` 文件托管在您域上的 `/.well-known/mcp-registry-auth`。文件托管后，使用 `mcp-publisher login` 命令登录：
 
 <CodeGroup>
 

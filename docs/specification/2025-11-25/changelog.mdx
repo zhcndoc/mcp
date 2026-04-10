@@ -1,49 +1,48 @@
 ---
-title: Key Changes
+title: 主要变更
 ---
 
 <div id="enable-section-numbers" />
 
-This document lists changes made to the Model Context Protocol (MCP) specification since
-the previous revision, [2025-06-18](/specification/2025-06-18).
+本文档列出了自上一个修订版 [2025-06-18](/specification/2025-06-18) 以来对模型上下文协议 (MCP) 规范所做的变更。
 
-## Major changes
+## 主要变更
 
-1. Enhance authorization server discovery with support for [OpenID Connect Discovery 1.0](https://openid.net/specs/openid-connect-discovery-1_0.html). (PR [#797](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/797))
-2. Allow servers to expose icons as additional metadata for tools, resources, resource templates, and prompts ([SEP-973](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/973)).
-3. Enhance authorization flows with incremental scope consent via `WWW-Authenticate` ([SEP-835](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/835))
-4. Provide guidance on tool names ([SEP-986](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1603))
-5. Update `ElicitResult` and `EnumSchema` to use a more standards-based approach and support titled, untitled, single-select, and multi-select enums ([SEP-1330](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1330)).
-6. Added support for [URL mode elicitation](/specification/2025-11-25/client/elicitation#url-elicitation-requests) ([SEP-1036](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/887))
-7. Add tool calling support to sampling via `tools` and `toolChoice` parameters ([SEP-1577](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1577))
-8. Add support for OAuth Client ID Metadata Documents as a recommended client registration mechanism ([SEP-991](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/991), PR [#1296](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1296))
-9. Add experimental support for [tasks](/specification/2025-11-25/basic/utilities/tasks) to enable tracking durable requests with polling and deferred result retrieval ([SEP-1686](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1686)).
+1. 增强授权服务器发现功能，支持 [OpenID Connect Discovery 1.0](https://openid.net/specs/openid-connect-discovery-1_0.html)。(PR [#797](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/797))
+2. 允许服务器将图标作为工具、资源、资源模板和提示的额外元数据暴露出来 ([SEP-973](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/973))。
+3. 通过 `WWW-Authenticate` 增强授权流程，支持增量范围同意 ([SEP-835](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/835))
+4. 提供关于工具名称的指导 ([SEP-986](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1603))
+5. 更新 `ElicitResult` 和 `EnumSchema` 以使用更基于标准的方法，并支持带标题、无标题、单选和多选枚举 ([SEP-1330](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1330))。
+6. 添加了对 [URL 模式诱导](/specification/2025-11-25/client/elicitation#url-elicitation-requests) 的支持 ([SEP-1036](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/887))
+7. 通过 `tools` 和 `toolChoice` 参数向采样添加工具调用支持 ([SEP-1577](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1577))
+8. 添加对 OAuth Client ID Metadata Documents 的支持，作为一种推荐的客户端注册机制 ([SEP-991](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/991), PR [#1296](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1296))
+9. 添加对 [任务](/specification/2025-11-25/basic/utilities/tasks) 的实验性支持，以启用通过轮询和延迟结果检索跟踪持久请求 ([SEP-1686](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1686))。
 
-## Minor changes
+## 次要变更
 
-1. Clarify that servers using stdio transport may use stderr for all types of logging, not just error messages (PR [#670](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/670)).
-2. Add optional `description` field to `Implementation` interface to align with MCP registry server.json format and provide human-readable context during initialization.
-3. Clarify that servers must respond with HTTP 403 Forbidden for invalid Origin headers in Streamable HTTP transport. (PR [#1439](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1439))
-4. Updated the [Security Best Practices guidance](https://modelcontextprotocol.io/specification/draft/basic/security_best_practices).
-5. Clarify that input validation errors should be returned as Tool Execution Errors rather than Protocol Errors to enable model self-correction ([SEP-1303](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1303)).
-6. Support polling SSE streams by allowing servers to disconnect at will ([SEP-1699](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1699)).
-7. Clarify SEP-1699: GET streams support polling, resumption always via GET regardless of stream origin, event IDs should encode stream identity, disconnection includes server-initiated closure (Issue [#1847](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1847)).
-8. Align OAuth 2.0 Protected Resource Metadata discovery with RFC 9728, making `WWW-Authenticate` header optional with fallback to `.well-known` endpoint ([SEP-985](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/985)).
-9. Add support for default values in all primitive types (string, number, enum) for elicitation schemas ([SEP-1034](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1034)).
-10. Establish JSON Schema 2020-12 as the default dialect for MCP schema definitions ([SEP-1613](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1613)).
+1. 澄清使用 stdio 传输的服务器可以使用 stderr 进行所有类型的日志记录，而不仅仅是错误消息 (PR [#670](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/670))。
+2. 向 `Implementation` 接口添加可选的 `description` 字段，以与 MCP 注册表 server.json 格式保持一致，并在初始化期间提供人类可读的上下文。
+3. 澄清服务器必须在 Streamable HTTP 传输中为无效的 Origin 头响应 HTTP 403 Forbidden。(PR [#1439](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1439))
+4. 更新了 [安全最佳实践指导](https://modelcontextprotocol.io/specification/draft/basic/security_best_practices)。
+5. 澄清输入验证错误应作为工具执行错误返回，而不是协议错误，以启用模型自我纠正 ([SEP-1303](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1303))。
+6. 支持轮询 SSE 流，允许服务器随时断开连接 ([SEP-1699](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1699))。
+7. 澄清 SEP-1699：GET 流支持轮询，无论流来源如何恢复始终通过 GET，事件 ID 应编码流身份，断开连接包括服务器发起的关闭 (问题 [#1847](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1847))。
+8. 使 OAuth 2.0 受保护资源元数据发现与 RFC 9728 保持一致，使 `WWW-Authenticate` 头成为可选，并回退到 `.well-known` 端点 ([SEP-985](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/985))。
+9. 添加对诱导模式所有原始类型（字符串、数字、枚举）默认值的支持 ([SEP-1034](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1034))。
+10. 确立 JSON Schema 2020-12 为 MCP 模式定义的默认方言 ([SEP-1613](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1613))。
 
-## Other schema changes
+## 其他模式变更
 
-1. Decouple request payloads from RPC method definitions into standalone parameter schemas. ([SEP-1319](https://github.com/modelcontextprotocol/specification/issues/1319), PR [#1284](https://github.com/modelcontextprotocol/specification/pull/1284))
+1. 将请求负载与 RPC 方法定义解耦为独立的参数模式。([SEP-1319](https://github.com/modelcontextprotocol/specification/issues/1319), PR [#1284](https://github.com/modelcontextprotocol/specification/pull/1284))
 
-## Governance and process updates
+## 治理和流程更新
 
-1. Formalize Model Context Protocol governance structure ([SEP-932](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/932)).
-2. Establish shared communication practices and guidelines for the MCP community ([SEP-994](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/994)).
-3. Formalize Working Groups and Interest Groups in MCP governance ([SEP-1302](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1302)).
-4. Establish SDK tiering system with clear requirements for feature support and maintenance commitments ([SEP-1730](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1730)).
+1. 正式化模型上下文协议治理结构 ([SEP-932](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/932))。
+2. 建立 MCP 社区的共享通信实践和指南 ([SEP-994](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/994))。
+3. 正式化 MCP 治理中的工作组和兴趣组 ([SEP-1302](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1302))。
+4. 建立 SDK 分层系统，明确功能支持和维护承诺的要求 ([SEP-1730](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1730))。
 
-## Full changelog
+## 完整变更日志
 
-For a complete list of all changes that have been made since the last protocol revision,
-[see GitHub](https://github.com/modelcontextprotocol/specification/compare/2025-06-18...2025-11-25).
+有关自上一个协议修订版以来所做的所有变更的完整列表，
+[请查看 GitHub](https://github.com/modelcontextprotocol/specification/compare/2025-06-18...2025-11-25)。

@@ -1,45 +1,43 @@
 ---
-title: Key Changes
+title: 主要变更
 ---
 
 <div id="enable-section-numbers" />
 
-This document lists changes made to the Model Context Protocol (MCP) specification since
-the previous revision, [2025-03-26](/specification/2025-03-26).
+本文档列出了自上一个版本 [2025-03-26](/specification/2025-03-26) 以来，模型上下文协议 (MCP) 规范所做的变更。
 
-## Major changes
+## 主要变更
 
-1. Remove support for JSON-RPC **[batching](https://www.jsonrpc.org/specification#batch)**
+1. 移除对 JSON-RPC **[批处理](https://www.jsonrpc.org/specification#batch)** 的支持
    (PR [#416](https://github.com/modelcontextprotocol/specification/pull/416))
-2. Add support for [structured tool output](/specification/2025-06-18/server/tools#structured-content)
+2. 添加对 [结构化工具输出](/specification/2025-06-18/server/tools#structured-content) 的支持
    (PR [#371](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/371))
-3. Classify MCP servers as [OAuth Resource Servers](/specification/2025-06-18/basic/authorization#authorization-server-discovery),
-   adding protected resource metadata to discover the corresponding Authorization server.
+3. 将 MCP 服务器分类为 [OAuth 资源服务器](/specification/2025-06-18/basic/authorization#authorization-server-discovery)，
+   添加受保护资源元数据以发现对应的授权服务器。
    (PR [#338](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/338))
-4. Require MCP clients to implement Resource Indicators as described in [RFC 8707](https://www.rfc-editor.org/rfc/rfc8707.html) to prevent
-   malicious servers from obtaining access tokens.
+4. 要求 MCP 客户端实现 [RFC 8707](https://www.rfc-editor.org/rfc/rfc8707.html) 中描述的资源指示符，以防止
+   恶意服务器获取访问令牌。
    (PR [#734](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/734))
-5. Clarify [security considerations](/specification/2025-06-18/basic/authorization#security-considerations) and best practices
-   in the authorization spec and in a new [security best practices page](/specification/2025-06-18/basic/security_best_practices).
-6. Add support for **[elicitation](/specification/2025-06-18/client/elicitation)**, enabling servers to request additional
-   information from users during interactions.
+5. 阐明授权规范中的 [安全注意事项](/specification/2025-06-18/basic/authorization#security-considerations) 和最佳实践，
+   并新增了一个 [安全最佳实践页面](/specification/2025-06-18/basic/security_best_practices)。
+6. 添加对 **[询问](/specification/2025-06-18/client/elicitation)** 的支持，使服务器能够在交互期间请求用户提供额外
+   信息。
    (PR [#382](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/382))
-7. Add support for **[resource links](/specification/2025-06-18/server/tools#resource-links)** in
-   tool call results. (PR [#603](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/603))
-8. Require [negotiated protocol version to be specified](/specification/2025-06-18/basic/transports#protocol-version-header)
-   via `MCP-Protocol-Version` header in subsequent requests when using HTTP (PR [#548](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/548)).
-9. Change **SHOULD** to **MUST** in [Lifecycle Operation](/specification/2025-06-18/basic/lifecycle#operation)
+7. 在工具调用结果中添加对 **[资源链接](/specification/2025-06-18/server/tools#resource-links)** 的支持。(PR [#603](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/603))
+8. 要求在使用 HTTP 时，通过 `MCP-Protocol-Version` 头信息在后续请求中指定 [协商后的协议版本](/specification/2025-06-18/basic/transports#protocol-version-header)
+   (PR [#548](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/548))。
+9. 在 [生命周期操作](/specification/2025-06-18/basic/lifecycle#operation) 中将 **SHOULD** 改为 **MUST**
 
-## Other schema changes
+## 其他模式变更
 
-1. Add `_meta` field to additional interface types (PR [#710](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/710)),
-   and specify [proper usage](/specification/2025-06-18/basic#meta).
-2. Add `context` field to `CompletionRequest`, providing for completion requests to include
-   previously-resolved variables (PR [#598](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/598)).
-3. Add `title` field for human-friendly display names, so that `name` can be used as a programmatic
-   identifier (PR [#663](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/663))
+1. 向其他接口类型添加 `_meta` 字段 (PR [#710](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/710))，
+   并指定 [正确用法](/specification/2025-06-18/basic#meta)。
+2. 向 `CompletionRequest` 添加 `context` 字段，允许完成请求包含
+   先前解析的变量 (PR [#598](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/598))。
+3. 添加 `title` 字段用于人类友好的显示名称，以便 `name` 可用作程序
+   标识符 (PR [#663](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/663))
 
-## Full changelog
+## 完整变更日志
 
-For a complete list of all changes that have been made since the last protocol revision,
-[see GitHub](https://github.com/modelcontextprotocol/specification/compare/2025-03-26...2025-06-18).
+有关自上一个协议修订版以来所有变更的完整列表，
+[请参阅 GitHub](https://github.com/modelcontextprotocol/specification/compare/2025-03-26...2025-06-18)。

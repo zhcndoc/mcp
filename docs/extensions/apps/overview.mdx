@@ -1,77 +1,42 @@
 ---
-title: MCP Apps
-description: Interactive UI applications that render inside MCP hosts like Claude Desktop
+title: MCP 应用
+description: 在 MCP 主机（如 Claude Desktop）内部渲染的交互式 UI 应用
 ---
 
 <Tip>
 
-For comprehensive API documentation, advanced patterns, and the full specification, visit the [official MCP Apps documentation](https://apps.extensions.modelcontextprotocol.io).
+如需全面的 API 文档、高级模式和完整规范，请访问 [官方 MCP 应用文档](https://apps.extensions.modelcontextprotocol.io)。
 
 </Tip>
 
-Text responses can only go so far. Sometimes users need to interact with data, not
-just read about it. MCP Apps let servers return interactive HTML interfaces (data
-visualizations, forms, dashboards) that render directly in the chat.
+文本回复的能力有限。有时用户需要与数据交互，而不仅仅是阅读。MCP 应用允许服务器返回交互式 HTML 界面（数据可视化、表单、仪表盘），这些界面可以直接渲染在聊天窗口中。
 
-## Why not just build a web app?
+## 为什么不直接构建一个 Web 应用？
 
-You could build a standalone web app and send users a link. However, MCP Apps
-offer these key advantages that a separate page can't match:
+您可以构建一个独立的 Web 应用并向用户发送链接。然而，MCP 应用提供了独立页面无法比拟的关键优势：
 
-- **Context preservation.** The app lives inside the conversation. Users don't
-  switch tabs, lose their place, or wonder which chat thread had that dashboard.
-  The UI is right there, alongside the discussion that led to it.
-- **Bidirectional data flow.** Your app can call any tool on the MCP server, and
-  the host can push fresh results to your app. A standalone web app would need its
-  own API, authentication, and state management. MCP Apps get this via existing
-  MCP patterns.
-- **Integration with the host's capabilities**. The app can delegate actions to the host, which can then invoke the capabilities and tools the user has already connected (subject to user consent). Instead of every app implementing and maintaining direct integrations (e.g., email providers), the app can request an outcome (like "schedule this meeting"), and the host routes it through the user's existing connected capabilities.
-- **Security guarantees.** MCP Apps run in a sandboxed iframe controlled by the
-  host. They can't access the parent page, steal cookies, or escape their
-  container. This means hosts can safely render third-party apps without trusting
-  the server author completely.
+- **上下文保留。** 应用存在于对话内部。用户无需切换标签页、丢失位置或疑惑哪个聊天线程中有该仪表盘。UI 就在那里，与导致它的讨论并肩呈现。
+- **双向数据流。** 您的应用可以调用 MCP 服务器上的任何工具，主机可以将新鲜结果推送到您的应用。独立的 Web 应用需要自己的 API、身份验证和状态管理。MCP 应用通过现有的 MCP 模式获得这些功能。
+- **与主机功能的集成**。应用可以将操作委托给主机，主机随后可以调用用户已连接的功能和工具（需经用户同意）。无需每个应用都实现和维护直接集成（例如电子邮件提供商），应用可以请求结果（如“安排此会议”），主机将其通过用户现有的已连接功能进行路由。
+- **安全保障。** MCP 应用在由主机控制的沙箱 iframe 中运行。它们无法访问父页面、窃取 cookie 或逃逸其容器。这意味着主机可以安全地渲染第三方应用，而无需完全信任服务器作者。
 
-If your use case doesn't benefit from these properties, a regular web app might
-be simpler. But if you want tight integration with the LLM-based conversation,
-MCP Apps are a much better tool.
+如果您的用例没有从这些属性中受益，普通的 Web 应用可能更简单。但如果您希望与基于 LLM 的对话紧密集成，MCP 应用是更好的工具。
 
-## How MCP Apps work
+## MCP 应用的工作原理
 
-Traditional MCP tools return text, images, resources or structured data that the host displays as
-part of the conversation. MCP Apps extend this pattern by allowing tools to
-declare a reference to an interactive UI in their tool description that the host
-renders in place.
+传统 MCP 工具返回文本、图像、资源或结构化数据，主机将其作为对话的一部分显示。MCP 应用扩展了这种模式，允许工具在其工具描述中声明对交互式 UI 的引用，主机将其原地渲染。
 
-The core pattern combines two MCP primitives: a tool that declares a UI resource
-in its description, plus a UI resource that renders data as an interactive HTML
-interface.
+核心模式结合了两个 MCP 原语：一个在其描述中声明 UI 资源的工具，加上一个将数据渲染为交互式 HTML 界面的 UI 资源。
 
-When a large language model (LLM) decides to call a tool that supports MCP Apps,
-here's what happens:
+当大型语言模型 (LLM) 决定调用支持 MCP 应用的工具时，会发生以下情况：
 
-1. **UI preloading**: The tool description includes a `_meta.ui.resourceUri`
-   field pointing to a `ui://` resource. The host can preload this resource before
-   the tool is even called, enabling features like streaming tool inputs to the
-   app.
+1. **UI 预加载**：工具描述包含一个 `_meta.ui.resourceUri` 字段，指向 `ui://` 资源。主机甚至在工具被调用之前就可以预加载此资源，从而实现将流式工具输入到应用等功能。
 
-2. **Resource fetch**: The host fetches the UI resource from the server. This
-   resource contains an HTML page, often bundled with its JavaScript and CSS for
-   simplicity. Apps can also load external scripts and resources from origins
-   specified in `_meta.ui.csp`.
+2. **资源获取**：主机从服务器获取 UI 资源。此资源包含一个 HTML 页面，为简便起见，通常与其 JavaScript 和 CSS 捆绑在一起。应用也可以从 `_meta.ui.csp` 中指定的来源加载外部脚本和资源。
 
-3. **Sandboxed rendering**: Web hosts typically render the HTML inside a
-   sandboxed [iframe](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe)
-   within the conversation. The sandbox restricts the app's access to the parent
-   page, ensuring security. The resource's `_meta.ui` object can include
-   `permissions` to request additional capabilities (e.g., microphone, camera)
-   and `csp` to control what external origins the app can load resources from.
+3. **沙箱渲染**：Web 主机通常在对话内的沙箱 [iframe](https://developer.mozilla.org/en-US/docs/Web/HTML/Element/iframe) 中渲染 HTML。沙箱限制应用对父页面的访问，确保安全性。资源的 `_meta.ui` 对象可以包含 `permissions` 以请求额外功能（例如麦克风、摄像头），以及 `csp` 以控制应用可以从哪些外部来源加载资源。
 
-4. **Bidirectional communication**: The app and host communicate through a
-   JSON-RPC protocol that forms its own dialect of MCP. Some requests and
-   notifications are shared with the core MCP protocol (e.g., `tools/call`), some
-   are similar (e.g., `ui/initialize`), and most are new with a `ui/` method name
-   prefix. The app can request tool calls, send messages, update the model's
-   context, and receive data from the host.
+4. **双向通信**：应用和主机通过形成自己 MCP 方言的 JSON-RPC 协议进行通信。一些请求和通知与核心 MCP 协议共享（例如 `tools/call`），一些类似（例如 `ui/initialize`），大多数是带有 `ui/` 方法名前缀的新内容。应用可以请求工具调用、发送消息、更新模型的上下文并从主机接收数据。
 
 ```mermaid
 sequenceDiagram
@@ -94,135 +59,86 @@ sequenceDiagram
     App-->>Agent: context update
 ```
 
-The app stays isolated from the host but can still call MCP tools through the
-secure postMessage channel.
+应用与主机保持隔离，但仍可以通过安全的 postMessage 通道调用 MCP 工具。
 
-## When to use MCP Apps
+## 何时使用 MCP 应用
 
-MCP Apps are a good fit when your use case involves:
+当您的用例涉及以下情况时，MCP 应用非常合适：
 
-**Exploring complex data.** A user asks "show me sales by region." A text
-response might list numbers, but an MCP App can render an interactive map where
-users click regions to drill down, hover for details, and toggle between
-metrics, all without additional prompts.
+**探索复杂数据。** 用户询问“按地区显示销售额”。文本回复可能会列出数字，但 MCP 应用可以渲染交互式地图，用户可以在其中点击地区进行深入查看、悬停查看详细信息以及在指标之间切换，所有这些都无需额外的提示。
 
-**Configuring with many options.** Setting up a deployment involves dozens of
-interdependent choices. Rather than a back-and-forth conversation ("Which
-region?" "What instance size?" "Enable autoscaling?"), an MCP App presents a
-form where users see all options at once, with validation and defaults.
+**配置众多选项。** 设置部署涉及数十个相互依赖的选择。MCP 应用无需来回对话（“哪个地区？”“什么实例大小？”“启用自动缩放？”），而是呈现一个表单，用户可以在其中一次性看到所有选项，并进行验证和默认设置。
 
-**Viewing rich media.** When a user asks to review a PDF, see a 3D model, or
-preview generated images, text descriptions fall short. An MCP App embeds the
-actual viewer (pan, zoom, rotate) directly in the conversation.
+**查看富媒体。** 当用户要求查看 PDF、查看 3D 模型或预览生成的图像时，文本描述显得不足。MCP 应用将实际查看器（平移、缩放、旋转）直接嵌入对话中。
 
-**Real-time monitoring.** A dashboard showing live metrics, logs, or system
-status needs continuous updates. An MCP App maintains a persistent connection,
-updating the display as data changes without requiring the user to ask "what's
-the status now?"
+**实时监控。** 显示实时指标、日志或系统状态的仪表盘需要持续更新。MCP 应用保持持久连接，在数据变化时更新显示，无需用户询问“现在状态如何？”。
 
-**Multi-step workflows.** Approving expense reports, reviewing code changes, or
-triaging issues involves examining items one by one. An MCP App provides
-navigation controls, action buttons, and state that persists across
-interactions.
+**多步骤工作流。** 批准费用报告、审查代码更改或分类问题涉及逐个检查项目。MCP 应用提供导航控件、操作按钮以及在交互之间持久存在的状态。
 
-## Security model
+## 安全模型
 
-MCP Apps run in a sandboxed
-[iframe](https://developer.mozilla.org/docs/Web/HTML/Element/iframe), which
-provides strong isolation from the host application. The sandbox prevents your
-app from accessing the parent window's
-[DOM](https://developer.mozilla.org/docs/Web/API/Document_Object_Model), reading
-the host's cookies or local storage, navigating the parent page, or executing
-scripts in the parent context.
+MCP 应用在沙箱 [iframe](https://developer.mozilla.org/docs/Web/HTML/Element/iframe) 中运行，这与主机应用程序提供了强大的隔离。沙箱防止您的应用访问父窗口的 [DOM](https://developer.mozilla.org/docs/Web/API/Document_Object_Model)、读取主机的 cookie 或本地存储、导航父页面或在父上下文中执行脚本。
 
-All communication between your app and the host goes through the
-[postMessage API](https://developer.mozilla.org/docs/Web/API/Window/postMessage).
-The host controls which capabilities your app can access. For example, a host
-might restrict which tools an app can call or disable the `sendOpenLink` capability.
+您的应用与主机之间的所有通信都通过 [postMessage API](https://developer.mozilla.org/docs/Web/API/Window/postMessage) 进行。主机控制您的应用可以访问哪些功能。例如，主机可能会限制应用可以调用哪些工具或禁用 `sendOpenLink` 功能。
 
-The sandbox is designed to prevent apps from escaping to access the host or user data.
+沙箱旨在防止应用逃逸以访问主机或用户数据。
 
-## Framework support
+## 框架支持
 
-MCP Apps use their own dialect of MCP, built on JSON-RPC like the core protocol.
-Some messages are shared with regular MCP (e.g., `tools/call`), while others are
-specific to apps (e.g., `ui/initialize`). The transport is
-[postMessage](https://developer.mozilla.org/docs/Web/API/Window/postMessage)
-instead of stdio or HTTP. Since it's all standard web primitives, you can use any
-framework or none at all.
+MCP 应用使用自己的 MCP 方言，像核心协议一样建立在 JSON-RPC 之上。一些消息与常规 MCP 共享（例如 `tools/call`），而另一些则是应用特定的（例如 `ui/initialize`）。传输是 [postMessage](https://developer.mozilla.org/docs/Web/API/Window/postMessage) 而不是 stdio 或 HTTP。由于都是标准 Web 原语，您可以使用任何框架或根本不使用。
 
-The `App` class from `@modelcontextprotocol/ext-apps` is a convenience wrapper,
-not a requirement. You can implement the
-[postMessage protocol](https://github.com/modelcontextprotocol/ext-apps/blob/main/specification/2026-01-26/apps.mdx)
-directly if you prefer to avoid dependencies or need tighter control.
+来自 `@modelcontextprotocol/ext-apps` 的 `App` 类是一个便利的包装器，并非必需。如果您希望避免依赖或需要更紧密的控制，可以直接实现 [postMessage 协议](https://github.com/modelcontextprotocol/ext-apps/blob/main/specification/2026-01-26/apps.mdx)。
 
-The [examples directory](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples)
-includes starter templates for React, Vue, Svelte, Preact, Solid, and vanilla
-JavaScript. These demonstrate recommended patterns for each framework's system,
-but they're examples rather than requirements. You can choose whatever works
-best for your use case.
+[示例目录](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples) 包括 React、Vue、Svelte、Preact、Solid 和 vanilla JavaScript 的入门模板。这些展示了每个框架系统的推荐模式，但它们只是示例而非要求。您可以选择最适合您用例的任何方案。
 
-## Client support
+## 客户端支持
 
 <Note>
 
-MCP Apps is an extension to the [core MCP specification](/specification). Host support varies by client.
+MCP 应用是 [核心 MCP 规范](/specification) 的扩展。主机支持因客户端而异。
 
 </Note>
 
-MCP Apps are currently supported by [Claude](https://claude.ai),
-[Claude Desktop](https://claude.ai/download),
-[VS Code GitHub Copilot](https://code.visualstudio.com/), [Goose](https://block.github.io/goose/), [Postman](https://postman.com), and [MCPJam](https://www.mcpjam.com/). See the
-[client matrix](/extensions/client-matrix) for the full list of extension support across clients.
+MCP 应用目前由 [Claude](https://claude.ai)、[Claude Desktop](https://claude.ai/download)、[VS Code GitHub Copilot](https://code.visualstudio.com/)、[Goose](https://block.github.io/goose/)、[Postman](https://postman.com) 和 [MCPJam](https://www.mcpjam.com/) 支持。请参阅 [客户端矩阵](/extensions/client-matrix) 以获取跨客户端的完整扩展支持列表。
 
-If you're building an MCP client and want to support MCP Apps, you have two options:
+如果您正在构建 MCP 客户端并希望支持 MCP 应用，您有两个选项：
 
-1. **Use a framework**: The [`@mcp-ui/client`](https://github.com/MCP-UI-Org/mcp-ui)
-   package provides React components for rendering and interacting with MCP Apps
-   views in your host application. See the
-   [MCP-UI documentation](https://mcpui.dev/) for usage details.
+1. **使用框架**：[`@mcp-ui/client`](https://github.com/MCP-UI-Org/mcp-ui) 包提供 React 组件，用于在主机应用程序中渲染和与 MCP 应用视图交互。请参阅 [MCP-UI 文档](https://mcpui.dev/) 以获取使用详情。
 
-2. **Build on AppBridge**: The SDK includes an
-   [**App Bridge**](https://apps.extensions.modelcontextprotocol.io/api/modules/app-bridge.html)
-   module that handles rendering apps in sandboxed iframes, message passing, tool
-   call proxying, and security policy enforcement. The
-   [basic-host example](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/basic-host)
-   shows how to integrate it.
+2. **基于 AppBridge 构建**：SDK 包含一个 [**App Bridge**](https://apps.extensions.modelcontextprotocol.io/api/modules/app-bridge.html) 模块，用于处理在沙箱 iframe 中渲染应用、消息传递、工具调用代理和安全策略执行。[basic-host 示例](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/basic-host) 展示了如何集成它。
 
-See the [API documentation](https://apps.extensions.modelcontextprotocol.io/api/)
-for implementation details.
+请参阅 [API 文档](https://apps.extensions.modelcontextprotocol.io/api/) 以获取实现详情。
 
-## Examples
+## 示例
 
-The [ext-apps repository](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples)
-includes ready-to-run examples demonstrating different use cases:
+[ext-apps 仓库](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples) 包括现成的示例，展示不同的用例：
 
-- **3D and visualization**:
+- **3D 与可视化**：
   [map-server](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/map-server)
-  (CesiumJS globe),
+  (CesiumJS  globe),
   [threejs-server](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/threejs-server)
-  (Three.js scenes),
+  (Three.js 场景),
   [shadertoy-server](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/shadertoy-server)
-  (shader effects)
-- **Data exploration**:
+  (着色器效果)
+- **数据探索**：
   [cohort-heatmap-server](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/cohort-heatmap-server),
   [customer-segmentation-server](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/customer-segmentation-server),
   [wiki-explorer-server](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/wiki-explorer-server)
-- **Business applications**:
+- **商业应用**：
   [scenario-modeler-server](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/scenario-modeler-server),
   [budget-allocator-server](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/budget-allocator-server)
-- **Media**:
+- **媒体**：
   [pdf-server](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/pdf-server),
   [video-resource-server](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/video-resource-server),
   [sheet-music-server](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/sheet-music-server),
   [say-server](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/say-server)
-  (text-to-speech)
-- **Utilities**:
+  (文本转语音)
+- **实用工具**：
   [qr-server](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/qr-server),
   [system-monitor-server](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/system-monitor-server),
   [transcript-server](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/transcript-server)
-  (speech-to-text)
-- **Starter templates**:
+  (语音转文本)
+- **入门模板**：
   [React](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/basic-server-react),
   [Vue](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/basic-server-vue),
   [Svelte](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/basic-server-svelte),
@@ -230,4 +146,4 @@ includes ready-to-run examples demonstrating different use cases:
   [Solid](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/basic-server-solid),
   [vanilla JavaScript](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/basic-server-vanillajs)
 
-To start building your own MCP App, see the [build guide](/extensions/apps/build).
+要开始构建您自己的 MCP 应用，请参阅 [构建指南](/extensions/apps/build)。

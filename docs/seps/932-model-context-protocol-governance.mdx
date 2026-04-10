@@ -1,119 +1,119 @@
 ---
-title: "SEP-932: Model Context Protocol Governance"
-sidebarTitle: "SEP-932: Model Context Protocol Governance"
-description: "Model Context Protocol Governance"
+title: "SEP-932: 模型上下文协议治理"
+sidebarTitle: "SEP-932: 模型上下文协议治理"
+description: "模型上下文协议治理"
 ---
 
 <div className="flex items-center gap-2 mb-4">
   <Badge color="green" shape="pill">
-    Final
+    最终版
   </Badge>
   <Badge color="gray" shape="pill">
-    Process
+    流程
   </Badge>
 </div>
 
-| Field         | Value                                                                         |
+| 字段          | 值                                                                            |
 | ------------- | ----------------------------------------------------------------------------- |
 | **SEP**       | 932                                                                           |
-| **Title**     | Model Context Protocol Governance                                             |
-| **Status**    | Final                                                                         |
-| **Type**      | Process                                                                       |
-| **Created**   | 2025-07-08                                                                    |
-| **Author(s)** | David Soria Parra                                                             |
-| **Sponsor**   | None                                                                          |
+| **标题**      | 模型上下文协议治理                                                             |
+| **状态**      | 最终版                                                                         |
+| **类型**      | 流程                                                                       |
+| **创建日期**   | 2025-07-08                                                                    |
+| **作者** | David Soria Parra                                                             |
+| **赞助者**   | 无                                                                          |
 | **PR**        | [#931](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/931) |
 
 ---
 
-## Abstract
+## 摘要
 
-This SEP establishes the formal governance model for the Model Context Protocol (MCP) project. It defines the organizational structure, decision-making processes, and contribution guidelines necessary for transparent and effective project stewardship. The proposal introduces a hierarchical governance structure with clear roles and responsibilities, along with the Specification Enhancement Proposal (SEP) process for managing protocol changes.
+本 SEP 建立了模型上下文协议 (MCP) 项目的正式治理模型。它定义了组织结构、决策流程和贡献指南，这对于透明且有效的项目管理是必要的。该提案引入了一个具有明确角色和职责的层级治理结构，以及用于管理协议变更的规范增强提案 (SEP) 流程。
 
-## Motivation
+## 动机
 
-As the Model Context Protocol grows in adoption and complexity, the need for formal governance becomes critical. The current informal decision-making process lacks:
+随着模型上下文协议的采用和复杂性增长，正式治理的需求变得至关重要。当前的非正式决策过程缺乏：
 
-1. **Transparency**: Community members have no clear visibility into how decisions are made
-2. **Participation Pathways**: Contributors lack defined ways to influence project direction
-3. **Accountability**: No formal structure exists for resolving disputes or contentious issues
-4. **Scalability**: Ad-hoc processes cannot scale with growing community and technical complexity
+1. **透明度**：社区成员无法清楚地了解决策是如何制定的
+2. **参与途径**：贡献者缺乏影响项目方向的定义方式
+3. **问责制**：不存在解决争议或 contentious 问题的正式结构
+4. **可扩展性**：临时流程无法随着社区和技术复杂性的增长而扩展
 
-Without formal governance, the project risks:
+如果没有正式治理，项目将面临风险：
 
-- Fragmentation of the ecosystem
-- Unclear or inconsistent technical decisions
-- Reduced community trust and participation
-- Inability to effectively manage contributions at scale
+- 生态系统的碎片化
+- 不明确或不一致的技术决策
+- 社区信任和参与度降低
+- 无法有效地大规模管理贡献
 
-## Rationale
+## 理由
 
-The proposed governance model draws inspiration from successful open source projects like Python, PyTorch, and Rust. Key design decisions include:
+ proposed 治理模型借鉴了 Python、PyTorch 和 Rust 等成功开源项目的经验。关键设计决策包括：
 
-### Hierarchical Structure
+### 层级结构
 
-We chose a hierarchical model (Contributors → Maintainers → Core Maintainers → Lead Maintainers) that is effectively how the project decisions are made today. From there we will continue to evolve governance in the best interest of the project.
+我们选择了一个层级模型（贡献者 → 维护者 → 核心维护者 → 首席维护者），这实际上是项目决策今天的运作方式。从此开始，我们将继续为了项目的最大利益演进治理。
 
-### Individual vs Corporate Membership
+### 个人与公司成员资格
 
-Membership is explicitly tied to individuals rather than companies to:
+成员资格明确与个人而非公司挂钩，以便：
 
-- Ensure decisions prioritize protocol integrity over corporate interests
-- Prevent capture by any single organization
-- Maintain continuity when individuals change employers
+- 确保决策优先考虑协议完整性而非公司利益
+- 防止被任何单一组织俘获
+- 在个人更换雇主时保持连续性
 
-### SEP Process
+### SEP 流程
 
-The Specification Enhancement Proposal process ensures:
+规范增强提案流程确保：
 
-- All protocol changes undergo thorough review
-- Community input is systematically collected
-- Design decisions are documented for posterity
-- Implementation precedes finalization
+- 所有协议变更都经过彻底审查
+- 社区意见被系统地收集
+- 设计决策被记录存档
+- 实现在最终确定之前完成
 
-## Specification
+## 规范
 
-### Governance Structure
+### 治理结构
 
-#### Contributors
+#### 贡献者
 
-- Any individual who files issues, submits pull requests, or participates in discussions
-- No formal membership or approval required
+- 任何提交问题、提交拉取请求或参与讨论的个人
+- 不需要正式成员资格或批准
 
-#### Maintainers
+#### 维护者
 
-- Responsible for specific components (SDKs, documentation, etc.)
-- Appointed by Core Maintainers
-- Have write/admin access to their repositories
-- May establish component-specific processes
+- 负责特定组件（SDK、文档等）
+- 由核心维护者任命
+- 拥有其仓库的写入/管理权限
+- 可以建立特定于组件的流程
 
-#### Core Maintainers
+#### 核心维护者
 
-- Deep understanding of MCP specification required
-- Responsible for protocol evolution and project direction
-- Meet bi-weekly for decisions
-- Can veto maintainer decisions by majority vote
-- Current members listed in governance documentation
+- 需要深入了解 MCP 规范
+- 负责协议演进和项目方向
+- 每两周开会进行决策
+- 可以通过多数投票否决维护者的决策
+- 当前成员列在治理文档中
 
-#### Lead Maintainers
+#### 首席维护者
 
-- Justin Spahr-Summers and David Soria Parra
-- Can veto any decision
-- Appoint/remove Core Maintainers
-- Admin access to all infrastructure
+- Justin Spahr-Summers 和 David Soria Parra
+- 可以否决任何决策
+- 任命/移除核心维护者
+- 拥有所有基础设施的管理权限
 
-## Backwards Compatibility
+## 向后兼容性
 
-N/A
+不适用
 
-## Reference Implementation
+## 参考实现
 
-See #931
+参见 #931
 
-1. **Documentation Files**:
-   - `/docs/community/governance.mdx` - Full governance documentation
-   - `/docs/community/sep-guidelines.mdx` - SEP process guidelines
+1. **文档文件**：
+   - `/docs/community/governance.mdx` - 完整治理文档
+   - `/docs/community/sep-guidelines.mdx` - SEP 流程指南
 
-## Security Implications
+## 安全影响
 
-N/A
+不适用

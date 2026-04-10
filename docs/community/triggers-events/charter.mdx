@@ -1,79 +1,79 @@
 ---
-title: Triggers and Events Charter
-description: Charter for the MCP Triggers and Events Working Group.
+title: 触发器与事件章程
+description: MCP 触发器与事件工作组的章程。
 ---
 
-## Group Type
+## 工作组类型
 
-**Working Group**
+**工作组**
 
-## Mission Statement
+## 使命陈述
 
-The Triggers and Events Working Group exists to define how MCP servers proactively notify clients of state changes. Today, clients learn about server-side updates by polling or holding an SSE connection open. This WG will specify a standardized callback mechanism—webhooks or similar—that lets servers push notifications when new data is available, with defined ordering guarantees that hold across all transports.
+触发器与事件工作组旨在定义 MCP 服务器如何主动通知客户端状态变更。目前，客户端通过轮询或保持 SSE 连接打开来了解服务器端更新。本工作组将指定一种标准化的回调机制——Webhook 或类似机制——使服务器在新数据可用时推送通知，并具有适用于所有传输方式的定义明确的排序保证。
 
-## Scope
+## 范围
 
-### In Scope
+### 范围内
 
-- **Specification Work**: SEPs defining the trigger/callback mechanism, subscription lifecycle, delivery semantics, and event ordering guarantees.
-- **Reference Implementations**: SDK components demonstrating server-initiated notifications and client-side callback handling.
-- **Cross-Cutting Concerns**: Coordination with the Transports WG on transport-specific delivery behavior, and with the Agents WG where task completion notifications intersect with event triggers.
-- **Documentation**: Specification sections covering event-driven patterns and migration guidance from polling-based approaches.
+- **规范工作**：定义触发器/回调机制、订阅生命周期、交付语义和事件排序保证的 SEP。
+- **参考实现**：演示服务器发起通知和客户端回调处理的 SDK 组件。
+- **跨领域关注点**：与传输工作组协调特定于传输的交付行为，以及与代理工作组协调任务完成通知与事件触发相交的部分。
+- **文档**：涵盖事件驱动模式和从基于轮询的方法迁移指南的规范部分。
 
-### Out of Scope
+### 范围外
 
-- Changes to the transport wire format or session model (owned by the Transports WG).
-- General-purpose pub/sub infrastructure beyond what the MCP protocol requires.
-- Modifications to existing notification primitives (`notifications/resources/updated`, `notifications/tools/list_changed`, etc.) that do not relate to proactive server-initiated delivery.
+- 传输线路格式或会话模型的变更（由传输工作组拥有）。
+- MCP 协议所需之外的通用发布/订阅基础设施。
+- 对现有通知原语（`notifications/resources/updated`, `notifications/tools/list_changed` 等）的修改，若与主动服务器发起交付无关。
 
-### Related Groups
+### 相关工作组
 
-- **Transports WG** — delivery and ordering guarantees depend on transport capabilities; callback semantics must be coherent across stdio, Streamable HTTP, and future transports.
-- **Agents WG** — [SEP-1686 (Tasks)](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1686) identifies webhook-style task completion notifications as a future consideration; this WG owns that mechanism.
+- **传输工作组** — 交付和排序保证取决于传输能力；回调语义必须在 stdio、Streamable HTTP 和未来传输之间保持一致。
+- **代理工作组** — [SEP-1686 (任务)](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1686) 将 Webhook 风格的任务完成通知确定为未来考虑事项；本工作组拥有该机制。
 
-## Leadership
+## 领导层
 
-| Role | Name            | Organization        | GitHub                                           | Term    |
+| 角色 | 姓名            | 组织        | GitHub                                           | 任期    |
 | ---- | --------------- | ------------------- | ------------------------------------------------ | ------- |
-| Lead | Clare Liguori   | Amazon Web Services | [@clareliguori](https://github.com/clareliguori) | Initial |
-| Lead | Peter Alexander | Anthropic           | [@pja-ant](https://github.com/pja-ant)           | Initial |
+| 组长 | Clare Liguori   | Amazon Web Services | [@clareliguori](https://github.com/clareliguori) | 初始 |
+| 组长 | Peter Alexander | Anthropic           | [@pja-ant](https://github.com/pja-ant)           | 初始 |
 
-## Authority & Decision Rights
+## 权限与决策权
 
-| Decision Type                       | Authority Level                                        |
+| 决策类型                       | 权限级别                                        |
 | ----------------------------------- | ------------------------------------------------------ |
-| Meeting logistics & scheduling      | WG Leads (autonomous)                                  |
-| Proposal prioritization within WG   | WG Leads (autonomous)                                  |
-| SEP triage & closure (in scope)     | WG Leads (autonomous, with documented rationale)       |
-| Technical design within scope       | WG consensus                                           |
-| Spec changes (additive)             | WG consensus → Core Maintainer approval                |
-| Spec changes (breaking/fundamental) | WG consensus → Core Maintainer approval + wider review |
-| Scope expansion                     | Core Maintainer approval required                      |
-| WG Member approval                  | WG Member sponsors                                     |
+| 会议后勤与调度      | 工作组组长（自主）                                  |
+| 工作组内提案优先级排序   | 工作组组长（自主）                                  |
+| SEP 分类与关闭（范围内）     | 工作组组长（自主，需记录理由）       |
+| 范围内技术设计       | 工作组共识                                           |
+| 规范变更（增量）             | 工作组共识 → 核心维护者批准                |
+| 规范变更（破坏性/根本性） | 工作组共识 → 核心维护者批准 + 更广泛审查 |
+| 范围扩展                     | 需要核心维护者批准                      |
+| 工作组成员批准                  | 工作组成员赞助者                                     |
 
-## Operations
+## 运营
 
-| Meeting         | Frequency | Duration | Purpose                               |
+| 会议         | 频率 | 时长 | 目的                               |
 | --------------- | --------- | -------- | ------------------------------------- |
-| Working Session | Weekly    | 30 min   | Technical discussion, proposal review |
+| 工作会议 | 每周    | 30 分钟   | 技术讨论，提案审查 |
 
-## Deliverables & Success Metrics
+## 交付物与成功指标
 
-### Active Work Items
+### 活跃工作项
 
-| Item                                    | Status   | Target Date | Champion |
+| 项目                                    | 状态   | 目标日期 | 倡导者 |
 | --------------------------------------- | -------- | ----------- | -------- |
-| SEP: Events in MCP v1 RFC               | Ideating | End April   | TBD      |
-| Reference implementation in Tier-1 SDKs | —        | End April   | TBD      |
+| SEP: MCP v1 RFC 中的事件               | 构思中 | 4 月底   | 待定      |
+| Tier-1 SDK 中的参考实现 | —        | 4 月底   | 待定      |
 
-### Success Criteria
+### 成功标准
 
-- An accepted SEP defining the trigger/callback mechanism and its subscription lifecycle.
-- Reference implementations in at least two Tier-1 SDKs.
-- Conformance test coverage for the new primitives.
+- 一份被接受的 SEP，定义触发器/回调机制及其订阅生命周期。
+- 至少在两个 Tier-1 SDK 中的参考实现。
+- 新原语的一致性测试覆盖。
 
-## Changelog
+## 变更日志
 
-| Date       | Change          |
+| 日期       | 变更          |
 | ---------- | --------------- |
-| 2026-03-24 | Initial charter |
+| 2026-03-24 | 初始章程 |

@@ -1,24 +1,24 @@
 ---
-title: How to Automate Publishing with GitHub Actions
+title: 如何使用 GitHub Actions 自动化发布
 sidebarTitle: GitHub Actions
 ---
 
 <Note>
-  The MCP Registry is currently in preview. Breaking changes or data resets may occur before general availability. If you encounter any issues, please report them on [GitHub](https://github.com/modelcontextprotocol/registry/issues).
+  MCP Registry 目前处于预览阶段。在正式发布之前，可能会发生破坏性更改或数据重置。如果遇到任何问题，请在 [GitHub](https://github.com/modelcontextprotocol/registry/issues) 上报告。
 </Note>
 
-## Step 1: Create a Workflow File
+## 步骤 1：创建工作流文件
 
-In your server project directory, create a `.github/workflows/publish-mcp.yml` file. Here is an example for npm-based local server, but the MCP Registry publishing steps are the same for all package types:
+在你的服务器项目目录中，创建一个 `.github/workflows/publish-mcp.yml` 文件。以下是基于 npm 的本地服务器的示例，但 MCP Registry 发布步骤对所有包类型都是相同的：
 
 <CodeGroup>
 
-```yaml OIDC authentication (recommended)
+```yaml OIDC 认证（推荐）
 name: Publish to MCP Registry
 
 on:
   push:
-    tags: ["v*"] # Triggers on version tags like v1.0.0
+    tags: ["v*"] # 在版本标签上触发，例如 v1.0.0
 
 jobs:
   publish:
@@ -31,7 +31,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
 
-      ### Publish underlying npm package:
+      ### 发布底层 npm 包：
 
       - name: Set up Node.js
         uses: actions/setup-node@v5
@@ -52,7 +52,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      ### Publish MCP server:
+      ### 发布 MCP 服务器：
 
       - name: Install mcp-publisher
         run: |
@@ -61,7 +61,7 @@ jobs:
       - name: Authenticate to MCP Registry
         run: ./mcp-publisher login github-oidc
 
-      # Optional:
+      # 可选：
       # - name: Set version in server.json
       #   run: |
       #     VERSION=${GITHUB_REF#refs/tags/v}
@@ -71,12 +71,12 @@ jobs:
         run: ./mcp-publisher publish
 ```
 
-```yaml PAT authentication
+```yaml PAT 认证
 name: Publish to MCP Registry
 
 on:
   push:
-    tags: ["v*"] # Triggers on version tags like v1.0.0
+    tags: ["v*"] # 在版本标签上触发，例如 v1.0.0
 
 jobs:
   publish:
@@ -88,7 +88,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
 
-      ### Publish underlying npm package:
+      ### 发布底层 npm 包：
 
       - name: Set up Node.js
         uses: actions/setup-node@v5
@@ -109,7 +109,7 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      ### Publish MCP server:
+      ### 发布 MCP 服务器：
 
       - name: Install mcp-publisher
         run: |
@@ -118,7 +118,7 @@ jobs:
       - name: Authenticate to MCP Registry
         run: ./mcp-publisher login github --token ${{ secrets.MCP_GITHUB_TOKEN }}
 
-      # Optional:
+      # 可选：
       # - name: Set version in server.json
       #   run: |
       #     VERSION=${GITHUB_REF#refs/tags/v}
@@ -128,12 +128,12 @@ jobs:
         run: ./mcp-publisher publish
 ```
 
-```yaml DNS authentication
+```yaml DNS 认证
 name: Publish to MCP Registry
 
 on:
   push:
-    tags: ["v*"] # Triggers on version tags like v1.0.0
+    tags: ["v*"] # 在版本标签上触发，例如 v1.0.0
 
 jobs:
   publish:
@@ -145,7 +145,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
 
-      ### Publish underlying npm package:
+      ### 发布底层 npm 包：
 
       - name: Set up Node.js
         uses: actions/setup-node@v5
@@ -166,19 +166,19 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      ### Publish MCP server:
+      ### 发布 MCP 服务器：
 
       - name: Install mcp-publisher
         run: |
           curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
 
       # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      # TODO: Replace `example.com` with your domain name
+      # TODO: 将 `example.com` 替换为你的域名
       # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       - name: Authenticate to MCP Registry
         run: ./mcp-publisher login dns --domain example.com --private-key ${{ secrets.MCP_PRIVATE_KEY }}
 
-      # Optional:
+      # 可选：
       # - name: Set version in server.json
       #   run: |
       #     VERSION=${GITHUB_REF#refs/tags/v}
@@ -190,36 +190,36 @@ jobs:
 
 </CodeGroup>
 
-## Step 2: Add Secrets
+## 步骤 2：添加密钥
 
-You may need to add a secret to the repository depending on which authentication method you choose:
+根据你选择的认证方法，你可能需要向仓库添加密钥：
 
-- **GitHub OIDC Authentication**: No dedicated secret necessary.
-- **GitHub PAT Authentication**: Add a `MCP_GITHUB_TOKEN` secret with a GitHub Personal Access Token (PAT) that has `read:org` and `read:user` scopes.
-- **DNS Authentication**: Add a `MCP_PRIVATE_KEY` secret with your Ed25519 private key.
+- **GitHub OIDC 认证**：无需专用密钥。
+- **GitHub PAT 认证**：添加一个 `MCP_GITHUB_TOKEN` 密钥，包含具有 `read:org` 和 `read:user` 范围的 GitHub 个人访问令牌 (PAT)。
+- **DNS 认证**：添加一个 `MCP_PRIVATE_KEY` 密钥，包含你的 Ed25519 私钥。
 
-You may also need to add secrets for your package registry. For example, the workflow above needs an `NPM_TOKEN` secret with your npm token.
+你可能还需要为包注册表添加密钥。例如，上面的工作流需要一个包含你的 npm 令牌的 `NPM_TOKEN` 密钥。
 
-For information about how to add secrets to a repository, see [Using secrets in GitHub Actions](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets).
+有关如何向仓库添加密钥的信息，请参阅 [在 GitHub Actions 中使用密钥](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets)。
 
-## Step 3: Tag and Release
+## 步骤 3：打标签和发布
 
-Create and push a version tag to trigger the workflow:
+创建并推送版本标签以触发工作流：
 
 ```bash
 git tag v1.0.0
 git push origin v1.0.0
 ```
 
-The workflow will run tests, build the package, publish the package to npm, and publish the server to the MCP Registry.
+工作流将运行测试、构建包、将包发布到 npm，并将服务器发布到 MCP Registry。
 
-## Troubleshooting
+## 故障排除
 
 {/* prettier-ignore-start */}
 
-| Error Message | Action |
+| 错误消息 | 操作 |
 | --- | --- |
-| "Authentication failed" | Ensure `id-token: write` permission is set for OIDC, or check secrets. |
-| "Package validation failed" | Verify your package successfully published to the package registry (e.g., npm, PyPI), and that your package has the [necessary verification information](./package-types). |
+| "认证失败" | 确保为 OIDC 设置了 `id-token: write` 权限，或检查 Secrets。 |
+| "软件包验证失败" | 验证您的软件包是否已成功发布到包注册表（例如，npm、PyPI），并且您的软件包拥有 [必要的验证信息](./package-types)。 |
 
 {/* prettier-ignore-end */}

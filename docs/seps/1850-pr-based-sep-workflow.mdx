@@ -1,203 +1,203 @@
 ---
-title: "SEP-1850: PR-Based SEP Workflow"
-sidebarTitle: "SEP-1850: PR-Based SEP Workflow"
-description: "PR-Based SEP Workflow"
+title: "SEP-1850: 基于 PR 的 SEP 工作流"
+sidebarTitle: "SEP-1850: 基于 PR 的 SEP 工作流"
+description: "基于 PR 的 SEP 工作流"
 ---
 
 <div className="flex items-center gap-2 mb-4">
   <Badge color="green" shape="pill">
-    Final
+    最终
   </Badge>
   <Badge color="gray" shape="pill">
-    Process
+    流程
   </Badge>
 </div>
 
-| Field         | Value                                                                                                              |
-| ------------- | ------------------------------------------------------------------------------------------------------------------ |
-| **SEP**       | 1850                                                                                                               |
-| **Title**     | PR-Based SEP Workflow                                                                                              |
-| **Status**    | Final                                                                                                              |
-| **Type**      | Process                                                                                                            |
-| **Created**   | 2025-11-20                                                                                                         |
-| **Accepted**  | 2025-11-28, 8 Yes, 0 No, 0 Absent per vote in Discord.                                                             |
-| **Author(s)** | Nick Cooper ([@nickcoai](https://github.com/nickcoai)), David Soria Parra ([@davidsp](https://github.com/davidsp)) |
-| **Sponsor**   | David Soria Parra ([@davidsp](https://github.com/davidsp))                                                         |
-| **PR**        | [#1850](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1850)                                    |
+| 字段          | 值                                                                                                                |
+| ------------- | ----------------------------------------------------------------------------------------------------------------- |
+| **SEP**       | 1850                                                                                                              |
+| **标题**      | 基于 PR 的 SEP 工作流                                                                                             |
+| **状态**      | 最终                                                                                                              |
+| **类型**      | 流程                                                                                                              |
+| **创建日期**  | 2025-11-20                                                                                                        |
+| **接受日期**  | 2025-11-28, 8 票赞成，0 票反对，0 票缺席，根据 Discord 投票结果。                                                    |
+| **作者**      | Nick Cooper ([@nickcoai](https://github.com/nickcoai)), David Soria Parra ([@davidsp](https://github.com/davidsp)) |
+| **赞助人**    | David Soria Parra ([@davidsp](https://github.com/davidsp))                                                        |
+| **PR**        | [#1850](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1850)                                   |
 
 ---
 
-## Abstract
+## 摘要
 
-This SEP formalizes the pull request-based SEP workflow that stores proposals as markdown files in the `seps/` directory of the Model Context Protocol specification repository. The workflow assigns SEP numbers from pull request numbers, maintains version history in Git, and replaces the previous GitHub Issues-based process. This establishes a file-based approach as the canonical way to author, review, and accept SEPs.
+本 SEP 正式化了基于拉取请求（PR）的 SEP 工作流，将提案作为 markdown 文件存储在 Model Context Protocol 规范仓库的 `seps/` 目录中。该工作流根据拉取请求编号分配 SEP 编号，在 Git 中维护版本历史，并取代了之前基于 GitHub Issues 的流程。这确立了基于文件的方法作为撰写、审查和接受 SEP 的规范方式。
 
-## Motivation
+## 动机
 
-The issue-based SEP process introduced several challenges:
+基于 Issue 的 SEP 流程引入了几个挑战：
 
-- **Dispersed content**: Proposal content was scattered across GitHub issues, linked documents, and pull requests, making review and archival difficult.
-- **Difficult collaboration**: Maintaining long-form specifications in issue bodies made iterative edits and multi-contributor collaboration harder.
-- **Limited version control**: GitHub issues don't provide the same version control capabilities as Git-managed files.
-- **Unclear status management**: The process lacked clear mechanisms for tracking status transitions and ensuring consistency between different sources of truth.
+- **内容分散**：提案内容散落在 GitHub issues、链接文档和拉取请求中，使得审查和归档变得困难。
+- **协作困难**：在 issue 正文中维护长篇规范使得迭代编辑和多贡献者协作变得更加困难。
+- **版本控制有限**：GitHub issues 不提供与 Git 管理文件相同的版本控制功能。
+- **状态管理不明确**：该流程缺乏跟踪状态转换和确保不同真实来源之间一致性的明确机制。
 
-A file-based workflow addresses these issues by:
+基于文件的工作流通过以下方式解决这些问题：
 
-- Keeping every SEP in version control alongside the specification itself
-- Providing Git's built-in review tooling, history, and searchability
-- Linking SEP numbers to pull requests to eliminate manual bookkeeping
-- Surfacing all discussion in the pull request thread
-- Using PR labels in conjunction with file status for better discoverability
+- 将每个 SEP 与规范本身一起保存在版本控制中
+- 提供 Git 内置的审查工具、历史记录和可搜索性
+- 将 SEP 编号链接到拉取请求以消除手动记录
+- 在拉取请求线程中展示所有讨论
+- 结合文件状态使用 PR 标签以提高可发现性
 
-## Specification
+## 规范
 
-### 1. Canonical Location
+### 1. 规范位置
 
-- Every SEP lives in `seps/{NUMBER}-{slug}.md` in the specification repository
-- The SEP number is always the pull request number that introduces the SEP file
-- The `seps/` directory serves as the single source of truth for all SEPs
+- 每个 SEP 位于规范仓库的 `seps/{NUMBER}-{slug}.md` 中
+- SEP 编号始终是引入 SEP 文件的拉取请求编号
+- `seps/` 目录作为所有 SEP 的唯一真实来源
 
-### 2. Author Workflow
+### 2. 作者工作流
 
-1. **Draft the proposal** in `seps/0000-{slug}.md` using `0000` as a placeholder number
-2. **Open a pull request** containing the draft SEP and any supporting materials
-3. **Request a sponsor** from the Maintainers list; tag potential sponsors from [MAINTAINERS.md](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/MAINTAINERS.md)
-4. **After the PR number is known**, amend the commit to rename the file to `{PR-number}-{slug}.md` and update the header (`SEP-{PR-number}` and `PR: #{PR-number}`)
-5. **Wait for sponsor assignment**: Once a sponsor agrees, they will assign themselves and update the status to `Draft`
+1. **起草提案**：在 `seps/0000-{slug}.md` 中起草，使用 `0000` 作为占位符编号
+2. **打开拉取请求**：包含草案 SEP 和任何支持材料
+3. **请求赞助人**：从维护者列表中请求赞助人；标记 [MAINTAINERS.md](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/MAINTAINERS.md) 中的潜在赞助人
+4. **得知 PR 编号后**：修正提交以将文件重命名为 `{PR 编号}-{slug}.md` 并更新头部（`SEP-{PR 编号}` 和 `PR: #{PR 编号}`）
+5. **等待赞助人分配**：一旦赞助人同意，他们将分配自己并将状态更新为 `草案`
 
-### 3. Sponsor Responsibilities
+### 3. 赞助人职责
 
-A Sponsor is a Core Maintainer or Maintainer who champions the SEP through the review process. The sponsor's responsibilities include:
+赞助人是核心维护者或维护者，负责在审查过程中支持 SEP。赞助人的职责包括：
 
-- **Reviewing the proposal** and providing constructive feedback
-- **Requesting changes** based on community input
-- **Managing status transitions** by:
-  - Ensuring that the `Status` field in the SEP markdown file is accurate
-  - Applying matching PR labels to keep them in sync with the file status
-  - Communicating status changes via PR comments
-- **Initiating formal review** when the SEP is ready (moving from `Draft` to `In-Review`)
-- **Raising to Core-Maintainers** ensuring the SEP is presented at the Core Maintainer meeting and that author and sponsor present.
-- **Ensuring quality standards** are met before advancing the proposal
-- **Tracking implementation** progress and ensuring reference implementations are complete before `Final` status
+- **审查提案**并提供建设性反馈
+- **请求更改**基于社区意见
+- **管理状态转换**通过：
+  - 确保 SEP markdown 文件中的 `状态` 字段准确
+  - 应用匹配的 PR 标签以保持与文件状态同步
+  - 通过 PR 评论沟通状态更改
+- **启动正式审查**当 SEP 准备就绪时（从 `草案` 移动到 `审查中`）
+- **提交给核心维护者**确保 SEP 在核心维护者会议上展示，并且作者和赞助人出席。
+- **确保质量标准**在推进提案之前得到满足
+- **跟踪实现**进度，并确保在 `最终` 状态之前完成参考实现
 
-### 4. Review Flow
+### 4. 审查流程
 
-Status progression follows: `Draft → In-Review → Accepted → Final`
+状态进展遵循：`草案 → 审查中 → 已接受 → 最终`
 
-Additional terminal states: `Rejected`, `Withdrawn`, `Superseded`, `Dormant`
+其他终端状态：`已拒绝`, `已撤回`, `已取代`, `休眠`
 
-**Dormant status**: If a SEP does not find a sponsor within six months, Core Maintainers may close the PR and mark the SEP as `dormant`.
+**休眠状态**：如果 SEP 在六个月内没有找到赞助人，核心维护者可以关闭 PR 并将 SEP 标记为 `休眠`。
 
-Reference implementations must be tracked via linked pull requests or issues and must be complete before marking a SEP as `Final`.
+参考实现必须通过链接的拉取请求或 issues 进行跟踪，并且在将 SEP 标记为 `最终` 之前必须完成。
 
-### 5. Documentation
+### 5. 文档
 
-- `docs/community/sep-guidelines.mdx` serves as the contributor-facing instructions
-- `seps/README.md` provides the concise reference for formatting, naming, sponsor responsibilities, and acceptance criteria
-- Both documents must reflect this workflow and be kept in sync
+- `docs/community/sep-guidelines.mdx` 作为面向贡献者的说明
+- `seps/README.md` 提供格式、命名、赞助人职责和接受标准的简明参考
+- 这两个文档必须反映此工作流并保持同步
 
-### 6. SEP File Structure
+### 6. SEP 文件结构
 
-Each SEP must include:
+每个 SEP 必须包括：
 
 ```markdown
-# SEP-{NUMBER}: {Title}
+# SEP-{编号}: {标题}
 
-- **Status**: Draft | In-Review | Accepted | Rejected | Withdrawn | Final | Superseded | Dormant
-- **Type**: Standards Track | Informational | Process
-- **Created**: YYYY-MM-DD
-- **Author(s)**: Name <email> (@github-username)
-- **Sponsor**: @github-username (or "None" if seeking sponsor)
-- **PR**: https://github.com/modelcontextprotocol/specification/pull/{NUMBER}
+- **状态**: 草案 | 审查中 | 已接受 | 已拒绝 | 已撤回 | 最终 | 已取代 | 休眠
+- **类型**: 标准轨道 | 信息类 | 流程
+- **创建日期**: YYYY-MM-DD
+- **作者**: 姓名 <email> (@github 用户名)
+- **赞助人**: @github 用户名 (或 "无" 如果正在寻找赞助人)
+- **PR**: https://github.com/modelcontextprotocol/specification/pull/{编号}
 
-## Abstract
+## 摘要
 
-## Motivation
+## 动机
 
-## Specification
+## 规范
 
-## Rationale
+## 理由
 
-## Backward Compatibility
+## 向后兼容性
 
-## Security Implications
+## 安全影响
 
-## Reference Implementation
+## 参考实现
 ```
 
-### 7. Status Management via PR Labels
+### 7. 通过 PR 标签管理状态
 
-To improve discoverability and filtering:
+为了提高可发现性和过滤：
 
-- Sponsors must apply PR labels that match the SEP status (`draft`, `in-review`, `accepted`, `final`, etc.)
-- Both the markdown `Status` field and PR labels should be kept in sync
-- The markdown file serves as the canonical record (versioned with the proposal)
-- PR labels enable easy filtering and searching for SEPs by status
-- Only sponsors should modify status fields and labels; authors should request changes through their sponsor
+- 赞助人必须应用与 SEP 状态匹配的 PR 标签（`草案`, `审查中`, `已接受`, `最终`, 等）
+- markdown `状态` 字段和 PR 标签都应保持同步
+- markdown 文件作为规范记录（与提案一起版本化）
+- PR 标签支持按状态轻松过滤和搜索 SEP
+- 只有赞助人应修改状态字段和标签；作者应通过其赞助人请求更改
 
-### 8. Legacy Considerations
+### 8. 遗留考虑
 
-- Contributors may optionally open a GitHub Issue for early discussion, but the authoritative SEP text lives in `seps/`
-- Issues should link to the relevant file once a pull request exists
-- SEP numbers are derived from PR numbers, not issue numbers
+- 贡献者可以选择打开 GitHub Issue 进行早期讨论，但权威 SEP 文本位于 `seps/` 中
+- Issues 应链接到相关文件一旦存在拉取请求
+- SEP 编号源自 PR 编号，而非 issue 编号
 
-## Rationale
+## 理由
 
-### Why File-Based?
+### 为什么基于文件？
 
-Storing SEPs as files keeps authoritative specs versioned with the code, mirroring successful processes used by PEPs (Python Enhancement Proposals) and other standards bodies. This approach:
+将 SEP 存储为文件可使权威规范与代码一起版本化，镜像了 PEPs（Python 增强提案）和其他标准机构使用的成功流程。这种方法：
 
-- Provides built-in version control via Git
-- Enables standard code review workflows
-- Maintains clear history of all changes
-- Supports multi-contributor collaboration
-- Integrates naturally with the specification repository
+- 通过 Git 提供内置版本控制
+- 启用标准代码审查工作流
+- 维护所有更改的清晰历史
+- 支持多贡献者协作
+- 自然地与规范仓库集成
 
-### Why PR Numbers?
+### 为什么使用 PR 编号？
 
-Using pull request numbers:
+使用拉取请求编号：
 
-- Eliminates race conditions around manual numbering
-- Creates natural traceability between proposal and discussion
-- Prevents number conflicts
-- Simplifies the contribution process
-- Maintains a single discussion thread for review
+- 消除手动编号周围的竞争条件
+- 在提案和讨论之间创建自然的可追溯性
+- 防止编号冲突
+- 简化贡献流程
+- 维护单一的审查讨论线程
 
-### Why PR Labels?
+### 为什么使用 PR 标签？
 
-Adding PR labels alongside the file status:
+在文件状态旁边添加 PR 标签：
 
-- Enables quick filtering of SEPs by status without opening files
-- Provides immediate visibility of SEP states in PR lists
-- Supports GitHub's search and filter capabilities
-- Complements the canonical markdown status field
-- Reduces friction for maintainers managing multiple SEPs
+- 无需打开文件即可按状态快速过滤 SEP
+- 在 PR 列表中提供 SEP 状态的即时可见性
+- 支持 GitHub 的搜索和过滤功能
+- 补充规范的 markdown 状态字段
+- 减少维护者管理多个 SEP 的摩擦
 
-### Making This the Primary Process
+### 使其成为主要流程
 
-Maintaining two overlapping canonical processes risked divergence and created confusion for contributors. Establishing the file-based approach as the primary method:
+维护两个重叠的规范流程可能导致分歧并为贡献者造成混淆。确立基于文件的方法为主要方法：
 
-- Reduces cognitive overhead for new contributors
-- Ensures consistency in the SEP corpus
-- Simplifies maintenance for sponsors
-- Aligns with industry best practices
+- 减少新贡献者的认知开销
+- 确保 SEP 语料库的一致性
+- 简化赞助人的维护工作
+- 与行业最佳实践保持一致
 
-## Backward Compatibility
+## 向后兼容性
 
-- Existing issue-based SEPs remain valid and require no migration
-- Historical GitHub Issue links continue to work
-- Future SEPs should reference the new file locations in `seps/`
-- Maintainers may optionally backfill historical SEPs into `seps/` for archival purposes
+- 现有的基于 issue 的 SEP 仍然有效，无需迁移
+- 历史 GitHub Issue 链接继续有效
+- 未来的 SEP 应在 `seps/` 中引用新文件位置
+- 维护者可以选择将历史 SEP 回填到 `seps/` 中以用于归档目的
 
-## Security Implications
+## 安全影响
 
-No new security considerations beyond the standard code review process for pull requests.
+除了拉取请求的标准代码审查流程外，没有新的安全考虑。
 
-## Reference Implementation
+## 参考实现
 
-- This pull request (#1850) implements the canonical instructions in both `seps/README.md` and `docs/community/sep-guidelines.mdx`
-- The process has been updated to reflect the PR-based workflow with status management via labels
-- This SEP document itself serves as an example of the new format
+- 此拉取请求 (#1850) 在 `seps/README.md` 和 `docs/community/sep-guidelines.mdx` 中实现了规范说明
+- 流程已更新以反映基于 PR 的工作流，并通过标签进行状态管理
+- 本 SEP 文档本身作为新格式的示例
 
-# Vote
+# 投票
 
-This SEP was accepted unanimously by the MCP Core Maintainers with a vote of 8 yes's, 0 no's and 0 absent votes on Friday December 28th, 2025 in a Discord poll.
+本 SEP 于 2025 年 12 月 28 日星期五在 Discord 投票中以 8 票赞成、0 票反对和 0 票缺席的结果被 MCP 核心维护者一致接受。

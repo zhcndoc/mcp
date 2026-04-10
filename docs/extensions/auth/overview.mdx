@@ -1,66 +1,63 @@
 ---
-title: Authorization Extensions
-description: Supplementary authorization mechanisms for the Model Context Protocol
+title: 授权扩展
+description: Model Context Protocol 的补充授权机制
 ---
 
-The [ext-auth repository](https://github.com/modelcontextprotocol/ext-auth) contains official MCP extensions that add authorization capabilities beyond the core MCP specification. These extensions address specific real-world scenarios where the standard OAuth 2.0 authorization code flow isn't the right fit.
+[ext-auth 仓库](https://github.com/modelcontextprotocol/ext-auth) 包含官方 MCP 扩展，这些扩展在核心 MCP 规范之外增加了授权功能。这些扩展解决了标准的 OAuth 2.0 授权码流程不适用的特定现实场景。
 
 <Card
   title="modelcontextprotocol/ext-auth"
   icon="github"
   href="https://github.com/modelcontextprotocol/ext-auth"
 >
-  Source code, specifications, and reference implementations for MCP
-  authorization extensions.
+  MCP 授权扩展的源代码、规范和参考实现。
 </Card>
 
-## Why authorization extensions?
+## 为什么需要授权扩展？
 
-The core MCP specification includes a robust [authorization framework](/specification/latest/basic/authorization) built on OAuth 2.0. That framework handles the common case well: a user interactively grants an MCP client permission to access a server on their behalf.
+核心 MCP 规范包含一个基于 OAuth 2.0 构建的稳健的 [授权框架](/specification/latest/basic/authorization)。该框架很好地处理了常见情况：用户交互式地授予 MCP 客户端代表他们访问服务器的权限。
 
-But not every MCP deployment fits this pattern:
+但并非每个 MCP 部署都符合此模式：
 
-- **Machine-to-machine integrations** don't have a human in the loop. Background services, CI pipelines, and automated workflows need to authenticate without interactive user consent flows.
-- **Enterprise environments** often have centralized identity providers (IdPs) that enforce policy across all applications. Requiring employees to authorize each MCP server individually creates friction and bypasses existing security controls.
+- **机器对机器集成**没有人工参与。后台服务、CI 管道和自动化工作流需要在没有交互式用户同意流程的情况下进行身份验证。
+- **企业环境**通常拥有集中式的身份提供商 (IdP)，在所有应用程序中强制执行策略。要求员工单独授权每个 MCP 服务器会产生摩擦并绕过现有的安全控制。
 
-The ext-auth extensions address these gaps.
+ext-auth 扩展解决了这些差距。
 
-## Available extensions
+## 可用扩展
 
 <CardGroup cols={2}>
   <Card
-    title="OAuth Client Credentials"
+    title="OAuth 客户端凭证"
     icon="robot"
     href="/extensions/auth/oauth-client-credentials"
   >
-    Machine-to-machine authentication using the OAuth 2.0 client credentials
-    flow. No user interaction required.
+    使用 OAuth 2.0 客户端凭证流程进行机器对机器身份验证。不需要用户交互。
   </Card>
   <Card
-    title="Enterprise-Managed Authorization"
+    title="企业托管授权"
     icon="building"
     href="/extensions/auth/enterprise-managed-authorization"
   >
-    Centralized access control via enterprise identity providers. Employees
-    access MCP servers through their organization's IdP.
+    通过企业身份提供商进行集中式访问控制。员工通过其组织的 IdP 访问 MCP 服务器。
   </Card>
 </CardGroup>
 
-## Choosing the right extension
+## 选择合适的扩展
 
-| Scenario                                             | Recommended extension                                                                 |
-| ---------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| Background service or daemon accessing an MCP server | [OAuth Client Credentials](/extensions/auth/oauth-client-credentials)                 |
-| CI/CD pipeline calling MCP tools                     | [OAuth Client Credentials](/extensions/auth/oauth-client-credentials)                 |
-| Server-to-server API integration                     | [OAuth Client Credentials](/extensions/auth/oauth-client-credentials)                 |
-| Enterprise employees accessing MCP servers at work   | [Enterprise-Managed Authorization](/extensions/auth/enterprise-managed-authorization) |
-| Organization-wide MCP access policy enforcement      | [Enterprise-Managed Authorization](/extensions/auth/enterprise-managed-authorization) |
-| Standard interactive user authorization              | Core MCP spec (no extension needed)                                                   |
+| 场景                                                 | 推荐扩展                                                                 |
+| ---------------------------------------------------- | ------------------------------------------------------------------------ |
+| 访问 MCP 服务器的后台服务或守护进程                  | [OAuth 客户端凭证](/extensions/auth/oauth-client-credentials)            |
+| 调用 MCP 工具的 CI/CD 管道                           | [OAuth 客户端凭证](/extensions/auth/oauth-client-credentials)            |
+| 服务器到服务器的 API 集成                            | [OAuth 客户端凭证](/extensions/auth/oauth-client-credentials)            |
+| 企业员工在工作中访问 MCP 服务器                      | [企业托管授权](/extensions/auth/enterprise-managed-authorization)        |
+| 组织范围内的 MCP 访问策略执行                        | [企业托管授权](/extensions/auth/enterprise-managed-authorization)        |
+| 标准交互式用户授权                                   | 核心 MCP 规范（不需要扩展）                                            |
 
-## Client support
+## 客户端支持
 
-Authorization extension support varies by client. See the [client matrix](/extensions/client-matrix) for a full breakdown. Both extensions require explicit support from the MCP client — they are never active by default.
+授权扩展支持因客户端而异。请参阅 [客户端矩阵](/extensions/client-matrix) 了解完整细分。这两个扩展都需要 MCP 客户端的明确支持——它们默认永远不会激活。
 
-## Specification
+## 规范
 
-Both extensions are specified in the [ext-auth repository](https://github.com/modelcontextprotocol/ext-auth/tree/main/specification/draft). They use the standard MCP [extension negotiation](/extensions/overview#negotiation) mechanism: clients and servers declare support in the `extensions` field of their capabilities during initialization.
+这两个扩展均在 [ext-auth 仓库](https://github.com/modelcontextprotocol/ext-auth/tree/main/specification/draft) 中指定。它们使用标准的 MCP [扩展协商](/extensions/overview#negotiation) 机制：客户端和服务器在初始化期间在其能力的 `extensions` 字段中声明支持。

@@ -1,36 +1,33 @@
 ---
-title: Key Changes
+title: 主要变更
 ---
 
-This document lists changes made to the Model Context Protocol (MCP) specification since
-the previous revision, [2024-11-05](/specification/2024-11-05).
+本文档列出了自上一个版本 [2024-11-05](/specification/2024-11-05) 以来对模型上下文协议 (MCP) 规范所做的更改。
 
-## Major changes
+## 主要变更
 
-1. Added a comprehensive **[authorization framework](/specification/2025-03-26/basic/authorization)**
-   based on OAuth 2.1 (PR
+1. 添加了基于 OAuth 2.1 的综合 **[授权框架](/specification/2025-03-26/basic/authorization)**
+   (PR
    [#133](https://github.com/modelcontextprotocol/specification/pull/133))
-1. Replaced the previous HTTP+SSE transport with a more flexible **[Streamable HTTP
-   transport](/specification/2025-03-26/basic/transports#streamable-http)** (PR
+1. 将之前的 HTTP+SSE 传输替换为更灵活的 **[流式 HTTP 传输](/specification/2025-03-26/basic/transports#streamable-http)** (PR
    [#206](https://github.com/modelcontextprotocol/specification/pull/206))
-1. Added support for JSON-RPC **[batching](https://www.jsonrpc.org/specification#batch)**
-   (PR [#228](https://github.com/modelcontextprotocol/specification/pull/228))
-1. Added comprehensive **tool annotations** for better describing tool behavior, like
-   whether it is read-only or destructive (PR
+1. 添加了对 JSON-RPC **[批处理](https://www.jsonrpc.org/specification#batch)**
+   的支持 (PR [#228](https://github.com/modelcontextprotocol/specification/pull/228))
+1. 添加了综合的 **工具注解**，用于更好地描述工具行为，例如
+   它是只读的还是破坏性的 (PR
    [#185](https://github.com/modelcontextprotocol/specification/pull/185))
 
-## Other schema changes
+## 其他架构变更
 
-- Added `message` field to `ProgressNotification` to provide descriptive status updates
-- Added support for audio data, joining the existing text and image content types
-- Added `completions` capability to explicitly indicate support for argument
-  autocompletion suggestions
+- 向 `ProgressNotification` 添加了 `message` 字段，以提供描述性的状态更新
+- 添加了对音频数据的支持，与现有的文本和图像内容类型并列
+- 添加了 `completions` 能力，以明确指示支持参数自动完成建议
 
-See
-[the updated schema](http://github.com/modelcontextprotocol/specification/tree/main/schema/2025-03-26/schema.ts)
-for more details.
+详见
+[更新后的架构](http://github.com/modelcontextprotocol/specification/tree/main/schema/2025-03-26/schema.ts)
+了解更多细节。
 
-## Full changelog
+## 完整变更日志
 
-For a complete list of all changes that have been made since the last protocol revision,
-[see GitHub](https://github.com/modelcontextprotocol/specification/compare/2024-11-05...2025-03-26).
+如需查看自上一个协议修订版以来所有更改的完整列表，
+[请参阅 GitHub](https://github.com/modelcontextprotocol/specification/compare/2024-11-05...2025-03-26)。

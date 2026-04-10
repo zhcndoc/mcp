@@ -1,141 +1,138 @@
 ---
-title: SDK Tiering System
-description: Feature completeness, protocol support, and maintenance commitment levels for Model Context Protocol SDKs
+title: SDK 分级系统
+description: Model Context Protocol SDK 的功能完整性、协议支持及维护承诺级别
 ---
 
-The MCP SDK Tiering System establishes clear expectations for feature completeness, protocol support, and maintenance commitments across official and community-driven SDKs. This helps developers choose the right SDK for their needs and provides SDK maintainers with a clear path to improving adoption expectations.
+MCP SDK 分级系统确立了官方和社区驱动 SDK 在功能完整性、协议支持及维护承诺方面的明确期望。这有助于开发者选择适合其需求的 SDK，并为 SDK 维护者提供一条明确的路径以提高采用期望。
 
 <Note>
-  **Key dates:**
-  - **January 23, 2026**: Conformance tests available
-  - **February 23, 2026**: Official SDK tiering published
+  **关键日期：**
+  - **2026 年 1 月 23 日**：一致性测试可用
+  - **2026 年 2 月 23 日**：官方 SDK 分级发布
 
-Between January 23 and February 23, SDK maintainers can work with the
-Conformance Testing working group to adopt the tests and set up GitHub issue
-tracking with the standardized labels defined below.
+  在 1 月 23 日至 2 月 23 日之间，SDK 维护者可以与
+  一致性测试工作组合作采用测试，并使用下面定义的标准化标签设置 GitHub 问题
+  跟踪。
 
 </Note>
 
-## Overview
+## 概述
 
-SDKs are classified into three tiers based on feature completeness, maintenance commitments, and documentation quality:
+SDK 根据功能完整性、维护承诺和文档质量分为三个层级：
 
-- **Tier 1**: Fully supported SDKs with complete protocol implementation, including all
-  non-experimental features and optional capabilities like sampling and elicitation
-- **Tier 2**: Actively-maintained SDKs working toward full protocol specification support
-- **Tier 3**: Experimental, partially implemented, or specialized SDKs
+- **Tier 1**：完全支持的 SDK，具有完整的协议实现，包括所有
+  非实验性功能和可选能力，如采样和诱导
+- **Tier 2**：积极维护的 SDK，致力于完全协议规范支持
+- **Tier 3**：实验性、部分实现或专用的 SDK
 
-Experimental features (such as Tasks) and protocol extensions (such as MCP Apps) are not required
-for any tier.
+实验性功能（如任务）和协议扩展（如 MCP 应用）不是
+任何层级的必需项。
 
-## Tier Requirements
+## 层级要求
 
-| Requirement                 | Tier 1: Fully Supported                                                                  | Tier 2: Commitment to Full Support                               | Tier 3: Experimental   |
+| 要求                 | Tier 1：完全支持                                                                  | Tier 2：承诺完全支持                               | Tier 3：实验性   |
 | --------------------------- | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------- | ---------------------- |
-| **Conformance Tests**       | 100% pass rate                                                                           | 80% pass rate                                                    | No minimum             |
-| **New Protocol Features**   | Before new spec version release, timeline agreed per release based on feature complexity | Within 6 months                                                  | No timeline commitment |
-| **Issue Triage**            | Within 2 business days                                                                   | Within a month                                                   | No requirement         |
-| **Critical Bug Resolution** | Within 7 days                                                                            | Within two weeks                                                 | No requirement         |
-| **Stable Release**          | Required with clear versioning                                                           | At least one stable release                                      | Not required           |
-| **Documentation**           | Comprehensive with examples for all features                                             | Basic documentation covering core features                       | No minimum             |
-| **Dependency Policy**       | Published update policy                                                                  | Published update policy                                          | Not required           |
-| **Roadmap**                 | Published roadmap                                                                        | Published plan toward Tier 1 or explanation for remaining Tier 2 | Not required           |
+| **一致性测试**       | 100% 通过率                                                                           | 80% 通过率                                                    | 无最低要求             |
+| **新协议特性**   | 在新规范版本发布之前，根据特性复杂度按版本商定时间表 | 6 个月内                                                  | 无时间表承诺 |
+| **问题分类**            | 2 个工作日内                                                                   | 一个月内                                                   | 无要求         |
+| **严重缺陷解决** | 7 天内                                                                            | 两周内                                                 | 无要求         |
+| **稳定版本发布**          | 需要清晰的版本控制                                                           | 至少一个稳定版本                                      | 不需要           |
+| **文档**           | 全面，包含所有功能的示例                                             | 涵盖核心功能的基本文档                       | 无最低要求             |
+| **依赖策略**       | 已发布的更新策略                                                                  | 已发布的更新策略                                          | 不需要           |
+| **路线图**                 | 已发布的路线图                                                                        | 已发布的向 Tier 1 推进的计划或保留在 Tier 2 的说明 | 不需要           |
 
-**Issue Triage** means labeling and determining whether an issue is valid, not resolving the issue.
+**问题分类** 意味着标记并确定问题是否有效，而非解决问题。
 
-**Critical Bug** refers to P0 issues (see [Priority labels](#priority-only-if-actionable) for
-detailed criteria).
+**严重缺陷** 指 P0 问题（详见 [优先级标签](#priority-only-if-actionable) 以获取
+详细标准）。
 
-**Stable Release** is a published version explicitly marked as production-ready (e.g., version `1.0.0`
-or higher without pre-release identifiers like `-alpha`, `-beta`, or `-rc`).
+**稳定版本发布** 是明确标记为生产就绪的已发布版本（例如，版本 `1.0.0`
+或更高，不带 `-alpha`、`-beta` 或 `-rc` 等预发布标识符）。
 
-**Clear Versioning** means following idiomatic versioning patterns with documented
-breaking change policies, so users can understand compatibility expectations when upgrading.
+**清晰版本控制** 意味着遵循惯用的版本控制模式并记录
+破坏性变更策略，以便用户在升级时能够理解兼容性期望。
 
-**Roadmap** outlines concrete steps and work items that track implementation of required MCP
-specification components (non-experimental features and optional capabilities as described in
-[Conformance Testing](#conformance-testing)), giving users visibility into upcoming feature support.
+**路线图** 概述了具体的步骤和工作项，跟踪所需 MCP
+规范组件的实施（[一致性测试](#conformance-testing) 中描述的非实验性功能和可选能力），让用户了解即将到来的功能支持情况。
 
-## Conformance Testing
+## 一致性测试
 
-All SDKs are evaluated using [automated conformance tests](https://github.com/modelcontextprotocol/conformance)
-that validate protocol support against the published specifications. SDKs receive a conformance score
-based on test results:
+所有 SDK 均使用 [自动化一致性测试](https://github.com/modelcontextprotocol/conformance) 进行评估，
+该测试针对已发布的规范验证协议支持。SDK 根据测试结果获得一致性评分：
 
-- **Tier 1**: 100% conformance required
-- **Tier 2**: 80% conformance required
-- **Tier 3**: No minimum requirement
+- **Tier 1**：要求 100% 一致性
+- **Tier 2**：要求 80% 一致性
+- **Tier 3**：无最低要求
 
-Conformance scores are calculated against **applicable required tests** only:
+一致性评分仅针对 **适用的必需测试** 计算：
 
-- Tests for the specification version the SDK targets
-- Excluding tests marked as pending or skipped
-- Excluding tests for experimental features
-- Excluding legacy backward-compatibility tests (unless the SDK claims legacy support)
+- 针对 SDK 目标的规范版本的测试
+- 排除标记为待处理或跳过的测试
+- 排除实验性功能的测试
+- 排除遗留向后兼容性测试（除非 SDK 声称支持遗留）
 
-Conformance testing validates that SDKs correctly implement the protocol by running standardized test
-scenarios and checking protocol message exchanges. See [Tier Relegation](#tier-relegation) for how
-temporary test failures are handled.
+一致性测试通过运行标准化测试
+场景并检查协议消息交换，验证 SDK 是否正确实现了协议。请参阅 [层级降级](#tier-relegation) 了解如何
+处理临时测试失败。
 
-## Tier Advancement
+## 层级晋升
 
-SDK maintainers can request tier advancement by:
+SDK 维护者可以通过以下方式请求层级晋升：
 
-1. Self-assessing against tier requirements
-2. Opening an issue in the [modelcontextprotocol/modelcontextprotocol](https://github.com/modelcontextprotocol/modelcontextprotocol) repository with supporting evidence
-3. Passing automated conformance testing
-4. Receiving approval from SDK Working Group maintainers
+1. 根据层级要求进行自我评估
+2. 在 [modelcontextprotocol/modelcontextprotocol](https://github.com/modelcontextprotocol/modelcontextprotocol) 仓库中开设问题并提供支持证据
+3. 通过自动化一致性测试
+4. 获得 SDK 工作组维护者的批准
 
-The SDK Working Group reviews advancement requests and makes final tier assignments.
+SDK 工作组审查晋升请求并做出最终层级分配。
 
-## Tier Relegation
+## 层级降级
 
-An SDK may be moved to a lower tier if existing conformance tests on the latest stable release fail
-continuously for 4 weeks:
+如果最新稳定版本上的现有连续性测试连续 4 周失败，SDK 可能会被移至较低层级：
 
-- **Tier 1 → Tier 2**: Any conformance test fails
-- **Tier 2 → Tier 3**: More than 20% of conformance tests fail
+- **Tier 1 → Tier 2**：任何一致性测试失败
+- **Tier 2 → Tier 3**：超过 20% 的一致性测试失败
 
-## Issue Triage Labels
+## 问题分类标签
 
-SDK repositories must use consistent labels to enable automated reporting on issue handling metrics.
-Tier calculations use these metrics to measure triage response times (time from issue creation to
-first label) and critical bug resolution times (time from P0 label to issue close).
+SDK 仓库必须使用一致的标签，以便启用关于问题处理指标的自动化报告。
+层级计算使用这些指标来衡量分类响应时间（从问题创建到
+首次标记的时间）和严重缺陷解决时间（从 P0 标记到问题关闭的时间）。
 
-### Type (pick one)
+### 类型（选一个）
 
-| Label         | Description                   |
+| 标签         | 描述                   |
 | ------------- | ----------------------------- |
-| `bug`         | Something isn't working       |
-| `enhancement` | Request for new feature       |
-| `question`    | Further information requested |
+| `bug`         | 某些功能无法工作       |
+| `enhancement` | 请求新功能       |
+| `question`    | 请求更多信息 |
 
-Repositories using [GitHub's native issue types](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/managing-issue-types-in-an-organization)
-satisfy this requirement without needing type labels.
+使用 [GitHub 原生问题类型](https://docs.github.com/en/issues/tracking-your-work-with-issues/using-issues/managing-issue-types-in-an-organization)
+的仓库满足此要求，无需类型标签。
 
-### Status (pick one)
+### 状态（选一个）
 
-Use these exact label names across all repositories to enable consistent reporting and analysis.
+在所有仓库中使用这些确切的标签名称，以启用一致的报告和分析。
 
-| Label                | Description                                             |
+| 标签                | 描述                                             |
 | -------------------- | ------------------------------------------------------- |
-| `needs confirmation` | Unclear if still relevant                               |
-| `needs repro`        | Insufficient information to reproduce                   |
-| `ready for work`     | Has enough information to start                         |
-| `good first issue`   | Good for newcomers                                      |
-| `help wanted`        | Contributions welcome from those familiar with codebase |
+| `needs confirmation` | 不清楚是否仍然相关                               |
+| `needs repro`        | 信息不足以复现                   |
+| `ready for work`     | 已有足够信息可以开始                         |
+| `good first issue`   | 适合新人                                      |
+| `help wanted`        | 欢迎熟悉代码库的人士贡献 |
 
-### Priority (only if actionable)
+### 优先级（仅当可操作时）
 
-| Label | Description                                                     |
+| 标签 | 描述                                                     |
 | ----- | --------------------------------------------------------------- |
-| `P0`  | Critical: core functionality failures or high-severity security |
-| `P1`  | Significant bug affecting many users                            |
-| `P2`  | Moderate issues, valuable feature requests                      |
-| `P3`  | Nice to haves, rare edge cases                                  |
+| `P0`  | 严重：核心功能故障或高严重性安全 |
+| `P1`  | 影响许多用户的重大缺陷                            |
+| `P2`  | 中等问题，有价值的功能请求                      |
+| `P3`  | 锦上添花，罕见的边缘情况                                  |
 
-**P0 (Critical)** issues are:
+**P0（严重）** 问题是：
 
-- **Security vulnerabilities** with CVSS score ≥ 7.0 (High or Critical severity)
-- **Core functionality failures** that prevent basic MCP operations: connection establishment,
-  message exchange, or use of core primitives (tools, resources, prompts)
+- **安全漏洞**，CVSS 评分 ≥ 7.0（高或严重级别）
+- **核心功能故障**，阻止基本 MCP 操作：连接建立、
+  消息交换或使用核心原语（工具、资源、提示）

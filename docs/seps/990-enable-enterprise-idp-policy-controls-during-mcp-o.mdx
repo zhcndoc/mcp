@@ -1,88 +1,88 @@
 ---
-title: "SEP-990: Enable enterprise IdP policy controls during MCP OAuth flows"
-sidebarTitle: "SEP-990: Enable enterprise IdP policy controls d…"
-description: "Enable enterprise IdP policy controls during MCP OAuth flows"
+title: "SEP-990: 在 MCP OAuth 流程中启用企业 IdP 策略控制"
+sidebarTitle: "SEP-990: 在 MCP OAuth 流程中启用企业 IdP 策略控制 d…"
+description: "在 MCP OAuth 流程中启用企业 IdP 策略控制"
 ---
 
 <div className="flex items-center gap-2 mb-4">
   <Badge color="green" shape="pill">
-    Final
+    最终版
   </Badge>
   <Badge color="gray" shape="pill">
-    Standards Track
+    标准轨道
   </Badge>
 </div>
 
-| Field         | Value                                                                         |
-| ------------- | ----------------------------------------------------------------------------- |
-| **SEP**       | 990                                                                           |
-| **Title**     | Enable enterprise IdP policy controls during MCP OAuth flows                  |
-| **Status**    | Final                                                                         |
-| **Type**      | Standards Track                                                               |
-| **Created**   | 2025-06-04                                                                    |
-| **Author(s)** | Aaron Parecki ([@aaronpk](https://github.com/aaronpk))                        |
-| **Sponsor**   | None                                                                          |
-| **PR**        | [#646](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/646) |
+| 字段           | 值                                                                            |
+| -------------- | ----------------------------------------------------------------------------- |
+| **SEP**        | 990                                                                           |
+| **标题**       | 在 MCP OAuth 流程中启用企业 IdP 策略控制                                      |
+| **状态**       | 最终版                                                                        |
+| **类型**       | 标准轨道                                                                      |
+| **创建日期**   | 2025-06-04                                                                    |
+| **作者**       | Aaron Parecki ([@aaronpk](https://github.com/aaronpk))                        |
+| **赞助方**     | 无                                                                            |
+| **PR**         | [#646](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/646) |
 
 ---
 
-## Abstract
+## 摘要
 
-This extension is designed to facilitate secure and interoperable authorization of MCP clients within corporate environments, leveraging existing enterprise identity infrastructure.
+此扩展旨在利用现有的企业身份基础设施，促进企业环境中 MCP 客户端的安全且可互操作的授权。
 
-- For end users, this removes the need to manually connect and authorize the MCP Client to individual services within the organization.
-- For enterprise admins, this enables visibility and control over which MCP Servers are able to be used within the organization.
+- 对于最终用户，这消除了手动连接和授权 MCP 客户端到组织内各个服务的需求。
+- 对于企业管理员，这使得他们能够可见并控制组织内可以使用哪些 MCP 服务器。
 
-## How Has This Been Tested?
+## 如何测试？
 
-We have an end to end implementation of this [here](https://github.com/oktadev/okta-cross-app-access-mcp), and in-progress MCP implementations with some partners.
+我们在此处有一个端到端的实现 [此处](https://github.com/oktadev/okta-cross-app-access-mcp)，并且正在与合作伙伴进行中的 MCP 实现。
 
-## Breaking Changes
+## 破坏性变更
 
-This is designed to augment the existing OAuth profile by providing an alternative when used under an enterprise IdP. MCP clients can opt in to this profile when necessary.
+此设计旨在通过在企业 IdP 下使用时提供替代方案来增强现有的 OAuth 配置文件。MCP 客户端可以在必要时选择加入此配置文件。
 
-## Additional Context
+## 附加背景
 
-For more background on this problem, you can refer to my blog post about this here:
+关于此问题的更多背景，您可以参考我在此处的博客文章：
 
-[Enterprise-Ready MCP](https://aaronparecki.com/2025/05/12/27/enterprise-ready-mcp)
+[支持企业的 MCP](https://aaronparecki.com/2025/05/12/27/enterprise-ready-mcp)
 
-I also presented this at the MCP Dev Summit in May.
+我还在五月的 MCP 开发者峰会上展示了这一点。
 
-A high level overview of the flow is below:
+流程的高级概述如下：
 
 ```mermaid
 sequenceDiagram
-    participant UA as Browser
-    participant C as MCP Client
-    participant MAS as MCP Authorization Server
-    participant MRS as MCP Resource Server
-    participant IdP as Identity Provider
+    participant UA as 浏览器
+    participant C as MCP 客户端
+    participant MAS as MCP 授权服务器
+    participant MRS as MCP 资源服务器
+    participant IdP as 身份提供商
 
     rect rgb(255,255,225)
-    C-->>UA: Redirect to IdP
-    UA->>+IdP: Redirect to IdP
-    Note over IdP: User Logs In
-    IdP-->>-UA: IdP Authorization Code
-    UA->>C: IdP Authorization Code
-    C->>+IdP: Token Request with IdP Authorization Code
-    IdP-->-C: ID Token
+    C-->>UA: 重定向到 IdP
+    UA->>+IdP: 重定向到 IdP
+    Note over IdP: 用户登录
+    IdP-->>-UA: IdP 授权码
+    UA->>C: IdP 授权码
+    C->>+IdP: 带有 IdP 授权码的令牌请求
+    IdP-->-C: ID 令牌
     end
 
-    note over C: User is logged<br>in to MCP Client.<br>Client stores ID Token.
+    note over C: 用户已登录<br>到 MCP 客户端。<br>客户端存储 ID 令牌。
 
-    C->+IdP: Exchange ID Token for ID-JAG
-    note over IdP: Evaluate Policy
-    IdP-->-C: Responds with ID-JAG
-    C->+MAS: Token Request with ID-JAG
-    note over MAS: Validate ID-JAG
-    MAS-->-C: MCP Access Token
+    C->+IdP: 交换 ID 令牌以获取 ID-JAG
+    note over IdP: 评估策略
+    IdP-->-C: 响应 ID-JAG
+    C->+MAS: 带有 ID-JAG 的令牌请求
+    note over MAS: 验证 ID-JAG
+    MAS-->-C: MCP 访问令牌
 
     loop
-    C->>+MRS: Call MCP API with Access Token
-    MRS-->>-C: MCP Response with Data
+    C->>+MRS: 使用访问令牌调用 MCP API
+    MRS-->>-C: 带有数据的 MCP 响应
     end
 ```
 
 > [!IMPORTANT]
-> **State:** Ready to Review
+> **状态：** 准备审查

@@ -1,93 +1,93 @@
 ---
-title: The MCP Registry
-sidebarTitle: About
+title: MCP 注册表
+sidebarTitle: 关于
 ---
 
 <Note>
-  The MCP Registry is currently in preview. Breaking changes or data resets may occur before general availability. If you encounter any issues, please report them on [GitHub](https://github.com/modelcontextprotocol/registry/issues).
+  MCP 注册表目前处于预览阶段。在正式发布之前，可能会发生破坏性更改或数据重置。如果您遇到任何问题，请在 [GitHub](https://github.com/modelcontextprotocol/registry/issues) 上报告。
 </Note>
 
-The MCP Registry is the official centralized metadata repository for publicly accessible MCP servers, backed by major trusted contributors to the MCP ecosystem such as Anthropic, GitHub, PulseMCP, and Microsoft.
+MCP 注册表是官方集中的元数据存储库，用于存放可公开访问的 MCP 服务器，由 Anthropic、GitHub、PulseMCP 和 Microsoft 等 MCP 生态系统的主要可信贡献者支持。
 
-The MCP Registry provides:
+MCP 注册表提供：
 
-- A single place for server creators to publish metadata about their servers
-- Namespace management through DNS verification
-- A REST API for MCP clients and aggregators to discover available servers
-- Standardized installation and configuration information
+- 为服务器创作者提供一个发布其服务器元数据的统一场所
+- 通过 DNS 验证进行命名空间管理
+- 供 MCP 客户端和聚合器发现可用服务器的 REST API
+- 标准化的安装和配置信息
 
-Server metadata is stored in a standardized [`server.json` format](https://github.com/modelcontextprotocol/registry/blob/main/docs/reference/server-json/server.schema.json), which contains:
+服务器元数据以标准化的 [`server.json` 格式](https://github.com/modelcontextprotocol/registry/blob/main/docs/reference/server-json/server.schema.json) 存储，其中包含：
 
-- The server's unique name (e.g., `io.github.user/server-name`)
-- Where to locate the server (e.g., npm package name, remote server URL)
-- Execution instructions (e.g., command-line args, env vars)
-- Other discovery data (e.g., description, server capabilities)
+- 服务器的唯一名称（例如，`io.github.user/server-name`）
+- 服务器位置（例如，npm 包名、远程服务器 URL）
+- 执行指令（例如，命令行参数、环境变量）
+- 其他发现数据（例如，描述、服务器功能）
 
-## The MCP Registry Ecosystem
+## MCP 注册表生态系统
 
-The MCP Registry is part of an ecosystem that looks something like:
+MCP 注册表是生态系统的一部分，大致如下所示：
 
-![The MCP Registry ecosystem](./ecosystem-diagram.excalidraw.svg)
+![MCP 注册表生态系统](./ecosystem-diagram.excalidraw.svg)
 
-### Relationship with Package Registries
+### 与包注册表的关系
 
-Package registries — such as npm, PyPI, and Docker Hub — host packages with code and binaries.
+包注册表（例如 npm、PyPI 和 Docker Hub）托管包含代码和二进制的包。
 
-The MCP Registry hosts metadata that points to those packages.
+MCP 注册表托管指向这些包的元数据。
 
-For example, a `weather-mcp` package could be hosted on npm, and metadata in the MCP Registry could map the "weather v1.2.0" server to `npm:weather-mcp`.
+例如，`weather-mcp` 包可以托管在 npm 上，MCP 注册表中的元数据可以将 "weather v1.2.0" 服务器映射到 `npm:weather-mcp`。
 
-The [Package Types guide](./package-types) lists the supported package types and registries. More package registries may be supported in the future based on community demand. If you are interested in building support for a package registry, please [open an issue](https://github.com/modelcontextprotocol/registry).
+[包类型指南](./package-types) 列出了支持的包类型和注册表。未来可能会根据社区需求支持更多包注册表。如果您有兴趣为包注册表构建支持，请 [提交问题](https://github.com/modelcontextprotocol/registry)。
 
-### Relationship with Server Developers
+### 与服务器开发人员的关系
 
-The MCP Registry supports both open-source and closed-source servers. Server developers can publish their server's metadata to the registry as long as the server's installation method is publicly available (e.g., an npm package or a Docker image on a public registry) _or_ the server itself is publicly accessible (e.g., a remote server that is not restricted to private networks).
+MCP 注册表支持开源和闭源服务器。只要服务器的安装方法是公开可用的（例如，公共注册表上的 npm 包或 Docker 镜像）_或_ 服务器本身是公开可访问的（例如，不受限于私有网络的远程服务器），服务器开发人员就可以将其服务器的元数据发布到注册表。
 
-The MCP Registry **does not** support private servers. Private servers are those that are only accessible to a narrow set of users. For example, servers published on a private network (like `mcp.acme-corp.internal`) or on private package registries (e.g. `npx -y @acme/mcp --registry https://artifactory.acme-corp.internal/npm`). If you want to publish private servers, we recommend that you host your own private MCP registry and add them there.
+MCP 注册表 **不** 支持私有服务器。私有服务器是指仅限少数用户访问的服务器。例如，发布在私有网络（如 `mcp.acme-corp.internal`）或私有包注册表（例如 `npx -y @acme/mcp --registry https://artifactory.acme-corp.internal/npm`）上的服务器。如果您想发布私有服务器，我们建议您托管自己的私有 MCP 注册表并将它们添加在那里。
 
-### Relationship with Downstream Aggregators
+### 与下游聚合器的关系
 
-The MCP Registry is intended to be consumed primarily by downstream aggregators, such as MCP server marketplaces.
+MCP 注册表主要供下游聚合器（例如 MCP 服务器市场）使用。
 
-The metadata hosted by the MCP Registry is deliberately unopinionated. Downstream aggregators can provide curation or additional metadata such as community ratings.
+MCP 注册表托管的元数据特意保持中立。下游聚合器可以提供策展或额外的元数据，例如社区评级。
 
-We expect that downstream aggregators will use the MCP Registry API to pull new metadata on a regular but infrequent basis (for example, once per hour). See the [MCP Registry Aggregators guide](./registry-aggregators) for more information.
+我们预计下游聚合器将使用 MCP Registry API 定期但不频繁地拉取新元数据（例如，每小时一次）。有关更多信息，请参阅 [MCP 注册表聚合器指南](./registry-aggregators)。
 
-### Relationship with Other MCP Registries
+### 与其他 MCP 注册表的关系
 
-In addition to a public REST API, the MCP Registry defines an [OpenAPI spec](https://github.com/modelcontextprotocol/registry/blob/main/docs/reference/api/openapi.yaml) that other MCP registries can implement in order to provide a standardized interface for MCP host applications.
+除了公共 REST API 外，MCP 注册表还定义了一个 [OpenAPI 规范](https://github.com/modelcontextprotocol/registry/blob/main/docs/reference/api/openapi.yaml)，其他 MCP 注册表可以实现该规范，以便为 MCP 主机应用程序提供标准化接口。
 
-We expect that many downstream aggregators will implement this interface. Private MCP registries can implement it as well to benefit from existing host application support.
+我们预计许多下游聚合器将实现此接口。私有 MCP 注册表也可以实现它，以受益于现有的主机应用程序支持。
 
-Note that the official MCP Registry codebase is **not** designed for self-hosting, and the registry maintainers cannot provide support for this use case. If you choose to fork it, you would need to maintain and operate it independently.
+请注意，官方 MCP 注册表代码库 **不** 设计用于自托管，注册表维护者无法为此用例提供支持。如果您选择分叉它，您需要独立维护和运营它。
 
-### Relationship with MCP Host Applications
+### 与 MCP 主机应用程序的关系
 
-The MCP Registry is not intended to be directly consumed by host applications. Instead, host applications should consume other MCP registries, such as downstream marketplaces, via a REST API conforming to the official MCP Registry's OpenAPI spec.
+MCP 注册表不打算由主机应用程序直接消费。相反，主机应用程序应通过符合官方 MCP 注册表 OpenAPI 规范的 REST API 消费其他 MCP 注册表，例如下游市场。
 
-## Trust and Security
+## 信任与安全
 
-### Verifying Server Authenticity
+### 验证服务器真实性
 
-The MCP Registry uses namespace authentication to ensure that servers come from their claimed sources. Server names follow a reverse DNS format (like `io.github.username/server` or `com.example/server`) that ties them to verified GitHub accounts or domains.
+MCP 注册表使用命名空间身份验证来确保服务器来自其声称的来源。服务器名称遵循反向 DNS 格式（如 `io.github.username/server` 或 `com.example/server`），将它们与经过验证的 GitHub 帐户或域绑定。
 
-This namespace system ensures that only the legitimate owner of a GitHub account or domain can publish servers under that namespace, providing trust and accountability in the ecosystem. For details on authentication methods, see the [Authentication guide](./authentication).
+此命名空间系统确保只有 GitHub 帐户或域的合法所有者才能在该命名空间下发布服务器，从而在生态系统中提供信任和问责制。有关身份验证方法的详细信息，请参阅 [身份验证指南](./authentication)。
 
-### Security Scanning
+### 安全扫描
 
-The MCP Registry delegates security scanning to:
+MCP 注册表将安全扫描委托给：
 
-- **Underlying package registries** — npm, PyPI, Docker Hub, and other package registries perform their own security scanning and vulnerability detection.
-- **Downstream aggregators** — MCP Registry aggregators and marketplaces can implement additional security checks, ratings, or curation.
+- **底层包注册表** — npm、PyPI、Docker Hub 和其他包注册表执行自己的安全扫描和漏洞检测。
+- **下游聚合器** — MCP 注册表聚合器和市场可以实现额外的安全检查、评级或策展。
 
-The MCP Registry focuses on namespace authentication and metadata hosting, while relying on the broader ecosystem for security scanning of actual server code.
+MCP 注册表专注于命名空间身份验证和元数据托管，同时依靠更广泛的生态系统进行实际服务器代码的安全扫描。
 
-### Spam Prevention
+### 垃圾邮件预防
 
-The MCP Registry uses multiple mechanisms to prevent spam:
+MCP 注册表使用多种机制来防止垃圾邮件：
 
-- **Namespace authentication requirements** — Publishers must verify ownership of their namespace through GitHub, DNS, or HTTP challenges, preventing arbitrary spam submissions.
-- **Character limits and validation** — Free-form fields have strict character limits and regex validation to prevent abuse.
-- **Manual takedown** — The registry maintainers can manually remove spam or malicious servers. See the [Moderation Policy](./moderation-policy) for details on what content is removed.
+- **命名空间身份验证要求** — 发布者必须通过 GitHub、DNS 或 HTTP 挑战验证其命名空间的所有权，防止任意垃圾邮件提交。
+- **字符限制和验证** — 自由格式字段具有严格的字符限制和正则表达式验证，以防止滥用。
+- **手动下架** — 注册表维护者可以手动删除垃圾邮件或恶意服务器。有关删除哪些内容的详细信息，请参阅 [审核政策](./moderation-policy)。
 
-Future spam prevention measures under consideration include stricter rate limiting, AI-based spam detection, and community reporting capabilities.
+未来考虑采取的垃圾邮件预防措施包括更严格的速率限制、基于 AI 的垃圾邮件检测和社区报告功能。

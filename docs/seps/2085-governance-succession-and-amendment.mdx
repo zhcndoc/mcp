@@ -1,106 +1,106 @@
 ---
-title: "SEP-2085: Governance Succession and Amendment Procedures"
-sidebarTitle: "SEP-2085: Governance Succession and Amendment Pro…"
-description: "Governance Succession and Amendment Procedures"
+title: "SEP-2085: 治理继任与修订流程"
+sidebarTitle: "SEP-2085: 治理继任与修订流…"
+description: "治理继任与修订流程"
 ---
 
 <div className="flex items-center gap-2 mb-4">
   <Badge color="green" shape="pill">
-    Final
+    最终版
   </Badge>
   <Badge color="gray" shape="pill">
-    Process
+    流程
   </Badge>
 </div>
 
-| Field         | Value                                                                           |
+| 字段           | 值                                                                            |
 | ------------- | ------------------------------------------------------------------------------- |
 | **SEP**       | 2085                                                                            |
-| **Title**     | Governance Succession and Amendment Procedures                                  |
-| **Status**    | Final                                                                           |
-| **Type**      | Process                                                                         |
-| **Created**   | 2025-12-05                                                                      |
-| **Author(s)** | David Soria Parra ([@dsp-ant](https://github.com/dsp-ant))                      |
-| **Sponsor**   | David Soria Parra ([@dsp-ant](https://github.com/dsp-ant))                      |
+| **标题**      | 治理继任与修订流程                                                              |
+| **状态**      | 最终版                                                                          |
+| **类型**      | 流程                                                                            |
+| **创建日期**  | 2025-12-05                                                                      |
+| **作者**      | David Soria Parra ([@dsp-ant](https://github.com/dsp-ant))                      |
+| **发起人**    | David Soria Parra ([@dsp-ant](https://github.com/dsp-ant))                      |
 | **PR**        | [#2085](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2085) |
 
 ---
 
-## Abstract
+## 摘要
 
-This SEP establishes formal procedures for Lead Maintainer succession and governance amendment within the Model Context Protocol project. It defines clear processes for leadership transitions when a Lead Maintainer leaves their role and establishes requirements for proposing and approving changes to the governance structure itself.
+本 SEP 确立了模型上下文协议 (MCP) 项目中首席维护者继任和治理修订的正式流程。它定义了首席维护者离职时的领导层过渡清晰流程，并确立了提议和批准治理结构本身变更的要求。
 
-## Motivation
+## 动机
 
-The current MCP governance structure defines roles and responsibilities but lacks explicit procedures for two critical scenarios:
+当前的 MCP 治理结构定义了角色和职责，但缺乏两种关键场景的明确流程：
 
-1. **Leadership Succession**: The governance document identifies Justin Spahr-Summers and David Soria Parra as Lead Maintainers (BDFLs) but does not specify what happens if one or both leave their roles. Without a defined succession process, an unexpected departure could create uncertainty about project leadership and decision-making authority.
+1. **领导层继任**：治理文档将 Justin Spahr-Summers 和 David Soria Parra 标识为首席维护者 (BDFL)，但未指定如果其中一人或两人离职会发生什么。如果没有定义的继任流程，意外的离职可能会导致项目领导层和决策权的不确定性。
 
-2. **Governance Evolution**: As the MCP project grows and the community evolves, the governance structure may need to adapt. Currently, there is no defined process for how the governance document itself can be amended, which could lead to ad-hoc changes without proper community input or unclear authority for making such changes.
+2. **治理演进**：随着 MCP 项目的增长和社区的演变，治理结构可能需要适应。目前，没有定义治理文档本身如何修订的流程，这可能导致在没有适当社区输入的情况下进行临时变更，或使进行此类变更的权限不明确。
 
-Establishing these procedures now, while the project leadership is stable, ensures continuity and provides clear guidance for future scenarios.
+在项目领导层稳定时建立这些流程，可确保连续性并为未来场景提供清晰指导。
 
-## Specification
+## 规范
 
-The following sections shall be added to the MCP Governance document.
+以下章节应添加到 MCP 治理文档中。
 
-### Succession
+### 继任
 
-If a Lead Maintainer leaves their role for any reason, the succession process begins upon their written notice or, if unable to provide notice, upon a determination by the remaining Lead Maintainer(s) or Core Maintainers that the Lead Maintainer is unable to continue serving.
+如果首席维护者因任何原因离职，继任流程在其书面通知时开始，或者如果无法提供通知，则由剩余的首席维护者或核心维护者确定该首席维护者无法继续任职时开始。
 
-If one or more Lead Maintainer(s) remain, they shall appoint a successor (by majority vote if multiple), and the remaining Lead Maintainer(s) will continue to govern until a successor is appointed.
+如果剩下一名或多名首席维护者，他们应任命继任者（如果有多人则通过多数投票），剩余的首席维护者将继续治理直到任命继任者。
 
-If no Lead Maintainers remain, the Core Maintainers shall appoint a successor by majority vote within 30 days, and the project operates by two-thirds vote of Core Maintainers until a new Lead Maintainer is appointed.
+如果没有首席维护者剩余，核心维护者应在 30 天内通过多数投票任命继任者，项目在任命新首席维护者之前由核心维护者的三分之二投票运作。
 
-### Amendment
+### 修订
 
-Amendments to this governance structure may only be proposed by Lead Maintainers. Any proposed amendment must be approved by a two-thirds (2/3) majority of all Core Maintainers to take effect.
+对此治理结构的修订只能由首席维护者提议。任何提议的修订必须获得所有核心维护者的三分之二 (2/3) 多数批准才能生效。
 
-Amendment proposals shall:
+修订提案应：
 
-1. Be submitted in writing with clear rationale for the proposed change
-2. Include specific language describing the modification to existing governance provisions
-3. Allow for a minimum comment period of five (5) days before voting
-4. Be decided by recorded vote of Core Maintainers
+1. 以书面形式提交，并清楚说明提议变更的理由
+2. 包含描述对现有治理条款修改的具体措辞
+3. 允许至少五 (5) 天的评论期后再进行投票
+4. 由核心维护者通过记录投票决定
 
-## Rationale
+## 理由
 
-### Succession Process Design
+### 继任流程设计
 
-The succession process is designed with several principles in mind:
+继任流程的设计考虑了以下原则：
 
-- **Continuity**: Remaining Lead Maintainers can continue operating and appoint successors without disruption to project governance.
-- **Fallback Authority**: If all Lead Maintainers depart, Core Maintainers have clear authority to select new leadership, preventing a governance vacuum.
-- **Time-Bound Process**: The 30-day requirement ensures succession happens promptly while allowing adequate time for deliberation.
-- **Supermajority Interim Governance**: Two-thirds voting during interregnum periods ensures major decisions have broad support during transitional periods.
+- **连续性**：剩余的首席维护者可以继续运作并任命继任者，而不中断项目治理。
+- **后备权限**：如果所有首席维护者离职，核心维护者拥有选择新领导层的明确权限，防止治理真空。
+- **限时流程**：30 天的要求确保继任迅速发生，同时允许足够的审议时间。
+- **过渡期超级多数治理**：过渡期间的三分之二投票确保重大决策在过渡期间获得广泛支持。
 
-### Amendment Process Design
+### 修订流程设计
 
-The amendment process balances stability with adaptability:
+修订流程平衡了稳定性与适应性：
 
-- **Lead Maintainer Proposal Authority**: Limiting proposal authority to Lead Maintainers prevents governance churn from frequent amendment proposals while ensuring those with deepest project investment can drive necessary changes.
-- **Core Maintainer Approval**: Requiring two-thirds Core Maintainer approval ensures amendments have broad support from those actively governing the project.
-- **Comment Period**: The five-day minimum comment period allows affected parties to review and provide input before voting.
-- **Recorded Votes**: Transparency in voting ensures accountability and provides a historical record of governance decisions.
+- **首席维护者提案权**：将提案权限限制为首席维护者，可防止因频繁的修订提案而导致治理变动，同时确保对项目投入最深的人能够推动必要的变更。
+- **核心维护者批准**：要求三分之二核心维护者批准，确保修订获得积极治理项目人员的广泛支持。
+- **评论期**：至少五天的评论期允许受影响方在投票前审查并提供意见。
+- **记录投票**：投票的透明度确保了问责制，并提供了治理决策的历史记录。
 
-### Alternatives Considered
+### 考虑的替代方案
 
-**Succession by Election**: An open election process was considered but rejected as potentially disruptive and slow during critical transition periods. The current proposal allows for quick succession while maintaining checks through the existing maintainer structure.
+**选举继任**：曾考虑公开选举流程，但被拒绝，因为在关键过渡期间可能具有破坏性且缓慢。当前的提案允许快速继任，同时通过现有的维护者结构保持检查。
 
-**Amendment by Any Maintainer**: Allowing any maintainer to propose amendments was considered but could lead to governance instability. The current approach balances stability with the ability to evolve.
+**任何维护者修订**：曾考虑允许任何维护者提议修订，但这可能导致治理不稳定。当前的方法平衡了稳定性与演进能力。
 
-**Longer Comment Periods**: Longer comment periods (e.g., 30 days) were considered but deemed excessive for a project that already has regular bi-weekly Core Maintainer meetings. Five days allows for at least one meeting cycle while enabling timely decisions.
+**更长的评论期**：曾考虑更长的评论期（例如 30 天），但对于已经拥有定期双周核心维护者会议的项目来说被认为过长。五天允许至少一个会议周期，同时能够及时决策。
 
-## Backward Compatibility
+## 向后兼容性
 
-This SEP adds new procedures without modifying existing governance structures. No backward compatibility concerns exist.
+本 SEP 添加了新流程而未修改现有治理结构。不存在向后兼容性问题。
 
-## Security Implications
+## 安全影响
 
-This SEP has no direct security implications. However, clear succession procedures indirectly support security by ensuring continuous responsible stewardship of the project, including security-related decisions.
+本 SEP 没有直接的安全影响。然而，清晰的继任流程通过确保项目的持续负责任管理（包括安全相关决策）间接支持安全。
 
-## Reference Implementation
+## 参考实现
 
-Upon acceptance, this SEP will be implemented by adding the Succession and Amendment sections to `docs/community/governance.mdx`. The new sections will be inserted after the "Lead Maintainers (BDFL)" section and before the "Decision Process" section.
+一旦被接受，本 SEP 将通过把继任和修订章节添加到 `docs/community/governance.mdx` 来实现。新章节将插入到"首席维护者 (BDFL)"章节之后和"决策流程"章节之前。
 
-A draft pull request implementing these changes will be linked here once available.
+一旦可用，实施这些变更的草案拉取请求将链接在此处。

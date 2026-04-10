@@ -1,62 +1,62 @@
 ---
-title: Example Servers
-description: "A list of example servers and implementations"
+title: 示例服务器
+description: "示例服务器和实现列表"
 ---
 
-This page showcases various Model Context Protocol (MCP) servers that demonstrate the protocol's capabilities and versatility. These servers enable Large Language Models (LLMs) to securely access tools and data sources.
+本页面展示了各种模型上下文协议 (MCP) 服务器，展示了该协议的功能和多功能性。这些服务器使大型语言模型 (LLM) 能够安全地访问工具和数据源。
 
-## Reference implementations
+## 参考实现
 
-These official reference servers demonstrate core MCP features and SDK usage:
+这些官方参考服务器展示了核心 MCP 功能和 SDK 用法：
 
-### Current reference servers
+### 当前参考服务器
 
-- **[Everything](https://github.com/modelcontextprotocol/servers/tree/main/src/everything)** - Reference / test server with prompts, resources, and tools
-- **[Fetch](https://github.com/modelcontextprotocol/servers/tree/main/src/fetch)** - Web content fetching and conversion for efficient LLM usage
-- **[Filesystem](https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem)** - Secure file operations with configurable access controls
-- **[Git](https://github.com/modelcontextprotocol/servers/tree/main/src/git)** - Tools to read, search, and manipulate Git repositories
-- **[Memory](https://github.com/modelcontextprotocol/servers/tree/main/src/memory)** - Knowledge graph-based persistent memory system
-- **[Sequential Thinking](https://github.com/modelcontextprotocol/servers/tree/main/src/sequentialthinking)** - Dynamic and reflective problem-solving through thought sequences
-- **[Time](https://github.com/modelcontextprotocol/servers/tree/main/src/time)** - Time and timezone conversion capabilities
+- **[Everything](https://github.com/modelcontextprotocol/servers/tree/main/src/everything)** - 带有提示、资源和工具的参考/测试服务器
+- **[Fetch](https://github.com/modelcontextprotocol/servers/tree/main/src/fetch)** - 用于高效 LLM 使用的 Web 内容获取和转换
+- **[Filesystem](https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem)** - 具有可配置访问控制的安全文件操作
+- **[Git](https://github.com/modelcontextprotocol/servers/tree/main/src/git)** - 用于读取、搜索和操作 Git 仓库的工具
+- **[Memory](https://github.com/modelcontextprotocol/servers/tree/main/src/memory)** - 基于知识图谱的持久记忆系统
+- **[Sequential Thinking](https://github.com/modelcontextprotocol/servers/tree/main/src/sequentialthinking)** - 通过思维序列进行动态和反思性问题解决
+- **[Time](https://github.com/modelcontextprotocol/servers/tree/main/src/time)** - 时间和时区转换功能
 
-### Additional example servers (archived)
+### 其他示例服务器（已归档）
 
-Visit the [servers-archived repository](https://github.com/modelcontextprotocol/servers-archived) to get access to archived example servers that are no longer actively maintained.
+访问 [servers-archived 仓库](https://github.com/modelcontextprotocol/servers-archived) 以获取不再积极维护的已归档示例服务器。
 
-They are provided for historical reference only.
+它们仅提供用于历史参考。
 
-## Official integrations
+## 官方集成
 
-Visit the [MCP Servers Repository (Official Integrations section)](https://github.com/modelcontextprotocol/servers?tab=readme-ov-file#%EF%B8%8F-official-integrations) for a list of MCP servers maintained by companies for their platforms.
+访问 [MCP 服务器仓库（官方集成部分）](https://github.com/modelcontextprotocol/servers?tab=readme-ov-file#%EF%B8%8F-official-integrations) 查看由公司为其平台维护的 MCP 服务器列表。
 
-## Community implementations
+## 社区实现
 
-Visit the [MCP Servers Repository (Community section)](https://github.com/modelcontextprotocol/servers?tab=readme-ov-file#-community-servers) for a list of MCP servers maintained by community members.
+访问 [MCP 服务器仓库（社区部分）](https://github.com/modelcontextprotocol/servers?tab=readme-ov-file#-community-servers) 查看由社区成员维护的 MCP 服务器列表。
 
-## Getting started
+## 快速开始
 
-### Using reference servers
+### 使用参考服务器
 
-TypeScript-based servers can be used directly with `npx`:
+基于 TypeScript 的服务器可以直接使用 `npx` 运行：
 
 ```bash
 npx -y @modelcontextprotocol/server-memory
 ```
 
-Python-based servers can be used with `uvx` (recommended) or `pip`:
+基于 Python 的服务器可以使用 `uvx`（推荐）或 `pip` 运行：
 
 ```bash
-# Using uvx
+# 使用 uvx
 uvx mcp-server-git
 
-# Using pip
+# 使用 pip
 pip install mcp-server-git
 python -m mcp_server_git
 ```
 
-### Configuring with Claude
+### 与 Claude 配置
 
-To use an MCP server with Claude, add it to your configuration:
+要在 Claude 中使用 MCP 服务器，请将其添加到您的配置中：
 
 ```json
 {
@@ -84,8 +84,8 @@ To use an MCP server with Claude, add it to your configuration:
 }
 ```
 
-## Additional resources
+## 其他资源
 
-Visit the [MCP Servers Repository (Resources section)](https://github.com/modelcontextprotocol/servers?tab=readme-ov-file#-resources) for a collection of other resources and projects related to MCP.
+访问 [MCP 服务器仓库（资源部分）](https://github.com/modelcontextprotocol/servers?tab=readme-ov-file#-resources) 查看与 MCP 相关的其他资源和项目集合。
 
-Visit our [GitHub Discussions](https://github.com/orgs/modelcontextprotocol/discussions) to engage with the MCP community.
+访问我们的 [GitHub 讨论区](https://github.com/orgs/modelcontextprotocol/discussions) 与 MCP 社区互动。

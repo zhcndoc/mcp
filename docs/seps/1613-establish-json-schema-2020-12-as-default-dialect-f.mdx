@@ -1,54 +1,54 @@
 ---
-title: "SEP-1613: Establish JSON Schema 2020-12 as Default Dialect for MCP"
-sidebarTitle: "SEP-1613: Establish JSON Schema 2020-12 as Defaul…"
-description: "Establish JSON Schema 2020-12 as Default Dialect for MCP"
+title: "SEP-1613: 确立 JSON Schema 2020-12 为 MCP 默认方言"
+sidebarTitle: "SEP-1613: 确立 JSON Schema 2020-12 为默认…"
+description: "确立 JSON Schema 2020-12 为 MCP 默认方言"
 ---
 
 <div className="flex items-center gap-2 mb-4">
   <Badge color="green" shape="pill">
-    Final
+    最终版
   </Badge>
   <Badge color="gray" shape="pill">
-    Standards Track
+    标准轨道
   </Badge>
 </div>
 
-| Field         | Value                                                                           |
+| 字段          | 值                                                                            |
 | ------------- | ------------------------------------------------------------------------------- |
 | **SEP**       | 1613                                                                            |
-| **Title**     | Establish JSON Schema 2020-12 as Default Dialect for MCP                        |
-| **Status**    | Final                                                                           |
-| **Type**      | Standards Track                                                                 |
-| **Created**   | 2025-10-06                                                                      |
-| **Author(s)** | Ola Hungerford                                                                  |
-| **Sponsor**   | None                                                                            |
+| **标题**      | 确立 JSON Schema 2020-12 为 MCP 默认方言                                        |
+| **状态**      | 最终版                                                                          |
+| **类型**      | 标准轨道                                                                        |
+| **创建日期**  | 2025-10-06                                                                      |
+| **作者**      | Ola Hungerford                                                                  |
+| **赞助者**    | 无                                                                              |
 | **PR**        | [#1613](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1613) |
 
 ---
 
-## Abstract
+## 摘要
 
-This SEP establishes JSON Schema 2020-12 as the default dialect for embedded schemas within MCP messages (tool `inputSchema`/`outputSchema` and elicitation `requestedSchema` fields). Schemas may explicitly declare alternative dialects via the `$schema` field. This resolves ambiguity that has caused compatibility issues between implementations.
+本 SEP 确立 JSON Schema 2020-12 为 MCP 消息中嵌入式模式（工具 `inputSchema`/`outputSchema` 和需求收集 `requestedSchema` 字段）的默认方言。模式可以通过 `$schema` 字段显式声明替代方言。这解决了导致实现之间兼容性问题的歧义。
 
-## Motivation
+## 动机
 
-The MCP specification does not explicitly state which JSON Schema version to use for embedded schemas. This has caused:
+MCP 规范未明确说明嵌入式模式应使用哪个 JSON Schema 版本。这导致了：
 
-- Validation failures between clients and servers assuming different versions
-- Implementation divergence across SDK ecosystems
-- Developer uncertainty requiring arbitrary version choices
+- 客户端和服务器假设不同版本之间的验证失败
+- SDK 生态系统之间的实现分歧
+- 开发者不确定性，需要进行任意版本选择
 
-Community discussion (GitHub Discussion #366, PR #655) revealed that implementations were split between draft-07 and 2020-12, with multiple maintainers and community members expressing strong preference for 2020-12 as the default.
+社区讨论（GitHub Discussion #366, PR #655）显示，实现方案在 draft-07 和 2020-12 之间分裂，多位维护者和社区成员强烈偏好将 2020-12 作为默认值。
 
-## Specification
+## 规范
 
-### 1. Default Dialect
+### 1. 默认方言
 
-Embedded JSON schemas within MCP messages **MUST** conform to [JSON Schema 2020-12](https://json-schema.org/draft/2020-12/schema) when no `$schema` field is present.
+当不存在 `$schema` 字段时，MCP 消息中的嵌入式 JSON 模式**必须**符合 [JSON Schema 2020-12](https://json-schema.org/draft/2020-12/schema)。
 
-### 2. Explicit Dialect Declaration
+### 2. 显式方言声明
 
-Schemas **MAY** include an explicit `$schema` field to declare a different dialect:
+模式**可以**包含显式的 `$schema` 字段以声明不同的方言：
 
 ```json
 {
@@ -60,19 +60,19 @@ Schemas **MAY** include an explicit `$schema` field to declare a different diale
 }
 ```
 
-### 3. Schema Validation Requirements
+### 3. 模式验证要求
 
-- Schemas **MUST** be valid according to their declared or default dialect
-- The `inputSchema` field **MUST NOT** be `null`
+- 模式**必须**根据其声明或默认方言有效
+- `inputSchema` 字段**不得**为 `null`
 
-**For tools with no parameters**, use one of these valid approaches:
+**对于无参数的工具**，使用以下有效方法之一：
 
-- `true` - accepts any input (most permissive)
-- `{}` - equivalent to `true`, accepts any input
-- `{ "type": "object" }` - accepts any object with any properties
-- `{ "type": "object", "additionalProperties": false }` - accepts only empty objects `{}`
+- `true` - 接受任何输入（最宽松）
+- `{}` - 等同于 `true`，接受任何输入
+- `{ "type": "object" }` - 接受具有任何属性的任何对象
+- `{ "type": "object", "additionalProperties": false }` - 仅接受空对象 `{}`
 
-**Example** for a tool with no parameters:
+**示例**：无参数的工具
 
 ```json
 {
@@ -85,107 +85,107 @@ Schemas **MAY** include an explicit `$schema` field to declare a different diale
 }
 ```
 
-### 4. Scope of Application
+### 4. 适用范围
 
-This specification applies to:
+本规范适用于：
 
-- `tools/list` response: `inputSchema` and `outputSchema`
-- `prompts/elicit` request: `requestedSchema`
-- Future MCP features embedding JSON Schema definitions
+- `tools/list` 响应：`inputSchema` 和 `outputSchema`
+- `prompts/elicit` 请求：`requestedSchema`
+- 未来嵌入 JSON Schema 定义的 MCP 功能
 
-### 5. Implementation Requirements
+### 5. 实现要求
 
-**Servers MUST:**
+**服务器必须：**
 
-- Generate schemas conforming to 2020-12 by default
-- Include explicit `$schema` when using non-default dialects
+- 默认生成符合 2020-12 的模式
+- 使用非默认方言时包含显式的 `$schema`
 
-**Clients MUST:**
+**客户端必须：**
 
-- Validate schemas according to declared or default dialect
-- Support at least JSON Schema 2020-12
+- 根据声明或默认方言验证模式
+- 至少支持 JSON Schema 2020-12
 
-## Rationale
+## 理由
 
-### Why 2020-12?
+### 为什么选择 2020-12？
 
-1. **Ecosystem alignment**: Python SDK (via Pydantic) and Go SDK implementations prefer/use 2020-12
-2. **Modern features**: Better validation capabilities and composition support
-3. **Community preference**: Multiple maintainers and community members in PR #655 discussion advocated for 2020-12 over draft-07
-4. **Current standard**: 2020-12 is the stable version as of 2025
+1. **生态系统对齐**：Python SDK（通过 Pydantic）和 Go SDK 实现偏好/使用 2020-12
+2. **现代特性**：更好的验证能力和组合支持
+3. **社区偏好**：PR #655 讨论中的多位维护者和社区成员倡导使用 2020-12 而非 draft-07
+4. **当前标准**：截至 2025 年，2020-12 是稳定版本
 
-### Why allow explicit declaration?
+### 为什么允许显式声明？
 
-- Supports migration paths for existing schemas
-- Provides flexibility without protocol changes
-- Follows JSON Schema best practices
+- 支持现有模式的迁移路径
+- 提供灵活性而无需协议变更
+- 遵循 JSON Schema 最佳实践
 
-### Alternatives considered
+### 考虑的替代方案
 
-- **Draft-07 as default**: Rejected after community feedback; older version with less capability
-- **No default**: Rejected as unnecessarily verbose; adds boilerplate
-- **Multiple equal versions**: Rejected; creates unpredictability and fragmentation
+- **Draft-07 作为默认值**：社区反馈后被拒绝；版本较旧，功能较少
+- **无默认值**：被拒绝，因为不必要的冗长；增加样板代码
+- **多个同等版本**：被拒绝；造成不可预测性和碎片化
 
-## Backward Compatibility
+## 向后兼容性
 
-This is technically a **clarification**, and not a breaking change:
+这在技术上是一个**澄清**，而非破坏性变更：
 
-- Existing schemas without `$schema` default to 2020-12
-- Servers can add explicit `$schema` during transition
-- Basic schemas (type, properties, required) work across versions
+- 没有 `$schema` 的现有模式默认为 2020-12
+- 服务器可以在过渡期间添加显式的 `$schema`
+- 基本模式（type, properties, required）跨版本工作
 
-**Migration may be needed for schemas assuming draft-07 by default:**
+**默认假设使用 draft-07 的模式可能需要迁移：**
 
-- Schemas using `dependencies` (→ `dependentSchemas` + `dependentRequired`)
-- Positional array validation (→ `prefixItems`)
+- 使用 `dependencies` 的模式（→ `dependentSchemas` + `dependentRequired`）
+- 位置数组验证（→ `prefixItems`）
 
-**Migration strategy:** Add explicit `$schema: "http://json-schema.org/draft-07/schema#"` during transition, then update to 2020-12 features.
+**迁移策略：** 在过渡期间添加显式的 `$schema: "http://json-schema.org/draft-07/schema#"`，然后更新为 2020-12 特性。
 
-## Reference Implementation
+## 参考实现
 
-### SDK Implementations
+### SDK 实现
 
-**Python SDK** - Already compatible:
+**Python SDK** - 已兼容：
 
-- Uses Pydantic for schema generation
-- Pydantic defaults to 2020-12 via `.model_json_schema()`
+- 使用 Pydantic 生成模式
+- Pydantic 通过 `.model_json_schema()` 默认为 2020-12
 
-**Go SDK** - Implemented 2020-12:
+**Go SDK** - 已实现 2020-12：
 
-- Explicit 2020-12 implementation completed
-- Confirmed by @samthanawalla in PR #655 discussion
+- 显式 2020-12 实现已完成
+- 由 @samthanawalla 在 PR #655 讨论中确认
 
-**Other SDKs:**
+**其他 SDK：**
 
-- May require updates but based on other examples, there should be straightforward or out-of-the-box options to support this. I can add more examples here or we can create issues to follow up on these after acceptance.
+- 可能需要更新，但基于其他示例，应该有简单或开箱即用的选项来支持此功能。我可以在此添加更多示例，或者我们可以在接受后创建问题进行跟进。
 
-## Security Implications
+## 安全影响
 
-No specific security implications have been identified from establishing 2020-12 as the default dialect. The clarification reduces ambiguity that could lead to validation mismatches between implementations, which is a minor security improvement through increased predictability.
+未发现将 2020-12 确立为默认方言有任何特定的安全影响。该澄清减少了可能导致实现之间验证不匹配的歧义，这是通过增加可预测性带来的轻微安全改进。
 
-Implementations should use well-maintained JSON Schema validator libraries and keep them updated, as with any dependency.
+与任何依赖项一样，实现应使用维护良好的 JSON Schema 验证器库并保持更新。
 
-## Related Work
+## 相关工作
 
-### [SEP-1330: Elicitation Enum Schema Improvements](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1330)
+### [SEP-1330: 需求收集枚举模式改进](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1330)
 
-**SEP-1330** proposes deprecating the non-standard `enumNames` property in favor of JSON Schema 2020-12 compliant patterns. This work is directly enabled by establishing 2020-12 as the default dialect.
+**SEP-1330** 提议弃用非标准的 `enumNames` 属性，转而使用符合 JSON Schema 2020-12 的模式。这项工作直接由确立 2020-12 为默认方言启用。
 
-**Implementation Consideration:**  
-As noted in SEP-1330 discussion, there is some concern about parsing complexity with advanced JSON Schema features like `oneOf` and `anyOf`. However, these features are part of the JSON Schema standard and well-supported by mature validator libraries. Implementations can balance standards compliance with their parsing needs by using well-tested JSON Schema validation libraries.
+**实现考虑：**  
+正如 SEP-1330 讨论中所指出的，对于高级 JSON Schema 特性（如 `oneOf` 和 `anyOf`）的解析复杂性存在一些担忧。然而，这些特性是 JSON Schema 标准的一部分，并由成熟的验证器库良好支持。实现可以通过使用经过良好测试的 JSON Schema 验证库来平衡标准合规性与它们的解析需求。
 
-### [SEP-834: Full JSON Schema 2020-12 Support](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/834)
+### [SEP-834: 完整 JSON Schema 2020-12 支持](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/834)
 
-This SEP establishes the foundation (default dialect) while SEP-834 addresses comprehensive support for 2020-12 features.
+本 SEP 奠定了基础（默认方言），而 SEP-834 解决了对 2020-12 特性的全面支持。
 
-## Open Questions
+## 未决问题
 
-The schema for the spec itself references `draft-07` and the `typescript-json-schema` package we use to generate it only supports draft-07.
+规范本身的模式引用了 `draft-07`，而我们用于生成它的 `typescript-json-schema` 包仅支持 draft-07。
 
-Options:
+选项：
 
-1.  Update schema generation script to patch to 2020-12 after generation (this is what I did in the current PR)
-2.  Switch to a different schema generator that supports 2020-12
-3.  Leave as-is since it doesn't actually conflict with the spec?
+1.  更新模式生成脚本，在生成后修补为 2020-12（这是我在当前 PR 中所做的）
+2.  切换到支持 2020-12 的不同模式生成器
+3.  保持原样，因为它实际上不与规范冲突？
 
-Personally I'd prefer (1) in the short term and then (2) as a follow-up.
+个人而言，我短期内更倾向于 (1)，然后作为后续工作采用 (2)。

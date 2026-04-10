@@ -1,60 +1,57 @@
 ---
-title: "SEP-414: Document OpenTelemetry Trace Context Propagation Conventions"
-sidebarTitle: "SEP-414: Document OpenTelemetry Trace Context Pr…"
-description: "Document OpenTelemetry Trace Context Propagation Conventions"
+title: "SEP-414：记录 OpenTelemetry 跟踪上下文传播约定"
+sidebarTitle: "SEP-414：记录 OpenTelemetry 跟踪上下文传播…"
+description: "记录 OpenTelemetry 跟踪上下文传播约定"
 ---
 
 <div className="flex items-center gap-2 mb-4">
   <Badge color="green" shape="pill">
-    Final
+    最终版
   </Badge>
   <Badge color="gray" shape="pill">
-    Standards Track
+    标准轨道
   </Badge>
 </div>
 
-| Field         | Value                                                                         |
+| 字段          | 值                                                                            |
 | ------------- | ----------------------------------------------------------------------------- |
 | **SEP**       | 414                                                                           |
-| **Title**     | Document OpenTelemetry Trace Context Propagation Conventions                  |
-| **Status**    | Final                                                                         |
-| **Type**      | Standards Track                                                               |
-| **Created**   | 2025-04-25                                                                    |
-| **Author(s)** | Adrian Cole ([@codefromthecrypt](https://github.com/codefromthecrypt))        |
-| **Sponsor**   | Marcelo Trylesinski ([@Kludex](https://github.com/Kludex))                    |
+| **标题**      | 记录 OpenTelemetry 跟踪上下文传播约定                                         |
+| **状态**      | 最终版                                                                        |
+| **类型**      | 标准轨道                                                                      |
+| **创建日期**  | 2025-04-25                                                                    |
+| **作者**      | Adrian Cole ([@codefromthecrypt](https://github.com/codefromthecrypt))        |
+| **发起人**    | Marcelo Trylesinski ([@Kludex](https://github.com/Kludex))                    |
 | **PR**        | [#414](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/414) |
 
 ---
 
-## Abstract
+## 摘要
 
-This SEP documents conventions for OpenTelemetry (OTel) trace context propagation in MCP.
+本 SEP 记录了 MCP 中 OpenTelemetry (OTel) 跟踪上下文传播的约定。
 
-[OTel semantic conventions for MCP](https://github.com/open-telemetry/semantic-conventions/blob/e126ea9105b15912ccd80deab98929025189b696/docs/gen-ai/mcp.md#context-propagation)
-specify using `_meta` as the carrier for W3C Trace Context keys. This is already in practice in the
-C# SDK and other implementations.
+[MCP 的 OTel 语义约定](https://github.com/open-telemetry/semantic-conventions/blob/e126ea9105b15912ccd80deab98929025189b696/docs/gen-ai/mcp.md#context-propagation)
+指定使用 `_meta` 作为 W3C 跟踪上下文键的载体。这已经在 C# SDK 和其他实现中实践。
 
-This specification documents an exception to the DNS prefixing convention for keys in `_meta`.
-This enables interoperability across existing and new implementations and serves as a foundation
-for related SEPs (such as [SEP-2028](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2028)).
+本规范记录了 `_meta` 中键的 DNS 前缀约定的一个例外。
+这使得现有和新实现之间能够互操作，并为相关的 SEP（例如 [SEP-2028](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2028)）奠定基础。
 
-## Specification
+## 规范
 
-This SEP adds documentation to the MCP specification, noting:
+本 SEP 向 MCP 规范添加了文档，注明：
 
-1. When OTel trace context is propagated via `_meta`, the keys `traceparent`, `tracestate`, and
-   `baggage` follow [W3C Trace Context](https://www.w3.org/TR/trace-context/) and
-   [W3C Baggage](https://www.w3.org/TR/baggage/) value formats.
+1. 当 OTel 跟踪上下文通过 `_meta` 传播时，键 `traceparent`、`tracestate` 和
+   `baggage` 遵循 [W3C 跟踪上下文](https://www.w3.org/TR/trace-context/) 和
+   [W3C Baggage](https://www.w3.org/TR/baggage/) 值格式。
 
-2. A non-normative example showing trace context in `_meta`.
+2. 一个展示 `_meta` 中跟踪上下文的非规范性示例。
 
-3. A note clarifying why this an exception to DNS prefixing keys in `_meta`: to remain
-   compatible with existing implementations and the OpenTelemetry semantic conventions.
+3. 一条说明，澄清为何这是 `_meta` 中 DNS 前缀键的例外：为了与现有实现和 OpenTelemetry 语义约定保持兼容。
 
-See [agentclientprotocol/agent-client-protocol#297](https://github.com/agentclientprotocol/agent-client-protocol/pull/297)
-for equivalent documentation changes in ACP.
+参见 [agentclientprotocol/agent-client-protocol#297](https://github.com/agentclientprotocol/agent-client-protocol/pull/297)
+了解 ACP 中的等效文档更改。
 
-### Non-normative example
+### 非规范性示例
 
 ```json
 {
@@ -73,43 +70,35 @@ for equivalent documentation changes in ACP.
 }
 ```
 
-## Rationale
+## 理由
 
-### Why document this?
+### 为什么要记录这个？
 
-This is currently documented elsewhere, but not as an MCP specification. Doing so ensures that
-SEPs depending on this pattern can complete, as well as other SDKs in and outside the MCP org
-can as well, such as [Logfire](https://github.com/pydantic/logfire/blob/09232402fd7e268c667db59d1e9f890ed30f7850/logfire/_internal/integrations/mcp.py#L149-L162) and [ToolHive](https://github.com/stacklok/toolhive/issues/3399).
+目前这在其他地方有记录，但不是作为 MCP 规范。这样做可以确保依赖此模式的 SEP 能够完成，以及 MCP 组织内外的其他 SDK 也能完成，例如 [Logfire](https://github.com/pydantic/logfire/blob/09232402fd7e268c667db59d1e9f890ed30f7850/logfire/_internal/integrations/mcp.py#L149-L162) 和 [ToolHive](https://github.com/stacklok/toolhive/issues/3399)。
 
-If we don't document this shared concern, differing interpretations could materialize, such
-as namespacing traceparent like `io.modelcontextprotocol.traceparent`, which will break traces
-and log correlation.
+如果我们不记录这个共同关注点，可能会出现不同的解释，例如将 traceparent 命名空间化为 `io.modelcontextprotocol.traceparent`，这将破坏跟踪和日志关联。
 
-### Related SEPs
+### 相关的 SEP
 
-- [SEP-1788](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1788) - reserved
-  keys in `_meta`; should be updated with `traceparent`, `tracestate`, and `baggage` when this
-  SEP is implemented
-- [SEP-2028](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2028) - builds on
-  this SEP for forwarding `_meta` values to HTTP headers
+- [SEP-1788](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1788) - `_meta` 中的保留键；当此 SEP 实施时，应使用 `traceparent`、`tracestate` 和 `baggage` 进行更新
+- [SEP-2028](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2028) - 在此 SEP 基础上构建，用于将 `_meta` 值转发到 HTTP 头
 
-## Backward Compatibility
+## 向后兼容性
 
-This SEP documents existing conventions and is backward compatible.
+本 SEP 记录了现有约定，并且是向后兼容的。
 
-## Security Implications
+## 安全影响
 
-Trace context in `_meta` may include correlation IDs. Implementations should follow existing
-data-handling guidance appropriate to their environment.
+`_meta` 中的跟踪上下文可能包含关联 ID。实现应遵循适用于其环境的现有数据处理指南。
 
-## Reference Implementation
+## 参考实现
 
-Existing implementations using this pattern:
+使用此模式的现有实现：
 
-- [C# SDK instrumentation](https://github.com/modelcontextprotocol/csharp-sdk/blob/main/src/ModelContextProtocol.Core/Diagnostics.cs)
-- [Python SDK instrumentation](https://github.com/modelcontextprotocol/python-sdk/pull/1693)
-- [OpenInference MCP instrumentation (Python)](https://github.com/Arize-ai/openinference/tree/main/python/instrumentation/openinference-instrumentation-mcp)
-- [OpenInference MCP instrumentation (TypeScript)](https://github.com/Arize-ai/openinference/tree/main/js/packages/openinference-instrumentation-mcp)
+- [C# SDK 插桩](https://github.com/modelcontextprotocol/csharp-sdk/blob/main/src/ModelContextProtocol.Core/Diagnostics.cs)
+- [Python SDK 插桩](https://github.com/modelcontextprotocol/python-sdk/pull/1693)
+- [OpenInference MCP 插桩 (Python)](https://github.com/Arize-ai/openinference/tree/main/python/instrumentation/openinference-instrumentation-mcp)
+- [OpenInference MCP 插桩 (TypeScript)](https://github.com/Arize-ai/openinference/tree/main/js/packages/openinference-instrumentation-mcp)
 - [Envoy AI Gateway](https://github.com/envoyproxy/ai-gateway/blob/6331b54aef81dd6c8d3d184acc4e2cb8167cea2a/internal/tracing/tracingapi/mcp.go)
 - [Logfire](https://github.com/pydantic/logfire/blob/09232402fd7e268c667db59d1e9f890ed30f7850/logfire/_internal/integrations/mcp.py#L149-L162)
 - [ToolHive](https://github.com/stacklok/toolhive/issues/3399)

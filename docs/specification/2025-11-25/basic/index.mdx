@@ -1,36 +1,34 @@
 ---
-title: Overview
+title: 概述
 ---
 
 <div id="enable-section-numbers" />
 
-The Model Context Protocol consists of several key components that work together:
+模型上下文协议（Model Context Protocol）由几个关键组件组成，它们协同工作：
 
-- **Base Protocol**: Core JSON-RPC message types
-- **Lifecycle Management**: Connection initialization, capability negotiation, and
-  session control
-- **Authorization**: Authentication and authorization framework for HTTP-based transports
-- **Server Features**: Resources, prompts, and tools exposed by servers
-- **Client Features**: Sampling and root directory lists provided by clients
-- **Utilities**: Cross-cutting concerns like logging and argument completion
+- **基础协议**：核心 JSON-RPC 消息类型
+- **生命周期管理**：连接初始化、能力协商和
+  会话控制
+- **授权**：基于 HTTP 的传输的认证和授权框架
+- **服务器功能**：服务器暴露的资源、提示词和工具
+- **客户端功能**：客户端提供的采样和根目录列表
+- **工具实用程序**：横切关注点，如日志记录和参数补全
 
-All implementations **MUST** support the base protocol and lifecycle management
-components. Other components **MAY** be implemented based on the specific needs of the
-application.
+所有实现 **必须** 支持基础协议和生命周期管理
+组件。其他组件 **可以** 根据应用程序的具体需求进行实现。
 
-These protocol layers establish clear separation of concerns while enabling rich
-interactions between clients and servers. The modular design allows implementations to
-support exactly the features they need.
+这些协议层建立了清晰的关注点分离，同时支持客户端和服务器之间丰富的
+交互。模块化设计允许实现仅支持它们确切需要的功能。
 
-## Messages
+## 消息
 
-All messages between MCP clients and servers **MUST** follow the
-[JSON-RPC 2.0](https://www.jsonrpc.org/specification) specification. The protocol defines
-these types of messages:
+MCP 客户端和服务器之间的所有消息 **必须** 遵循
+[JSON-RPC 2.0](https://www.jsonrpc.org/specification) 规范。协议定义了
+这些类型的消息：
 
-### Requests
+### 请求
 
-[Requests](/specification/2025-11-25/schema#jsonrpcrequest) are sent from the client to the server or vice versa, to initiate an operation.
+[请求](/specification/2025-11-25/schema#jsonrpcrequest) 由客户端发送给服务器，反之亦然，以启动操作。
 
 ```typescript
 {
@@ -43,18 +41,17 @@ these types of messages:
 }
 ```
 
-- Requests **MUST** include a string or integer ID.
-- Unlike base JSON-RPC, the ID **MUST NOT** be `null`.
-- The request ID **MUST NOT** have been previously used by the requestor within the same
-  session.
+- 请求 **必须** 包含字符串或整数 ID。
+- 与基础 JSON-RPC 不同，ID **不得** 为 `null`。
+- 请求 ID **不得** 在同一会话中被请求者先前使用过。
 
-### Responses
+### 响应
 
-Responses are sent in reply to requests, containing either the result or error of the operation.
+响应作为对请求的回复发送，包含操作的结果或错误。
 
-#### Result Responses
+#### 结果响应
 
-[Result responses](/specification/2025-11-25/schema#jsonrpcresultresponse) are sent when the operation completes successfully.
+[结果响应](/specification/2025-11-25/schema#jsonrpcresultresponse) 在操作成功完成时发送。
 
 ```typescript
 {
@@ -66,13 +63,13 @@ Responses are sent in reply to requests, containing either the result or error o
 }
 ```
 
-- Result responses **MUST** include the same ID as the request they correspond to.
-- Result responses **MUST** include a `result` field.
-- The `result` **MAY** follow any JSON object structure.
+- 结果响应 **必须** 包含与其对应的请求相同的 ID。
+- 结果响应 **必须** 包含 `result` 字段。
+- `result` **可以** 遵循任何 JSON 对象结构。
 
-#### Error Responses
+#### 错误响应
 
-[Error responses](/specification/2025-11-25/schema#jsonrpcerrorresponse) are sent when the operation fails or encounters an error.
+[错误响应](/specification/2025-11-25/schema#jsonrpcerrorresponse) 在操作失败或遇到错误时发送。
 
 ```typescript
 {
@@ -86,14 +83,14 @@ Responses are sent in reply to requests, containing either the result or error o
 }
 ```
 
-- Error responses **MUST** include the same ID as the request they correspond to (except in error cases where the ID could not be read due a malformed request).
-- Error responses **MUST** include an `error` field with a `code` and `message`.
-- Error codes **MUST** be integers.
+- 错误响应 **必须** 包含与其对应的请求相同的 ID（除非在因请求格式错误而无法读取 ID 的错误情况下）。
+- 错误响应 **必须** 包含带有 `code` 和 `message` 的 `error` 字段。
+- 错误代码 **必须** 为整数。
 
-### Notifications
+### 通知
 
-[Notifications](/specification/2025-11-25/schema#jsonrpcnotification) are sent from the client to the server or vice versa, as a one-way message.
-The receiver **MUST NOT** send a response.
+[通知](/specification/2025-11-25/schema#jsonrpcnotification) 由客户端发送给服务器，反之亦然，作为单向消息。
+接收者 **不得** 发送响应。
 
 ```typescript
 {
@@ -105,50 +102,49 @@ The receiver **MUST NOT** send a response.
 }
 ```
 
-- Notifications **MUST NOT** include an ID.
+- 通知 **不得** 包含 ID。
 
-## Auth
+## 授权
 
-MCP provides an [Authorization](/specification/2025-11-25/basic/authorization) framework for use with HTTP.
-Implementations using an HTTP-based transport **SHOULD** conform to this specification,
-whereas implementations using STDIO transport **SHOULD NOT** follow this specification,
-and instead retrieve credentials from the environment.
+MCP 提供了一个用于 HTTP 的 [授权](/specification/2025-11-25/basic/authorization) 框架。
+使用基于 HTTP 的传输的实现 **应该** 符合此规范，
+而使用 STDIO 传输的实现 **不应该** 遵循此规范，
+而是从环境中检索凭证。
 
-Additionally, clients and servers **MAY** negotiate their own custom authentication and
-authorization strategies.
+此外，客户端和服务器 **可以** 协商它们自己的自定义认证和
+授权策略。
 
-For further discussions and contributions to the evolution of MCP's auth mechanisms, join
-us in
+关于进一步讨论和贡献 MCP 认证机制的演进，请加入
 [GitHub Discussions](https://github.com/modelcontextprotocol/specification/discussions)
-to help shape the future of the protocol!
+以帮助塑造协议的未来！
 
-## Schema
+## 架构
 
-The full specification of the protocol is defined as a
-[TypeScript schema](https://github.com/modelcontextprotocol/specification/blob/main/schema/2025-11-25/schema.ts).
-This is the source of truth for all protocol messages and structures.
+协议的完整规范定义为
+[TypeScript 架构](https://github.com/modelcontextprotocol/specification/blob/main/schema/2025-11-25/schema.ts)。
+这是所有协议消息和结构的事实来源。
 
-There is also a
-[JSON Schema](https://github.com/modelcontextprotocol/specification/blob/main/schema/2025-11-25/schema.json),
-which is automatically generated from the TypeScript source of truth, for use with
-various automated tooling.
+还有一个
+[JSON Schema](https://github.com/modelcontextprotocol/specification/blob/main/schema/2025-11-25/schema.json)，
+它是从 TypeScript 事实来源自动生成的，用于
+各种自动化工具。
 
-## JSON Schema Usage
+## JSON Schema 使用
 
-The Model Context Protocol uses JSON Schema for validation throughout the protocol. This section clarifies how JSON Schema should be used within MCP messages.
+模型上下文协议在整个协议中使用 JSON Schema 进行验证。本节阐明了如何在 MCP 消息中使用 JSON Schema。
 
-### Schema Dialect
+### 架构方言
 
-MCP supports JSON Schema with the following rules:
+MCP 支持带有以下规则的 JSON Schema：
 
-1. **Default dialect**: When a schema does not include a `$schema` field, it defaults to [JSON Schema 2020-12](https://json-schema.org/draft/2020-12/schema)
-1. **Explicit dialect**: Schemas MAY include a `$schema` field to specify a different dialect
-1. **Supported dialects**: Implementations MUST support at least 2020-12 and SHOULD document which additional dialects they support
-1. **Recommendation**: Implementors are RECOMMENDED to use JSON Schema 2020-12.
+1. **默认方言**：当架构不包含 `$schema` 字段时，默认为 [JSON Schema 2020-12](https://json-schema.org/draft/2020-12/schema)
+1. **显式方言**：架构 **可以** 包含 `$schema` 字段以指定不同的方言
+1. **支持的方言**：实现 **必须** 至少支持 2020-12，并且 **应该** 记录它们支持哪些附加方言
+1. **推荐**：实现者 **推荐** 使用 JSON Schema 2020-12。
 
-### Example Usage
+### 使用示例
 
-#### Default dialect (2020-12):
+#### 默认方言 (2020-12)：
 
 ```json
 {
@@ -161,7 +157,7 @@ MCP supports JSON Schema with the following rules:
 }
 ```
 
-#### Explicit dialect (draft-07):
+#### 显式方言 (draft-07)：
 
 ```json
 {
@@ -175,93 +171,93 @@ MCP supports JSON Schema with the following rules:
 }
 ```
 
-### Implementation Requirements
+### 实现要求
 
-- Clients and servers **MUST** support JSON Schema 2020-12 for schemas without an explicit `$schema` field
-- Clients and servers **MUST** validate schemas according to their declared or default dialect. They **MUST** handle unsupported dialects gracefully by returning an appropriate error indicating the dialect is not supported.
-- Clients and servers **SHOULD** document which schema dialects they support
+- 对于没有显式 `$schema` 字段的架构，客户端和服务器 **必须** 支持 JSON Schema 2020-12
+- 客户端和服务器 **必须** 根据其声明或默认的方言验证架构。它们 **必须** 通过返回适当的错误指示不支持该方言来优雅地处理不支持的方言。
+- 客户端和服务器 **应该** 记录它们支持的架构方言
 
-### Schema Validation
+### 架构验证
 
-- Schemas **MUST** be valid according to their declared or default dialect
+- 架构 **必须** 根据其声明或默认的方言有效
 
-## General fields
+## 通用字段
 
 ### `_meta`
 
-The `_meta` property/parameter is reserved by MCP to allow clients and servers
-to attach additional metadata to their interactions.
+`_meta` 属性/参数由 MCP 保留，允许客户端和服务器
+在其交互中附加额外的元数据。
 
-Certain key names are reserved by MCP for protocol-level metadata, as specified below;
-implementations MUST NOT make assumptions about values at these keys.
+某些键名由 MCP 保留用于协议级元数据，如下所述；
+实现 **不得** 对这些键处的值做出假设。
 
-Additionally, definitions in the [schema](https://github.com/modelcontextprotocol/specification/blob/main/schema/2025-11-25/schema.ts)
-may reserve particular names for purpose-specific metadata, as declared in those definitions.
+此外，[架构](https://github.com/modelcontextprotocol/specification/blob/main/schema/2025-11-25/schema.ts) 中的定义
+可以保留特定名称用于特定目的的元数据，如这些定义中所声明的。
 
-**Key name format:** valid `_meta` key names have two segments: an optional **prefix**, and a **name**.
+**键名格式：** 有效的 `_meta` 键名有两个部分：一个可选的 **前缀** 和一个 **名称**。
 
-**Prefix:**
+**前缀：**
 
-- If specified, MUST be a series of labels separated by dots (`.`), followed by a slash (`/`).
-  - Labels MUST start with a letter and end with a letter or digit; interior characters can be letters, digits, or hyphens (`-`).
-  - Implementations SHOULD use reverse DNS notation (e.g., `com.example/` rather than `example.com/`).
-- Any prefix where the second label is `modelcontextprotocol` or `mcp` is **reserved** for MCP use.
-  - For example: `io.modelcontextprotocol/`, `dev.mcp/`, `org.modelcontextprotocol.api/`, and `com.mcp.tools/` are all reserved.
-  - However, `com.example.mcp/` is NOT reserved, as the second label is `example`.
+- 如果指定，**必须** 是一系列由点 (`.`) 分隔的标签，后跟斜杠 (`/`)。
+  - 标签 **必须** 以字母开头并以字母或数字结尾；内部字符可以是字母、数字或连字符 (`-`)。
+  - 实现 **应该** 使用反向 DNS 表示法（例如，`com.example/` 而不是 `example.com/`）。
+- 任何第二个标签为 `modelcontextprotocol` 或 `mcp` 的前缀均 **保留** 供 MCP 使用。
+  - 例如：`io.modelcontextprotocol/`、`dev.mcp/`、`org.modelcontextprotocol.api/` 和 `com.mcp.tools/` 均被保留。
+  - 但是，`com.example.mcp/` 未被保留，因为第二个标签是 `example`。
 
-**Name:**
+**名称：**
 
-- Unless empty, MUST begin and end with an alphanumeric character (`[a-z0-9A-Z]`).
-- MAY contain hyphens (`-`), underscores (`_`), dots (`.`), and alphanumerics in between.
+- 除非为空，**必须** 以字母数字字符 (`[a-z0-9A-Z]`) 开头和结尾。
+- 中间 **可以** 包含连字符 (`-`)、下划线 (`_`)、点 (`.`) 和字母数字字符。
 
 ### `icons`
 
-The `icons` property provides a standardized way for servers to expose visual identifiers for their resources, tools, prompts, and implementations. Icons enhance user interfaces by providing visual context and improving the discoverability of available functionality.
+`icons` 属性为服务器提供了一种标准化方式来暴露其资源、工具、提示词和实现的视觉标识。图标通过提供视觉上下文和提高可用功能的可发现性来增强用户界面。
 
-Icons are represented as an array of `Icon` objects, where each icon includes:
+图标表示为 `Icon` 对象的数组，其中每个图标包括：
 
-- `src`: A URI pointing to the icon resource (required). This can be:
-  - An HTTP/HTTPS URL pointing to an image file
-  - A data URI with base64-encoded image data
-- `mimeType`: Optional MIME type if the server's type is missing or generic
-- `sizes`: Optional array of size specifications (e.g., `["48x48"]`, `["any"]` for scalable formats like SVG, or `["48x48", "96x96"]` for multiple sizes)
-- `theme`: Optional theme preference (`light` or `dark`) for the icon background
+- `src`：指向图标资源的 URI（必需）。这可以是：
+  - 指向图像文件的 HTTP/HTTPS URL
+  - 带有 base64 编码图像数据的 data URI
+- `mimeType`：如果服务器的类型缺失或通用，则为可选的 MIME 类型
+- `sizes`：可选的尺寸规格数组（例如，`["48x48"]`、`["any"]` 用于 SVG 等可缩放格式，或 `["48x48", "96x96"]` 用于多种尺寸）
+- `theme`：图标背景的可选主题偏好（`light` 或 `dark`）
 
-**Required MIME type support:**
+**必需的 MIME 类型支持：**
 
-Clients that support rendering icons **MUST** support at least the following MIME types:
+支持渲染图标的客户端 **必须** 至少支持以下 MIME 类型：
 
-- `image/png` - PNG images (safe, universal compatibility)
-- `image/jpeg` (and `image/jpg`) - JPEG images (safe, universal compatibility)
+- `image/png` - PNG 图像（安全，通用兼容）
+- `image/jpeg`（和 `image/jpg`）- JPEG 图像（安全，通用兼容）
 
-Clients that support rendering icons **SHOULD** also support:
+支持渲染图标的客户端 **应该** 也支持：
 
-- `image/svg+xml` - SVG images (scalable but requires security precautions as noted below)
-- `image/webp` - WebP images (modern, efficient format)
+- `image/svg+xml` - SVG 图像（可缩放，但需要如下所述的安全预防措施）
+- `image/webp` - WebP 图像（现代，高效格式）
 
-**Security considerations:**
+**安全考虑：**
 
-Consumers of icon metadata **MUST** take appropriate security precautions when handling icons to prevent compromise:
+图标元数据的消费者 **必须** 在处理图标时采取适当的安全预防措施以防止泄露：
 
-- Treat icon metadata and icon bytes as untrusted inputs and defend against network, privacy, and parsing risks.
-- Ensure that the icon URI is either a HTTPS or `data:` URI. Clients **MUST** reject icon URIs that use unsafe schemes and redirects, such as `javascript:`, `file:`, `ftp:`, `ws:`, or local app URI schemes.
-  - Disallow scheme changes and redirects to hosts on different origins.
-- Be resilient against resource exhaustion attacks stemming from oversized images, large dimensions, or excessive frames (e.g., in GIFs).
-  - Consumers **MAY** set limits for image and content size.
-- Fetch icons without credentials. Do not send cookies, `Authorization` headers, or client credentials.
-- Verify that icon URIs are from the same origin as the server. This minimizes the risk of exposing data or tracking information to third-parties.
-- Exercise caution when fetching and rendering icons as the payload **MAY** contain executable content (e.g., SVG with [embedded JavaScript](https://www.w3.org/TR/SVG11/script.html) or [extended capabilities](https://www.w3.org/TR/SVG11/extend.html)).
-  - Consumers **MAY** choose to disallow specific file types or otherwise sanitize icon files before rendering.
-- Validate MIME types and file contents before rendering. Treat the MIME type information as advisory. Detect content type via magic bytes; reject on mismatch or unknown types.
-  - Maintain a strict allowlist of image types.
+- 将图标元数据和图标字节视为不可信的输入，并防御网络、隐私和解析风险。
+- 确保图标 URI 是 HTTPS 或 `data:` URI。客户端 **必须** 拒绝使用不安全方案和重定向的图标 URI，例如 `javascript:`、`file:`、`ftp:`、`ws:` 或本地应用 URI 方案。
+  - 禁止方案更改和重定向到不同源的主机。
+- 对源自过大图像、大尺寸或过多帧（例如在 GIF 中）的资源耗尽攻击具有弹性。
+  - 消费者 **可以** 为图像和内容大小设置限制。
+- 获取图标时不带凭证。不要发送 cookies、`Authorization` 头或客户端凭证。
+- 验证图标 URI 是否与服务器同源。这最小化了向第三方暴露数据或跟踪信息的风险。
+- 在获取和渲染图标时要小心，因为负载 **可能** 包含可执行内容（例如，带有 [嵌入式 JavaScript](https://www.w3.org/TR/SVG11/script.html) 或 [扩展功能](https://www.w3.org/TR/SVG11/extend.html) 的 SVG）。
+  - 消费者 **可以** 选择禁止特定文件类型或在渲染前清理图标文件。
+- 在渲染前验证 MIME 类型和文件内容。将 MIME 类型信息视为建议性的。通过魔术字节检测内容类型；在不匹配或未知类型时拒绝。
+  - 维护严格的图像类型白名单。
 
-**Usage:**
+**用法：**
 
-Icons can be attached to:
+图标可以附加到：
 
-- `Implementation`: Visual identifier for the MCP server/client implementation
-- `Tool`: Visual representation of the tool's functionality
-- `Prompt`: Icon to display alongside prompt templates
-- `Resource`: Visual indicator for different resource types
+- `Implementation`：MCP 服务器/客户端实现的视觉标识
+- `Tool`：工具功能的视觉表示
+- `Prompt`：与提示词模板一起显示的图标
+- `Resource`：不同资源类型的视觉指示器
 
-Multiple icons can be provided to support different display contexts and resolutions. Clients should select the most appropriate icon based on their UI requirements.
+可以提供多个图标以支持不同的显示上下文和分辨率。客户端应根据其 UI 需求选择最合适的图标。

@@ -1,64 +1,50 @@
 ---
-title: Sampling
+title: 采样
 ---
 
 <div id="enable-section-numbers" />
 
-The Model Context Protocol (MCP) provides a standardized way for servers to request LLM
-sampling ("completions" or "generations") from language models via clients. This flow
-allows clients to maintain control over model access, selection, and permissions while
-enabling servers to leverage AI capabilities&mdash;with no server API keys necessary.
-Servers can request text, audio, or image-based interactions and optionally include
-context from MCP servers in their prompts.
+Model Context Protocol (MCP) 提供了一种标准化方式，允许服务器通过客户端请求大语言模型（LLM）采样（“补全”或“生成”）。此流程允许客户端保持对模型访问、选择和权限的控制，同时使服务器能够利用 AI 能力——无需服务器 API 密钥。服务器可以请求文本、音频或基于图像的交互，并可选择在其提示词中包含来自 MCP 服务器的上下文。
 
-## User Interaction Model
+## 用户交互模型
 
-Sampling in MCP allows servers to implement agentic behaviors, by enabling LLM calls to
-occur _nested_ inside other MCP server features.
+MCP 中的采样允许服务器实现代理行为，通过使 LLM 调用能够 _嵌套_ 发生在其他 MCP 服务器功能内部。
 
-Implementations are free to expose sampling through any interface pattern that suits
-their needs&mdash;the protocol itself does not mandate any specific user interaction
-model.
+实现可以自由地通过任何适合其需求的接口模式暴露采样——协议本身不强制任何特定的用户交互模型。
 
 <Warning>
 
-For trust & safety and security, there **SHOULD** always
-be a human in the loop with the ability to deny sampling requests.
+为了信任、安全和安全性，**SHOULD** 始终有人工介入，能够拒绝采样请求。
 
-Applications **SHOULD**:
+应用程序 **SHOULD**：
 
-- Provide UI that makes it easy and intuitive to review sampling requests
-- Allow users to view and edit prompts before sending
-- Present generated responses for review before delivery
+- 提供用户界面，使其能够轻松直观地审查采样请求
+- 允许用户在发送前查看和编辑提示词
+- 在交付前展示生成的响应以供审查
 
 </Warning>
 
 <Warning>
 
-**Request Association Requirement**
+**请求关联要求**
 
-Servers **MUST** send `sampling/createMessage` requests only in association with an
-originating client request (e.g., during `tools/call`, `resources/read`, or
-`prompts/get` processing).
+服务器 **MUST** 仅在与发起的客户端请求关联时发送 `sampling/createMessage` 请求（例如，在 `tools/call`、`resources/read` 或 `prompts/get` 处理期间）。
 
-Standalone server-initiated sampling on independent communication streams (unrelated
-to any client request) is not supported and **MUST NOT** be implemented. Future
-transport implementations are not required to support this pattern.
+不支持在独立通信流上（与任何客户端请求无关）独立发起的服务器端采样，且 **MUST NOT** 实现此功能。未来的传输实现不需要支持此模式。
 
 </Warning>
 
-## Tools in Sampling
+## 采样中的工具
 
-Servers can request that the client's LLM use tools during sampling by providing a `tools` array and optional `toolChoice` configuration in their sampling requests. The tool definitions in the `tools` array are scoped to the sampling request — they don't need to correspond to registered tools. This enables servers to implement agentic behaviors where the LLM can call specially designated tools, receive results, and continue the conversation - all within a single sampling request flow.
+服务器可以通过在其采样请求中提供 `tools` 数组和可选的 `toolChoice` 配置，请求客户端的 LLM 在采样期间使用工具。`tools` 数组中的工具定义仅限于采样请求范围——它们不需要对应于注册的工具。这使得服务器能够实现代理行为，其中 LLM 可以调用专门指定的工具，接收结果，并继续对话——所有都在单个采样请求流程中完成。
 
-Clients **MUST** declare support for tool use via the `sampling.tools` capability to receive tool-enabled sampling requests. Servers **MUST NOT** send tool-enabled sampling requests to Clients that have not declared support for tool use via the `sampling.tools` capability.
+客户端 **MUST** 通过 `sampling.tools` 能力声明对工具使用的支持，以接收启用工具的采样请求。服务器 **MUST NOT** 向未通过 `sampling.tools` 能力声明支持工具使用的客户端发送启用工具的采样请求。
 
-## Capabilities
+## 能力
 
-Clients that support sampling **MUST** declare the `sampling` capability during
-[initialization](/specification/draft/basic/lifecycle#initialization):
+支持采样的客户端 **MUST** 在 [初始化](/specification/draft/basic/lifecycle#initialization) 期间声明 `sampling` 能力：
 
-**Basic sampling:**
+**基本采样：**
 
 ```json
 {
@@ -68,7 +54,7 @@ Clients that support sampling **MUST** declare the `sampling` capability during
 }
 ```
 
-**With tool use support:**
+**带工具使用支持：**
 
 ```json
 {
@@ -80,7 +66,7 @@ Clients that support sampling **MUST** declare the `sampling` capability during
 }
 ```
 
-**With context inclusion support (soft-deprecated):**
+**带上下文包含支持（软弃用）：**
 
 ```json
 {
@@ -93,20 +79,16 @@ Clients that support sampling **MUST** declare the `sampling` capability during
 ```
 
 <Note>
-  The `includeContext` parameter values `"thisServer"` and `"allServers"` are
-  soft-deprecated. Servers **SHOULD** avoid using these values (e.g. can just
-  omit `includeContext` since it defaults to `"none"`), and **SHOULD NOT** use
-  them unless the client declares `sampling.context` capability. These values
-  may be removed in future spec releases.
+  `includeContext` 参数值 `"thisServer"` 和 `"allServers"` 是软弃用的。服务器 **SHOULD** 避免使用这些值（例如，可以省略 `includeContext`，因为它默认为 `"none"`），并且 **SHOULD NOT** 使用它们，除非客户端声明了 `sampling.context` 能力。这些值可能会在未来的规范版本中移除。
 </Note>
 
-## Protocol Messages
+## 协议消息
 
-### Creating Messages
+### 创建消息
 
-To request a language model generation, servers send a `sampling/createMessage` request:
+要请求语言模型生成，服务器发送 `sampling/createMessage` 请求：
 
-**Request:**
+**请求：**
 
 ```json
 {
@@ -141,7 +123,7 @@ To request a language model generation, servers send a `sampling/createMessage` 
 }
 ```
 
-**Response:**
+**响应：**
 
 ```json
 {
@@ -159,9 +141,9 @@ To request a language model generation, servers send a `sampling/createMessage` 
 }
 ```
 
-### Sampling with Tools
+### 带工具的采样
 
-The following diagram illustrates the complete flow of sampling with tools, including the multi-turn tool loop:
+下图展示了带工具的采样的完整流程，包括多轮工具循环：
 
 ```mermaid
 sequenceDiagram
@@ -203,9 +185,9 @@ sequenceDiagram
     Note over Server: Server processes result<br/>(may continue conversation...)
 ```
 
-To request LLM generation with tool use capabilities, servers include `tools` and optionally `toolChoice` in the request:
+要请求具有工具使用能力的 LLM 生成，服务器在请求中包含 `tools` 和可选的 `toolChoice`：
 
-**Request (Server -> Client):**
+**请求（服务器 -> 客户端）：**
 
 ```json
 {
@@ -246,7 +228,7 @@ To request LLM generation with tool use capabilities, servers include `tools` an
 }
 ```
 
-**Response (Client -> Server):**
+**响应（客户端 -> 服务器）：**
 
 ```json
 {
@@ -278,16 +260,16 @@ To request LLM generation with tool use capabilities, servers include `tools` an
 }
 ```
 
-### Multi-turn Tool Loop
+### 多轮工具循环
 
-After receiving tool use requests from the LLM, the server typically:
+在收到来自 LLM 的工具使用请求后，服务器通常：
 
-1. Executes the requested tool uses.
-2. Sends a new sampling request with the tool results appended
-3. Receives the LLM's response (which might contain new tool uses)
-4. Repeats as many times as needed (server might cap the maximum number of iterations, and e.g. pass `toolChoice: {mode: "none"}` on the last iteration to force a final result)
+1. 执行请求的工具使用。
+2. 发送一个新的采样请求，追加工具结果
+3. 接收 LLM 的响应（其中可能包含新的工具使用）
+4. 根据需要重复多次（服务器可能会限制最大迭代次数，例如在最后一次迭代传递 `toolChoice: {mode: "none"}` 以强制最终结果）
 
-**Follow-up request (Server -> Client) with tool results:**
+**后续请求（服务器 -> 客户端）带工具结果：**
 
 ```json
 {
@@ -364,7 +346,7 @@ After receiving tool use requests from the LLM, the server typically:
 }
 ```
 
-**Final response (Client -> Server):**
+**最终响应（客户端 -> 服务器）：**
 
 ```json
 {
@@ -382,15 +364,15 @@ After receiving tool use requests from the LLM, the server typically:
 }
 ```
 
-## Message Content Constraints
+## 消息内容约束
 
-### Tool Result Messages
+### 工具结果消息
 
-When a user message contains tool results (type: "tool_result"), it **MUST** contain ONLY tool results. Mixing tool results with other content types (text, image, audio) in the same message is not allowed.
+当用户消息包含工具结果（类型："tool_result"）时，它 **MUST** 仅包含工具结果。不允许在同一消息中将工具结果与其他内容类型（文本、图像、音频）混合。
 
-This constraint ensures compatibility with provider APIs that use dedicated roles for tool results (e.g., OpenAI's "tool" role, Gemini's "function" role).
+此约束确保与为工具结果使用专用角色的提供商 API 兼容（例如，OpenAI 的 "tool" 角色，Gemini 的 "function" 角色）。
 
-**Valid - single tool result:**
+**有效 - 单个工具结果：**
 
 ```json
 {
@@ -403,7 +385,7 @@ This constraint ensures compatibility with provider APIs that use dedicated role
 }
 ```
 
-**Valid - multiple tool results:**
+**有效 - 多个工具结果：**
 
 ```json
 {
@@ -423,7 +405,7 @@ This constraint ensures compatibility with provider APIs that use dedicated role
 }
 ```
 
-**Invalid - mixed content:**
+**无效 - 混合内容：**
 
 ```json
 {
@@ -442,61 +424,61 @@ This constraint ensures compatibility with provider APIs that use dedicated role
 }
 ```
 
-### Tool Use and Result Balance
+### 工具使用与结果平衡
 
-When using tool use in sampling, every assistant message containing `ToolUseContent` blocks **MUST** be followed by a user message that consists entirely of `ToolResultContent` blocks, with each tool use (e.g. with `id: $id`) matched by a corresponding tool result (with `toolUseId: $id`), before any other message.
+在采样中使用工具使用时，每个包含 `ToolUseContent` 块的助手消息 **MUST** 后跟一个完全由 `ToolResultContent` 块组成的用户消息，每个工具使用（例如，`id: $id`）由相应的工具结果（`toolUseId: $id`）匹配，然后才是任何其他消息。
 
-This requirement ensures:
+此要求确保：
 
-- Tool uses are always resolved before the conversation continues
-- Provider APIs can concurrently process multiple tool uses and fetch their results in parallel
-- The conversation maintains a consistent request-response pattern
+- 工具使用总是在对话继续之前得到解决
+- 提供商 API 可以并发处理多个工具使用并并行获取其结果
+- 对话保持一致的请求 - 响应模式
 
-**Example valid sequence:**
+**有效序列示例：**
 
-1. User message: "What's the weather like in Paris and London?"
-2. Assistant message: `ToolUseContent` (`id: "call_abc123", name: "get_weather", input: {city: "Paris"}`) + `ToolUseContent` (`id: "call_def456", name: "get_weather", input: {city: "London"}`)
-3. User message: `ToolResultContent` (`toolUseId: "call_abc123", content: "18°C, partly cloudy"`) + `ToolResultContent` (`toolUseId: "call_def456", content: "15°C, rainy"`)
-4. Assistant message: Text response comparing the weather in both cities
+1. 用户消息："What's the weather like in Paris and London?"
+2. 助手消息：`ToolUseContent` (`id: "call_abc123", name: "get_weather", input: {city: "Paris"}`) + `ToolUseContent` (`id: "call_def456", name: "get_weather", input: {city: "London"}`)
+3. 用户消息：`ToolResultContent` (`toolUseId: "call_abc123", content: "18°C, partly cloudy"`) + `ToolResultContent` (`toolUseId: "call_def456", content: "15°C, rainy"`)
+4. 助手消息：文本响应比较两个城市的天气
 
-**Invalid sequence - missing tool result:**
+**无效序列 - 缺失工具结果：**
 
-1. User message: "What's the weather like in Paris and London?"
-2. Assistant message: `ToolUseContent` (`id: "call_abc123", name: "get_weather", input: {city: "Paris"}`) + `ToolUseContent` (`id: "call_def456", name: "get_weather", input: {city: "London"}`)
-3. User message: `ToolResultContent` (`toolUseId: "call_abc123", content: "18°C, partly cloudy"`) ← Missing result for call_def456
-4. Assistant message: Text response (invalid - not all tool uses were resolved)
+1. 用户消息："What's the weather like in Paris and London?"
+2. 助手消息：`ToolUseContent` (`id: "call_abc123", name: "get_weather", input: {city: "Paris"}`) + `ToolUseContent` (`id: "call_def456", name: "get_weather", input: {city: "London"}`)
+3. 用户消息：`ToolResultContent` (`toolUseId: "call_abc123", content: "18°C, partly cloudy"`) ← 缺失 call_def456 的结果
+4. 助手消息：文本响应（无效 - 并非所有工具使用都已解决）
 
-## Cross-API Compatibility
+## 跨 API 兼容性
 
-The sampling specification is designed to work across multiple LLM provider APIs (Claude, OpenAI, Gemini, etc.). Key design decisions for compatibility:
+采样规范旨在适用于多个 LLM 提供商 API（Claude、OpenAI、Gemini 等）。兼容性的关键设计决策：
 
-### Message Roles
+### 消息角色
 
-MCP uses two roles: "user" and "assistant".
+MCP 使用两个角色："user" 和 "assistant"。
 
-Tool use requests are sent in CreateMessageResult with the "assistant" role.
-Tool results are sent back in messages with the "user" role.
-Messages with tool results cannot contain other kinds of content.
+工具使用请求在 CreateMessageResult 中以 "assistant" 角色发送。
+工具结果在消息中以 "user" 角色发回。
+包含工具结果的消息不能包含其他类型的内容。
 
-### Tool Choice Modes
+### 工具选择模式
 
-`CreateMessageRequest.params.toolChoice` controls the tool use ability of the model:
+`CreateMessageRequest.params.toolChoice` 控制模型的工具使用能力：
 
-- `{mode: "auto"}`: Model decides whether to use tools (default)
-- `{mode: "required"}`: Model MUST use at least one tool before completing
-- `{mode: "none"}`: Model MUST NOT use any tools
+- `{mode: "auto"}`：模型决定是否使用工具（默认）
+- `{mode: "required"}`：模型在完成前必须使用至少一个工具
+- `{mode: "none"}`：模型不得使用任何工具
 
-### Parallel Tool Use
+### 并行工具使用
 
-MCP allows models to make multiple tool use requests in parallel (returning an array of `ToolUseContent`). All major provider APIs support this:
+MCP 允许模型并行发出多个工具使用请求（返回 `ToolUseContent` 数组）。所有主要提供商 API 都支持此功能：
 
-- **Claude**: Supports parallel tool use natively
-- **OpenAI**: Supports parallel tool calls (can be disabled with `parallel_tool_calls: false`)
-- **Gemini**: Supports parallel function calls natively
+- **Claude**：原生支持并行工具使用
+- **OpenAI**：支持并行工具调用（可通过 `parallel_tool_calls: false` 禁用）
+- **Gemini**：原生支持并行函数调用
 
-Implementations wrapping providers that support disabling parallel tool use MAY expose this as an extension, but it is not part of the core MCP specification.
+封装支持禁用并行工具使用的提供商的实现可以将此作为扩展公开，但这不是核心 MCP 规范的一部分。
 
-## Message Flow
+## 消息流
 
 ```mermaid
 sequenceDiagram
@@ -505,38 +487,36 @@ sequenceDiagram
     participant User
     participant LLM
 
-    Note over Server,Client: Server initiates sampling
+    Note over Server,Client: 服务器发起采样
     Server->>Client: sampling/createMessage
 
-    Note over Client,User: Human-in-the-loop review
-    Client->>User: Present request for approval
-    User-->>Client: Review and approve/modify
+    Note over Client,User: 人工介入审查
+    Client->>User: 呈现请求以供批准
+    User-->>Client: 审查并批准/修改
 
-    Note over Client,LLM: Model interaction
-    Client->>LLM: Forward approved request
-    LLM-->>Client: Return generation
+    Note over Client,LLM: 模型交互
+    Client->>LLM: 转发批准的请求
+    LLM-->>Client: 返回生成结果
 
-    Note over Client,User: Response review
-    Client->>User: Present response for approval
-    User-->>Client: Review and approve/modify
+    Note over Client,User: 响应审查
+    Client->>User: 呈现响应以供批准
+    User-->>Client: 审查并批准/修改
 
-    Note over Server,Client: Complete request
-    Client-->>Server: Return approved response
+    Note over Server,Client: 完成请求
+    Client-->>Server: 返回批准的响应
 ```
 
-## Data Types
+## 数据类型
 
-### Messages
+### 消息
 
-Sampling messages **MUST** contain a `role` field of `"user"` or `"assistant"`; and
-a `content` field representing the message data.
+采样消息 **必须** 包含 `"user"` 或 `"assistant"` 的 `role` 字段；以及表示消息数据的 `content` 字段。
 
-The list of messages in a sampling request **SHOULD NOT** be retained between
-separate requests.
+采样请求中的消息列表 **不应** 在不同请求之间保留。
 
-The `content` field can contain:
+`content` 字段可以包含：
 
-#### Text Content
+#### 文本内容
 
 ```json
 {
@@ -545,7 +525,7 @@ The `content` field can contain:
 }
 ```
 
-#### Image Content
+#### 图像内容
 
 ```json
 {
@@ -555,7 +535,7 @@ The `content` field can contain:
 }
 ```
 
-#### Audio Content
+#### 音频内容
 
 ```json
 {
@@ -565,115 +545,100 @@ The `content` field can contain:
 }
 ```
 
-### Model Preferences
+### 模型偏好
 
-Model selection in MCP requires careful abstraction since servers and clients may use
-different AI providers with distinct model offerings. A server cannot simply request a
-specific model by name since the client may not have access to that exact model or may
-prefer to use a different provider's equivalent model.
+MCP 中的模型选择需要仔细抽象，因为服务器和客户端可能使用具有不同模型产品的不同 AI 提供商。服务器不能简单地按名称请求特定模型，因为客户端可能无法访问该确切模型，或者可能更喜欢使用不同提供商的等效模型。
 
-To solve this, MCP implements a preference system that combines abstract capability
-priorities with optional model hints:
+为解决此问题，MCP 实现了一个偏好系统，结合了抽象能力优先级与可选模型提示：
 
-#### Capability Priorities
+#### 能力优先级
 
-Servers express their needs through three normalized priority values (0-1):
+服务器通过三个归一化优先级值 (0-1) 表达其需求：
 
-- `costPriority`: How important is minimizing costs? Higher values prefer cheaper models.
-- `speedPriority`: How important is low latency? Higher values prefer faster models.
-- `intelligencePriority`: How important are advanced capabilities? Higher values prefer
-  more capable models.
+- `costPriority`：最小化成本有多重要？较高的值偏好更便宜的模型。
+- `speedPriority`：低延迟有多重要？较高的值偏好更快的模型。
+- `intelligencePriority`：高级能力有多重要？较高的值偏好能力更强的模型。
 
-#### Model Hints
+#### 模型提示
 
-While priorities help select models based on characteristics, `hints` allow servers to
-suggest specific models or model families:
+虽然优先级有助于根据特征选择模型，但 `hints` 允许服务器建议特定模型或模型系列：
 
-- Hints are treated as substrings that can match model names flexibly
-- Multiple hints are evaluated in order of preference
-- Clients **MAY** map hints to equivalent models from different providers
-- Hints are advisory&mdash;clients make final model selection
+- 提示被视为可灵活匹配模型名称的子字符串
+- 多个提示按偏好顺序评估
+- 客户端 **可以** 将提示映射到不同提供商的等效模型
+- 提示是建议性的——客户端进行最终模型选择
 
-For example:
+例如：
 
 ```json
 {
   "hints": [
-    { "name": "claude-3-sonnet" }, // Prefer Sonnet-class models
-    { "name": "claude" } // Fall back to any Claude model
+    { "name": "claude-3-sonnet" }, // 首选 Sonnet 类模型
+    { "name": "claude" } // 回退到任何 Claude 模型
   ],
-  "costPriority": 0.3, // Cost is less important
-  "speedPriority": 0.8, // Speed is very important
-  "intelligencePriority": 0.5 // Moderate capability needs
+  "costPriority": 0.3, // 成本不太重要
+  "speedPriority": 0.8, // 速度非常重要
+  "intelligencePriority": 0.5 // 中等能力需求
 }
 ```
 
-The client processes these preferences to select an appropriate model from its available
-options. For instance, if the client doesn't have access to Claude models but has Gemini,
-it might map the sonnet hint to `gemini-1.5-pro` based on similar capabilities.
+客户端处理这些偏好以从其可用选项中选择适当的模型。例如，如果客户端无法访问 Claude 模型但有 Gemini，它可能会根据类似能力将 sonnet 提示映射到 `gemini-1.5-pro`。
 
-### System Prompt
+### 系统提示
 
-The optional `systemPrompt` field allows servers to request a specific system prompt.
-The client **MAY** modify or ignore this field without communicating this to the server.
+可选的 `systemPrompt` 字段允许服务器请求特定的系统提示。客户端 **可以** 修改或忽略此字段，而无需将此通知服务器。
 
-### Context Inclusion
+### 上下文包含
 
-The `includeContext` parameter specifies what context information the client is expected
-to include in its response:
+`includeContext` 参数指定客户端在其响应中应包含哪些上下文信息：
 
-- `"none"`: No additional context.
-- `"thisServer"`: Include context from the requesting server.
-- `"allServers"`: Include context from all connected MCP servers.
+- `"none"`：无额外上下文。
+- `"thisServer"`：包含来自请求服务器的上下文。
+- `"allServers"`：包含来自所有已连接 MCP 服务器的上下文。
 
-The client **MAY** modify or ignore this field without communicating this to the server.
-For example, a client could determine that respecting this field in a particular request
-would require sharing sensitive information with a server, and constrain its response
-accordingly.
+客户端 **可以** 修改或忽略此字段，而无需将此通知服务器。例如，客户端可以确定在特定请求中遵守此字段需要与服务器共享敏感信息，并相应地限制其响应。
 
-### Sampling Parameters
+### 采样参数
 
-LLM sampling can be fine-tuned with the following parameters:
+LLM 采样可以使用以下参数进行微调：
 
-- `temperature`: Controls randomness in model responses. Higher values produce higher randomness, and lower values produce more stable output. Valid range depends upon the model provider.
-- `maxTokens`: Maximum tokens to generate; required.
-- `stopSequences`: Array of sequences that stop generation.
-- `metadata`: Additional provider-specific parameters.
+- `temperature`：控制模型响应中的随机性。较高的值产生较高的随机性，较低的值产生更稳定的输出。有效范围取决于模型提供商。
+- `maxTokens`：生成的最大令牌数；必需。
+- `stopSequences`：停止生成的序列数组。
+- `metadata`：额外的提供商特定参数。
 
-The client **MUST** respect the `maxTokens` parameter.
+客户端 **必须** 遵守 `maxTokens` 参数。
 
-The client **MAY** modify or ignore `temperature`, `stopSequences` and `metadata`. For
-example, a client could use a model that does not support one or more of these parameters,
-and would therefore be unable to leverage them.
+客户端 **可以** 修改或忽略 `temperature`、`stopSequences` 和 `metadata`。例如，客户端可以使用不支持其中一个或多个参数的模型，因此将无法利用它们。
 
-### Result Fields
+### 结果字段
 
-Sampling results will contain the following fields:
+采样结果将包含以下字段：
 
-- `role`: The message role; see [Messages](#messages).
-- `content`: The message content. This can be either:
-  - A single content block when the response contains only one content block, such as a single text response.
-  - An array of content blocks when the response contains one or more content blocks, such as multiple tool uses or mixed content.
+- `role`：消息角色；参见 [消息](#messages)。
+- `content`：消息内容。这可以是：
+  - 当响应仅包含一个内容块时的单个内容块，例如单个文本响应。
+  - 当响应包含一个或多个内容块时的内容块数组，例如多个工具使用或混合内容。
 
-  See [Messages](#messages) for content block types.
+  参见 [消息](#messages) 了解内容块类型。
 
-- `model`: The name of the model that generated the message.
-- `stopReason`: The reason why sampling stopped, if known. The specification defines the following (non-exhaustive) stop reasons, although implementations **MAY** provide their own arbitrary values:
-  - `"endTurn"`: The participant is yielding the conversation to the other party.
-  - `"stopSequence"`: Message generation encountered one of the requested `stopSequences`.
-  - `"maxTokens"`: The token limit was reached.
-  - `"toolUse"`: The model wants to use one or more tools.
+- `model`：生成消息的模型名称。
+- `stopReason`：采样停止的原因（如果已知）。规范定义了以下（非详尽）停止原因，尽管实现 **可以** 提供自己的任意值：
+  - `"endTurn"`：参与者将对话让给另一方。
+  - `"stopSequence"`：消息生成遇到请求的 `stopSequences` 之一。
+  - `"maxTokens"`：达到令牌限制。
+  - `"toolUse"`：模型想要使用一个或多个工具。
 
-## Error Handling
+## 错误处理
 
-Clients **SHOULD** return errors for common failure cases:
+客户端 **应该** 为常见失败情况返回错误：
 
-- User rejected sampling request: `-1`
-- Tool result missing in request: `-32602` (Invalid params)
-- Tool results mixed with other content: `-32602` (Invalid params)
-- Sampling request not associated with a client-to-server request: `-32602` (Invalid params)
+- 用户拒绝采样请求：`-1`
+- 请求中缺少工具结果：`-32602`（无效参数）
+- 工具结果与其他内容混合：`-32602`（无效参数）
+- 采样请求未与客户端到服务器的请求关联：`-32602`（无效参数）
 
-Example errors:
+错误示例：
 
 ```json
 {
@@ -697,15 +662,15 @@ Example errors:
 }
 ```
 
-## Security Considerations
+## 安全考虑
 
-1. Clients **SHOULD** implement user approval controls
-2. Both parties **SHOULD** validate message content
-3. Clients **SHOULD** respect model preference hints
-4. Clients **SHOULD** implement rate limiting
-5. Both parties **MUST** handle sensitive data appropriately
+1. 客户端 **应该** 实现用户批准控制
+2. 双方 **应该** 验证消息内容
+3. 客户端 **应该** 遵守模型偏好提示
+4. 客户端 **应该** 实现速率限制
+5. 双方 **必须** 妥善处理敏感数据
 
-When tools are used in sampling, additional security considerations apply:
+当采样中使用工具时，适用额外的安全考虑：
 
-6. Servers **MUST** ensure that when replying to a `stopReason: "toolUse"`, each `ToolUseContent` item is responded to with a `ToolResultContent` item with a matching `toolUseId`, and that the user message contains only tool results (no other content types)
-7. Both parties **SHOULD** implement iteration limits for tool loops
+6. 服务器 **必须** 确保在回复 `stopReason: "toolUse"` 时，每个 `ToolUseContent` 项都响应一个具有匹配 `toolUseId` 的 `ToolResultContent` 项，并且用户消息仅包含工具结果（无其他内容类型）
+7. 双方 **应该** 为工具循环实现迭代限制

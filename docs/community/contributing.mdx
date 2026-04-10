@@ -1,46 +1,41 @@
 ---
-title: Contributing to MCP
-description: How to contribute to the Model Context Protocol project
+title: 为 MCP 做贡献
+description: 如何为模型上下文协议项目做贡献
 ---
 
-The Model Context Protocol (MCP) is an open source project that welcomes contributions from the
-community. This guide walks you through everything you need to get started.
+模型上下文协议 (MCP) 是一个开源项目，欢迎社区贡献。本指南将带你了解开始所需的一切。
 
-## Before You Begin
+## 开始之前
 
-### Prerequisites
+### 先决条件
 
-Before contributing, ensure you have the following installed and ready:
+在贡献之前，确保你已安装并准备好以下内容：
 
-- **[Git](https://git-scm.com/downloads)** - For cloning repositories and submitting changes
-- **[Node.js 24+](https://nodejs.org/)** - Required for building and testing our projects
-- **npm** - Comes with Node.js, used for dependency management
-- **[GitHub account](https://github.com/signup)** - For submitting pull requests and issues
-- **Language-specific tooling** - If contributing to an SDK, you'll need the appropriate
-  development environment for that language (e.g., Python, Rust, Go)
+- **[Git](https://git-scm.com/downloads)** - 用于克隆仓库和提交更改
+- **[Node.js 24+](https://nodejs.org/)** - 构建和测试我们的项目所需
+- **npm** - 随 Node.js 附带，用于依赖管理
+- **[GitHub 账户](https://github.com/signup)** - 用于提交拉取请求和 Issue
+- **特定语言的工具** - 如果为 SDK 做贡献，你需要该语言的适当开发环境（例如 Python、Rust、Go）
 
-Verify your setup:
+验证你的设置：
 
 ```bash
-node --version  # Should be 24.x or higher
-npm --version   # Should be 11.x or higher
-git --version   # Any recent version
+node --version  # 应该是 24.x 或更高
+npm --version   # 应该是 11.x 或更高
+git --version   # 任何近期版本
 ```
 
 <Note>
-  These commands work the same on macOS, Linux, and Windows, so you're good to
-  go on any platform.
+  这些命令在 macOS、Linux 和 Windows 上工作方式相同，所以你在任何平台上都可以顺利进行。
 </Note>
 
-### Repository Structure
+### 仓库结构
 
-MCP spans multiple repositories in the
-[`modelcontextprotocol`](https://github.com/modelcontextprotocol) organization on GitHub. Here are
-a few notable sub-projects worth checking out:
+MCP 跨越 GitHub 上 [`modelcontextprotocol`](https://github.com/modelcontextprotocol) 组织中的多个仓库。以下是一些值得查看的著名子项目：
 
-| Repository                                                                                                  | Contents                  |
+| 仓库                                                                                                  | 内容                  |
 | ----------------------------------------------------------------------------------------------------------- | ------------------------- |
-| [`modelcontextprotocol/modelcontextprotocol`](https://github.com/modelcontextprotocol/modelcontextprotocol) | Specification, docs, SEPs |
+| [`modelcontextprotocol/modelcontextprotocol`](https://github.com/modelcontextprotocol/modelcontextprotocol) | 规范、文档、SEPs |
 | [`modelcontextprotocol/typescript-sdk`](https://github.com/modelcontextprotocol/typescript-sdk)             | TypeScript/JavaScript SDK |
 | [`modelcontextprotocol/python-sdk`](https://github.com/modelcontextprotocol/python-sdk)                     | Python SDK                |
 | [`modelcontextprotocol/go-sdk`](https://github.com/modelcontextprotocol/go-sdk)                             | Go SDK                    |
@@ -52,259 +47,237 @@ a few notable sub-projects worth checking out:
 | [`modelcontextprotocol/ruby-sdk`](https://github.com/modelcontextprotocol/ruby-sdk)                         | Ruby SDK                  |
 | [`modelcontextprotocol/php-sdk`](https://github.com/modelcontextprotocol/php-sdk)                           | PHP SDK                   |
 
-Throughout this guide, **specification repository** refers to
-`modelcontextprotocol/modelcontextprotocol`, which contains the protocol spec, this documentation
-site, and [Spec Enhancement Proposals (SEPs)](/community/sep-guidelines).
+在本指南中，**规范仓库** 指的是 `modelcontextprotocol/modelcontextprotocol`，其中包含协议规范、本文档站点和 [规范增强提案 (SEPs)](/community/sep-guidelines)。
 
-### Project Roles
+### 项目角色
 
-MCP follows a [governance model](/community/governance) with different levels of responsibility:
+MCP 遵循具有不同责任级别的 [治理模型](/community/governance)：
 
-- **Contributors** - Anyone who files issues, submits PRs, or participates in discussions (that's
-  you!)
-- **Maintainers** - Steward specific areas like SDKs, documentation, or
-  [Working Groups](/community/working-interest-groups)
-- **Core Maintainers** - Guide overall project direction, review SEPs, and oversee the specification
+- **贡献者** - 任何提交 Issue、提交 PR 或参与讨论的人（就是你！）
+- **维护者** - 负责特定领域，如 SDK、文档或 [工作组](/community/working-interest-groups)
+- **核心维护者** - 指导整体项目方向、审查 SEP 并监督规范
 
-You can find the current list of maintainers in the
-[`MAINTAINERS.md`](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/MAINTAINERS.md)
-file.
+你可以在 [`MAINTAINERS.md`](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/MAINTAINERS.md) 文件中找到当前的维护者列表。
 
-Maintainers are here to help you succeed! Don't hesitate to reach out if you have questions or
-need guidance on your contribution.
+维护者在这里帮助你成功！如果你有问题或需要关于贡献的指导，请随时联系。
 
-## Your First Contribution
+## 你的第一次贡献
 
-Start here if you are new to MCP and contributing to its ecosystem.
+如果你是 MCP 新手并为其生态系统做贡献，请从这里开始。
 
 <Note>
-  While we use the specification repository as an example, the key patterns are
-  applicable to other MCP repos as well.
+  虽然我们以规范仓库为例，但关键模式也适用于其他 MCP 仓库。
 </Note>
 
-### Step 1: Set Up Your Environment
+### 步骤 1：设置你的环境
 
-Set up your local environment so you can test and validate changes before submitting them.
+设置你的本地环境，以便在提交之前测试和验证更改。
 
 <Steps>
-<Step title="Fork the repository">
+<Step title="Fork 仓库">
 
-Click the **Fork** button on the [repository page](https://github.com/modelcontextprotocol/modelcontextprotocol) to create your own copy. This gives you a personal workspace where you can make changes without affecting the main project.
+点击 [仓库页面](https://github.com/modelcontextprotocol/modelcontextprotocol) 上的 **Fork** 按钮以创建你自己的副本。这为你提供了一个个人工作区，你可以在其中进行更改而不会影响主项目。
 
 </Step>
-<Step title="Clone your fork">
+<Step title="克隆你的 Fork">
 
 ```bash
 git clone https://github.com/YOUR-USERNAME/modelcontextprotocol.git
 cd modelcontextprotocol
 ```
 
-Replace `YOUR-USERNAME` with your GitHub username.
+将 `YOUR-USERNAME` 替换为你的 GitHub 用户名。
 
 </Step>
-<Step title="Install dependencies">
+<Step title="安装依赖">
 
 ```bash
 npm install
 ```
 
-This installs the tools needed for schema generation, documentation building, and validation.
+这将安装架构生成、文档构建和验证所需的工具。
 
 </Step>
-<Step title="Verify everything works">
+<Step title="验证一切正常">
 
 ```bash
 npm run check
 ```
 
-This runs TypeScript compilation, schema validation, example validation, documentation link checks, and formatting checks. If everything passes, your environment is good and you're ready to contribute.
+这将运行 TypeScript 编译、架构验证、示例验证、文档链接检查和格式检查。如果一切通过，你的环境就准备好了，可以开始贡献。
 
 </Step>
 </Steps>
 
-If `npm run check` fails, see [Troubleshooting](#troubleshooting) below.
+如果 `npm run check` 失败，请参阅下面的 [故障排除](#troubleshooting)。
 
-### Step 2: Find Something to Work On
+### 步骤 2：寻找要做的事情
 
-While a lot of the items you might see tracked in the repository can feel intimidating, especially
-for newcomers, there are plenty of places where you can start with your first improvements:
+虽然你在仓库中看到的许多跟踪项目可能会让人感到畏惧，尤其是对于 newcomers，但有很多地方你可以开始进行第一次改进：
 
-1. **Documentation improvements** - Help us fix typos, unclear explanations, broken links, or
-   incomplete examples
-2. **Issues labeled `good first issue`** - Tackle issues tagged in the
-   [specification repo](https://github.com/modelcontextprotocol/modelcontextprotocol/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
-   as well as our SDK repos
-3. **Schema examples** - Add examples to `schema/draft/examples/` to make it easier for developers
-   to understand protocol primitives
+1. **文档改进** - 帮助我们修复拼写错误、不清楚的解释、损坏的链接或不完整的示例
+2. **标记为 `good first issue` 的 Issue** - 解决 [规范仓库](https://github.com/modelcontextprotocol/modelcontextprotocol/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22) 以及我们的 SDK 仓库中标记的问题
+3. **架构示例** - 向 `schema/draft/examples/` 添加示例，使开发人员更容易理解协议原语
 
-### Step 3: Make Your Change
+### 步骤 3：进行更改
 
-Create your changes in a dedicated branch.
+在专用分支中创建你的更改。
 
 <Steps>
-<Step title="Create a branch">
+<Step title="创建分支">
 
 ```bash
 git checkout -b fix/your-description
 ```
 
-Use a descriptive branch name that reflects your change, like `fix/typo-in-tools-doc` or `feat/add-example-for-resources`.
+使用反映你更改的描述性分支名，例如 `fix/typo-in-tools-doc` 或 `feat/add-example-for-resources`。
 
 </Step>
-<Step title="Make your changes">
+<Step title="进行更改">
 
-Edit the relevant files in your local copy. If you're editing schema files, remember to run `npm run generate:schema` to regenerate the JSON schema and documentation.
+编辑本地副本中的相关文件。如果你正在编辑架构文件，请记住运行 `npm run generate:schema` 以重新生成 JSON 架构和文档。
 
 </Step>
-<Step title="Run checks">
+<Step title="运行检查">
 
 ```bash
 npm run check
 ```
 
-Fix any issues before committing. If you have formatting errors, `npm run format` can auto-fix most of them.
+提交前修复任何问题。如果你有格式错误，`npm run format` 可以自动修复大多数错误。
 
 </Step>
-<Step title="Commit with a clear message">
+<Step title="使用清晰的消息提交">
 
 ```bash
 git commit -m "Fix typo in tools documentation"
 ```
 
-Write a concise message that describes what you changed and why. Reference issue numbers if applicable (e.g., `Fix typo in tools documentation (#123)`).
+编写简洁的消息，描述你更改了什么以及原因。如果适用，引用 Issue 编号（例如 `Fix typo in tools documentation (#123)`）。
 
 </Step>
 </Steps>
 
-### Step 4: Submit a Pull Request
+### 步骤 4：提交拉取请求
 
-When you're ready, push your branch and open a pull request.
+当你准备好后，推送你的分支并打开拉取请求。
 
 <Steps>
-<Step title="Push your branch">
+<Step title="推送你的分支">
 
 ```bash
 git push origin fix/your-description
 ```
 
 </Step>
-<Step title="Open a PR on GitHub">
+<Step title="在 GitHub 上打开 PR">
 
-You can use the [GitHub CLI](https://cli.github.com/) to make this process easier:
+你可以使用 [GitHub CLI](https://cli.github.com/) 使此过程更容易：
 
 ```bash
 gh pr create --fill
 ```
 
-Alternatively, navigate to your fork on GitHub and click **Compare & pull request**.
+或者，在 GitHub 上导航到你的 Fork 并点击 **Compare & pull request**。
 
 </Step>
-<Step title="Fill in the PR template">
+<Step title="填写 PR 模板">
 
-Provide a clear description of your changes and link any related issues.
+提供清晰的更改描述并链接任何相关的 Issue。
 
 </Step>
-<Step title="Wait for review">
+<Step title="等待审查">
 
-Maintainers typically respond within 1-5 business days.
+维护者通常在 1-5 个工作日内回复。
 
 </Step>
 </Steps>
 
 <Tip>
-  That's it, **congratulations on your first contribution**! Every improvement,
-  no matter how small, helps make MCP better for everyone.
+  就是这样，**恭喜你完成第一次贡献**！每一个改进，无论多么小，都有助于让 MCP 对每个人来说变得更好。
 </Tip>
 
-### What Makes a Good Contribution
+### 什么是好的贡献
 
-Help us review your contribution quickly by following these patterns:
+通过遵循这些模式，帮助我们快速审查你的贡献：
 
-| Harder to Review                             | Thoughtful and Impactful                         |
+| 难以审查                             | 周到且有影响力                         |
 | -------------------------------------------- | ------------------------------------------------ |
-| Large PR with unrelated changes              | Focused PR addressing one issue                  |
-| Reformatting code without functional changes | Fixing a bug with a clear explanation            |
-| Vague commit messages ("fixed stuff")        | Descriptive commits linking to issues            |
-| Submitting with failing CI checks            | All CI tests pass before requesting review       |
-| Duplicating existing documentation           | Documenting an undocumented feature or edge case |
+| 包含不相关更改的大型 PR              | 专注于解决一个问题的 PR                  |
+| 没有功能更改的代码重新格式化 | 修复带有清晰解释的 Bug            |
+| 模糊的提交消息（"fixed stuff"）        | 链接到 Issue 的描述性提交            |
+| 在 CI 检查失败时提交            | 请求审查前所有 CI 测试通过       |
+| 复制现有文档           | 记录未记录的功能或边缘情况 |
 
-## Types of Contributions
+## 贡献类型
 
-Different contributions follow different processes depending on their scope.
+不同的贡献根据其范围遵循不同的流程。
 
 <Tip>
-  Not sure which category your change falls into? Ask in the [MCP Contributor
-  Discord](/community/communication#discord) before starting any significant
-  work.
+  不确定你的更改属于哪一类？在开始任何重要工作之前，请在 [MCP 贡献者 Discord](/community/communication#discord) 中询问。
 </Tip>
 
-### Small Changes (Direct PR)
+### 小改动（直接 PR）
 
-Simply submit a pull request directly to the repo for:
+直接向仓库提交拉取请求即可：
 
-- Bug fixes and typo corrections
-- Documentation improvements, such as bringing clarity to an ambiguous or unclear section
-- Adding examples to existing features
-- Minor schema fixes that don't materially change the specification or SDK behavior
-- Test improvements
+- Bug 修复和拼写纠正
+- 文档改进，例如澄清模糊或不清楚的部分
+- 为现有功能添加示例
+- 不会实质性地改变规范或 SDK 行为的次要架构修复
+- 测试改进
 
-### Major Changes (SEP Required)
+### 重大改动（需要 SEP）
 
-Anything that changes the MCP specification requires following the
-[Specification Enhancement Proposal (SEP)](/community/sep-guidelines) process. This includes, but
-is not limited to:
+任何更改 MCP 规范的内容都需要遵循 [规范增强提案 (SEP)](/community/sep-guidelines) 流程。包括但不限于：
 
-- New protocol features or API methods
-- Breaking changes to existing behavior
-- Changes to the message format or schema structure
-- New interoperability standards
-- Governance or process changes
+- 新协议功能或 API 方法
+- 对现有行为的破坏性更改
+- 更改消息格式或架构结构
+- 新的互操作性标准
+- 治理或流程更改
 
-Here are a few concrete examples of what would require following the SEP steps:
+以下是一些需要遵循 SEP 步骤的具体示例：
 
-- Adding a new RPC method like `tools/execute`
-- Changing how authentication and authorization works
-- Adding a new capability negotiation field
-- Modifying the transport layer specification
+- 添加新的 RPC 方法，如 `tools/execute`
+- 更改身份验证和授权的工作方式
+- 添加新的能力协商字段
+- 修改传输层规范
 
-## Working with the Specification Repository
+## 使用规范仓库
 
-Once you've determined [what type of contribution](#types-of-contributions) you're making, here's
-how to work with the specification repository.
+一旦你确定了正在进行的 [贡献类型](#types-of-contributions)，以下是如何使用规范仓库的方法。
 
-### Schema Changes
+### 模式变更
 
-The TypeScript schema (`schema/draft/schema.ts`) is the **source of truth** for the protocol. It
-defines every message type, request/response structure, and primitive (tools, resources, prompts)
-that clients and servers exchange. SDK implementers across all languages rely on this schema to
-build conformant implementations.
+TypeScript 模式（`schema/draft/schema.ts`）是协议的 **事实来源**。它定义了客户端和服务器交换的每种消息类型、请求/响应结构和原语（工具、资源、提示）。所有语言的 SDK 实现者都依赖此模式来构建符合规范的实现。
 
-When you run `npm run generate:schema`, it generates:
+当你运行 `npm run generate:schema` 时，它会生成：
 
-- The JSON schema (`schema/draft/schema.json`) for validation
-- The Schema Reference documentation (`docs/specification/draft/schema.mdx`)
+- 用于验证的 JSON 模式（`schema/draft/schema.json`）
+- 模式参考文档（`docs/specification/draft/schema.mdx`）
 
-To modify the schema:
+要修改模式：
 
 <Steps>
-<Step title="Edit the TypeScript schema">
+<Step title="编辑 TypeScript 模式">
 
-Make your changes in `schema/draft/schema.ts`.
-
-</Step>
-<Step title="Add examples (optional)">
-
-Add JSON examples in `schema/draft/examples/[TypeName]/` (e.g., `Tool/my-example.json`). Reference them in the schema using `@example` + `@includeCode` JSDoc tags.
+在 `schema/draft/schema.ts` 中进行更改。
 
 </Step>
-<Step title="Generate JSON schema and docs">
+<Step title="添加示例（可选）">
+
+在 `schema/draft/examples/[TypeName]/` 中添加 JSON 示例（例如 `Tool/my-example.json`）。使用 `@example` + `@includeCode` JSDoc 标签在模式中引用它们。
+
+</Step>
+<Step title="生成 JSON 模式和文档">
 
 ```bash
 npm run generate:schema
 ```
 
 </Step>
-<Step title="Validate your changes">
+<Step title="验证你的变更">
 
 ```bash
 npm run check
@@ -313,105 +286,91 @@ npm run check
 </Step>
 </Steps>
 
-### Documentation Changes
+### 文档变更
 
-Docs are written in [MDX format](https://mdxjs.com/) (Markdown with JSX components) and powered by
-[Mintlify](https://mintlify.com/). The `docs/` directory contains:
+文档采用 [MDX 格式](https://mdxjs.com/)（带有 JSX 组件的 Markdown）编写，并由 [Mintlify](https://mintlify.com/) 提供支持。`docs/` 目录包含：
 
-- `docs/docs/` - Guides and tutorials for getting started and building with MCP
-- `docs/specification/` - Formal protocol specification (versioned by date)
+- `docs/docs/` - 入门和构建 MCP 的指南和教程
+- `docs/specification/` - 正式协议规范（按日期版本化）
 
-Here is how you can contribute to our documentation:
+以下是你如何贡献文档的方法：
 
 <Steps>
-<Step title="Start the local docs server">
+<Step title="启动本地文档服务器">
 
 ```bash
 npm run serve:docs
 ```
 
-This launches a live preview at `http://localhost:3000` with hot reloading.
+这将在 `http://localhost:3000` 启动带有热重载的实时预览。
 
 </Step>
-<Step title="Make your changes">
+<Step title="进行更改">
 
-Edit the relevant `.mdx` files. You can use [Mintlify components](https://www.mintlify.com/docs/components) like `<Note>`, `<Tip>`, `<Steps>`, and `<Card>` for richer formatting.
+编辑相关的 `.mdx` 文件。你可以使用 [Mintlify 组件](https://www.mintlify.com/docs/components)，如 `<Note>`、`<Tip>`、`<Steps>` 和 `<Card>`，以获得更丰富的格式。
 
 </Step>
-<Step title="Check for issues">
+<Step title="检查问题">
 
 ```bash
 npm run check:docs
 ```
 
-This validates formatting, broken links, and other common issues.
+这将验证格式、损坏的链接和其他常见问题。
 
 </Step>
 </Steps>
 
-### Major Protocol Changes
+### 主要协议变更
 
-For significant changes, follow the [SEP process](/community/sep-guidelines). Prior to spending a
-lot of time on a spec proposal, make sure to follow these best practices.
+对于重大变更，请遵循 [SEP 流程](/community/sep-guidelines)。在花费大量时间编写规范提案之前，请确保遵循这些最佳实践。
 
 <Steps>
-  <Step title="Validate your idea first">
-    Discuss in an [Interest Group](/community/working-interest-groups) or on
-    [Discord](https://discord.gg/6CSzBmMkjX).
+  <Step title="首先验证你的想法">
+    在 [兴趣小组](/community/working-interest-groups) 或 [Discord](https://discord.gg/6CSzBmMkjX) 中讨论。
   </Step>
-  <Step title="Build a prototype">
-    Demonstrate practical application of your idea.
+  <Step title="构建原型">
+    展示你的想法的实际应用。
   </Step>
-  <Step title="Find a sponsor">
-    A maintainer from the [maintainer
-    list](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/MAINTAINERS.md)
-    who will champion your proposal.
+  <Step title="寻找赞助人">
+    来自 [维护者列表](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/MAINTAINERS.md) 的维护者，他将支持你的提案。
   </Step>
-  <Step title="Write the SEP">
-    Follow the [SEP Guidelines](/community/sep-guidelines).
+  <Step title="编写 SEP">
+    遵循 [SEP 指南](/community/sep-guidelines)。
   </Step>
 </Steps>
 
-## Working with the SDK Repositories
+## 使用 SDK 仓库
 
-MCP maintains official SDKs in multiple languages. Contributions are welcome - whether you're
-fixing bugs, improving performance, adding features, or enhancing documentation.
+MCP 维护多种语言的官方 SDK。欢迎贡献——无论是修复 bug、改进性能、添加功能还是增强文档。
 
 <Note>
-  Each SDK has its own repository, maintainers, and contribution guidelines.
-  Some SDKs are maintained in collaboration with larger partner organizations,
-  such as Google, Microsoft, JetBrains, and others, so processes may vary
-  slightly between repositories.
+  每个 SDK 都有自己的仓库、维护者和贡献指南。
+  某些 SDK 是与大型合作伙伴组织协作维护的，
+  例如 Google、Microsoft、JetBrains 等，因此不同仓库之间的流程可能略有不同。
 </Note>
 
-### Before Contributing to an SDK
+### 贡献 SDK 之前
 
-Before diving into code, follow these steps.
+在深入代码之前，请遵循以下步骤。
 
 <Steps>
-  <Step title="Open an issue first">
-    Before starting significant work, open an issue to discuss your approach.
-    This helps avoid duplicate effort, ensures your contribution aligns with the
-    SDK's direction, and gives maintainers a chance to provide early feedback.
+  <Step title="首先开启 issue">
+    在开始重大工作之前，开启一个 issue 来讨论你的方法。
+    这有助于避免重复工作，确保你的贡献与 SDK 的方向一致，并让维护者有机会提供早期反馈。
   </Step>
-  <Step title="Join the SDK channel">
-    Find the relevant channel in [Discord](https://discord.gg/6CSzBmMkjX) (e.g.,
-    `#typescript-sdk-dev`, `#python-sdk-dev`).
+  <Step title="加入 SDK 频道">
+    在 [Discord](https://discord.gg/6CSzBmMkjX) 中找到相关频道（例如 `#typescript-sdk-dev`、`#python-sdk-dev`）。
   </Step>
-  <Step title="Read the SDK's CONTRIBUTING.md">
-    Each repository has its own `CONTRIBUTING.md` with specific instructions for
-    setting up your development environment, coding standards, commit message
-    conventions, and PR requirements.
+  <Step title="阅读 SDK 的 CONTRIBUTING.md">
+    每个仓库都有自己的 `CONTRIBUTING.md`，其中包含设置开发环境、编码标准、提交消息约定和 PR 要求的具体说明。
   </Step>
-  <Step title="Write tests">
-    All contributions should include appropriate test coverage. Bug fixes should
-    include a test that reproduces the issue, and new features should have tests
-    covering the expected behavior. This helps maintain SDK reliability and
-    prevents regressions.
+  <Step title="编写测试">
+    所有贡献都应包含适当的测试覆盖。Bug 修复应包含复现该问题的测试，新功能应包含覆盖预期行为的测试。这有助于保持 SDK 可靠性并防止回归。
   </Step>
 </Steps>
 
-### SDK Repositories
+### SDK 仓库
 
 <CardGroup cols={2}>
   <Card
@@ -466,155 +425,117 @@ Before diving into code, follow these steps.
   />
 </CardGroup>
 
-## Getting Help
+## 获取帮助
 
-### Communication Channels
+### 沟通渠道
 
-Got questions or need guidance? The MCP community is here to help.
+有问题或需要指导？MCP 社区在此提供帮助。
 
-- **[Discord](/community/communication#discord)** - Real-time discussion with contributors and
-  maintainers, focused on MCP contributions (not general MCP support)
-- **[GitHub Discussions](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions)**
-  \- Exploration and conversation: **feature requests**, questions, roadmap planning, and proposals
-  that need input before becoming concrete tasks
-- **[GitHub Issues](https://github.com/modelcontextprotocol/modelcontextprotocol/issues)** -
-  Actionable work: bug reports with reproducible steps, documentation fixes, and tasks that are
-  well-defined and ready to implement (not feature requests)
+- **[Discord](/community/communication#discord)** - 与贡献者和维护者进行实时讨论，专注于 MCP 贡献（而非一般 MCP 支持）
+- **[GitHub Discussions](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions)** - 探索和对话：**功能请求**、问题、路线图规划和需要输入才能成为具体任务的提案
+- **[GitHub Issues](https://github.com/modelcontextprotocol/modelcontextprotocol/issues)** - 可执行的工作：带有可复现步骤的 bug 报告、文档修复以及定义明确且 ready 实施的任务（而非功能请求）
 
-This separation helps maintainers focus on work that's ready for implementation while giving ideas
-room to develop. If you're unsure whether something is ready to be an issue, start with a
-discussion. For a complete guide, see our [Contributor Communication](/community/communication)
-documentation.
+这种分离有助于维护者专注于准备实施的工作，同时让想法有发展的空间。如果你不确定某事是否已准备好成为 issue，请先从讨论开始。完整指南，请参阅我们的 [贡献者沟通](/community/communication) 文档。
 
-For protocol discussions, join [Working Group](/community/working-interest-groups) channels like
-`#auth-wg` or `#server-identity-wg`. For SDK help, find your language's channel (e.g.,
-`#typescript-sdk-dev`).
+对于协议讨论，加入 [工作组](/community/working-interest-groups) 频道，如 `#auth-wg` 或 `#server-identity-wg`。对于 SDK 帮助，找到你语言的频道（例如 `#typescript-sdk-dev`）。
 
-### Finding a Sponsor for SEPs
+### 寻找 SEP 赞助人
 
-A **sponsor** is a Core Maintainer or Maintainer who champions your SEP through the review
-process. They provide feedback, help refine your proposal, and present it at Core Maintainer
-meetings.
+**赞助人** 是核心维护者或维护者，他们在审查过程中支持你的 SEP。他们提供反馈，帮助完善你的提案，并在核心维护者会议上展示它。
 
 <Warning>
-  Every SEP needs a sponsor to move forward. SEPs that don't find a sponsor
-  within 6 months are marked as **dormant**. Dormant SEPs aren't rejected
-  outright - they can be revived later if a sponsor is found or the proposal is
-  re-assessed to be needed.
+  每个 SEP 都需要一个赞助人才能继续推进。6 个月内未找到赞助人的 SEP 将被标记为 **休眠**。休眠的 SEP 不会被直接拒绝——如果找到赞助人或重新评估认为需要该提案，它们可以在以后恢复。
 </Warning>
 
-To find a sponsor:
+寻找赞助人：
 
 <Steps>
-  <Step title="Find relevant maintainers">
-    Look at the [maintainer
-    list](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/MAINTAINERS.md)
-    to find maintainers working in your area.
+  <Step title="寻找相关的维护者">
+    查看 [维护者列表](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/MAINTAINERS.md) 以查找在你领域工作的维护者。
   </Step>
-  <Step title="Tag maintainers in your PR">
-    Tag 1-2 relevant maintainers (don't spam everyone).
+  <Step title="在你的 PR 中标记维护者">
+    标记 1-2 位相关维护者（不要骚扰所有人）。
   </Step>
-  <Step title="Share in Discord">
-    Post your PR in the relevant Discord channel to increase visibility.
+  <Step title="在 Discord 中分享">
+    在相关 Discord 频道发布你的 PR 以增加可见性。
   </Step>
-  <Step title="Follow up if needed">
-    If no response after 2 weeks, ask in `#general` or reach out to a Core
-    Maintainer.
+  <Step title="必要时跟进">
+    如果 2 周后无响应，请在 `#general` 中询问或联系核心维护者。
   </Step>
 </Steps>
 
-Maintainers review open proposals regularly, but response time varies based on complexity and
-availability.
+维护者定期审查开放的提案，但响应时间因复杂性和可用性而异。
 
-## Troubleshooting
+## 故障排除
 
-Sometimes things don't go as planned - that's completely normal! Here are solutions to common
-issues. If you're still stuck, don't hesitate to ask for help in
-[Discord](/community/communication#discord). The community is friendly and happy to help you get
-unstuck.
+有时事情不会按计划进行——这完全正常！以下是常见问题的解决方案。如果你仍然卡住，请毫不犹豫地在 [Discord](/community/communication#discord) 中寻求帮助。社区很友好，很乐意帮助你摆脱困境。
 
-### `npm run check` fails
+### `npm run check` 失败
 
-Common causes:
+常见原因：
 
-- **Wrong Node.js version** - Ensure you have Node.js 24+
-- **Missing dependencies** - Run `npm install` again
-- **Schema out of sync** - Run `npm run generate:schema`
-- **Formatting issues** - Run `npm run format` to auto-fix
+- **Node.js 版本错误** - 确保你有 Node.js 24+
+- **缺少依赖** - 再次运行 `npm install`
+- **模式不同步** - 运行 `npm run generate:schema`
+- **格式问题** - 运行 `npm run format` 自动修复
 
-### My PR has been sitting unnoticed for weeks
+### 我的 PR 几周都无人问津
 
-1. Ensure all CI checks pass
-2. Politely ping the desired reviewer in a comment
-3. Ask in the relevant Discord channel
-4. For urgent issues, reach out to a Core Maintainer
+1. 确保所有 CI 检查通过
+2. 在评论中礼貌地提醒所需的审查者
+3. 在相关 Discord 频道询问
+4. 对于紧急问题，联系核心维护者
 
-### I can't find a sponsor for my SEP
+### 我找不到我的 SEP 的赞助人
 
-1. Make sure your idea has been discussed in Discord or an Interest Group first
-2. Proposals with demonstrated community interest are more likely to find sponsors
-3. Consider whether your change might be too large - could it be split into smaller SEPs?
+1. 确保你的想法已在 Discord 或兴趣小组中讨论过
+2. 有社区兴趣展示的提案更有可能找到赞助人
+3. 考虑你的变更是否太大——能否拆分为更小的 SEP？
 
-### My SEP was rejected
+### 我的 SEP 被拒绝了
 
-Don't take it personally - a SEP rejection doesn't mean your idea was bad. SEPs can be rejected
-for many reasons: timing, scope, competing priorities, or simply because the protocol isn't ready
-for that change yet. The feedback you receive is valuable and often points toward a path forward.
+不要往心里去——SEP 被拒绝并不意味着你的想法不好。SEP 可能因多种原因被拒绝：时机、范围、竞争优先级，或者仅仅因为协议尚未准备好进行该变更。你收到的反馈很有价值，通常指向前进的道路。
 
-Rejection is not permanent. You have a few options ahead:
+拒绝不是永久性的。你有几个选择：
 
-1. **Address the feedback and resubmit** - Often, rejection comes with specific concerns.
-   Addressing those concerns and resubmitting can be the right path forward.
-2. **Discuss in Discord** - Talk with maintainers to better understand the concerns. Sometimes a
-   brief conversation reveals a simpler path forward.
-3. **Try a different approach** - Submit a new SEP that addresses the same problem differently,
-   incorporating what you learned.
-4. **Wait for the right moment** - Circumstances change. New use cases emerge, the community
-   grows, and priorities shift. An idea rejected today might be welcomed tomorrow.
+1. **解决反馈并重新提交** - 通常，拒绝伴随着具体的担忧。解决这些担忧并重新提交可能是正确的前进道路。
+2. **在 Discord 中讨论** - 与维护者交谈以更好地理解担忧。有时简短的对话会揭示更简单的前进道路。
+3. **尝试不同的方法** - 提交一个新的 SEP，以不同的方式解决相同的问题，并结合你学到的东西。
+4. **等待合适的时机** - 情况会变化。新的用例出现，社区成长，优先级转变。今天被拒绝的想法明天可能会受到欢迎。
 
-## Out of Scope
+## 范围之外
 
-This guide covers contributions to the **core MCP project** - the specification, official SDKs,
-and documentation.
+本指南涵盖对 **MCP 核心项目** 的贡献——规范、官方 SDK 和文档。
 
-Building your own MCP servers, clients, or tools is **not** covered here. For guidance on building
-with MCP, see our documentation:
+构建您自己的 MCP 服务器、客户端或工具 **不** 在此涵盖范围内。有关使用 MCP 构建的指导，请参阅我们的文档：
 
-- [Build a Server](/docs/develop/build-server)
-- [Build a Client](/docs/develop/build-client)
-- [Example Servers](/examples)
+- [构建服务器](/docs/develop/build-server)
+- [构建客户端](/docs/develop/build-client)
+- [服务器示例](/examples)
 
-If you build something you'd like to share with the community, you can submit it to the
-[MCP Registry](/registry/about).
+如果您构建了想要与社区分享的内容，您可以将其提交到 [MCP 注册表](/registry/about)。
 
-## AI Contributions
+## AI 贡献
 
-We welcome the use of AI tools like Claude or ChatGPT to help with your contributions! If you do
-use AI assistance, just let us know in your pull request or issue - a quick note about how you
-used it (drafting docs, generating code, brainstorming, etc.) is all we need.
+我们欢迎使用像 Claude 或 ChatGPT 这样的 AI 工具来帮助您的贡献！如果您确实使用了 AI 协助，只需在您的 pull request 或 issue 中告诉我们——简要说明您如何使用它（起草文档、生成代码、头脑风暴等）就足够了。
 
-The key is that you understand and can stand behind your contribution:
+关键在于您理解并能够为您的贡献负责：
 
-- **You get it** - You understand what the changes do and can explain them
-- **You know why** - You can articulate why the change is needed
-- **You've verified it** - You've tested or validated that it works as intended
+- **您理解它** - 您理解更改的作用并能解释它们
+- **您知道原因** - 您能够阐明为什么需要此更改
+- **您已验证它** - 您已测试或验证它能按预期工作
 
-You can read more about our stance in
-[our spec contribution guidelines](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/CONTRIBUTING.md#ai-contributions).
+您可以在 [我们的规范贡献指南](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/CONTRIBUTING.md#ai-contributions) 中阅读更多关于我们立场的信息。
 
-## Code of Conduct
+## 行为准则
 
-All contributors must follow the
-[Code of Conduct](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/CODE_OF_CONDUCT.md).
-We expect respectful, professional, and inclusive interactions across all channels.
+所有贡献者必须遵守 [行为准则](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/CODE_OF_CONDUCT.md)。我们期望在所有渠道中进行尊重、专业和包容的互动。
 
-## License
+## 许可证
 
-By contributing, you agree that your contributions will be licensed under:
+通过贡献，您同意您的贡献将根据以下许可进行授权：
 
-- **Code and specifications**: Apache License 2.0
-- **Documentation** (excluding specifications): CC-BY 4.0
+- **代码和规范**：Apache License 2.0
+- **文档**（不包括规范）：CC-BY 4.0
 
-See the
-[LICENSE](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/LICENSE) file for
-details.
+详见 [LICENSE](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/LICENSE) 文件。

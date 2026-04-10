@@ -1,13 +1,13 @@
 ---
-title: Versioning Published MCP Servers
-sidebarTitle: Versioning
+title: 已发布 MCP 服务器的版本控制
+sidebarTitle: 版本控制
 ---
 
 <Note>
-  The MCP Registry is currently in preview. Breaking changes or data resets may occur before general availability. If you encounter any issues, please report them on [GitHub](https://github.com/modelcontextprotocol/registry/issues).
+  MCP Registry 目前处于预览阶段。在正式发布之前，可能会发生破坏性更改或数据重置。如果遇到任何问题，请在 [GitHub](https://github.com/modelcontextprotocol/registry/issues) 上报告。
 </Note>
 
-MCP servers **MUST** define a version string in `server.json`. For example:
+MCP 服务器 **必须** 在 `server.json` 中定义版本字符串。例如：
 
 ```json server.json highlight={6}
 {
@@ -29,51 +29,51 @@ MCP servers **MUST** define a version string in `server.json`. For example:
 }
 ```
 
-The version string **MUST** be unique for each publication of the server. Once published, the version string (and other metadata) cannot be changed.
+版本字符串对于服务器的每次发布 **必须** 是唯一的。一旦发布，版本字符串（和其他元数据）无法更改。
 
-## Version Format
+## 版本格式
 
-The MCP Registry recommends [semantic versioning](https://semver.org/), but supports any version string format. When a server is published, the MCP Registry will attempt to parse its version as a semantic version string for sorting purposes, and will mark the version as "latest" if appropriate. If parsing fails, the version will always be marked as "latest".
+MCP Registry 推荐 [语义化版本控制](https://semver.org/)，但支持任何版本字符串格式。当服务器发布时，MCP Registry 将尝试将其版本解析为语义化版本字符串以便排序，如果合适，会将该版本标记为"latest"。如果解析失败，该版本将始终被标记为"latest"。
 
 <Warning>
 
-If a server uses semantic version strings but publishes a new version that does _not_ conform to semantic versioning, the new version will be marked as "latest" even if it would otherwise be sorted before the semantic version strings.
+如果服务器使用语义化版本字符串，但发布了一个 _不_ 符合语义化版本控制的新版本，即使该新版本否则应该排在语义化版本字符串之前，它也会被标记为"latest"。
 
 </Warning>
 
-As an error prevention mechanism, the MCP Registry prohibits version strings that appear to refer to ranges of versions.
+作为一种错误预防机制，MCP Registry 禁止使用看似指代版本范围的版本字符串。
 
-| Example        | Type                | Guidance                       |
+| 示例           | 类型                | 指导                       |
 | -------------- | ------------------- | ------------------------------ |
-| `1.0.0`        | semantic version    | **Recommended**                |
-| `2.1.3-alpha`  | semantic prerelease | **Recommended**                |
-| `1.0.0-beta.1` | semantic prerelease | **Recommended**                |
-| `3.0.0-rc.2`   | semantic prerelease | **Recommended**                |
-| `2025.11.25`   | semantic date       | Recommended                    |
-| `2025.6.18`    | semantic date       | Recommended **(⚠️Caution!⚠️)** |
-| `2025.06.18`   | non-semantic date   | Allowed **(⚠️Caution!⚠️)**     |
-| `2025-06-18`   | non-semantic date   | Allowed                        |
-| `v1.0`         | prefixed version    | Allowed                        |
-| `^1.2.3`       | version range       | Prohibited                     |
-| `~1.2.3`       | version range       | Prohibited                     |
-| `>=1.2.3`      | version range       | Prohibited                     |
-| `<=1.2.3`      | version range       | Prohibited                     |
-| `>1.2.3`       | version range       | Prohibited                     |
-| `<1.2.3`       | version range       | Prohibited                     |
-| `1.x`          | version range       | Prohibited                     |
-| `1.2.*`        | version range       | Prohibited                     |
-| `1 - 2`        | version range       | Prohibited                     |
-| `1.2 \|\| 1.3` | version range       | Prohibited                     |
+| `1.0.0`        | 语义化版本          | **推荐**                       |
+| `2.1.3-alpha`  | 语义化预发布        | **推荐**                       |
+| `1.0.0-beta.1` | 语义化预发布        | **推荐**                       |
+| `3.0.0-rc.2`   | 语义化预发布        | **推荐**                       |
+| `2025.11.25`   | 语义化日期          | 推荐                           |
+| `2025.6.18`    | 语义化日期          | 推荐 **(⚠️注意！⚠️)**          |
+| `2025.06.18`   | 非语义化日期        | 允许 **(⚠️注意！⚠️)**          |
+| `2025-06-18`   | 非语义化日期        | 允许                           |
+| `v1.0`         | 带前缀的版本        | 允许                           |
+| `^1.2.3`       | 版本范围            | 禁止                           |
+| `~1.2.3`       | 版本范围            | 禁止                           |
+| `>=1.2.3`      | 版本范围            | 禁止                           |
+| `<=1.2.3`      | 版本范围            | 禁止                           |
+| `>1.2.3`       | 版本范围            | 禁止                           |
+| `<1.2.3`       | 版本范围            | 禁止                           |
+| `1.x`          | 版本范围            | 禁止                           |
+| `1.2.*`        | 版本范围            | 禁止                           |
+| `1 - 2`        | 版本范围            | 禁止                           |
+| `1.2 \|\| 1.3` | 版本范围            | 禁止                           |
 
-## Best Practices
+## 最佳实践
 
-### Use Semantic Versioning
+### 使用语义化版本控制
 
-Use [semantic versioning](https://semver.org/) for version strings.
+对版本字符串使用 [语义化版本控制](https://semver.org/)。
 
-### Align Server Version with Package Version
+### 使服务器版本与包版本保持一致
 
-For local servers, align the server version with the underlying package version in order to prevent confusion:
+对于本地服务器，使服务器版本与底层包版本保持一致以防止混淆：
 
 ```json server.json highlight={2,7}
 {
@@ -91,7 +91,7 @@ For local servers, align the server version with the underlying package version 
 }
 ```
 
-If there are multiple underlying packages, use the server version to indicate the overall release version:
+如果有多个底层包，使用服务器版本来表示整体发布版本：
 
 ```json server.json highlight={2,7,15}
 {
@@ -117,9 +117,9 @@ If there are multiple underlying packages, use the server version to indicate th
 }
 ```
 
-### Align Server Version with Remote API Version
+### 使服务器版本与远程 API 版本保持一致
 
-For remote servers with an API version, the server version should align with the API version:
+对于具有 API 版本的远程服务器，服务器版本应与 API 版本保持一致：
 
 ```json server.json highlight={2,6}
 {
@@ -133,9 +133,9 @@ For remote servers with an API version, the server version should align with the
 }
 ```
 
-### Use Prerelease Versions for Registry-only Updates
+### 对仅注册表更新使用预发布版本
 
-If you anticipate publishing a server multiple times _without_ changing the underlying package or remote URL — for example, to update other parts of the metadata — use semantic prerelease versions:
+如果您预计多次发布服务器而 _不_ 更改底层包或远程 URL — 例如，更新元数据的其他部分 — 请使用语义化预发布版本：
 
 ```json server.json highlight={2}
 {
@@ -155,17 +155,17 @@ If you anticipate publishing a server multiple times _without_ changing the unde
 
 <Warning>
 
-According to semantic versioning, prerelease versions such as `1.2.3-1` are sorted before regular semantic versions such as `1.2.3`. Therefore, if you publish a prerelease version _after_ its corresponding regular version, the prerelease version will **not** be marked as "latest".
+根据语义化版本控制，预发布版本（如 `1.2.3-1`）排在常规语义化版本（如 `1.2.3`）之前。因此，如果您在对应的常规版本 _之后_ 发布预发布版本，该预发布版本将 **不会** 被标记为"latest"。
 
 </Warning>
 
-## Aggregator Recommendations
+## 聚合器建议
 
-MCP Registry aggregators **SHOULD**:
+MCP Registry 聚合器 **应该**：
 
-1. Attempt to interpret versions as semantic versions when possible
-2. Use the following version comparison rules:
-   - If one version is marked as "latest", treat it as later
-   - If both versions are valid semantic versions, use semantic versioning comparison rules
-   - If neither versions are valid semantic versions, compare published timestamp
-   - If one version is a valid semantic version and the other is not, treat the semantic version as later
+1. 尽可能尝试将版本解释为语义化版本
+2. 使用以下版本比较规则：
+   - 如果一个版本被标记为"latest"，则将其视为较新版本
+   - 如果两个版本都是有效的语义化版本，使用语义化版本比较规则
+   - 如果两个版本都不是有效的语义化版本，比较发布时间戳
+   - 如果一个版本是有效的语义化版本而另一个不是，将语义化版本视为较新版本

@@ -1,143 +1,143 @@
 ---
-title: "SEP-2133: Extensions"
-sidebarTitle: "SEP-2133: Extensions"
-description: "Extensions"
+title: "SEP-2133: 扩展"
+sidebarTitle: "SEP-2133: 扩展"
+description: "扩展"
 ---
 
 <div className="flex items-center gap-2 mb-4">
   <Badge color="green" shape="pill">
-    Final
+    最终版
   </Badge>
   <Badge color="gray" shape="pill">
-    Standards Track
+    标准轨道
   </Badge>
 </div>
 
-| Field         | Value                                                                           |
+| 字段          | 值                                                                            |
 | ------------- | ------------------------------------------------------------------------------- |
 | **SEP**       | 2133                                                                            |
-| **Title**     | Extensions                                                                      |
-| **Status**    | Final                                                                           |
-| **Type**      | Standards Track                                                                 |
-| **Created**   | 2025-01-21                                                                      |
-| **Author(s)** | Peter Alexander ([@pja-ant](https://github.com/pja-ant))                        |
-| **Sponsor**   | None (seeking sponsor)                                                          |
+| **标题**      | 扩展                                                                            |
+| **状态**      | 最终版                                                                          |
+| **类型**      | 标准轨道                                                                        |
+| **创建日期**  | 2025-01-21                                                                      |
+| **作者**      | Peter Alexander ([@pja-ant](https://github.com/pja-ant))                        |
+| **赞助者**    | 无（寻求赞助者）                                                                |
 | **PR**        | [#2133](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2133) |
 
 ---
 
-## Abstract
+## 摘要
 
-This SEP establishes a lightweight framework for extending the Model Context Protocol through optional, composable extensions. This proposal defines a governance model and presentation structure for extensions that allows the MCP ecosystem to evolve while maintaining core protocol stability. Extensions enable experimentation with new capabilities without forcing adoption across all implementations, providing clear extension points for the community to propose, review, and adopt enhanced functionality.
+本 SEP 建立了一个轻量级框架，用于通过可选的、可组合的扩展来扩展模型上下文协议（Model Context Protocol）。本提案定义了一个治理模型和扩展展示结构，允许 MCP 生态系统在保持核心协议稳定性的同时演进。扩展使得新能力的实验成为可能，而无需强制所有实现都采用，为社区提议、审查和采用增强功能提供了清晰的扩展点。
 
-This SEP defines both official extensions (maintained by MCP maintainers) and experimental extensions (an incubation pathway for Working Groups and Interest Groups to prototype and collaborate on extension ideas before formal acceptance). Externally maintained extensions will likely come at a later stage.
+本 SEP 定义了官方扩展（由 MCP 维护者维护）和实验性扩展（工作组和兴趣组在正式接受之前原型化和协作扩展想法的孵化路径）。外部维护的扩展可能会在稍后阶段出现。
 
-## Motivation
+## 动机
 
-MCP currently lacks any form of guidance on how extensions are to be proposed or adopted. Without a process, it is unclear how these extensions are governed, what expectations there are around implementation, how they should be referenced in the specification, etc.
+MCP 目前缺乏任何关于如何提议或采用扩展的指导。如果没有流程，就不清楚这些扩展是如何治理的，对实现有什么期望，以及它们应该在规范中如何引用等。
 
-## Specification
+## 规范
 
-### Definition
+### 定义
 
-An MCP extension is an optional addition to the specification that defines capabilities beyond the core protocol. Extensions enable functionality that may be modular (e.g., distinct features like authentication), specialized (e.g., industry-specific logic), or experimental (e.g., features being incubated for potential core inclusion).
+MCP 扩展是规范的可选补充，定义了核心协议之外的能力。扩展启用的功能可以是模块化的（例如，像认证这样的不同特性）、专业化的（例如，行业特定逻辑）或实验性的（例如，正在孵化以潜在纳入核心的特性）。
 
-Extensions are identified using a unique _extension identifier_ with the format: `{vendor-prefix}/{extension-name}`, e.g. `io.modelcontextprotocol/oauth-client-credentials` or `com.example/websocket-transport`. The names follow the same rules as the [\_meta keys](https://modelcontextprotocol.io/specification/draft/basic/index#meta), except that the prefix is mandatory.
+扩展使用唯一的_扩展标识符_进行识别，格式为：`{供应商前缀}/{扩展名称}`，例如 `io.modelcontextprotocol/oauth-client-credentials` 或 `com.example/websocket-transport`。名称遵循与 [_meta 键](https://modelcontextprotocol.io/specification/draft/basic/index#meta) 相同的规则，除了前缀是强制的。
 
-To prevent identifier collisions, the vendor prefix SHOULD be a reversed domain name that the extension author owns or controls (similar to Java package naming conventions). For example, a company owning `example.com` would use `com.example/` as their prefix.
+为了防止标识符冲突，供应商前缀应该是扩展作者拥有或控制的反向域名（类似于 Java 包命名约定）。例如，拥有 `example.com` 的公司将使用 `com.example/` 作为其前缀。
 
-Breaking changes MUST use a new identifier, e.g. `io.modelcontextprotocol/oauth-client-credentials-v2`. A breaking change is any modification that would cause existing compliant implementations to fail or behave incorrectly, including: removing or renaming fields, changing field types, altering the semantics of existing behavior, or adding new required fields.
+破坏性变更必须使用新的标识符，例如 `io.modelcontextprotocol/oauth-client-credentials-v2`。破坏性变更是指任何会导致现有合规实现失败或行为不正确的修改，包括：删除或重命名字段、更改字段类型、改变现有行为的语义或添加新的必填字段。
 
-Extensions may have settings that are sent in client/server messages for fine-grained configuration.
+扩展可能具有在客户端/服务器消息中发送的设置，用于细粒度配置。
 
-This SEP defines _Official Extensions_ and _Experimental Extensions_. Experimental extensions are maintained within the MCP organization as an incubation pathway but are not yet officially accepted. _Unofficial extensions_ are not recognized by MCP governance and may be introduced and governed by developers outside the MCP organization.
+本 SEP 定义了_官方扩展_和_实验性扩展_。实验性扩展在 MCP 组织内维护，作为孵化路径，但尚未正式接受。_非官方扩展_不受 MCP 治理认可，可能由 MCP 组织之外的开发人员引入和治理。
 
-### Official Extensions
+### 官方扩展
 
-Official extensions live inside the MCP github org at https://github.com/modelcontextprotocol/ and are officially developed and recommended by MCP maintainers. Official extensions use the `io.modelcontextprotocol` vendor prefix in their extension identifiers.
+官方扩展位于 MCP GitHub 组织内，地址为 https://github.com/modelcontextprotocol/，并由 MCP 维护者官方开发和推荐。官方扩展在其扩展标识符中使用 `io.modelcontextprotocol` 供应商前缀。
 
-An _extension repository_ is a repository within the official modelcontextprotocol github org with the `ext-` prefix, e.g. https://github.com/modelcontextprotocol/ext-auth.
+_扩展仓库_ 是官方 modelcontextprotocol GitHub 组织内带有 `ext-` 前缀的仓库，例如 https://github.com/modelcontextprotocol/ext-auth。
 
-- Extension repositories are created at the core maintainers discretion with the purpose of grouping extensions in a specific area (e.g. auth, transport, financial services).
-- A repository has a set of maintainers (identified by MAINTAINERS.md) appointed by the core maintainers that are responsible for the repository and extensions within it (e.g. [ext-auth MAINTAINERS.md](https://github.com/modelcontextprotocol/ext-auth/blob/main/MAINTAINERS.md), [ext-apps MAINTAINERS.md](https://github.com/modelcontextprotocol/ext-apps/blob/main/MAINTAINERS.md)).
-- Extensions SHOULD have an associated working group or interest group to guide their development and gather community input.
+- 扩展仓库由核心维护者酌情创建，目的是将特定领域的扩展分组（例如，认证、传输、金融服务）。
+- 仓库有一组由核心维护者指定的维护者（由 MAINTAINERS.md 标识），负责仓库及其中的扩展（例如 [ext-auth MAINTAINERS.md](https://github.com/modelcontextprotocol/ext-auth/blob/main/MAINTAINERS.md)，[ext-apps MAINTAINERS.md](https://github.com/modelcontextprotocol/ext-apps/blob/main/MAINTAINERS.md)）。
+- 扩展应该有一个关联的工作组或兴趣组来指导其开发并收集社区意见。
 
-An _extension_ is a versioned specification document within an extension repository, e.g. https://github.com/modelcontextprotocol/ext-auth/blob/main/specification/draft/oauth-client-credentials.mdx
+_扩展_ 是扩展仓库内的版本化规范文档，例如 https://github.com/modelcontextprotocol/ext-auth/blob/main/specification/draft/oauth-client-credentials.mdx
 
-- Extension specifications MUST use the same language as the core specification (i.e. [[BCP 14](https://www.rfc-editor.org/info/bcp14)] [[RFC2119](https://datatracker.ietf.org/doc/html/rfc2119)] [[RFC8174](https://datatracker.ietf.org/doc/html/rfc8174)]) and SHOULD be worded as if they were part of the core specification.
+- 扩展规范必须使用与核心规范相同的语言（即 [[BCP 14](https://www.rfc-editor.org/info/bcp14)] [[RFC2119](https://datatracker.ietf.org/doc/html/rfc2119)] [[RFC8174](https://datatracker.ietf.org/doc/html/rfc8174)]），并且措辞应仿佛它们是核心规范的一部分。
 
-While day-to-day governance is delegated to extension repository maintainers, the core maintainers retain ultimate authority over official extensions, including the ability to modify, deprecate, or remove any extension.
+虽然日常治理委托给扩展仓库维护者，但核心维护者保留对官方扩展的最终权威，包括修改、弃用或移除任何扩展的能力。
 
-### Experimental Extensions
+### 实验性扩展
 
-Experimental extensions provide an incubation pathway for Working Groups (WGs) and Interest Groups (IGs) to facilitate discovery, prototype ideas, and collaborate on extension concepts before formal SEP submission. Experimental extensions allow cross-company collaboration under neutral governance with clear anti-trust protection and IP clarity.
+实验性扩展为工作组（WGs）和兴趣组（IGs）提供了一个孵化路径，以便在正式 SEP 提交之前促进发现、原型化想法和协作扩展概念。实验性扩展允许在中立治理下进行跨公司协作，并具有明确的反垄断保护和知识产权清晰度。
 
-An _experimental extension repository_ is a repository within the official modelcontextprotocol github org with the `experimental-ext-` prefix, e.g. `https://github.com/modelcontextprotocol/experimental-ext-interceptors`.
+_实验性扩展仓库_ 是官方 modelcontextprotocol GitHub 组织内带有 `experimental-ext-` 前缀的仓库，例如 `https://github.com/modelcontextprotocol/experimental-ext-interceptors`。
 
-- Any maintainer MAY create an experimental extension repository while the associated SEP is still in draft state (or before a SEP has been submitted).
-- Experimental extensions MUST be associated with a Working Group or Interest Group, whose maintainers are responsible for day-to-day governance of the repository.
-- Experimental extension repositories MUST clearly indicate their experimental/non-official status (e.g., in the README) to avoid confusion with official extensions.
-- Any published packages from experimental extensions MUST use naming that clearly indicates their experimental status.
-- Core maintainers retain oversight of experimental extension repositories, including the ability to archive or remove them.
+- 任何维护者都可以在关联的 SEP 仍处于草稿状态（或在提交 SEP 之前）创建实验性扩展仓库。
+- 实验性扩展必须与工作组或兴趣组关联，其维护者负责仓库的日常治理。
+- 实验性扩展仓库必须清楚表明其实验性/非官方状态（例如，在 README 中），以避免与官方扩展混淆。
+- 任何来自实验性扩展的已发布包必须使用清楚表明其实验状态的命名。
+- 核心维护者保留对实验性扩展仓库的监督权，包括归档或移除它们的能力。
 
-To graduate an experimental extension to official status, the standard SEP process (Extensions Track) applies. The experimental repository and any reference implementations developed during incubation MAY be referenced in the SEP to demonstrate the extension's practicality.
+要将实验性扩展转正为官方状态，适用标准 SEP 流程（扩展轨道）。孵化期间开发的实验性仓库和任何参考实现可以在 SEP 中引用，以证明扩展的实用性。
 
-### Lifecycle
+### 生命周期
 
-#### Creation
+#### 创建
 
-Extensions MAY optionally begin as experimental extensions (see _Experimental Extensions_ section) to facilitate prototyping and collaboration before formal submission. This incubation period is encouraged but not required.
+扩展可以选择性地作为实验性扩展开始（参见_实验性扩展_部分），以便在正式提交之前促进原型设计和协作。鼓励但不强制要求此孵化期。
 
-To become an official extension, extensions are created via a SEP in the [main MCP repository](https://github.com/modelcontextprotocol/modelcontextprotocol/) using the [standard SEP guidelines](https://modelcontextprotocol.io/community/sep-guidelines) but with a new type: **Extensions Track**. This type follows the same review and acceptance process as Standards Track SEPs, but clearly indicates that the proposal is for an extension rather than a core protocol addition. The SEP must identify the Working Group and Extension Maintainers that will be responsible for the extension. See [SEP-2148](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2148) for how maintainers are appointed.
+要成为官方扩展，扩展是通过 [MCP 主仓库](https://github.com/modelcontextprotocol/modelcontextprotocol/) 中的 SEP 创建的，使用 [标准 SEP 指南](https://modelcontextprotocol.io/community/sep-guidelines)，但使用一个新类型：**扩展轨道**。此类型遵循与标准轨道 SEP 相同的审查和接受流程，但清楚地表明该提案是针对扩展而不是核心协议补充。SEP 必须识别将负责扩展的工作组和扩展维护者。参见 [SEP-2148](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2148) 了解如何任命维护者。
 
-Extension SEPs:
+扩展 SEP：
 
-- SHOULD be discussed and iterated on in a relevant working group prior to submission.
-- MUST have at least one reference implementation in an official SDK prior to review to ensure the extension is practical and implementable.
-- MAY reference an existing experimental extension repository and implementations developed during incubation.
-- Will be reviewed by the Core Maintainers, who have the final authority over its inclusion as an Official Extension.
+- 应该在提交之前在相关工作组中进行讨论和迭代。
+- 在审查之前必须至少在官方 SDK 中有一个参考实现，以确保扩展是实用且可实现的。
+- 可以引用现有的实验性扩展仓库和孵化期间开发的实现。
+- 将由核心维护者审查，他们对其作为官方扩展的包含拥有最终决定权。
 
-Once approved, the author SHOULD produce a PR that introduces the extension to the extension repository and reference in the main spec (see _Spec Recommendation_ section). Approved extensions MAY be implemented in additional clients / servers / SDKs (see _SDK Implementation_).
+一旦批准，作者应该生成一个 PR，将扩展引入扩展仓库并在主规范中引用（参见_规范建议_部分）。批准的扩展可以在额外的客户端/服务器/SDK 中实现（参见 _SDK 实现_）。
 
-#### Iteration
+#### 迭代
 
-Once accepted, extensions may be iterated on without further review from the Core Maintainers. The extension repository maintainers are responsible for the review and acceptance of changes to an extension and SHOULD coordinate change via the relevant working group(s). As extensions are independent of the core protocol, extensions may be updated and deployed at any time, but changes MUST ensure they account for backwards compatibility in their design.
+一旦被接受，扩展可以在无需核心维护者进一步审查的情况下进行迭代。扩展仓库维护者负责审查和接受对扩展的更改，并应该通过相关工作组协调更改。由于扩展独立于核心协议，扩展可以随时更新和部署，但更改必须确保其设计考虑到向后兼容性。
 
-#### Promotion to Core Protocol (Optional)
+#### 晋升为核心协议（可选）
 
-Eventually, some extensions MAY transition to being core protocol features. This SHOULD be treated as a Standards Track SEP with separate core maintainer review. Note that not all extensions are suitable for inclusion in the core protocol (e.g. those specific to an industry) and may remain as extensions indefinitely.
+最终，某些扩展可能会过渡为核心协议特性。这应被视为标准轨道 SEP，并进行单独的核心维护者审查。请注意，并非所有扩展都适合纳入核心协议（例如，那些特定于行业的扩展），并且可能无限期地保持为扩展。
 
-### Spec Recommendation
+### 规范建议
 
-Extensions will be referenced from a new page on the MCP website at [modelcontextprotocol.io/extensions](http://modelcontextprotocol.io/extensions) (to be created) with links to their specification.
+扩展将从 MCP 网站上的新页面 [modelcontextprotocol.io/extensions](http://modelcontextprotocol.io/extensions)（待创建）引用，并链接到其规范。
 
-Links to relevant extensions MAY also be added to the core specification as appropriate (e.g. https://modelcontextprotocol.io/specification/draft/basic/authorization may link to ext-auth extensions), but they MUST be clearly advertised as optional extensions and SHOULD be links only (not copies of specification text).
+相关链接也可以酌情添加到核心规范中（例如，https://modelcontextprotocol.io/specification/draft/basic/authorization 可以链接到 ext-auth 扩展），但它们必须明确宣传为可选扩展，并且应该仅是链接（而不是规范文本的副本）。
 
-### SDK Implementation
+### SDK 实现
 
-SDKs MAY implement extensions. Where implemented, extensions MUST be disabled by default and require explicit opt-in. SDK documentation SHOULD list supported extensions.
+SDK 可以实现扩展。在实现的情况下，扩展必须默认禁用，并需要显式选择加入。SDK 文档应该列出支持的扩展。
 
-SDK maintainers have full autonomy over extension support in their SDKs:
+SDK 维护者对其 SDK 中的扩展支持拥有完全自主权：
 
-- Maintainers are solely responsible for the implementation and maintenance of any extensions they choose to support.
-- Maintainers are under no obligation to implement any extension or accept contributed implementations. Extension support is not required for 100% protocol conformance or the upcoming SDK conformance tiers.
-- This SEP does not prescribe how SDKs should structure or package extensions. Maintainers may provide extension points, plugin systems, or any other mechanism they see fit.
+- 维护者仅负责他们选择支持的任何扩展的实现和维护。
+- 维护者没有义务实现任何扩展或接受贡献的实现。扩展支持不是 100% 协议一致性或即将到来的 SDK 一致性层级所必需的。
+- 本 SEP 不规定 SDK 应如何构建或打包扩展。维护者可以提供扩展点、插件系统或他们认为合适的任何其他机制。
 
-### Evolution
+### 演进
 
-All extensions evolve **independently** of the core protocol, i.e. a new version of an extension MAY be published without review by the core maintainers. Minor updates, bug fixes, and non-breaking enhancements to an extension do not require a new SEP; these changes are managed by the extension repository maintainers.
+所有扩展都**独立**于核心协议演进，即可以在无需核心维护者审查的情况下发布扩展的新版本。扩展的次要更新、错误修复和非破坏性增强不需要新的 SEP；这些更改由扩展仓库维护者管理。
 
-Extensions SHOULD be versioned, but exact versioning approach is not specified here.
+扩展应该进行版本控制，但此处未指定确切的版本控制方法。
 
-### Negotiation
+### 协商
 
-Clients and servers advertise their support for extensions in the [ClientCapabilities](https://modelcontextprotocol.io/specification/2025-06-18/schema#clientcapabilities) and [ServerCapabilities](https://modelcontextprotocol.io/specification/2025-06-18/schema#servercapabilities) fields respectively, and in the [Server Card](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1649) (currently in progress).
+客户端和服务器分别在 [ClientCapabilities](https://modelcontextprotocol.io/specification/2025-06-18/schema#clientcapabilities) 和 [ServerCapabilities](https://modelcontextprotocol.io/specification/2025-06-18/schema#servercapabilities) 字段中宣告他们对扩展的支持，并在 [服务器卡片](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1649) 中（目前正在进行中）。
 
-A new "extensions" field will be introduced to each that is a map of _extension identifiers_ to per-extension settings objects. Each extension specifies the schema of its settings object; an empty object indicates no settings.
+将为每个字段引入一个新的 "extensions" 字段，它是_扩展标识符_到每个扩展设置对象的映射。每个扩展指定其设置对象的模式；空对象表示没有设置。
 
-#### Client Capabilities
+#### 客户端能力
 
-Clients advertise extension support in the `initialize` request:
+客户端在 `initialize` 请求中宣告扩展支持：
 
 ```json
 {
@@ -164,9 +164,9 @@ Clients advertise extension support in the `initialize` request:
 }
 ```
 
-#### Server Capabilities
+#### 服务器能力
 
-Servers advertise extension support in the `initialize` response:
+服务器在 `initialize` 响应中宣告扩展支持：
 
 ```json
 {
@@ -188,9 +188,9 @@ Servers advertise extension support in the `initialize` response:
 }
 ```
 
-#### Server-Side Capability Checking
+#### 服务器端能力检查
 
-Servers SHOULD check client capabilities before offering extension-specific features:
+服务器在提供特定于扩展的功能之前应该检查客户端能力：
 
 ```typescript
 const hasUISupport = clientCapabilities?.extensions?.[
@@ -198,85 +198,85 @@ const hasUISupport = clientCapabilities?.extensions?.[
 ]?.mimeTypes?.includes("text/html;profile=mcp-app");
 
 if (hasUISupport) {
-  // Register tools with UI features
+  // 注册带有 UI 功能的工具
 } else {
-  // Register text-only fallback
+  // 注册仅文本的回退方案
 }
 ```
 
-#### Graceful Degradation
+#### 优雅降级
 
-If one party supports an extension but the other does not, the supporting party MUST either revert to core protocol behavior or reject the request with an appropriate error if the extension is mandatory. Extensions SHOULD document their expected fallback behavior. For example, a server offering UI-enhanced tools should still return meaningful text content for clients that do not support the UI extension, while a server requiring a specific authentication extension MAY reject connections from clients that do not support it.
+如果一方支持扩展而另一方不支持，支持方必须要么回退到核心协议行为，要么如果扩展是强制性的，则使用适当的错误拒绝请求。扩展应该记录其预期的回退行为。例如，提供 UI 增强工具的服务器仍应为不支持 UI 扩展的客户端返回有意义的文本内容，而需要特定认证扩展的服务器可以拒绝来自不支持该扩展的客户端的连接。
 
-### Legal Requirements
+### 法律要求
 
-#### Trademark Policy
+#### 商标政策
 
-- Use of MCP trademarks in extension identifiers does not grant trademark rights. Third parties may not use 'MCP', 'Model Context Protocol', or confusingly similar marks in ways that imply endorsement or affiliation.
-- MCP makes no judgment about trademark validity of terms used in extensions.
+- 在扩展标识符中使用 MCP 商标并不授予商标权。第三方不得以暗示背书或隶属关系的方式使用 'MCP'、'Model Context Protocol' 或混淆性相似的标记。
+- MCP 不对扩展中使用的术语的商标有效性做出判断。
 
-#### Antitrust
+#### 反垄断
 
-- Extension developers acknowledge that they may compete with other participants, have no obligation to implement any extension, are free to develop competing extensions and protocols, and may license their technology to third parties including for competing solutions.
-- Status as an official extension does not create an exclusive relationship.
-- Extension repository maintainers act in individual capacity using best technical judgment.
+- 扩展开发者承认他们可能与其他参与者竞争，没有义务实现任何扩展，可以自由开发竞争性的扩展和协议，并可以向第三方许可他们的技术，包括用于竞争解决方案。
+- 作为官方扩展的状态并不创建独家关系。
+- 扩展仓库维护者以个人身份行事，使用最佳技术判断。
 
-#### Licensing
+#### 许可
 
-Official extensions MUST be available under the Apache 2.0 license.
+官方扩展必须在 Apache 2.0 许可下可用。
 
-#### Contributor License Grant
+#### 贡献者许可授予
 
-By submitting a contribution to an official MCP extension repository, you represent that:
+通过向官方 MCP 扩展仓库提交贡献，您表示：
 
-1. You have the legal authority to grant the rights in this agreement
-2. Your contribution is your original work, or you have sufficient rights to submit it
-3. You grant to Linux Foundation and recipients of the specification a perpetual, worldwide, non-exclusive, no-charge, royalty-free, irrevocable license to:
-   - Reproduce, prepare derivative works of, publicly display, publicly perform, sublicense, and distribute the contribution
-   - Make, have made, use, offer to sell, sell, import, and otherwise transfer implementations
+1. 您拥有授予本协议中权利的法律授权
+2. 您的贡献是您的原创作品，或者您拥有提交它的充分权利
+3. 您授予 Linux 基金会和规范接收者永久的、全球性的、非独占的、免费的、免版税的、不可撤销的许可，以：
+   - 复制、准备衍生作品、公开展示、公开表演、分许可和分发贡献
+   - 制造、委托制造、使用、要约销售、销售、进口和以其他方式转移实现
 
-#### No Other Rights
+#### 无其他权利
 
-Except as explicitly set forth in this section, no other patent, trademark, copyright, or other intellectual property rights are granted under this agreement, including by implication, waiver, or estoppel.
+除本节明确陈述外，本协议下不授予任何其他专利、商标、版权或其他知识产权，包括通过暗示、放弃或禁止反言。
 
-### Not Specified
+### 未指定内容
 
-This SEP does not specify all aspects of an extension system. The following is an incomplete list of what this SEP does not address:
+本 SEP 未指定扩展系统的所有方面。以下是本 SEP 未解决的不完整列表：
 
-- **Schema**: we do not specify a mechanism for extensions to advertise how they modify the schema.
-- **Dependencies**: we do not specify if/how extensions may have dependencies on specific core protocol versions, or interdependencies with other extensions (or versions of extensions).
-- **Profiles**: we do not specify a way of grouping extensions.
+- **模式**：我们未指定扩展如何宣告它们如何修改模式的机制。
+- **依赖**：我们未指定扩展是否/如何可能依赖于特定核心协议版本，或与其他扩展（或扩展版本）的相互依赖。
+- **概要**：我们未指定一种分组扩展的方法。
 
-These are omitted not because they are unimportant, but because they may be added later and the goal of this SEP is simply to get some initial extension structure off the ground and defers detailed technical discussion around more complex/debatable aspects of extensions.
+这些被省略不是因为它们不重要，而是因为它们可能会在以后添加，本 SEP 的目标仅仅是让一些初始扩展结构落地，并将围绕扩展更复杂/有争议方面的详细技术讨论推迟。
 
-## Rationale
+## 设计理由
 
-This design for extensions uses the following principles:
+此扩展设计遵循以下原则：
 
-- **Start simple**: the intention is to have a relatively simple mechanism that allows people to start building and proposing extensions in a structured way.
-- **Clear governance**: For now, the focus is on clear governance and less on implementation details.
-- **Refine later**: Over time, once we have more experience with extensions, we can adjust the approach appropriately.
+- **始于简单**：目的是提供一个相对简单的机制，让人们能够以结构化的方式开始构建和提出扩展。
+- **清晰的治理**：目前，重点在于清晰的治理，而非实现细节。
+- **后期完善**：随着时间的推移，一旦我们在扩展方面积累了更多经验，我们可以适当地调整方法。
 
-Some specific design choices:
+一些具体的设计选择：
 
-- **Why extension repositories instead of individual/independent extensions?** Repositories provide a natural group and governance structure that allows for the repository maintainers to enforce structure and conformity to extensions. It avoids a failure case of different extensions in an area working in incompatible ways. Also provides a way to delegate much of the governance work.
-- **Why not require core maintainer review for official extensions?** Delegated reviews allows for extensions to evolve autonomously without being bottlenecked on core maintainer review, which is already a (often months) long process.
-- **Why separate versioning?** Extensions are additions to the spec and optional so there is no need to tie versions together. Separate versions allow for more rapid iteration.
+- **为什么使用扩展仓库而不是单独/独立的扩展？** 仓库提供了一种自然的分组和治理结构，允许仓库维护者强制执行扩展的结构和一致性。它避免了某一领域不同扩展以不兼容方式工作的失败情况。还提供了一种委托大部分治理工作的方法。
+- **为什么不需要核心维护者审查官方扩展？** 委托审查允许扩展自主演进，而不受核心维护者审查的瓶颈限制，后者已经是一个（通常长达数月）漫长的过程。
+- **为什么版本独立？** 扩展是对规范的补充且是可选的，因此无需将版本绑定在一起。独立的版本允许更快速的迭代。
 
-## Backward Compatibility
+## 向后兼容性
 
-The extension framework itself is purely additive to the core protocol, so there are no backwards compatibility concerns with the core specification.
+扩展框架本身纯粹是对核心协议的补充，因此不存在与核心规范相关的向后兼容性问题。
 
-The design described in this SEP is consistent with existing official extensions ([ext-apps](https://github.com/modelcontextprotocol/ext-apps) and [ext-auth](https://github.com/modelcontextprotocol/ext-auth)), which already use the patterns specified here for capability negotiation and extension identifiers.
+本 SEP 中描述的设计与现有的官方扩展（[ext-apps](https://github.com/modelcontextprotocol/ext-apps) 和 [ext-auth](https://github.com/modelcontextprotocol/ext-auth)）一致，它们已经使用了此处指定的模式进行能力协商和扩展标识符。
 
-However, individual extensions may have their own backwards compatibility concerns. Extensions MUST consider and account for backwards compatibility in their design, both across core protocol versions and extension versions. Breaking changes within an extension MUST use a new extension identifier (see _Definition_ section). Extensions SHOULD also document their approach to backwards compatibility and stability (e.g. an extension MAY advertise itself as "experimental" indicating that it may break without notice).
+然而，单个扩展可能有其自己的向后兼容性问题。扩展必须在其设计中考虑并说明向后兼容性，包括跨核心协议版本和扩展版本。扩展内的破坏性变更必须使用新的扩展标识符（参见_定义_部分）。扩展还应该记录其向后兼容性和稳定性的方法（例如，扩展可以将自己标为“实验性”，表明它可能会在不通知的情况下发生破坏）。
 
-## Security Implications
+## 安全影响
 
-Extensions MUST implement all related security best practices in the area that they extend.
+扩展必须在其扩展的领域内实施所有相关的安全最佳实践。
 
-Clients and servers SHOULD treat any new fields or data introduced as part of an extension as untrusted and SHOULD comprehensively validate them.
+客户端和服务器应该将作为扩展一部分引入的任何新字段或数据视为不可信，并应该对其进行全面验证。
 
-## Reference Implementation
+## 参考实现
 
-To be provided.
+待提供。
