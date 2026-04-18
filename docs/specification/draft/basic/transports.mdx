@@ -33,13 +33,13 @@ sequenceDiagram
     participant Client
     participant Server Process
 
-    Client->>+Server Process: Launch subprocess
-    loop Message Exchange
-        Client->>Server Process: Write to stdin
-        Server Process->>Client: Write to stdout
-        Server Process--)Client: Optional logs on stderr
+    Client->>+Server Process: 启动子进程
+    loop 消息交换
+        Client->>Server Process: 写入 stdin
+        Server Process->>Client: 写入 stdout
+        Server Process--)Client: stderr 上的可选日志
     end
-    Client->>Server Process: Close stdin, terminate subprocess
+    Client->>Server Process: 关闭 stdin，终止子进程
     deactivate Server Process
 ```
 
@@ -70,25 +70,49 @@ sequenceDiagram
 
 从客户端发送的每条 JSON-RPC 消息 **必须** 是对 MCP 端点的新 HTTP POST 请求。
 
-1. 客户端 **必须** 使用 HTTP POST 向 MCP 端点发送 JSON-RPC 消息。
-2. 客户端 **必须** 包含一个 `Accept` 头，列出 `application/json` 和 `text/event-stream` 作为支持的内容类型。
-3. HTTP POST 请求的体 **必须** 是单个 JSON-RPC _请求_、_通知_ 或对服务器发送请求的 _响应_。
-4. 如果体是 JSON-RPC _通知_ 或对服务器发送请求的 _响应_：
-   - 如果服务器接受输入，服务器 **必须** 返回 HTTP 状态码 202 Accepted，且不带体。
-   - 如果服务器无法接受输入，它 **必须** 返回 HTTP 错误状态码（例如，400 Bad Request）。HTTP 响应体 **可以** 包含一个没有 `id` 的 JSON-RPC _错误响应_。
-5. 如果体是 JSON-RPC _请求_，服务器 **必须** 要么返回 `Content-Type: text/event-stream` 以启动 SSE 流，要么返回 `Content-Type: application/json` 以返回一个 JSON 对象。客户端 **必须** 支持这两种情况。
-6. 如果服务器启动 SSE 流：
-   - 服务器 **应该** 立即发送一个包含事件 ID 和空 `data` 字段的 SSE 事件，以便让客户端准备好重新连接（使用该事件 ID 作为 `Last-Event-ID`）。
-   - 在服务器向客户端发送了带有事件 ID 的 SSE 事件后，服务器 **可以** 随时关闭 _连接_（而不终止 _SSE 流_），以避免保持长连接。客户端 **应该** 然后通过尝试重新连接来“轮询”SSE 流。
-   - 如果服务器在终止 _SSE 流_ 之前关闭了 _连接_，它 **应该** 在关闭连接之前发送一个带有标准 [`retry`](https://html.spec.whatwg.org/multipage/server-sent-events.html#:~:text=field%20name%20is%20%22retry%22) 字段的 SSE 事件。客户端 **必须** 遵守 `retry` 字段，在尝试重新连接之前等待指定的毫秒数。
-   - SSE 流 **应该** 最终包含针对 POST 体中发送的 JSON-RPC _请求_ 的 JSON-RPC _响应_。
-   - 在发送 JSON-RPC _响应_ 之前，服务器 **可以** 发送 JSON-RPC _请求_ 和 _通知_。这些消息 **必须** 与发起的客户端 _请求_ 相关。
-   - 如果 [会话](#session-management) 过期，服务器 **可以** 终止 SSE 流。
-   - 在发送 JSON-RPC _响应_ 后，服务器 **应该** 终止 SSE 流。
-   - 断开连接 **可以** 随时发生（例如，由于网络条件）。因此：
-     - 断开连接 **不应** 被解释为客户端取消了其请求。
-     - 要取消，客户端 **应该** 显式发送一个 MCP `CancelledNotification`。
-     - 为了避免因断开连接而丢失消息，服务器 **可以** 使流 [可恢复](#resumability-and-redelivery)。
+1. The client **MUST** use HTTP POST to send JSON-RPC messages to the MCP endpoint.
+2. The client **MUST** include an `Accept` header, listing both `application/json` and
+   `text/event-stream` as supported content types.
+3. The client **MUST** include the [standard MCP request headers](#standard-mcp-request-headers)
+   on each POST request.
+4. The body of the HTTP POST request **MUST** be a single JSON-RPC _request_, _notification_, or _response_ to a server-sent request.
+5. If the body is a JSON-RPC _notification_ or _response_ to a server-sent request:
+   - If the server accepts the input, the server **MUST** return HTTP status code 202
+     Accepted with no body.
+   - If the server cannot accept the input, it **MUST** return an HTTP error status code
+     (e.g., 400 Bad Request). The HTTP response body **MAY** comprise a JSON-RPC _error
+     response_ that has no `id`.
+6. If the body is a JSON-RPC _request_, the server **MUST** either
+   return `Content-Type: text/event-stream`, to initiate an SSE stream, or
+   `Content-Type: application/json`, to return one JSON object. The client **MUST**
+   support both these cases.
+7. If the server initiates an SSE stream:
+   - The server **SHOULD** immediately send an SSE event consisting of an event
+     ID and an empty `data` field in order to prime the client to reconnect
+     (using that event ID as `Last-Event-ID`).
+   - After the server has sent an SSE event with an event ID to the client, the
+     server **MAY** close the _connection_ (without terminating the _SSE stream_)
+     at any time in order to avoid holding a long-lived connection. The client
+     **SHOULD** then "poll" the SSE stream by attempting to reconnect.
+   - If the server does close the _connection_ prior to terminating the _SSE stream_,
+     it **SHOULD** send an SSE event with a standard [`retry`](https://html.spec.whatwg.org/multipage/server-sent-events.html#:~:text=field%20name%20is%20%22retry%22) field before
+     closing the connection. The client **MUST** respect the `retry` field,
+     waiting the given number of milliseconds before attempting to reconnect.
+   - The SSE stream **SHOULD** eventually include a JSON-RPC _response_ for the
+     JSON-RPC _request_ sent in the POST body.
+   - The server **MAY** send JSON-RPC _requests_ and _notifications_ before sending the
+     JSON-RPC _response_. These messages **MUST** relate to the originating client
+     _request_.
+   - The server **MAY** terminate the SSE stream if the [session](#session-management)
+     expires.
+   - After the JSON-RPC _response_ has been sent, the server **SHOULD** terminate the
+     SSE stream.
+   - Disconnection **MAY** occur at any time (e.g., due to network conditions).
+     Therefore:
+     - Disconnection **SHOULD NOT** be interpreted as the client cancelling its request.
+     - To cancel, the client **SHOULD** explicitly send an MCP `CancelledNotification`.
+     - To avoid message loss due to disconnection, the server **MAY** make the stream
+       [resumable](#resumability-and-redelivery).
 
 ### 监听来自服务器的消息
 
@@ -145,7 +169,7 @@ sequenceDiagram
     participant Client
     participant Server
 
-    note over Client, Server: initialization
+    note over Client, Server: 初始化
 
     Client->>+Server: POST InitializeRequest
     Server->>-Client: InitializeResponse<br>MCP-Session-Id: 1868a90c...
@@ -153,27 +177,27 @@ sequenceDiagram
     Client->>+Server: POST InitializedNotification<br>MCP-Session-Id: 1868a90c...
     Server->>-Client: 202 Accepted
 
-    note over Client, Server: client requests
+    note over Client, Server: 客户端请求
     Client->>+Server: POST ... request ...<br>MCP-Session-Id: 1868a90c...
 
-    alt single HTTP response
+    alt 单个 HTTP 响应
       Server->>Client: ... response ...
-    else server opens SSE stream
-      loop while connection remains open
-          Server-)Client: ... SSE messages from server ...
+    else 服务器打开 SSE 流
+      loop 在连接保持打开期间
+          Server-)Client: ... 来自服务器的 SSE 消息 ...
       end
       Server-)Client: SSE event: ... response ...
     end
     deactivate Server
 
-    note over Client, Server: client notifications/responses
+    note over Client, Server: 客户端通知/响应
     Client->>+Server: POST ... notification/response ...<br>MCP-Session-Id: 1868a90c...
     Server->>-Client: 202 Accepted
 
-    note over Client, Server: server requests
+    note over Client, Server: 服务器请求
     Client->>+Server: GET<br>MCP-Session-Id: 1868a90c...
-    loop while connection remains open
-        Server-)Client: ... SSE messages from server ...
+    loop 在连接保持打开期间
+        Server-)Client: ... 来自服务器的 SSE 消息 ...
     end
     deactivate Server
 
@@ -191,7 +215,291 @@ sequenceDiagram
 
 如果服务器收到带有无效或不受支持的 `MCP-Protocol-Version` 的请求，它 **必须** 响应 `400 Bad Request`。
 
-### SSE 流配置
+### Standard MCP Request Headers
+
+The Streamable HTTP transport requires clients to include the following headers on POST
+requests, mirrored from the JSON-RPC request body:
+
+| Header Name  | Source Field                  | Required For                                           |
+| ------------ | ----------------------------- | ------------------------------------------------------ |
+| `Mcp-Method` | `method`                      | All requests and notifications                         |
+| `Mcp-Name`   | `params.name` or `params.uri` | `tools/call`, `resources/read`, `prompts/get` requests |
+
+These headers are **REQUIRED** for compliance.
+
+#### Examples
+
+**`tools/call` request:**
+
+```http
+POST /mcp HTTP/1.1
+Content-Type: application/json
+Mcp-Session-Id: 1f3a4b5c-6d7e-8f9a-0b1c-2d3e4f5a6b7c
+Mcp-Method: tools/call
+Mcp-Name: get_weather
+
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "get_weather",
+    "arguments": {
+      "location": "Seattle, WA"
+    }
+  }
+}
+```
+
+**`resources/read` request:**
+
+```http
+POST /mcp HTTP/1.1
+Content-Type: application/json
+Mcp-Session-Id: 1f3a4b5c-6d7e-8f9a-0b1c-2d3e4f5a6b7c
+Mcp-Method: resources/read
+Mcp-Name: file:///projects/myapp/config.json
+
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "resources/read",
+  "params": {
+    "uri": "file:///projects/myapp/config.json"
+  }
+}
+```
+
+**`initialize` request (no `Mcp-Name` needed):**
+
+```http
+POST /mcp HTTP/1.1
+Content-Type: application/json
+Mcp-Method: initialize
+
+{
+  "jsonrpc": "2.0",
+  "id": 4,
+  "method": "initialize",
+  "params": {
+    "protocolVersion": "2025-06-18",
+    "capabilities": {},
+    "clientInfo": {
+      "name": "ExampleClient",
+      "version": "1.0.0"
+    }
+  }
+}
+```
+
+**Notification:**
+
+```http
+POST /mcp HTTP/1.1
+Content-Type: application/json
+Mcp-Session-Id: 1f3a4b5c-6d7e-8f9a-0b1c-2d3e4f5a6b7c
+Mcp-Method: notifications/initialized
+
+{
+  "jsonrpc": "2.0",
+  "method": "notifications/initialized"
+}
+```
+
+#### Case Sensitivity
+
+Header names (called "field names" in [RFC 9110](https://datatracker.ietf.org/doc/html/rfc9110#name-field-names))
+are case-insensitive. Clients and servers **MUST** use case-insensitive comparisons for
+header names. Header _values_ (such as method names) are case-sensitive.
+
+#### Server Validation
+
+Servers that process the request body **MUST** reject requests where the values specified
+in the headers do not match the corresponding values in the request body. This prevents
+potential security vulnerabilities when different components in the network rely on
+different sources of truth (e.g., a load balancer routing on the header value while the
+MCP server executes based on the body value).
+
+When rejecting a request due to header validation failure, servers **MUST** return HTTP
+status `400 Bad Request` and **SHOULD** include a JSON-RPC error response using the following error code:
+
+| Code     | Name     | Description                                                                                                            |
+| -------- | -------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `-32001` | `HeaderMismatch` | HTTP 头与请求正文中的相应值不匹配，或者必需的头缺失/格式错误。 |
+
+This error code is in the JSON-RPC implementation-defined server error range (`-32000` to
+`-32099`).
+
+**Example error response:**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "error": {
+    "code": -32001,
+    "message": "Header mismatch: Mcp-Name header value 'foo' does not match body value 'bar'"
+  }
+}
+```
+
+Validation failure conditions include:
+
+- A required standard header (`Mcp-Method`, `Mcp-Name`) is missing
+- A header value does not match the corresponding request body value
+- A header value contains invalid characters
+
+<Note>
+
+Intermediaries **MUST** return an appropriate HTTP error status (e.g., `400 Bad Request`)
+for validation failures but are not required to return a JSON-RPC error response.
+
+</Note>
+
+### Custom Headers from Tool Parameters
+
+MCP servers **MAY** designate specific tool parameters to be mirrored into HTTP headers
+using an `x-mcp-header` extension property in the parameter's schema within the tool's
+`inputSchema`. See [Tool Definitions](/specification/draft/server/tools#x-mcp-header) for
+details on how to annotate tool parameters.
+
+While the use of `x-mcp-header` is optional for servers, clients **MUST** support this
+feature. When a server's tool definition includes `x-mcp-header` annotations, conforming
+clients **MUST** mirror the designated parameter values into HTTP headers.
+
+#### Schema Extension
+
+The `x-mcp-header` property specifies the name portion used to construct the header name
+`Mcp-Param-{name}`.
+
+**Constraints on `x-mcp-header` values**:
+
+- **MUST NOT** be empty
+- **MUST** contain only ASCII characters (excluding space and `:`)
+- **MUST** be case-insensitively unique among all `x-mcp-header` values in the
+  `inputSchema`
+- **MUST** only be applied to parameters with primitive types (number, string, boolean)
+
+Clients **MUST** reject tool definitions where any `x-mcp-header` value violates these
+constraints. Rejection means the client **MUST** exclude the invalid tool from the result
+of `tools/list`. Clients **SHOULD** log a warning when rejecting a tool definition,
+including the tool name and the reason for rejection.
+
+**Example tool definition:**
+
+```json
+{
+  "name": "execute_sql",
+  "description": "在 Google Cloud Spanner 上执行 SQL",
+  "inputSchema": {
+    "type": "object",
+    "properties": {
+      "region": {
+        "type": "string",
+        "description": "执行查询的区域",
+        "x-mcp-header": "Region"
+      },
+      "query": {
+        "type": "string",
+        "description": "要执行的 SQL 查询"
+      }
+    },
+    "required": ["region", "query"]
+  }
+}
+```
+
+**Resulting HTTP request:**
+
+```http
+POST /mcp HTTP/1.1
+Content-Type: application/json
+Mcp-Session-Id: 1f3a4b5c-6d7e-8f9a-0b1c-2d3e4f5a6b7c
+Mcp-Method: tools/call
+Mcp-Name: execute_sql
+Mcp-Param-Region: us-west1
+
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "execute_sql",
+    "arguments": {
+      "region": "us-west1",
+      "query": "SELECT * FROM users"
+    }
+  }
+}
+```
+
+#### Value Encoding
+
+Clients **MUST** encode parameter values before including them in HTTP headers to ensure
+safe transmission and prevent injection attacks.
+
+**Type conversion**: Convert the parameter value to its string representation:
+
+- `string`: Use the value as-is
+- `number`: Convert to decimal string representation (e.g., `42`, `3.14`)
+- `boolean`: Convert to lowercase `"true"` or `"false"`
+
+Per [RFC 9110](https://datatracker.ietf.org/doc/html/rfc9110#name-field-values), HTTP
+header field values must consist of visible ASCII characters (0x21-0x7E), space (0x20),
+and horizontal tab (0x09). When a value cannot be safely represented as a plain ASCII
+header value (e.g., it contains non-ASCII characters, control characters, or has
+leading/trailing whitespace), clients **MUST** use Base64 encoding of the UTF-8
+representation with the following format:
+
+```text
+Mcp-Param-{Name}: =?base64?{Base64EncodedValue}?=
+```
+
+The prefix `=?base64?` and suffix `?=` indicate that the value is Base64-encoded.
+Servers and intermediaries that need to inspect these values **MUST** decode them
+accordingly.
+
+**Encoding examples:**
+
+| Original Value   | Reason                  | Encoded Header Value                                  |
+| ---------------- | ----------------------- | ----------------------------------------------------- |
+| `"us-west1"`     | Plain ASCII             | `Mcp-Param-Region: us-west1`                          |
+| `"Hello, 世界"`  | Contains non-ASCII      | `Mcp-Param-Greeting: =?base64?SGVsbG8sIOS4lueVjA==?=` |
+| `" padded "`     | Leading/trailing spaces | `Mcp-Param-Text: =?base64?IHBhZGRlZCA=?=`             |
+| `"line1\nline2"` | Contains newline        | `Mcp-Param-Text: =?base64?bGluZTEKbGluZTI=?=`         |
+
+#### Client Behavior
+
+When constructing a `tools/call` request via HTTP transport, the client **MUST**:
+
+1. Extract the values for any standard headers from the request body (e.g., `method`,
+   `params.name`, `params.uri`)
+2. Append the `Mcp-Method` header and, if applicable, `Mcp-Name` header to the request
+3. Inspect the tool's `inputSchema` for properties marked with `x-mcp-header` and extract
+   the value for each parameter
+4. Encode the values according to the [Value Encoding](#value-encoding) rules
+5. Append a `Mcp-Param-{Name}: {Value}` header to the request
+
+#### Server Behavior for Custom Headers
+
+Intermediate servers that do not recognize an `Mcp-Param-{Name}` header **MUST** forward it and otherwise ignore it, as required by the [HTTP Semantics RFC](https://www.rfc-editor.org/rfc/rfc9110.html#name-field-names).
+
+Servers **MUST** reject requests with a recognized `Mcp-Param-{Name}` headers that contain invalid
+characters (see [Value Encoding](#value-encoding)).
+
+Any server that processes the message body **MUST** validate that encoded header values,
+after decoding if Base64-encoded, match the corresponding values in the request body.
+Servers **MUST** reject requests with a `400 Bad Request` HTTP status and JSON-RPC error
+code `-32001` (`HeaderMismatch`) if any validation fails.
+
+| Scenario                                 | Client Behavior                | Server Behavior                          |
+| ---------------------------------------- | ------------------------------ | ---------------------------------------- |
+| Parameter value provided                 | Client MUST include the header | Server MUST validate header matches body |
+| Parameter value is `null`                | Client MUST omit the header    | Server MUST NOT expect the header        |
+| Parameter not in arguments               | Client MUST omit the header    | Server MUST NOT expect the header        |
+| Client omits header but value is in body | Non-conforming client          | Server MUST reject the request           |
+
+### SSE Stream Configuration
 
 在启动 SSE 流时，服务器 **应该** 在返回 `Content-Type: text/event-stream` 的 HTTP 响应中包含 `X-Accel-Buffering: no` 头。此头指示反向代理（如 nginx）禁用响应缓冲，确保 SSE 事件立即交付给客户端，而不是保存在缓冲区中。如果没有此头，代理可能会在将消息发送给客户端之前积累消息，引入不必要的延迟并可能破坏 SSE 通信的实时性。
 

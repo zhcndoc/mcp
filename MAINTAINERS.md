@@ -1,27 +1,30 @@
-# MCP Maintainers
+# MCP 维护者
 
-This document lists current maintainers in the Model Context Protocol project.
+本文档列出了 Model Context Protocol 项目当前的维护者。
 
-**Last updated:** February 2, 2026
+**最后更新：** 2026 年 4 月 8 日
 
-## Lead Maintainers
+## 主要维护者
 
 - [David Soria Parra](https://github.com/dsp-ant)
-- _[Justin Spahr-Summers](https://github.com/jspahrsummers) (currently inactive)_
+- [Den Delimarsky](https://github.com/localden)
 
-## Core Maintainers
+## 核心维护者
 
 - [Caitie McCaffrey](https://github.com/CaitieM20)
 - [Che Liu](https://github.com/pwwpche)
 - [Clare Liguori](https://github.com/clareliguori)
-- [Den Delimarsky](https://github.com/localden)
 - [Kurtis Van Gent](https://github.com/kurtisvg)
 - [Nick Aldridge](https://github.com/000-000-000-000-000)
 - [Nick Cooper](https://github.com/nickcoai)
 - [Paul Carleton](https://github.com/pcarleton)
 - [Peter Alexander](https://github.com/pja-ant)
 
-## SDK Maintainers
+## 名誉维护者
+
+- [Justin Spahr-Summers](https://github.com/jspahrsummers)（联合发明人，名誉主要维护者）
+
+## SDK 维护者
 
 ### Java SDK
 
@@ -46,9 +49,10 @@ This document lists current maintainers in the Model Context Protocol project.
 
 ### Go SDK
 
-- [Rob Findley](https://github.com/findleyr)
+- [Maciej Kisiel](https://github.com/maciej-kisiel)
+- [Yaroslav Shevchuk](https://github.com/yarolegovich)
+- [Guglielmo Colombo](https://github.com/guglielmo-san)
 - [Jonathan Amsterdam](https://github.com/jba)
-- [Sam Thanawalla](https://github.com/samthanawalla)
 
 ### C# SDK
 
@@ -101,7 +105,7 @@ This document lists current maintainers in the Model Context Protocol project.
 - [Tobias Nyholm](https://github.com/Nyholm)
 - [Roman Pronskiy](https://github.com/pronskiy)
 
-## Project Maintainers
+## 项目维护者
 
 ### use-mcp
 
@@ -122,13 +126,13 @@ This document lists current maintainers in the Model Context Protocol project.
 - [Radoslav (Rado) Dimitrov](https://github.com/rdimitrov)
 - [Bob Dickinson](https://github.com/BobDickinson)
 
-### MCPB (Model Context Protocol Bundle)
+### MCPB（Model Context Protocol Bundle）
 
 - [Alexander Sklar](https://github.com/asklar)
 - [Adam Jones](https://github.com/domdomegg)
 - [Joan Xie](https://github.com/joan-anthropic)
 
-### Reference Servers
+### 参考服务器
 
 - [Ola Hungerford](https://github.com/olaservo)
 - [Cliff Hall](https://github.com/cliffhall)
@@ -136,7 +140,7 @@ This document lists current maintainers in the Model Context Protocol project.
 - [Shaun Smith](https://github.com/evalstate)
 - [Jonathan Hefner](https://github.com/jonathanhefner)
 
-## Community Moderators
+## 社区版主
 
 - [Ola Hungerford](https://github.com/olaservo)
 - [Cliff Hall](https://github.com/cliffhall)
@@ -145,25 +149,25 @@ This document lists current maintainers in the Model Context Protocol project.
 - [Tadas Antanavicius](https://github.com/tadasant)
 - [Peder Holdgaard Pedersen](https://github.com/PederHP)
 
-## Working Group & Interest Group Maintainers
+## 工作组与兴趣组维护者
 
-[Working Groups and Interest Groups](https://modelcontextprotocol.io/community/working-interest-groups) are not required to have maintainers (they can be managed by informal facilitators), but maintainers may be appointed on an as-needed basis.
+[工作组和兴趣组](https://modelcontextprotocol.io/community/working-interest-groups) 不要求必须有维护者（它们可以由非正式协调人管理），但可根据需要指定维护者。
 
-### Security Interest Group
+### 安全兴趣组
 
 - [Den Delimarsky](https://github.com/dend)
 - [Paul Carleton](https://github.com/pcarleton)
 - [Jenn Newton](https://github.com/jenn-newton)
 
-### Authorization Interest Group
+### 授权兴趣组
 
 - [Aaron Parecki](https://github.com/aaronpk)
 - [Darin McAdams](https://github.com/D-McAdams)
 - [Paul Carleton](https://github.com/pcarleton)
 
-### Client Implementor Interest Group
+### 客户端实现方兴趣组
 
-**Note:** These individuals serve as MCP protocol representatives for their respective clients. For client-specific issues, use the official support channels provided by each product.
+**注意：** 这些个人作为各自客户端的 MCP 协议代表。对于特定客户端的问题，请使用各产品提供的官方支持渠道。
 
 - [Alex Hancock](https://github.com/alexhancock) - Goose
 - [Ben Brandt](https://github.com/benbrandt) - Zed
@@ -173,40 +177,38 @@ This document lists current maintainers in the Model Context Protocol project.
 - [Tyler Leonhardt](https://github.com/TylerLeonhardt) - VS Code
 - [Michael Feldstein](https://github.com/msfeldstein) - Cursor
 
-### Financial Services Interest Group
+### 金融服务兴趣组
 
 - [Sambhav Kothari](https://github.com/sambhav)
 - [Peder Holdgaard Pedersen](https://github.com/PederHP)
 
-### Transports Interest Group
+### 传输层兴趣组
 
 - [Kurtis Van Gent](https://github.com/kurtisvg)
 - [Jonathan Hefner](https://github.com/jonathanhefner)
 - [Shaun Smith](https://github.com/evalstate)
 - [Harvey Tuch](https://github.com/htuch)
 
-### Server Identity Working Group
+### 服务器身份工作组
 
 - [David Soria Parra](https://github.com/dsp-ant)
 - [Nick Cooper](https://github.com/nickcoai)
 
-### Agents Working Group
+### 智能体工作组
 
 - [Peter Alexander](https://github.com/pja-ant)
 - [Luca Chang](https://github.com/LucaButBoring)
 - [Inna Harper](https://github.com/ihrpr)
 
-### MCP Apps Working Group
+### MCP 应用工作组
 
 - [Liad Yosef](https://github.com/liady)
 - [Ido Salomon](https://github.com/idosal)
 
-### Primitive Grouping Interest Group
+### 基元分组兴趣组
 
 - [Tapan Chugh](https://github.com/chughtapan)
 
-## About This Document
+## 关于本文档
 
-This document is updated by the MCP maintainers and reflects the current
-governance structure. For more information about MCP governance, see our
-[governance documentation](https://modelcontextprotocol.io/community/governance).
+本文档由 MCP 维护者更新，反映当前的治理结构。有关 MCP 治理的更多信息，请参阅我们的[治理文档](https://modelcontextprotocol.io/community/governance)。

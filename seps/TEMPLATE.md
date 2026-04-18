@@ -1,109 +1,109 @@
-# SEP-{NUMBER}: {Title}
+# SEP-{NUMBER}: {标题}
 
-> **Note**: This template provides a standard structure for SEPs. You may adapt sections based on the specific needs of your proposal. For example, Process SEPs may not need a "Backward Compatibility" section, while Standards Track SEPs should include detailed technical specifications.
+> **注意**: 此模板为 SEPs 提供了标准结构。你可以根据提案的具体需求调整各部分。例如，流程类 SEP 可能不需要“向后兼容性”部分，而标准跟踪类 SEP 应包含详细的技术规范。
 
-- **Status**: Draft | In-Review | Accepted | Rejected | Withdrawn | Final | Superseded | Dormant
-- **Type**: Standards Track | Informational | Process
-- **Created**: YYYY-MM-DD
-- **Author(s)**: Name <email> (@github-username)
-- **Sponsor**: @github-username (or "None" if seeking sponsor)
-- **PR**: https://github.com/modelcontextprotocol/specification/pull/{NUMBER}
+- **状态**: Draft | In-Review | Accepted | Rejected | Withdrawn | Final | Superseded | Dormant
+- **类型**: Standards Track | Informational | Process
+- **创建时间**: YYYY-MM-DD
+- **作者**: 姓名 <email> (@github-username)
+- **赞助人**: @github-username（如果在寻求赞助，则为 "None"）
+- **PR**: https://github.com/modelcontextprotocol/modelcontextprotocol/pull/{NUMBER}
 
-## Abstract
+## 摘要
 
-Brief (~200 word) technical summary of the proposal. This should be a concise overview that allows readers to quickly understand what this SEP proposes.
+对提案的简要（约 200 字）技术总结。这里应提供一个简明概述，使读者能够快速理解该 SEP 提议了什么。
 
-## Motivation
+## 动机
 
-Why is this change needed? Why is the current protocol specification inadequate to address the problem that this SEP solves?
+为什么需要这个变更？为什么当前的协议规范不足以解决该 SEP 所要解决的问题？
 
-The motivation is critical for SEPs that want to change the Model Context Protocol. SEP submissions without sufficient motivation may be rejected outright.
+对于希望修改 Model Context Protocol 的 SEPs 来说，动机部分至关重要。缺乏充分动机的 SEP 提交可能会被直接拒绝。
 
-## Specification
+## 规范
 
-Detailed technical specification of the proposed changes. The specification should describe the syntax and semantics of any new protocol feature in sufficient detail to allow competing, interoperable implementations.
+对所提议变更的详细技术规范。该规范应足够详细地描述任何新协议特性的语法和语义，以便不同实现能够互操作。
 
-For Protocol changes, include:
+对于协议变更，请包括：
 
-- New message formats or data structures
-- Endpoints or methods
-- Behavioral requirements
-- Error handling
+- 新的消息格式或数据结构
+- 端点或方法
+- 行为要求
+- 错误处理
 
-For Process changes, include:
+对于流程变更，请包括：
 
-- Step-by-step procedures
-- Roles and responsibilities
-- Timelines or milestones
+- 分步流程
+- 角色与职责
+- 时间线或里程碑
 
-## Rationale
+## 原因说明
 
-Explain why particular design decisions were made. This section should:
+解释为何做出特定的设计决策。本节应：
 
-- Describe alternate designs that were considered
-- Explain why the proposed approach was chosen
-- Reference related work or prior art
-- Document important objections or concerns raised during discussion
-- Provide evidence of consensus within the community
+- 描述考虑过的替代设计
+- 解释为何选择所提议的方法
+- 引用相关工作或先前实践
+- 记录讨论中提出的重要反对意见或担忧
+- 提供社区内达成共识的证据
 
-## Backward Compatibility
+## 向后兼容性
 
-**Required for SEPs that introduce backward incompatibilities.**
+**适用于引入向后不兼容性的 SEPs。**
 
-Describe:
+请描述：
 
-- What existing functionality will break or change
-- The severity and scope of incompatibilities
-- How the author proposes to handle the transition
-- Migration paths for existing implementations
+- 哪些现有功能会失效或发生变化
+- 不兼容的严重性和范围
+- 作者建议如何处理过渡
+- 现有实现的迁移路径
 
-If there are no backward compatibility concerns, state that explicitly.
+如果不存在向后兼容性问题，请明确说明。
 
-## Security Implications
+## 安全影响
 
-Describe any security concerns related to this proposal, including:
+描述与该提案相关的任何安全问题，包括：
 
-- New attack surfaces
-- Privacy considerations
-- Authentication or authorization changes
-- Data validation requirements
+- 新的攻击面
+- 隐私考虑
+- 身份验证或授权变更
+- 数据验证要求
 
-If there are no security implications, state that explicitly.
+如果没有安全影响，请明确说明。
 
-## Reference Implementation
+## 参考实现
 
-Link to or describe a reference implementation. A reference implementation is required before any SEP can be given "Final" status.
+链接到或描述一个参考实现。在任何 SEP 能被赋予“Final”状态之前，都需要有参考实现。
 
-The principle of "rough consensus and running code" is useful when resolving discussions of protocol details.
+“粗略共识和可运行代码”的原则在解决协议细节讨论时很有帮助。
 
-Include:
+请包括：
 
-- Links to prototype code or pull requests
-- Pointers to example usage
-- Test results or validation
+- 原型代码或拉取请求链接
+- 示例用法指引
+- 测试结果或验证
 
 ---
 
-## Additional Optional Sections
+## 其他可选部分
 
-Depending on your SEP, you may want to include:
+根据你的 SEP，你可能还希望包括：
 
-### Performance Implications
+### 性能影响
 
-How does this change affect performance, scalability, or resource usage?
+此变更如何影响性能、可扩展性或资源使用？
 
-### Testing Plan
+### 测试计划
 
-How will this proposal be tested? What test cases should implementations cover?
+将如何测试该提案？实现应覆盖哪些测试用例？
 
-### Alternatives Considered
+### 替代方案
 
-Detailed discussion of alternative approaches that were rejected and why.
+对被否决的替代方法进行详细讨论，以及为何被拒绝。
 
-### Open Questions
+### 未解决的问题
 
-Unresolved issues that need community input or further discussion.
+需要社区输入或进一步讨论的未决问题。
 
-### Acknowledgments
+### 致谢
 
-Credit to people who contributed ideas, feedback, or reviews.
+感谢提供想法、反馈或审阅的人。

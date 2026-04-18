@@ -1,0 +1,115 @@
+---
+title: "Inspector V2 工作组章程"
+description: "Inspector V2 工作组的章程，该工作组是 Model Context Protocol 社区的一个工作组。"
+---
+
+## 组别类型
+
+工作组
+
+## 使命声明
+
+Inspector V2 工作组正在构建 Inspector V2，这是一款全新的基于 Web 的 MCP 检查器，从零开始重新设计，以提升可维护性和可靠性。该工作组提供共享的 Inspector Core 架构，最大化 Web、CLI 和 TUI 实现之间的代码复用，并配套一套完整的测试机制。由于这项工作涵盖 UI、协议工具和测试基础设施，而这些今天并不由任何单一维护者负责，因此需要跨维护者协作。
+
+## 范围
+
+### 范围内
+
+- `modelcontextprotocol/inspector` 仓库，包括：
+- **Inspector Core** —— 一种新的共享代码架构，为所有 Inspector 前端提供通用的 MCP 和协议接口。
+- **Web Inspector UI** —— 基于 Mantine 和 TypeScript 构建的浏览器端检查器。
+- **CLI Inspector** —— 共享 Inspector Core 的命令行界面。
+- **TUI Inspector** —— 共享 Inspector Core 的终端界面。
+- **Testing apparatus** —— 跨所有 Inspector 界面的共享测试工具、测试夹具和集成测试。
+- 将 `main` 分支上的现有 Inspector 弃用，并迁移到 `v1.x` 维护分支。
+- 一旦可用，在 Inspector Core 中采用 MCP TypeScript SDK V2。
+
+### 范围外
+
+- 核心 MCP 规范。
+- MCP SDK 维护（TypeScript、Python 或任何其他语言的 SDK）。
+- MCP 服务器实现。
+
+### 相关工作组
+
+- **SDK WG** —— Inspector Core 会使用 TypeScript SDK；采用 SDK V2 需要协调。
+- **MCP Apps WG** —— 围绕客户端/应用易用性和检查工作流的共享表面区域。
+- **Auth WG** —— Inspector 在连接受保护服务器时所使用的认证流程。
+- **Registry WG** —— Inspector 向用户展示的发现和元数据界面。
+
+## 领导层
+
+{/* Leadership requirements and responsibilities are defined in the governance rules. List current Leads (WG) or Facilitators (IG). */}
+
+| 角色    | 姓名           | 组织 | GitHub                                           | 任期    |
+| ------- | -------------- | ------------ | ------------------------------------------------ | ------- |
+| WG 负责人 | Cliff Hall     | Futurescale  | [@cliffhall](https://github.com/cliffhall)       | 持续中 |
+| WG 负责人 | Ola Hungerford | Nordstrom    | [@olaservo](https://github.com/olaservo)         | 持续中 |
+| WG 负责人 | Bob Dickinson  | TeamSpark.ai | [@BobDickinson](https://github.com/BobDickinson) | 持续中 |
+
+## 权限与决策权
+
+| 决策类型                       | 权限级别                                        |
+| ----------------------------------- | ------------------------------------------------------ |
+| 会议后勤与日程安排      | WG 负责人（自主）                                  |
+| WG 内提案优先级排序   | WG 负责人（自主）                                  |
+| SEP 分流与关闭（在范围内）     | WG 负责人（自主，并附有记录的理由）       |
+| 范围内的技术设计       | WG 共识                                           |
+| 规范变更（增量）             | WG 共识 → 核心维护者批准                |
+| 规范变更（破坏性/基础性） | WG 共识 → 核心维护者批准 + 更广泛审查 |
+| 范围扩展                     | 需核心维护者批准                      |
+| WG 成员批准                  | WG 成员赞助者                                     |
+
+## 成员资格
+
+{/* List current group members and their participation levels, if any. Leave out if no members exist yet. Participation tiers and membership criteria are defined in the governance rules. */}
+
+| 名称           | 组织         | GitHub                                           | Discord     | 级别      |
+| -------------- | ------------ | ------------------------------------------------ | ----------- | ---------- |
+| Cliff Hall     | Futurescale  | [@cliffhall](https://github.com/cliffhall)       | seaofarrows | 维护者     |
+| Ola Hungerford | Nordstrom    | [@olaservo](https://github.com/olaservo)         | olaservo    | 维护者     |
+| Bob Dickinson  | TeamSpark.ai | [@BobDickinson](https://github.com/BobDickinson) | rddthree    | 维护者     |
+| Tobin South    | Anthropic    | [@tobinsouth](https://github.com/tobinsouth)     | tobinsouth  | 成员       |
+
+## 运营
+
+| 会议            | 频率                                      | 时长       | 目的                                  |
+| --------------- | ----------------------------------------- | ---------- | ------------------------------------- |
+| 工作会议        | 每周三 11:00 America/New_York             | 60 分钟    | 技术讨论、提案审查                      |
+
+会议在 [meet.modelcontextprotocol.io/tag/inspector-v2-wg](https://meet.modelcontextprotocol.io/tag/inspector-v2-wg) 举行。根据当前 MCP 会议政策，议程会至少提前 7 天发布。会议记录会发布到 `modelcontextprotocol/modelcontextprotocol` 仓库中的 [Meeting Notes — Inspector V2 WG](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions/categories/meeting-notes-inspector-v2-wg) 讨论分类下。
+
+**沟通渠道**
+
+- 主要频道：MCP Discord 上的 `#inspector-v2-wg`。
+- 异步讨论：`modelcontextprotocol/inspector` 中的 GitHub Discussions。
+- 季度更新：发布到该 WG 的 GitHub Discussions 分类中。
+
+## 交付物与成功指标
+
+### 当前工作项
+
+| 工作项                                                                               | 状态                       | 负责人                   |
+| --------------------------------------------------------------------------------------- | ---------------------------- | -------------------------- |
+| Web Inspector UI（Mantine / TypeScript）— 使用真实 MCP/Core 接口的“哑”组件 | 进行中                  | Cliff Hall, Ola Hungerford |
+| Inspector Core 共享代码架构                                                 | 进行中                  | Bob Dickinson              |
+| CLI Inspector 和 TUI Inspector                                                         | 进行中                  | Bob Dickinson              |
+| 将 `main` 上现有的 Inspector 迁移到 `v1.x` 维护分支                  | 规划中                     | WG 负责人                   |
+| Core、Web、CLI 和 TUI 的测试装置                                        | 规划中                     | WG 负责人                   |
+| Inspector Core 采用 MCP TypeScript SDK V2                                        | 已阻塞（受 TS SDK WG 影响） | Bob Dickinson              |
+
+### 成功标准
+
+1. **Q1 结束** — Web UI 完成，“哑”组件已连接到真实的 MCP/Inspector Core 接口。
+2. **Q1 结束** — Inspector Core 架构完成定稿。
+3. **Q2 结束** — Inspector Core 合并到 `v2/main`，并可与 Web UI 端到端正常工作。
+4. **Q2 结束** — CLI 和 TUI Inspectors 合并到 `v2/main`，并可与 Inspector Core 端到端正常工作。
+5. **Q2 结束** — `main` 上现有的 Inspector 已迁移到 `v1.x` 分支，并正式弃用。
+6. **Q2 结束** — 新的 Inspector 产品线（Web、CLI、TUI）已发布并正式可用。
+7. **Q3 结束** — Inspector Core 运行于 MCP TypeScript SDK V2 之上（受 TypeScript SDK WG 的交付时间表影响）。
+
+## 更新日志
+
+| 日期       | 变更                                           | 作者               |
+| ---------- | ------------------------------------------------ | -------------------- |
+| 2026-04-11 | 为符合 SEP-2149 而通过初始章程。 | Cliff Hall（联合负责人） |

@@ -13,7 +13,9 @@ title: 主要变更
 ## 次要变更
 
 1. 向 `ClientCapabilities` 和 `ServerCapabilities` 添加 `extensions` 字段，以支持核心协议之外的可选 [扩展](/docs/extensions/overview)。
-2. 记录 `_meta` 键（`traceparent`、`tracestate`、`baggage`）的 OpenTelemetry 跟踪上下文传播约定 ([SEP-414](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/414))。
+2. 记录 `_meta` 键（`traceparent`、`tracestate`、`baggage`）的 OpenTelemetry 跟踪上下文传播约定（[SEP-414](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/414)）。
+3. 服务器 **应当** 以确定性顺序从 `tools/list` 返回工具，以便启用客户端缓存并提高 LLM 提示缓存命中率。
+4. 要求 Streamable HTTP POST 请求包含标准 MCP 请求头（`Mcp-Method`、`Mcp-Name`），并增加通过工具参数中的 `x-mcp-header` 支持自定义请求头的能力（[SEP-2243](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2243)）。
 
 ## 其他架构变更
 
