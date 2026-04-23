@@ -51,7 +51,13 @@
               "docs/develop/connect-remote-servers",
               "docs/develop/build-with-agent-skills",
               "docs/develop/build-server",
-              "docs/develop/build-client",
+              {
+                "group": "Clients",
+                "pages": [
+                  "docs/develop/build-client",
+                  "docs/develop/clients/building-quality-clients"
+                ]
+              },
               "docs/sdk",
               {
                 "group": "安全",
@@ -466,6 +472,7 @@
             "group": "工作组章程",
             "pages": [
               "community/inspector-v2/charter",
+              "community/interceptors/charter",
               "community/server-card/charter",
               "community/skills-over-mcp/charter",
               "community/triggers-events/charter"
