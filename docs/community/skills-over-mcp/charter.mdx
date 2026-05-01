@@ -9,7 +9,7 @@ description: MCP Skills Over MCP 工作组章程。
 
 ## Mission Statement
 
-Skills Over MCP 工作组定义“agent skills”——用于 agent 工作流的丰富、结构化指令——如何通过 MCP 被发现、分发和消费。主应用中的原生技能支持表明需求强劲，而该工作组源于对 [SEP-2076 — Agent Skills as a First-Class MCP Primitive](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2076) 的讨论；该讨论提出了一个尚未解决的问题：现有 MCP 原语是否已足够，或者还需要标准化哪些约定。该 WG 会产出规范扩展、参考实现和协调性产物，因为这些解决方案会同时涉及协议规范、注册表 schema、SDK 实现以及客户端行为。
+Skills Over MCP 工作组定义了“agent skills”——用于 agent 工作流的丰富、结构化指令——如何通过 MCP 被发现、分发和消费。主机应用中对原生 skills 支持的实现表明需求强烈，而该工作组源自对 [SEP-2076 — Agent Skills as a First-Class MCP Primitive](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2076) 的讨论，该讨论提出了一个尚未解决的问题：现有的 MCP 原语是否足够，还是需要标准化哪些约定。该 WG 会产出规范扩展、参考实现和协调性产物，因为这些解决方案会同时涉及协议规范、注册表 schema、SDK 实现以及客户端行为。WG 当前的方向记录在 [SEP-2640 — Skills Extension](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2640) 中（基于 Resources 的 Extensions Track）。
 
 ## Scope
 
@@ -71,6 +71,7 @@ Skills Over MCP 工作组定义“agent skills”——用于 agent 工作流的
 | Juan Antonio Osorio      | Stacklok                        | [@JAORMX](https://github.com/JAORMX)                   |         | Participant |
 | Kaxil Naik               | Astronomer / Apache Airflow PMC | [@kaxil](https://github.com/kaxil)                     |         | Participant |
 | Cliff Hall               | Futurescale                     | [@cliffhall](https://github.com/cliffhall)             |         | Participant |
+| Haoyu Wang               | Google                          | [@helloeve](https://github.com/helloeve)               |         | Participant |
 
 ## Operations
 
@@ -95,12 +96,12 @@ Discord: [#skills-over-mcp-wg](https://discord.com/channels/1358869848138059966/
 
 完整的实时跟踪见 [Skills Over MCP WG 项目看板](https://github.com/orgs/modelcontextprotocol/projects/38/views/1)。重点工作流如下：
 
-| Item                                           | Status      | Target Date | Champion                                                                                     |
-| ---------------------------------------------- | ----------- | ----------- | -------------------------------------------------------------------------------------------- |
-| Skills Extension SEP (draft, Extensions Track) | In Review   |             | [@pja-ant](https://github.com/pja-ant)                                                       |
-| Skills Extension reference implementation      | In Review   |             | [@olaservo](https://github.com/olaservo)                                                     |
-| Agent Skills spec coordination                 | In Progress |             | [@jonathanhefner](https://github.com/jonathanhefner), [@pja-ant](https://github.com/pja-ant) |
-| Registry skills.json proposal                  | In Progress |             | [@JAORMX](https://github.com/JAORMX)                                                         |
+| Item                                                                                                              | Status      | Target Date | Champion                                                                                     |
+| ----------------------------------------------------------------------------------------------------------------- | ----------- | ----------- | -------------------------------------------------------------------------------------------- |
+| [Skills Extension SEP](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2640) (Extensions Track) | In Review   |             | [@pja-ant](https://github.com/pja-ant)                                                       |
+| Skills Extension reference implementation                                                                         | In Review   |             | [@olaservo](https://github.com/olaservo)                                                     |
+| Agent Skills spec coordination                                                                                    | In Progress |             | [@jonathanhefner](https://github.com/jonathanhefner), [@pja-ant](https://github.com/pja-ant) |
+| Registry skills.json proposal                                                                                     | In Progress |             | [@JAORMX](https://github.com/JAORMX)                                                         |
 
 ### Success Criteria
 
@@ -112,6 +113,7 @@ Discord: [#skills-over-mcp-wg](https://discord.com/channels/1358869848138059966/
 
 | Date       | Change                                                                                                                                                                                                                                                                                                           |
 | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-04-25 | 在 Active Work Items 中链接 SEP-2640；新增 @helloeve（Google）为 Participant                                                                                                                                                                                                                                    |
 | 2026-04-16 | 从 Interest Group 转换为 Working Group                                                                                                                                                                                                                                                                   |
-| 2026-04-14 | 初始章程（根据 [experimental-ext-skills](https://github.com/modelcontextprotocol/experimental-ext-skills) 仓库 README 正式化而来；在通过 [SEP-2149](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2149) 建立章程流程之前，该 README 曾作为事实上的章程） |
-| 2026-02-01 | 成立 IG；创建实验性仓库                                                                                                                                                                                                                                                                             |
+| 2026-04-14 | 初始章程（由 [experimental-ext-skills](https://github.com/modelcontextprotocol/experimental-ext-skills) 仓库的 README 正式化而来；在通过 [SEP-2149](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2149) 建立章程流程之前，该 README 一直作为事实上的章程） |
+| 2026-02-01 | 组建 IG；创建实验性仓库                                                                                                                                                                                                                                                                             |

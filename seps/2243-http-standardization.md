@@ -3,11 +3,11 @@
 <!-- cspell:ignore streamable -->
 <!-- markdownlint-disable MD036 MD060 -->
 
-- **状态**: Draft
+- **状态**: Final
 - **类型**: Standards Track
 - **创建时间**: 2026-02-04
 - **作者**: MCP Transports Working Group
-- **发起方**: None
+- **赞助方**: None
 - **PR**: https://github.com/modelcontextprotocol/specification/pull/2243
 
 ## 摘要

@@ -1,0 +1,95 @@
+---
+title: File Uploads Charter
+description: MCP 文件上传工作组章程。
+---
+
+## 小组类型
+
+**工作组**
+
+## 使命宣言
+
+文件上传工作组旨在定义 MCP 工具和引导请求如何声明文件输入，以便宿主能够呈现原生文件选择器，并将用户选定的文件内容传递给服务器。如今，需要从用户处获取文件的服务器往往会退而求其次，使用自然语言说明来要求提供 base64 字符串或本地路径，这会导致不一致的用户体验，并将编码细节推给最终用户。该工作组将基于 [SEP-2356](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2356)，为声明文件输入和交付这些输入的线格式制定一个最小的、schema 级别的机制。
+
+## 范围
+
+### 范围内
+
+- **规范工作**：定义在工具输入 schema 和引导请求 schema 上声明式文件输入描述符的 SEP、文件内容的线格式编码，以及宿主侧处理要求。
+- **参考实现**：`FileInputDescriptor` 的 SDK 类型和辅助方法、data URI 编码，以及一个演示文件选择器调用和值替换的宿主流程示例。
+- **跨领域协作**：与 MCP Apps WG 协调，以处理嵌入式 UI 自带文件选择器的场景；并与 Security WG 协调宿主侧验证要求。
+- **文档**：覆盖文件输入声明的规范章节，以及面向当前使用临时 base64 指令的服务器的迁移指南。
+
+### 范围外
+
+- 服务器到客户端的文件传递，这一部分已经由 Resources 和 `BlobResourceContents` 覆盖。
+- 对传输层或会话模型的更改。
+
+作为设计工作的一部分，WG 可以评估流式传输、分块传输或预签名上传 URL 等方案；这些方案是落入初始 SEP 还是后续补充，由 WG 决定，而不是章程约束。
+
+### 相关小组
+
+- **MCP Apps WG** — 嵌入式应用 UI 可能会呈现其自己的文件选择器；该描述符格式应在该场景中可复用。
+- **Security WG** — 针对用户提供的文件内容的宿主侧验证要求（该 SEP 参考了 [OWASP ASVS V5](https://owasp.org/www-project-application-security-verification-standard/) 作为通用上传卫生规范）。
+- **Tool Annotations IG** — 文件输入描述符是一种输入参数元数据，且应与更广泛的注解分类保持一致。
+
+## 领导层
+
+| 角色 | 姓名           | 组织         | GitHub                                   | 任期    |
+| ---- | -------------- | ------------ | ---------------------------------------- | ------- |
+| 负责人 | Den Delimarsky | Anthropic    | [@localden](https://github.com/localden) | 初始    |
+
+由 Den Delimarsky（[@localden](https://github.com/localden)）和 Nick Cooper
+([@nickcoai](https://github.com/nickcoai)) 赞助。
+
+## 权限与决策权
+
+| 决策类型                           | 权限级别                                             |
+| ----------------------------------- | ---------------------------------------------------- |
+| 会议后勤与排期                     | WG 负责人（自主）                                     |
+| WG 内的提案优先级排序              | WG 负责人（自主）                                     |
+| SEP 分流与关闭（范围内）           | WG 负责人（自主，附带记录在案的理由）                 |
+| 范围内的技术设计                   | WG 共识                                               |
+| 规范变更（增量）                   | WG 共识 → Core Maintainer 批准                          |
+| 规范变更（破坏性/基础性）         | WG 共识 → Core Maintainer 批准 + 更广泛的审查          |
+| 范围扩展                           | 需要 Core Maintainer 批准                              |
+| WG 成员批准                        | WG 成员赞助人                                          |
+
+## 成员
+
+| 姓名           | 组织         | GitHub                                   | Discord | 级别       |
+| -------------- | ------------ | ---------------------------------------- | ------- | ---------- |
+| Den Delimarsky | Anthropic    | [@localden](https://github.com/localden) |         | 负责人     |
+| Nick Cooper    | OpenAI       | [@nickcoai](https://github.com/nickcoai) |         | WG 成员    |
+| Olivier Chafik | Anthropic    | [@ochafik](https://github.com/ochafik)   |         | WG 成员    |
+
+## 运营
+
+| 会议             | 频率     | 时长     | 目的                                 |
+| --------------- | -------- | -------- | ------------------------------------- |
+| Working Session | 每两周   | 30 分钟  | 技术讨论、提案审查                      |
+
+Discord: `#file-uploads-wg`
+
+## 交付物与成功指标
+
+### 进行中的工作项
+
+| 项目                                                                                                        | 状态 | 目标日期 | 负责人                               |
+| ----------------------------------------------------------------------------------------------------------- | ------ | ----------- | -------------------------------------- |
+| [SEP-2356: Declarative file inputs](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2356) | Draft  | 5 月底      | [@ochafik](https://github.com/ochafik) |
+| TypeScript SDK reference implementation                                                                     | —      | 5 月底      | [@ochafik](https://github.com/ochafik) |
+| Reference implementation in a second Tier-1 SDK                                                             | —      | 6 月底      | TBD                                    |
+
+### 成功标准
+
+- 一份已接受的 SEP，定义文件输入描述符和线格式编码。
+- 至少两个 Tier-1 SDK 中有参考实现。
+- 至少有一个生产环境宿主能够根据该描述符渲染原生文件选择器。
+- 新 schema 关键字具有一致性测试覆盖。
+
+## 更新日志
+
+| 日期       | 变更          |
+| ---------- | --------------- |
+| 2026-04-23 | 初始章程 |
