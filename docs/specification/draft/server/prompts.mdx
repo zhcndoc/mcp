@@ -65,12 +65,12 @@ Model Context Protocol (MCP) 提供了一种标准化方式，使服务器能够
     "prompts": [
       {
         "name": "code_review",
-        "title": "Request Code Review",
-        "description": "Asks the LLM to analyze code quality and suggest improvements",
+        "title": "请求代码审查",
+        "description": "让 LLM 分析代码质量并提出改进建议",
         "arguments": [
           {
             "name": "code",
-            "description": "The code to review",
+            "description": "要审查的代码",
             "required": true
           }
         ],
@@ -115,19 +115,21 @@ Model Context Protocol (MCP) 提供了一种标准化方式，使服务器能够
   "jsonrpc": "2.0",
   "id": 2,
   "result": {
-    "description": "Code review prompt",
+    "description": "代码审查提示词",
     "messages": [
       {
         "role": "user",
         "content": {
           "type": "text",
-          "text": "Please review this Python code:\ndef hello():\n    print('world')"
+          "text": "请审查这段 Python 代码：\ndef hello():\n    print('world')"
         }
       }
     ]
   }
 }
 ```
+
+服务器**也可以**对 `prompts/get` 返回一个 [`InputRequiredResult`](/specification/draft/basic/utilities/mrtr#InputRequiredResult)，以表明在解析提示词之前还需要额外输入。这遵循 [多轮往返请求](/specification/draft/basic/utilities/mrtr#multi-round-trip-requests) 机制。在重试该请求时，客户端会在请求参数中包含 `inputResponses`，以及服务器提供的 `requestState`（如果有）。
 
 ### 列表更改通知
 
@@ -147,20 +149,20 @@ sequenceDiagram
     participant Client
     participant Server
 
-    Note over Client,Server: Discovery
+    Note over Client,Server: 发现
     Client->>Server: prompts/list
-    Server-->>Client: List of prompts
+    Server-->>Client: 提示词列表
 
-    Note over Client,Server: Usage
+    Note over Client,Server: 使用
     Client->>Server: prompts/get
-    Server-->>Client: Prompt content
+    Server-->>Client: 提示词内容
 
     opt listChanged
-      Client->>+Server: GET /mcp<br>(starts background SSE stream)
-      Note over Client,Server: Changes
-      Server--)Client: prompts/list_changed<br>(notification on background SSE stream)
+      Client->>+Server: GET /mcp<br>(启动后台 SSE 流)
+      Note over Client,Server: 变更
+      Server--)Client: prompts/list_changed<br>(后台 SSE 流上的通知)
       Client->>Server: prompts/list
-      Server-->>Client: Updated prompts
+      Server-->>Client: 更新后的提示词
     end
 ```
 
@@ -196,7 +198,7 @@ sequenceDiagram
 ```json
 {
   "type": "text",
-  "text": "The text content of the message"
+  "text": "消息的文本内容"
 }
 ```
 
@@ -209,7 +211,7 @@ sequenceDiagram
 ```json
 {
   "type": "image",
-  "data": "base64-encoded-image-data",
+  "data": "base64 编码的图像数据",
   "mimeType": "image/png"
 }
 ```
@@ -223,7 +225,7 @@ sequenceDiagram
 ```json
 {
   "type": "audio",
-  "data": "base64-encoded-audio-data",
+  "data": "base64 编码的音频数据",
   "mimeType": "audio/wav"
 }
 ```
@@ -240,7 +242,7 @@ sequenceDiagram
   "resource": {
     "uri": "resource://example",
     "mimeType": "text/plain",
-    "text": "Resource content"
+    "text": "资源内容"
   }
 }
 ```

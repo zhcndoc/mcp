@@ -47,7 +47,7 @@ requests when the underlying set of tools has not changed). Deterministic orderi
 clients to reliably cache the tool list and improves LLM prompt cache hit rates when tools
 are included in model context.
 
-## Protocol Messages
+## 协议消息
 
 ### 列出工具
 
@@ -132,6 +132,7 @@ are included in model context.
   "jsonrpc": "2.0",
   "id": 2,
   "result": {
+    "resultType": "complete",
     "content": [
       {
         "type": "text",
@@ -142,6 +143,68 @@ are included in model context.
   }
 }
 ```
+
+### 不完整的工具结果
+
+服务器 **可以** 使用 [`InputRequiredResult`](/specification/draft/basic/utilities/mrtr#InputRequiredResult) 响应 `tools/call`，表示在完成工具调用之前还需要额外输入。这遵循 [多轮往返请求](/specification/draft/basic/utilities/mrtr#multi-round-trip-requests) 机制。
+
+在使用输入响应重试请求时，客户端会在请求参数中包含 `inputResponses`，以及如果服务器提供了 `requestState`，则也会包含它：
+
+**不完整响应：**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "result": {
+    "resultType": "input_required",
+    "inputRequests": {
+      "github_login": {
+        "method": "elicitation/create",
+        "params": {
+          "mode": "form",
+          "message": "请提供你的 GitHub 用户名",
+          "requestedSchema": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" }
+            },
+            "required": ["name"]
+          }
+        }
+      }
+    },
+    "requestState": "eyJsb2NhdGlvbiI6Ik5ldyBZb3JrIn0..."
+  }
+}
+```
+
+**使用输入响应重试：**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "method": "tools/call",
+  "params": {
+    "name": "get_weather",
+    "arguments": {
+      "location": "New York"
+    },
+    "inputResponses": {
+      "github_login": {
+        "action": "accept",
+        "content": {
+          "name": "octocat"
+        }
+      }
+    },
+    "requestState": "eyJsb2NhdGlvbiI6Ik5ldyBZb3JrIn0..."
+  }
+}
+```
+
+请注意，初始请求与重试请求中的 JSON-RPC `id` **必须** 不同。
 
 ### 列表变更通知
 
@@ -162,19 +225,19 @@ sequenceDiagram
     participant Client
     participant Server
 
-    Note over Client,Server: Discovery
+    Note over Client,Server: 发现
     Client->>Server: tools/list
     Server-->>Client: 工具列表
 
-    Note over Client,LLM: Tool Selection
+    Note over Client,LLM: 工具选择
     LLM->>Client: 选择要使用的工具
 
-    Note over Client,Server: Invocation
+    Note over Client,Server: 调用
     Client->>Server: tools/call
     Server-->>Client: 工具结果
     Client->>LLM: 处理结果
 
-    Note over Client,Server: Updates
+    Note over Client,Server: 更新
     Server--)Client: tools/list_changed
     Client->>Server: tools/list
     Server-->>Client: 更新后的工具
@@ -231,7 +294,7 @@ sequenceDiagram
 
 #### x-mcp-header
 
-The `x-mcp-header` 扩展属性允许服务器在使用 [Streamable HTTP transport](/specification/draft/basic/transports#custom-headers-from-tool-parameters) 时，将特定工具参数镜像到 HTTP 头中。
+`x-mcp-header` 扩展属性允许服务器在使用 [Streamable HTTP transport](/specification/draft/basic/transports#custom-headers-from-tool-parameters) 时，将特定工具参数镜像到 HTTP 头中。
 这使得网络中介（负载均衡器、代理、WAF）无需解析请求体即可基于参数值路由和处理请求。
 
 `x-mcp-header` 属性直接放置在要镜像的属性的 JSON Schema 内。其值指定结果 `Mcp-Param-{name}` HTTP 头中的名称部分。

@@ -1,0 +1,90 @@
+---
+title: SDK Working Group Charter
+description: MCP SDK 工作组章程。
+---
+
+## 组别类型
+
+**工作组**
+
+## 使命陈述
+
+SDK 工作组旨在确保官方 MCP SDK 与规范保持一致、符合要求并持续更新。它负责协调不同语言中新版协议的实现，管理 [SDK 分层系统](/community/sdk-tiers)，并在合适的情况下建立共享的设计模式，使开发者在不同 SDK 之间获得一致的体验，同时每个 SDK 仍保持其语言的惯用风格。
+
+## 范围
+
+### 范围内
+
+- **SDK 分层**：运行 [SDK 分层系统](/community/sdk-tiers)，包括审核分层晋升申请、应用降级标准，并维护已发布的分层分配。
+- **官方 SDK 名单**：评估新增官方 SDK 或退役现有 SDK 的提案。
+- **发布协调**：将 Tier-1 SDK 的发布计划与规范版本日期对齐，以便协议功能能够按照其层级要求的时间线进入 SDK。
+- **跨 SDK 设计指导**：为 SDK API 表面、版本控制、弃用、错误处理和扩展打包推荐通用模式，使各语言中的 SDK 在保持惯用性的同时仍然具有可识别的一致性。
+- **一致性集成**：与 Conformance Testing 项目协作，确保每个官方 SDK 运行一致性测试套件并发布结果。
+- **维护者协调**：为各语言 SDK 维护者提供一个交流实现经验的论坛，并将规范中的模糊之处反馈给 Core Maintainers。
+
+### 范围外
+
+- **单个 SDK 的日常维护**：某个 SDK 的问题分流、PR 审查和发布仍由该 SDK 在 [MAINTAINERS.md](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/MAINTAINERS.md) 中列出的维护者负责。
+- **规范编写**：协议变更通过 [SEP 流程](/community/sep-guidelines) 提出，并由相关工作组或 Core Maintainers 负责。SDK WG 实现已被接受的 SEP；它不拥有规范章节。
+- **一致性测试编写**：一致性测试套件本身由 [Conformance Testing](https://github.com/modelcontextprotocol/conformance) 项目负责。
+- **第三方和社区 SDK**：位于 [modelcontextprotocol](https://github.com/modelcontextprotocol) 组织之外的 SDK 不受本组管理。
+
+### 相关组别
+
+- **Transports WG**：传输实现是每个 SDK 的重要组成部分。当传输类 SEP 落地时，SDK WG 会与 Transports WG 协调推出顺序。
+- **Conformance Testing**：层级分配取决于一致性得分。SDK WG 会使用一致性结果，并将测试覆盖范围中的缺口反馈回去。
+- **所有产出规范的工作组**：SDK WG 是已被接受的 SEP 的下游使用者，并与发起组协调参考实现的时间安排。
+
+## 领导层
+
+| 角色 | 姓名             | 组织       | GitHub                                                 | 任期    |
+| ---- | ---------------- | ---------- | ------------------------------------------------------ | ------- |
+| 负责人 | Felix Weinberger | Anthropic | [@felixweinberger](https://github.com/felixweinberger) | 持续中 |
+
+## 权限与决策权
+
+| 决策类型                           | 权限级别                                   |
+| ---------------------------------- | ------------------------------------------ |
+| 会议安排与日程                      | WG Leads（自主）                          |
+| WG 内部提案优先级排序              | WG Leads（自主）                          |
+| SDK 层级晋升或降级                  | WG 共识                                   |
+| 跨 SDK 设计指导                     | WG 共识（对各 SDK 维护者的建议性意见）     |
+| 单个 SDK 的发布、版本控制、API 设计 | 该 SDK 的维护者（自主）                    |
+| 新增或退役官方 SDK                  | WG 共识 → Core Maintainer 批准             |
+| 更改分层标准                        | WG 共识 → Core Maintainer 批准             |
+| 扩大范围                            | 需要 Core Maintainer 批准                  |
+| WG 成员批准                         | WG 成员赞助者                             |
+
+## 成员资格
+
+WG 成员是 [MAINTAINERS.md](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/MAINTAINERS.md) 中记录的每个官方 SDK 的维护者，以及 [modelcontextprotocol/access](https://github.com/modelcontextprotocol/access) 中对应角色的人员。任何官方 SDK 的维护者默认都是 WG 成员。
+
+## 运作
+
+| 会议             | 频率     | 时长   | 目的                                                 |
+| ---------------- | -------- | ------ | ---------------------------------------------------- |
+| 工作会议         | 每两周   | 45 分钟 | 发布协调、层级审查、跨 SDK 设计                    |
+
+沟通在 `#general-sdk-dev` Discord 频道以及 [GitHub Discussions](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions) 中的 SDK Working Group 分类下进行。
+
+## 交付物与成功指标
+
+### 当前工作项
+
+| 项目                                              | 状态        | 目标日期   | 负责人              |
+| ------------------------------------------------- | ----------- | ---------- | ------------------- |
+| 2026-06-30 Tier-1 SDK 跨规范支持                 | 规划中      | 2026 年第 3 季度 | 各 SDK 维护者        |
+| 无状态传输采用的跨 SDK 指导                      | 进行中      | 2026 年第 2 季度 | WG Leads            |
+| 季度层级审查                                      | 周期性      | 每季度     | WG Leads            |
+
+### 成功标准
+
+- 所有官方 SDK 都有已发布的层级，并且在其默认分支上通过一致性运行。
+- Tier-1 SDK 在其层级要求的时间线内，为每个已发布的规范版本提供支持。
+- 层级晋升和降级决策及其理由记录在 GitHub Discussions 中。
+
+## 变更日志
+
+| 日期       | 变更          |
+| ---------- | --------------- |
+| 2026-04-28 | 初始章程 |

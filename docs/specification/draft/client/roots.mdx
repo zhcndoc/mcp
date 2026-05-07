@@ -42,14 +42,12 @@ MCP 中的根目录通常通过工作区或项目配置界面暴露。
 
 ### 列出根目录
 
-要检索根目录，服务器发送 `roots/list` 请求：
+要在处理客户端请求期间检索根目录，服务器会发送一个包含 `roots/list` 请求的 `IncompleteResponse`：
 
 **请求：**
 
 ```json
 {
-  "jsonrpc": "2.0",
-  "id": 1,
   "method": "roots/list"
 }
 ```
@@ -58,8 +56,6 @@ MCP 中的根目录通常通过工作区或项目配置界面暴露。
 
 ```json
 {
-  "jsonrpc": "2.0",
-  "id": 1,
   "result": {
     "roots": [
       {
@@ -71,17 +67,6 @@ MCP 中的根目录通常通过工作区或项目配置界面暴露。
 }
 ```
 
-### 根目录列表更改
-
-当根目录更改时，支持 `listChanged` 的客户端**必须**发送通知：
-
-```json
-{
-  "jsonrpc": "2.0",
-  "method": "notifications/roots/list_changed"
-}
-```
-
 ## 消息流
 
 ```mermaid
@@ -89,14 +74,10 @@ sequenceDiagram
     participant Server
     participant Client
 
-    Note over Server,Client: Discovery
-    Server->>Client: roots/list
-    Client-->>Server: Available roots
-
-    Note over Server,Client: Changes
-    Client--)Server: notifications/roots/list_changed
-    Server->>Client: roots/list
-    Client-->>Server: Updated roots
+    Note over Server,Client: 发现
+    Client->>Server: tool/call(id: 1)
+    Server-->>Client: IncompleteResponse(roots/list)
+    Client->>Server: tool/call(id: 2, 可用根目录)
 ```
 
 ## 数据类型
@@ -115,7 +96,7 @@ sequenceDiagram
 ```json
 {
   "uri": "file:///home/user/projects/myproject",
-  "name": "My Project"
+  "name": "我的项目"
 }
 ```
 
@@ -125,38 +106,18 @@ sequenceDiagram
 [
   {
     "uri": "file:///home/user/repos/frontend",
-    "name": "Frontend Repository"
+    "name": "前端仓库"
   },
   {
     "uri": "file:///home/user/repos/backend",
-    "name": "Backend Repository"
+    "name": "后端仓库"
   }
 ]
 ```
 
 ## 错误处理
 
-客户端**应该**为常见失败情况返回标准 JSON-RPC 错误：
-
-- 客户端不支持根目录：`-32601` (方法未找到)
-- 服务器发送 `roots/list` 请求且没有关联的客户端到服务器请求：`-32602` (无效参数)
-- 内部错误：`-32603`
-
-错误示例：
-
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 1,
-  "error": {
-    "code": -32601,
-    "message": "Roots not supported",
-    "data": {
-      "reason": "Client does not have roots capability"
-    }
-  }
-}
-```
+如果发生错误，客户端不需要使用错误消息重放初始调用，因为服务器并不在等待 `IncompleteResponse` 模式下的响应。
 
 ## 安全考虑
 

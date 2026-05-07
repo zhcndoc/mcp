@@ -86,14 +86,12 @@ MCP 中的采样允许服务器实现代理行为，通过使 LLM 调用能够 _
 
 ### 创建消息
 
-要请求语言模型生成，服务器发送 `sampling/createMessage` 请求：
+要在处理客户端请求期间请求大语言模型生成，服务器发送一个包含 `sampling/createMessage` 请求的 `IncompleteResponse`：
 
 **请求：**
 
 ```json
 {
-  "jsonrpc": "2.0",
-  "id": 1,
   "method": "sampling/createMessage",
   "params": {
     "messages": [
@@ -127,8 +125,6 @@ MCP 中的采样允许服务器实现代理行为，通过使 LLM 调用能够 _
 
 ```json
 {
-  "jsonrpc": "2.0",
-  "id": 1,
   "result": {
     "role": "assistant",
     "content": {
@@ -152,8 +148,9 @@ sequenceDiagram
     participant User
     participant LLM
 
-    Note over Server,Client: Initial request with tools
-    Server->>Client: sampling/createMessage<br/>(messages + tools)
+    Client->>Server: tools/call(id:1)
+    note right of Server: Server needs more info
+    Server->>Client: IncompleteResponse(<br/>sampling/createMessage<br/>(messages + tools))
 
     Note over Client,User: Human-in-the-loop review
     Client->>User: Present request for approval
@@ -164,13 +161,13 @@ sequenceDiagram
 
     Client->>User: Present tool calls for review
     User-->>Client: Approve tool calls
-    Client-->>Server: Return tool_use response
+    Client-->>Server: tools/call(id:2, Return tool_use response)
 
     Note over Server: Execute tool(s)
     Server->>Server: Run get_weather("Paris")<br/>Run get_weather("London")
 
     Note over Server,Client: Continue with tool results
-    Server->>Client: sampling/createMessage<br/>(history + tool_results + tools)
+    Server->>Client: IncompleteResponse(<br/>sampling/createMessage<br/>(history + tool_results + tools))
 
     Client->>User: Present continuation
     User-->>Client: Approve
@@ -180,7 +177,7 @@ sequenceDiagram
 
     Client->>User: Present response
     User-->>Client: Approve
-    Client-->>Server: Return final response
+    Client-->>Server: tools/call(id:3, Return final response)
 
     Note over Server: Server processes result<br/>(may continue conversation...)
 ```
@@ -191,8 +188,6 @@ sequenceDiagram
 
 ```json
 {
-  "jsonrpc": "2.0",
-  "id": 1,
   "method": "sampling/createMessage",
   "params": {
     "messages": [
@@ -232,8 +227,6 @@ sequenceDiagram
 
 ```json
 {
-  "jsonrpc": "2.0",
-  "id": 1,
   "result": {
     "role": "assistant",
     "content": [
@@ -273,8 +266,6 @@ sequenceDiagram
 
 ```json
 {
-  "jsonrpc": "2.0",
-  "id": 2,
   "method": "sampling/createMessage",
   "params": {
     "messages": [
@@ -350,8 +341,6 @@ sequenceDiagram
 
 ```json
 {
-  "jsonrpc": "2.0",
-  "id": 2,
   "result": {
     "role": "assistant",
     "content": {
@@ -487,8 +476,9 @@ sequenceDiagram
     participant User
     participant LLM
 
-    Note over Server,Client: 服务器发起采样
-    Server->>Client: sampling/createMessage
+    Client->>Server: tool/call(id:1)
+    note right of Server: Server needs more info
+    Server->>Client: IncompleteResponse(<br/>sampling/createMessage<br/>(messages + tools))
 
     Note over Client,User: 人工介入审查
     Client->>User: 呈现请求以供批准
@@ -502,8 +492,8 @@ sequenceDiagram
     Client->>User: 呈现响应以供批准
     User-->>Client: 审查并批准/修改
 
-    Note over Server,Client: 完成请求
-    Client-->>Server: 返回批准的响应
+    Note over Server,Client: 使用已批准的响应重放请求
+    Client-->>Server: tools/call(id:3, 返回已批准的响应)
 ```
 
 ## 数据类型
@@ -521,7 +511,7 @@ sequenceDiagram
 ```json
 {
   "type": "text",
-  "text": "The message content"
+  "text": "消息内容"
 }
 ```
 
@@ -631,36 +621,7 @@ LLM 采样可以使用以下参数进行微调：
 
 ## 错误处理
 
-客户端 **应该** 为常见失败情况返回错误：
-
-- 用户拒绝采样请求：`-1`
-- 请求中缺少工具结果：`-32602`（无效参数）
-- 工具结果与其他内容混合：`-32602`（无效参数）
-- 采样请求未与客户端到服务器的请求关联：`-32602`（无效参数）
-
-错误示例：
-
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 3,
-  "error": {
-    "code": -1,
-    "message": "User rejected sampling request"
-  }
-}
-```
-
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 4,
-  "error": {
-    "code": -32602,
-    "message": "Tool result missing in request"
-  }
-}
-```
+如果发生错误或用户拒绝采样请求，客户端不需要使用错误消息重放初始调用，因为服务器并不在等待 `IncompleteResponse` 模式下的响应。
 
 ## 安全考虑
 

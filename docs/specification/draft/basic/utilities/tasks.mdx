@@ -24,7 +24,7 @@ title: 任务
 
 ## 用户交互模型
 
-任务设计为**请求者驱动**——请求者负责用任务增强请求并轮询这些任务的结果；同时，接收者严格控制哪些请求（如果有）支持基于任务的执行，并管理这些任务的生命周期。
+任务被设计为**由请求者驱动**——请求者负责用任务增强请求，并轮询这些任务的结果；与此同时，接收者严格控制哪些请求（如果有）支持基于任务的执行，并管理这些任务的生命周期。
 
 这种请求者驱动的方法确保了确定性响应处理，并实现了复杂的模式，例如分发并发请求，只有请求者才有足够的上下文来编排这些请求。
 
@@ -156,7 +156,7 @@ title: 任务
     "task": {
       "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840",
       "status": "working",
-      "statusMessage": "The operation is now in progress.",
+      "statusMessage": "操作正在进行中。",
       "createdAt": "2025-11-25T10:30:00Z",
       "lastUpdatedAt": "2025-11-25T10:40:00Z",
       "ttl": 60000,
@@ -216,7 +216,7 @@ title: 任务
   "result": {
     "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840",
     "status": "working",
-    "statusMessage": "The operation is now in progress.",
+    "statusMessage": "操作正在进行中。",
     "createdAt": "2025-11-25T10:30:00Z",
     "lastUpdatedAt": "2025-11-25T10:40:00Z",
     "ttl": 30000,
@@ -235,7 +235,9 @@ title: 任务
 
 </Note>
 
-任务完成操作结果后，通过 [`tasks/result`](/specification/draft/schema#tasks%2Fresult) 检索。这不同于初始 `CreateTaskResult` 响应，后者仅包含任务数据。结果结构与原始请求类型匹配（例如，`tools/call` 的 `CallToolResult`）。
+任务完成后，可通过 [`tasks/result`](/specification/draft/schema#tasks%2Fresult) 检索操作结果。这与初始的 `CreateTaskResult` 响应不同，后者仅包含任务数据。结果结构与原始请求类型匹配（例如，`tools/call` 对应 `CallToolResult`）。
+
+当任务处于 `input_required` 状态时，`tasks/result` 会返回一个 [`InputRequiredResult`](/specification/draft/basic/utilities/mrtr#InputRequiredResult)，其中包含客户端必须通过 [`tasks/input_response`](#providing-input-for-tasks) 请求来满足的 `inputRequests`。有关持久工作流的详细信息，请参见 [多轮往返请求](/specification/draft/basic/utilities/mrtr#multi-round-trip-requests)。
 
 要检索已完成任务的结果，请求者可以发送 `tasks/result` 请求：
 
@@ -264,7 +266,7 @@ title: 任务
     "content": [
       {
         "type": "text",
-        "text": "Current weather in New York:\nTemperature: 72°F\nConditions: Partly cloudy"
+        "text": "New York 当前天气：\n温度：72°F\n天气状况：局部多云"
       }
     ],
     "isError": false,
@@ -300,7 +302,7 @@ title: 任务
 
 通知包括完整的 [`Task`](/specification/draft/schema#task) 对象，包括更新的 `status` 和 `statusMessage`（如果存在）。这允许请求者访问完整的任务状态而无需进行额外的 `tasks/get` 请求。
 
-请求者**不得**依赖接收此通知，因为它是可选的。接收者不需要发送状态通知，并且可能选择仅针对某些状态转换发送它们。请求者**应该**继续通过 `tasks/get` 轮询以确保他们接收状态更新。
+请求者**不得**依赖接收此通知，因为它是可选的。接收者没有义务发送状态通知，并且可以选择仅在某些状态转换时发送。请求者**应该**继续通过 `tasks/get` 轮询，以确保收到状态更新。
 
 ### 列出任务
 
@@ -374,7 +376,7 @@ title: 任务
   "result": {
     "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840",
     "status": "cancelled",
-    "statusMessage": "The task was cancelled by request.",
+    "statusMessage": "任务已按请求取消。",
     "createdAt": "2025-11-25T10:30:00Z",
     "lastUpdatedAt": "2025-11-25T10:40:00Z",
     "ttl": 30000,
@@ -382,6 +384,60 @@ title: 任务
   }
 }
 ```
+
+### 为任务提供输入
+
+当任务达到 `input_required` 状态并且 `tasks/result` 返回一个 [`InputRequiredResult`](/specification/draft/basic/utilities/mrtr#InputRequiredResult) 时，请求者通过 [`tasks/input_response`](/specification/draft/schema#tasks%2Finput_response) 请求提供所需输入。这是 [多轮往返请求](/specification/draft/basic/utilities/mrtr#multi-round-trip-requests) 的任务工作流形式。
+
+`tasks/input_response` 请求携带：
+
+- `taskId`：需要输入的任务 ID
+- `inputResponses`：一个对象，将 `inputRequests` 中的每个键映射到从客户端获得的响应
+- `requestState`（可选）：来自 `InputRequiredResult` 的不透明状态令牌，如果有提供
+
+**请求：**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 7,
+  "method": "tasks/input_response",
+  "params": {
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840",
+    "inputResponses": {
+      "github_login": {
+        "action": "accept",
+        "content": {
+          "name": "octocat"
+        }
+      }
+    },
+    "requestState": "eyJzZXNzaW9uIjoiYWJjMTIzIn0..."
+  }
+}
+```
+
+**响应（任务恢复）：**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 7,
+  "result": {
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840",
+    "status": "working",
+    "statusMessage": "已收到输入，正在恢复操作。",
+    "createdAt": "2025-11-25T10:30:00Z",
+    "lastUpdatedAt": "2025-11-25T10:45:00Z",
+    "ttl": 60000,
+    "pollInterval": 5000
+  }
+}
+```
+
+发送 `tasks/input_response` 后，请求者**应该**通过 `tasks/get` 恢复轮询。
+
+对于不处于 `input_required` 状态的任务，接收者**必须**拒绝 `tasks/input_response` 请求，并返回错误码 `-32602`（无效参数）。
 
 ## 行为要求
 
@@ -444,10 +500,10 @@ stateDiagram-v2
 
 </Note>
 
-1. 当任务接收方有对于请求方完成任务所必需的消息时，接收方**应当**将任务移动到 `input_required` 状态。
-1. 接收方**必须**在请求中包含 `io.modelcontextprotocol/related-task` 元数据以将其与任务关联。
-1. 当请求方遇到 `input_required` 状态时，**应当**预先调用 `tasks/result`。
-1. 当接收方收到所有必需的输入时，任务**应当** transition 出 `input_required` 状态（通常回到 `working`）。
+1. 当任务接收方有必须提供给请求方、以完成任务的消息时，接收方**应当**将任务移至 `input_required` 状态。
+1. 接收方**必须**在请求中包含 `io.modelcontextprotocol/related-task` 元数据，以将其与任务关联起来。
+1. 当请求方遇到 `input_required` 状态时，**应当**预先调用 `tasks/result`。如果结果是 [`InputRequiredResult`](/specification/draft/basic/utilities/mrtr#InputRequiredResult)，请求方**应当**满足 `inputRequests`，并通过 [`tasks/input_response`](#providing-input-for-tasks) 提交响应。
+1. 当接收方收到全部必需输入后，任务**应当**退出 `input_required` 状态（通常回到 `working`）。
 
 ### TTL 与资源管理
 
@@ -460,10 +516,11 @@ stateDiagram-v2
 
 ### 结果检索
 
-1. 接受任务增强请求的接收方**必须**返回 `CreateTaskResult` 作为响应。此结果**应当**在接受任务后尽快返回。
-1. 当接收方收到处于终止状态（`completed`、`failed` 或 `cancelled`）的任务的 `tasks/result` 请求时，**必须**返回底层请求的最终结果，无论是成功结果还是 JSON-RPC 错误。
-1. 当接收方收到处于任何其他非终止状态（`working` 或 `input_required`）的任务的 `tasks/result` 请求时，**必须**阻塞响应直到任务达到终止状态。
-1. 对于处于终止状态的任务，接收方**必须**从 `tasks/result` 返回底层请求本应返回的内容，无论是成功结果还是 JSON-RPC 错误。
+1. 接收方在接受任务增强请求后，**必须**返回 `CreateTaskResult` 作为响应。该结果**应当**在接受任务后尽快返回。
+1. 当接收方收到处于终止状态（`completed`、`failed` 或 `cancelled`）的任务的 `tasks/result` 请求时，**必须**返回底层请求的最终结果，无论该结果是成功结果还是 JSON-RPC 错误。
+1. 当接收方收到处于 `input_required` 状态的任务的 `tasks/result` 请求时，**必须**返回一个 [`InputRequiredResult`](/specification/draft/basic/utilities/mrtr#InputRequiredResult)，其中包含请求方必须通过 [`tasks/input_response`](#providing-input-for-tasks) 完成的 `inputRequests`。
+1. 当接收方收到处于 `working` 状态的任务的 `tasks/result` 请求时，**必须**阻塞响应，直到任务到达终止状态或 `input_required` 状态。
+1. 对于处于终止状态的任务，接收方**必须**通过 `tasks/result` 返回与底层请求完全相同的内容，无论该内容是成功结果还是 JSON-RPC 错误。
 
 ### 关联任务相关消息
 
@@ -570,14 +627,13 @@ sequenceDiagram
     S->>C: input_required
     deactivate S
 
-    Note over C,S: 客户端打开结果流
     C->>S: tasks/result (task-123)
     activate S
-    S->>C: elicitation/create (related-task: task-123)
+    S->>C: InputRequiredResult(elicitation/create)
     activate C
-    C->>U: 提示用户输入
-    U->>C: 提供信息
-    C->>S: elicitation 响应 (related-task: task-123)
+    C->>U: Prompt user for input
+    U->>C: Provide information
+    C->>S: tasks/input_response (elicitation response, task-123)
     deactivate C
     deactivate S
 
@@ -715,11 +771,11 @@ sequenceDiagram
 
 任务可以处于以下状态之一：
 
-- `working`：请求正在处理中。
-- `input_required`：接收方需要请求方提供输入。即使任务尚未达到终端状态，请求方也应调用 `tasks/result` 来接收输入请求。
-- `completed`：请求成功完成，结果可用。
-- `failed`：关联的请求未成功完成。对于工具调用，这包括工具调用结果的 `isError` 设置为 true 的情况。
-- `cancelled`：请求在完成前被取消。
+- `working`: 当前正在处理该请求。
+- `input_required`: 接收方需要来自请求方的输入。尽管任务尚未到达终止状态，请求方**应当**调用 `tasks/result` 以接收输入请求。
+- `completed`: 请求已成功完成，结果可用。
+- `failed`: 关联请求未能成功完成。对于工具调用而言，这包括工具调用结果将 `isError` 设为 `true` 的情况。
+- `cancelled`: 请求在完成前已被取消。
 
 ### 任务参数
 
@@ -855,7 +911,7 @@ sequenceDiagram
 }
 ```
 
-对于封装工具调用请求的任务，当工具结果的 `isError` 设置为 `true` 时，任务应达到 `failed` 状态。
+对于包装工具调用请求的任务，当工具结果的 `isError` 设置为 `true` 时，该任务 **应该** 进入 `failed` 状态。
 
 `tasks/result` 端点返回的内容与底层请求原本将返回的内容完全一致：
 

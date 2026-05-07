@@ -2,7 +2,7 @@
 
 本文档列出了 Model Context Protocol 项目当前的维护者。
 
-**最后更新：** 2026 年 4 月 8 日
+**最后更新：** 2026 年 5 月 1 日
 
 ## 主要维护者
 
@@ -12,7 +12,6 @@
 ## 核心维护者
 
 - [Caitie McCaffrey](https://github.com/CaitieM20)
-- [Che Liu](https://github.com/pwwpche)
 - [Clare Liguori](https://github.com/clareliguori)
 - [Kurtis Van Gent](https://github.com/kurtisvg)
 - [Nick Aldridge](https://github.com/000-000-000-000-000)
@@ -22,7 +21,9 @@
 
 ## 名誉维护者
 
-- [Justin Spahr-Summers](https://github.com/jspahrsummers)（联合发明人，名誉主要维护者）
+- [Justin Spahr-Summers](https://github.com/jspahrsummers)（联合创始人，首席维护者荣休）
+- [Basil Hosmer](https://github.com/bhosmer-ant)（核心维护者荣休）
+- [Che Liu](https://github.com/pwwpche)（核心维护者荣休）
 
 ## SDK 维护者
 
