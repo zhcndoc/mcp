@@ -1,0 +1,84 @@
+---
+title: 发现
+---
+
+<div id="enable-section-numbers" />
+
+`server/discover` 允许客户端在发送任何其他请求之前，查询服务器支持的协议版本、
+能力和标识。服务器 **必须** 实现它。
+
+## 请求
+
+除标准 `_meta` 外，请求不携带任何主体参数：
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": "discover-1",
+  "method": "server/discover",
+  "params": {
+    "_meta": {
+      "io.modelcontextprotocol/protocolVersion": "DRAFT-2026-v1",
+      "io.modelcontextprotocol/clientInfo": {
+        "name": "ExampleClient",
+        "version": "1.0.0"
+      },
+      "io.modelcontextprotocol/clientCapabilities": {}
+    }
+  }
+}
+```
+
+## 响应
+
+服务器将返回其支持的协议版本、能力和
+标识：
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": "discover-1",
+  "result": {
+    "resultType": "complete",
+    "supportedVersions": ["DRAFT-2026-v1"],
+    "capabilities": {
+      "tools": {},
+      "resources": {}
+    },
+    "serverInfo": {
+      "name": "ExampleServer",
+      "version": "1.0.0"
+    },
+    "instructions": "This server provides weather and resource utilities."
+  }
+}
+```
+
+### 响应字段
+
+| 字段                | 类型                 | 必需 | 描述                                                                                  |
+| ------------------- | -------------------- | ---- | -------------------------------------------------------------------------------------------- |
+| `supportedVersions` | `string[]`           | 是   | 服务器支持的协议版本。客户端应为后续请求选择其中一个。 |
+| `capabilities`      | `ServerCapabilities` | 是   | 服务器支持的能力（工具、资源、提示等）。                          |
+| `serverInfo`        | `Implementation`     | 是   | 服务器软件的名称和版本。                                                     |
+| `instructions`      | `string`             | 否   | 用自然语言为 LLM 提供如何有效使用该服务器的指导。                    |
+
+## 何时调用
+
+对于客户端来说，调用 `server/discover` 是可选的——客户端可以内联发起任何
+RPC，并在服务器不支持请求的版本时处理
+[`UnsupportedProtocolVersionError`](/specification/draft/schema#unsupportedprotocolversionerror)。
+不过，`server/discover`
+在以下两种场景中很有用：
+
+- **提前进行版本选择。** 客户端在发送任何其他请求之前先了解服务器支持的
+  版本，从而避免一次往返错误。
+- **STDIO 向后兼容探测。** 在 stdio 上，没有逐请求的
+  HTTP 状态码来驱动回退。支持现代（逐请求 `_meta`）和旧版
+ （`initialize` 握手）服务器的客户端 **应该**
+  先发送 `server/discover`。如果服务器返回 `Method not found`
+  （`-32601`），客户端回退到 `initialize` 握手。
+
+完整的版本选择流程请参见 [协议版本协商](/specification/draft/basic/lifecycle#protocol-version-negotiation)。
+有关未知方法返回的 HTTP 特定状态码，请参见 Transports 中的 [协议版本头](/specification/draft/basic/transports#protocol-version-header)
+部分。

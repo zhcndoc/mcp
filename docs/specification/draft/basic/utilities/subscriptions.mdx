@@ -1,0 +1,101 @@
+---
+title: 订阅
+---
+
+<div id="enable-section-numbers" />
+
+`subscriptions/listen` 会从服务器到客户端打开一个长期存在的通知流。与一次性请求不同，该流会保持打开状态并持续发送通知，直到客户端取消它。它取代了原先的 `resources/subscribe` RPC 和 HTTP GET 端点。
+
+## 打开流
+
+客户端发送一个带有 `notifications` 过滤器的 `subscriptions/listen` 请求，用于指定希望接收哪些事件类型。服务器 **不得** 发送客户端未明确请求的通知类型。
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "subscriptions/listen",
+  "params": {
+    "_meta": {
+      "io.modelcontextprotocol/protocolVersion": "DRAFT-2026-v1",
+      "io.modelcontextprotocol/clientInfo": {
+        "name": "ExampleClient",
+        "version": "1.0.0"
+      },
+      "io.modelcontextprotocol/clientCapabilities": {}
+    },
+    "notifications": {
+      "toolsListChanged": true,
+      "resourceSubscriptions": ["file:///project/config.json"]
+    }
+  }
+}
+```
+
+### 通知过滤器
+
+| 字段                    | 类型        | 描述                                                         |
+| ----------------------- | ----------- | ------------------------------------------------------------ |
+| `toolsListChanged`      | `boolean`   | 当工具发生变化时接收 `notifications/tools/list_changed`      |
+| `promptsListChanged`    | `boolean`   | 当提示词发生变化时接收 `notifications/prompts/list_changed`  |
+| `resourcesListChanged`  | `boolean`   | 当列表发生变化时接收 `notifications/resources/list_changed`  |
+| `resourceSubscriptions` | `string[]`  | 为这些资源 URI 接收 `notifications/resources/updated`        |
+
+所有字段都是可选的。省略某个字段等同于不订阅该通知类型。
+
+## 确认
+
+服务器 **必须** 作为流上的第一条消息发送 `notifications/subscriptions/acknowledged`。确认中的 `notifications` 字段反映了服务器同意支持的子集——服务器不支持的通知类型会被省略。
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "notifications/subscriptions/acknowledged",
+  "params": {
+    "_meta": {
+      "io.modelcontextprotocol/subscriptionId": "1"
+    },
+    "notifications": {
+      "toolsListChanged": true,
+      "resourceSubscriptions": ["file:///project/config.json"]
+    }
+  }
+}
+```
+
+客户端 **应该** 将已确认的过滤器与其请求内容进行比对，并优雅地处理任何不受支持的类型。
+
+## 接收通知
+
+流上发送的所有通知都会在 `_meta` 中携带 `io.modelcontextprotocol/subscriptionId`，该值与打开流的 `subscriptions/listen` 请求 ID 相匹配。对于 stdio，由于所有消息共享单一通道，客户端 **必须** 使用此字段将通知与其来源订阅关联起来。
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "notifications/resources/updated",
+  "params": {
+    "_meta": {
+      "io.modelcontextprotocol/subscriptionId": "1"
+    },
+    "uri": "file:///project/config.json"
+  }
+}
+```
+
+## 多个并发订阅
+
+客户端 **可以** 同时拥有多个活动订阅——例如，一个监听工具列表变更，另一个监听资源更新。每个订阅都由其 `subscriptions/listen` 请求的 JSON-RPC 请求 ID 标识，而流上的每条通知都会在 `io.modelcontextprotocol/subscriptionId` 中携带该 ID，以便客户端进行分流。
+
+## 取消
+
+订阅在以下情况下结束：
+
+- **客户端** 取消它——关闭 SSE 流（HTTP）或发送引用监听请求 ID 的 `notifications/cancelled`（stdio）。
+- **服务器** 将其拆除（例如，在关闭期间）——它会关闭底层传输连接。
+- 底层传输关闭（HTTP 超时、TCP 断开连接、stdio 进程退出）。
+
+在 **stdio** 下，如果连接被终止后又重新建立，客户端 **必须** 重新发送 `subscriptions/listen` 以重建其订阅——服务器不会在重连之间保留任何订阅状态。
+
+完整规则请参见 [取消][cancellation]。
+
+[cancellation]: /specification/draft/basic/utilities/cancellation

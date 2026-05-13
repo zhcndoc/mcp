@@ -326,8 +326,8 @@
                     "group": "实用工具",
                     "pages": [
                       "specification/draft/basic/utilities/cancellation",
-                      "specification/draft/basic/utilities/ping",
                       "specification/draft/basic/utilities/progress",
+                      "specification/draft/basic/utilities/subscriptions",
                       "specification/draft/basic/utilities/tasks",
                       "specification/draft/basic/utilities/mrtr"
                     ]
@@ -346,6 +346,7 @@
                 "group": "服务器功能",
                 "pages": [
                   "specification/draft/server/index",
+                  "specification/draft/server/discover",
                   "specification/draft/server/prompts",
                   "specification/draft/server/resources",
                   "specification/draft/server/tools",
@@ -424,14 +425,16 @@
               "seps/2133-extensions",
               "seps/2148-contributor-ladder",
               "seps/2149-working-group-charter-template",
-              "seps/2243-http-standardization"
+              "seps/2243-http-standardization",
+              "seps/2567-sessionless-mcp"
             ]
           },
           {
             "group": "已接受",
             "pages": [
               "seps/2207-oidc-refresh-token-guidance",
-              "seps/2260-Require-Server-requests-to-be-associated-with-Client-requests"
+              "seps/2260-Require-Server-requests-to-be-associated-with-Client-requests",
+              "seps/2575-stateless-mcp"
             ]
           },
           {

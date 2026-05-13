@@ -20,7 +20,7 @@ Model Context Protocol (MCP) 提供了一种标准化方式，使服务器能够
 
 ## 能力
 
-支持提示词的服务器**必须**在 [初始化](/specification/draft/basic/lifecycle#initialization) 期间声明 `prompts` 能力：
+支持提示词的服务器 **必须** 在其 [`DiscoverResult`](/specification/draft/schema#discoverresult) 中声明 `prompts` 能力：
 
 ```json
 {
@@ -34,7 +34,7 @@ Model Context Protocol (MCP) 提供了一种标准化方式，使服务器能够
 
 `listChanged` 指示服务器是否将在可用提示词列表更改时发出通知。
 
-声明了 `prompts` 能力的服务器**必须**响应 `prompts/list` 请求，返回当前对请求客户端可用的一组提示词。该集合**可以**为空，并且**可以**在连接生命周期内更改（见 [列表更改通知](#list-changed-notification)）。
+声明了 `prompts` 能力的服务器 **必须** 以当前对请求客户端可用的提示词集合响应 `prompts/list` 请求。该集合**可以**为空，也**可以**随时间变化（参见 [列表更改通知](#list-changed-notification)），但**绝不能**因连接而异，或因该连接上的其他请求而产生副作用。该集合**可以**随请求中提供的授权而变化——例如，仅返回调用方已获授权范围内允许的提示词——因为凭据是逐请求输入，而不是连接状态。
 
 ## 协议消息
 
@@ -133,7 +133,7 @@ Model Context Protocol (MCP) 提供了一种标准化方式，使服务器能够
 
 ### 列表更改通知
 
-当可用提示词列表更改时，声明了 `listChanged` 能力的服务器**应该**发送通知：
+当可用提示词列表发生变化时，声明了 `listChanged` 能力的服务器**应该**向已打开带有 `promptsListChanged: true` 的 [`subscriptions/listen`](/specification/draft/basic/utilities/subscriptions) 流的客户端发送通知：
 
 ```json
 {
@@ -158,9 +158,10 @@ sequenceDiagram
     Server-->>Client: 提示词内容
 
     opt listChanged
-      Client->>+Server: GET /mcp<br>(启动后台 SSE 流)
-      Note over Client,Server: 变更
-      Server--)Client: prompts/list_changed<br>(后台 SSE 流上的通知)
+      Client->>Server: subscriptions/listen (promptsListChanged: true)
+      Server--)Client: notifications/subscriptions/acknowledged
+      Note over Client,Server: 更改
+      Server--)Client: notifications/prompts/list_changed
       Client->>Server: prompts/list
       Server-->>Client: 更新后的提示词
     end

@@ -8,7 +8,15 @@ title: 主要变更
 
 ## 重大变更
 
-无
+1. 移除流式 HTTP 传输中的协议级会话以及 `Mcp-Session-Id` 标头。列表端点（`tools/list`、`resources/list`、`prompts/list`）不再按连接变化。需要跨调用状态的服务器应使用显式的、由服务器签发的句柄，并将其作为普通工具参数传递 ([SEP-2567](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2567))。
+
+2. 使 MCP 无状态：移除 `initialize`/`notifications/initialized` 握手。现在每个请求都在 `_meta` 中携带其协议版本、客户端标识和客户端能力（`io.modelcontextprotocol/protocolVersion`、`io.modelcontextprotocol/clientInfo`、`io.modelcontextprotocol/clientCapabilities`）。版本不匹配时返回 `UnsupportedProtocolVersionError` ([SEP-2575](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2575))。
+
+3. 添加 `server/discover`：服务器必须实现此 RPC，以公布其支持的协议版本、能力和标识。客户端可以在任何其他请求之前调用它，以便提前选择版本；或者在 STDIO 上将其用作向后兼容探测 ([SEP-2575](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2575))。
+
+4. 用 `subscriptions/listen` 替换 HTTP GET 端点以及 `resources/subscribe`/`resources/unsubscribe`：为所有服务器到客户端通知提供一个单一的、长连接的 POST 响应流。客户端可选择订阅特定类型（`toolsListChanged`、`promptsListChanged`、`resourcesListChanged`、`resourceSubscriptions`）；服务器会确认并使用 `io.modelcontextprotocol/subscriptionId` 标记通知 ([SEP-2575](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2575))。
+
+5. 移除 `ping`、`logging/setLevel` 和 `notifications/roots/list_changed`。日志级别现在通过 `_meta` 中的 `io.modelcontextprotocol/logLevel` 按请求设置；对于未包含此字段的请求，服务器**不得**发送 `notifications/message` ([SEP-2575](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2575))。
 
 ## 次要变更
 

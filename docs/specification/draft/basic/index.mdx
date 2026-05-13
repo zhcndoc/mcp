@@ -7,12 +7,11 @@ title: 概述
 模型上下文协议由几个关键组件组成，它们协同工作：
 
 - **基础协议**：核心 JSON-RPC 消息类型
-- **生命周期管理**：连接初始化、能力协商和
-  会话控制
-- **授权**：基于 HTTP 传输的身份验证和授权框架
-- **服务器功能**：服务器暴露的资源、提示和工具
-- **客户端功能**：客户端提供的采样和根目录列表
-- **工具实用程序**：日志记录和参数补全等跨领域关注点
+- **生命周期管理**：协议版本协商和按请求能力声明
+- **授权**：基于 HTTP 传输的认证和授权框架
+- **服务器功能**：由服务器公开的资源、提示和工具
+- **客户端功能**：由客户端提供的采样和根目录列表
+- **实用工具**：日志记录和参数补全等横切关注点
 
 所有实现 **必须** 支持基础协议和生命周期管理
 组件。其他组件 **可以** 根据应用程序的具体需求来实现。
@@ -43,7 +42,7 @@ MCP 客户端和服务器之间的所有消息 **必须** 遵循
 
 - 请求 **必须** 包含字符串或整数 ID。
 - 与基础 JSON-RPC 不同，ID **不得** 为 `null`。
-- 请求 ID **不得** 在同一会话中被请求者先前使用过。
+- 请求 ID **不得** 与发送方已发出且尚未收到响应的任何其他请求的 ID 相同。
 
 ### 响应
 
@@ -221,6 +220,32 @@ MCP 支持带有以下规则的 JSON Schema：
 
 - 除非为空，否则 **必须** 以字母数字字符 (`[a-z0-9A-Z]`) 开头和结尾。
 - 中间 **可以** 包含连字符 (`-`)、下划线 (`_`)、点 (`.`) 和字母数字字符。
+
+**每请求协议字段：**
+
+每个客户端请求 **必须** 在 `_meta` 中包含以下 `io.modelcontextprotocol/*` 字段。
+服务器使用这些字段来识别客户端和正在使用的协议版本，而无需依赖任何先前的连接状态。有关版本协商规则，请参见
+[生命周期][lifecycle]。
+
+| Key                                          | Type                 | Required | Description                                                 |
+| -------------------------------------------- | -------------------- | -------- | ----------------------------------------------------------- |
+| `io.modelcontextprotocol/protocolVersion`    | `string`             | Yes      | 此请求的协议版本（例如 `"DRAFT-2026-v1"`） |
+| `io.modelcontextprotocol/clientInfo`         | `Implementation`     | Yes      | 客户端名称和版本                                     |
+| `io.modelcontextprotocol/clientCapabilities` | `ClientCapabilities` | Yes      | 与此请求相关的客户端能力                |
+| `io.modelcontextprotocol/logLevel`           | `LoggingLevel`       | No       | 服务器应为此请求输出的最低日志级别   |
+
+服务器 **不得** 依赖客户端未声明的能力。如果处理请求需要客户端未在
+`io.modelcontextprotocol/clientCapabilities` 中包含的能力，服务器 **必须** 返回
+[`MissingRequiredClientCapabilityError`](/specification/draft/schema#missingrequiredclientcapabilityerror)
+（`-32003`），其 `data.requiredCapabilities` 列出缺失的能力。在
+HTTP 上，响应状态 **必须** 为 `400 Bad Request`。
+
+对于通过 [`subscriptions/listen`][subscriptions-listen] 流传递的通知，服务器
+**必须** 在 `_meta` 中包含 `io.modelcontextprotocol/subscriptionId`，以便
+客户端可以将通知与源订阅请求关联起来。
+
+[lifecycle]: /specification/draft/basic/lifecycle
+[subscriptions-listen]: /specification/draft/basic/utilities/subscriptions
 
 **OpenTelemetry 追踪上下文：**
 

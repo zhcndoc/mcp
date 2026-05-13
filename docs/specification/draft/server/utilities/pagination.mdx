@@ -55,10 +55,10 @@ sequenceDiagram
     participant Client
     participant Server
 
-    Client->>Server: List Request (no cursor)
-    loop Pagination Loop
-      Server-->>Client: Page of results + nextCursor
-      Client->>Server: List Request (with cursor)
+    Client->>Server: 列表请求（无游标）
+    loop 分页循环
+      Server-->>Client: 结果页 + nextCursor
+      Client->>Server: 列表请求（带游标）
     end
 ```
 
@@ -81,11 +81,10 @@ sequenceDiagram
    - 将缺失的 `nextCursor` 视为结果结束
    - 支持分页和非分页流程
 
-3. 客户端**必须**将游标视为不透明令牌：
-   - 不要对游标格式做出假设
+3. Clients **MUST** 将游标视为不透明令牌：
+   - 不要对游标格式做任何假设
    - 不要尝试解析或修改游标
-   - 不要基于游标值做出任何判断，除非判断是否提供了非空值（例如，空字符串是有效的游标，因此**不得**被视为结果结束）
-   - 不要在会话之间持久化游标
+   - 不要基于游标值做任何判断，除了是否提供了非空值（例如，空字符串是一个有效游标，因此**MUST NOT** 将其视为结果结束）
 
 ## 错误处理
 

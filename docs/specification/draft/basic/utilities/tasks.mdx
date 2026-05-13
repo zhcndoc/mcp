@@ -32,7 +32,7 @@ title: 任务
 
 ## 能力
 
-支持任务增强请求的服务器和客户端**必须**在初始化期间声明 `tasks` 能力。`tasks` 能力按请求类别结构化，具有布尔属性指示哪些特定请求类型支持任务增强。
+支持任务增强请求的服务器和客户端**必须**声明 `tasks` 能力。服务器在其 [`DiscoverResult`](/specification/draft/schema#discoverresult) 中包含它；客户端在每个请求的 `_meta.io.modelcontextprotocol/clientCapabilities` 中包含它。`tasks` 能力按请求类别进行结构化，布尔属性指示哪些特定请求类型支持任务增强。
 
 ### 服务器能力
 
@@ -92,7 +92,7 @@ title: 任务
 
 ### 能力协商
 
-在初始化阶段，双方交换它们的 `tasks` 能力以建立哪些操作支持基于任务的执行。请求者**应该**仅在接收者声明了相应能力的情况下用任务增强请求。
+请求者**应该**只在接收者已声明相应能力时才用任务增强请求。客户端通过 `server/discover` 发现服务器的 `tasks` 能力；服务器通过每个请求 `_meta` 中的 `clientCapabilities` 了解客户端的 `tasks` 能力。
 
 例如，如果服务器的能力包括 `tasks.requests.tools.call: {}`，则客户端可以用任务增强 `tools/call` 请求。如果客户端的能力包括 `tasks.requests.sampling.createMessage: {}`，则服务器可以用任务增强 `sampling/createMessage` 请求。
 
@@ -492,9 +492,9 @@ stateDiagram-v2
 
 服务器可以通过将消息入队到客户端来处理这种情况，以便在其他响应旁边通过侧信道传递任务相关消息。
 
-服务器在任务轮询和结果检索期间管理 SSE 流的方式具有灵活性，客户端**应当**预期消息会在任何 SSE 流上交付，包括 HTTP GET 流。
+服务器在任务轮询和结果检索期间管理 SSE 流的方式具有灵活性，客户端**应当**预期消息会通过任何通过 POST 响应打开的 SSE 流传递。
 一种可能的方法是在 `tasks/result` 上维护一个 SSE 流（参见关于 `input_required` 状态的说明）。
-在可能的情况下，服务器**应当不**响应 `tasks/get` 请求而升级到 SSE 流，因为客户端已表明它希望轮询结果。
+在可能的情况下，服务器**不应**在响应 `tasks/get` 请求时升级为 SSE 流，因为客户端已表明其希望轮询结果。
 
 虽然此说明不对 SSE 流的具体使用做出规定，但所有实现**必须**继续遵守现有的 [可流式 HTTP 传输规范](../transports#sending-messages-to-the-server)。
 

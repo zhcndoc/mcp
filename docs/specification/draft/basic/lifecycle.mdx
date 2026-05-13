@@ -4,216 +4,76 @@ title: 生命周期
 
 <div id="enable-section-numbers" />
 
-模型上下文协议 (MCP) 定义了客户端 - 服务器连接的严格生命周期，以确保正确的能力协商和状态管理。
+模型上下文协议（MCP）是一种**无状态协议**：处理请求所需的所有信息都包含在请求本身中。服务器独立处理每个请求；不应从先前请求中推断任何状态，即使这些请求来自同一连接或流。
 
-1. **初始化**：能力协商和协议版本达成一致
-2. **运行**：正常协议通信
-3. **关闭**：优雅地终止连接
+尤其是，打开的连接或 STDIO 进程不是对话或会话：客户端可以在同一传输上交错发送无关请求，而服务器**不得**将连接或进程身份视为对话或会话连续性的代理。
+
+具体而言：
+
+- 服务器**不得**依赖同一连接上的先前请求来建立上下文（例如，能力、协议版本、客户端身份）。每个请求都在其 [`_meta`](/specification/draft/basic/index#meta) 字段中提供这些元数据。
+- 服务器**不得**要求客户端复用同一连接来执行相关操作。
+- 需要跨多个请求保存的状态（例如，长时间运行的任务、应用层句柄）**必须**通过客户端在每个请求中传递的显式标识符来引用。
+
+像 [`subscriptions/listen`](/specification/draft/basic/utilities/subscriptions) 这样的长生命周期请求仍然是请求/响应模式——响应只是一个打开的通知流。它们的状态作用域属于请求本身，而不是底层连接。
 
 ```mermaid
 sequenceDiagram
     participant Client
     participant Server
 
-    Note over Client,Server: 初始化阶段
-    activate Client
-    Client->>+Server: initialize 请求
-    Server-->>Client: initialize 响应
-    Client--)Server: initialized 通知
-
-    Note over Client,Server: 运行阶段
-    rect rgb(200, 220, 250)
-        note over Client,Server: 正常协议操作
+    Client->>Server: 请求（带有 `_meta`）
+    alt 服务器支持请求的版本
+        Server-->>Client: 结果
+    else 版本不受支持
+        Server-->>Client: UnsupportedProtocolVersionError
+        Note over Client,Server: 客户端使用双方都支持的版本重试
     end
-
-    Note over Client,Server: 关闭
-    Client--)-Server: 断开连接
-    deactivate Server
-    Note over Client,Server: 连接已关闭
 ```
 
 <Info>
-  有关这些生命周期阶段如何映射到 SDK 代码的演练，请参阅
+  关于按请求模型如何映射到 SDK 代码的演练，请参见
   [架构指南](/docs/learn/architecture#example)。
 </Info>
 
-## 生命周期阶段
+## 协议版本协商
 
-### 初始化
+每个请求都会在其 [`_meta`](/specification/draft/basic/index#meta) 字段中声明它所使用的协议版本。在 HTTP 中，这一信息也会通过
+[`MCP-Protocol-Version` header](/specification/draft/basic/transports#protocol-version-header) 传递。
 
-初始化阶段 **必须** 是客户端和服务器之间的第一次交互。
-在此阶段，客户端和服务器：
-
-- 建立协议版本兼容性
-- 交换并协商能力
-- 共享实现细节
-
-客户端 **必须** 通过发送包含以下内容的 `initialize` 请求来启动此阶段：
-
-- 支持的协议版本
-- 客户端能力
-- 客户端实现信息
+如果服务器未实现请求的版本（无论是服务器未知该版本，还是服务器已知但选择不支持该版本），它**必须**返回一个
+[`UnsupportedProtocolVersionError`](/specification/draft/schema#unsupportedprotocolversionerror)，并列出其支持的版本：
 
 ```json
 {
   "jsonrpc": "2.0",
   "id": 1,
-  "method": "initialize",
-  "params": {
-    "protocolVersion": "2025-11-25",
-    "capabilities": {
-      "roots": {
-        "listChanged": true
-      },
-      "sampling": {},
-      "elicitation": {
-        "form": {},
-        "url": {}
-      },
-      "tasks": {
-        "requests": {
-          "elicitation": {
-            "create": {}
-          },
-          "sampling": {
-            "createMessage": {}
-          }
-        }
-      }
-    },
-    "clientInfo": {
-      "name": "ExampleClient",
-      "title": "示例客户端显示名称",
-      "version": "1.0.0",
-      "description": "一个示例 MCP 客户端应用程序",
-      "icons": [
-        {
-          "src": "https://example.com/icon.png",
-          "mimeType": "image/png",
-          "sizes": ["48x48"]
-        }
-      ],
-      "websiteUrl": "https://example.com"
+  "error": {
+    "code": -32602,
+    "message": "不支持的协议版本",
+    "data": {
+      "supported": ["DRAFT-2026-v1", "2025-11-25"],
+      "requested": "1900-01-01"
     }
   }
 }
 ```
 
-服务器 **必须** 以其自身的能力和信息进行响应：
+客户端**应当**从 `supported` 列表中选择一个双方都支持的版本并重试请求；如果不存在兼容版本，则向用户展示错误。
 
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 1,
-  "result": {
-    "protocolVersion": "2025-11-25",
-    "capabilities": {
-      "logging": {},
-      "prompts": {
-        "listChanged": true
-      },
-      "resources": {
-        "subscribe": true,
-        "listChanged": true
-      },
-      "tools": {
-        "listChanged": true
-      },
-      "tasks": {
-        "list": {},
-        "cancel": {},
-        "requests": {
-          "tools": {
-            "call": {}
-          }
-        }
-      }
-    },
-    "serverInfo": {
-      "name": "ExampleServer",
-      "title": "示例服务器显示名称",
-      "version": "1.0.0",
-      "description": "一个提供工具和资源的示例 MCP 服务器",
-      "icons": [
-        {
-          "src": "https://example.com/server-icon.svg",
-          "mimeType": "image/svg+xml",
-          "sizes": ["any"]
-        }
-      ],
-      "websiteUrl": "https://example.com/server"
-    },
-    "instructions": "给客户端的可选指令"
-  }
-}
-```
+服务器**必须**实现 [`server/discover`](/specification/draft/server/discover)。客户端**可以**在发送任何其他请求之前先调用它，以便提前了解服务器支持的版本，但这不是强制要求——客户端也可以直接发起任意 RPC，并在其首选版本不受支持时处理 `UnsupportedProtocolVersionError`。
 
-成功初始化后，客户端 **必须** 发送 `initialized` 通知
-以表明它已准备好开始正常操作：
+### 与基于初始化的版本保持向后兼容
 
-```json
-{
-  "jsonrpc": "2.0",
-  "method": "notifications/initialized"
-}
-```
+希望同时支持旧版客户端（它们期望 `initialize` 握手）和现代客户端（它们使用按请求元数据）的服务器**可以**同时实现这两种行为。需要与这两类服务器互操作的客户端可以检测当前是哪一种：
 
-- 在服务器响应 `initialize` 请求之前，客户端 **不应** 发送除
-  [ping](/specification/draft/basic/utilities/ping) 之外的请求。
-- 在收到 `initialized` 通知之前，服务器 **不应** 发送除
-  [ping](/specification/draft/basic/utilities/ping) 和
-  [日志](/specification/draft/server/utilities/logging) 之外的请求。
+- **HTTP.** 直接尝试发送现代请求。如果服务器返回 `400 Bad Request`（或其他表明服务器未实现现代协议的版本错误），则回退到 `initialize`，并在后续请求中继续使用旧版协议。
+- **STDIO.** 由于没有按请求状态码可用于驱动回退，支持两个时代的客户端**应当**先探测 [`server/discover`](/specification/draft/server/discover)，并在 `_meta` 中设置其首选的现代版本。如果服务器返回 `Method not found`（`-32601`），则回退到旧版 `initialize` 握手。如果服务器返回 `UnsupportedProtocolVersionError`，则说明服务器运行的是一种不使用 `initialize` 的 MCP 版本——应使用其公布的 `supportedVersions` 之一，而不是回退到 `initialize`。
 
-#### 版本协商
+只支持现代（按请求元数据）版本的客户端不需要探测——它只需发送自己首选的版本，并正常处理 `UnsupportedProtocolVersionError` 即可。
 
-在 `initialize` 请求中，客户端 **必须** 发送其支持的协议版本。
-这 **应当** 是客户端支持的 _最新_ 版本。
+## 扩展协商
 
-如果服务器支持请求的协议版本，它 **必须** 响应相同的
-版本。否则，服务器 **必须** 响应其支持的另一个协议版本。这 **应当** 是服务器支持的 _最新_ 版本。
-
-如果客户端不支持服务器响应中的版本，它 **应当**
-断开连接。
-
-<Note>
-如果使用 HTTP，客户端 **必须** 在所有后续请求中包含 `MCP-Protocol-Version:
-<protocol-version>` HTTP 头到 MCP
-服务器。
-详细信息，请参阅 [传输中的协议版本头部分](/specification/draft/basic/transports#protocol-version-header)。
-</Note>
-
-#### 能力协商
-
-客户端和服务器能力建立会话期间可用的可选协议功能。
-
-关键能力包括：
-
-| 类别 | 能力 | 描述 |
-| -------- | -------------- | ---------------------------------------------------------------------------------------- |
-| 客户端 | `roots` | 提供文件系统 [roots](/specification/draft/client/roots) 的能力 |
-| 客户端 | `sampling` | 支持 LLM [sampling](/specification/draft/client/sampling) 请求 |
-| 客户端 | `elicitation` | 支持服务器 [elicitation](/specification/draft/client/elicitation) 请求 |
-| 客户端 | `tasks` | 支持 [任务增强](/specification/draft/basic/utilities/tasks) 客户端请求 |
-| 客户端 | `extensions` | 支持核心协议之外的可选 [扩展](/docs/extensions/overview) |
-| 客户端 | `experimental` | 描述对非标准实验性功能的支持 |
-| 服务器 | `prompts` | 提供 [提示模板](/specification/draft/server/prompts) |
-| 服务器 | `resources` | 提供可读的 [资源](/specification/draft/server/resources) |
-| 服务器 | `tools` | 暴露可调用的 [工具](/specification/draft/server/tools) |
-| 服务器 | `logging` | 发出结构化的 [日志消息](/specification/draft/server/utilities/logging) |
-| 服务器 | `completions` | 支持参数 [自动完成](/specification/draft/server/utilities/completion) |
-| 服务器 | `tasks` | 支持 [任务增强](/specification/draft/basic/utilities/tasks) 服务器请求 |
-| 服务器 | `extensions` | 支持核心协议之外的可选 [扩展](/docs/extensions/overview) |
-| 服务器 | `experimental` | 描述对非标准实验性功能的支持 |
-
-能力对象可以描述子能力，例如：
-
-- `listChanged`：支持列表变更通知（适用于提示、资源和
-  工具）
-- `subscribe`：支持订阅单个项目的变更（仅适用于资源）
-
-#### 扩展协商
-
-客户端和服务器还可以协商对核心协议之外的可选 [扩展](/docs/extensions/overview) 的支持。扩展在能力的 `extensions` 字段中公布，该字段是扩展标识符到每个扩展设置对象的映射。
+客户端和服务器可以就核心协议之外的可选[扩展](/docs/extensions/overview)进行协商。扩展会在能力的 `extensions` 字段中声明，该字段是一个从扩展标识符到各扩展设置对象的映射。
 
 带扩展的客户端能力示例：
 
@@ -243,81 +103,6 @@ sequenceDiagram
 }
 ```
 
-每个扩展指定其设置对象的模式；空对象表示支持 without 额外设置。
+每个扩展都会指定其设置对象的模式；空对象表示支持该扩展，但不需要额外设置。
 
-如果一方支持扩展而另一方不支持，支持方 **必须** 要么恢复为核心协议行为，要么用适当的错误拒绝请求。扩展 **应当** 记录其预期的回退行为。
-
-### 运行
-
-在运行阶段，客户端和服务器根据协商的能力交换消息。
-
-双方 **必须**：
-
-- 遵守协商的协议版本
-- 仅使用成功协商的能力
-
-### 关闭
-
-在关闭阶段，一方（通常是客户端）干净地终止协议
-连接。没有定义特定的关闭消息——相反，应使用底层传输
-机制来信号连接终止：
-
-#### stdio
-
-对于 stdio [传输](/specification/draft/basic/transports)，客户端 **应当** 通过以下方式启动
-关闭：
-
-1. 首先，关闭到子进程（服务器）的输入流
-2. 等待服务器退出
-3. 如果服务器未在合理时间内退出，使用适用于操作系统的机制强制终止
-   进程
-
-在 POSIX 系统上，强制终止通常从
-[`SIGTERM`](https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/signal.h.html) 升级到
-`SIGKILL`。在 Windows 上，由于 POSIX 信号不可用，客户端可以使用
-[`TerminateProcess`](https://learn.microsoft.com/windows/win32/api/processthreadsapi/nf-processthreadsapi-terminateprocess)
-或
-[Job Objects](https://learn.microsoft.com/windows/win32/procthread/job-objects)。
-
-当标准输入关闭或读取返回文件结尾时，服务器 **应当**  promptly 退出。这是主要的优雅关闭信号，也是唯一可移植的信号，因此遵守它可以减少强制终止的需要。
-
-服务器 **可以** 通过关闭其到客户端的输出流并
-退出来启动关闭。
-
-#### HTTP
-
-对于 HTTP [传输](/specification/draft/basic/transports)，关闭通过关闭关联的
-HTTP 连接来指示。
-
-## 超时
-
-实现 **应该** 为所有发送的请求建立超时机制，以防止连接挂起和资源耗尽。当请求在超时期限内未收到成功或错误响应时，发送方 **应该** 为该请求发出 [取消通知](/specification/draft/basic/utilities/cancellation) 并停止等待响应。
-
-SDK 和其他中间件 **应该** 允许针对每个请求配置这些超时。
-
-实现 **可以** 选择在收到对应请求的 [进度通知](/specification/draft/basic/utilities/progress) 时重置超时时钟，因为这意味着实际工作正在进行。然而，实现 **应该** 始终强制实行最大超时，无论是否有进度通知，以限制行为不当的客户端或服务器的影响。
-
-## 错误处理
-
-实现 **应该** 准备好处理这些错误情况：
-
-- 协议版本不匹配
-- 协商所需能力失败
-- 请求 [超时](#timeouts)
-
-初始化错误示例：
-
-```json
-{
-  "jsonrpc": "2.0",
-  "id": 1,
-  "error": {
-    "code": -32602,
-    "message": "Unsupported protocol version",
-    "data": {
-      "supported": ["2024-11-05"],
-      "requested": "1.0.0"
-    }
-  }
-}
-```
+如果一方支持某个扩展而另一方不支持，支持该扩展的一方**必须**退回到核心协议行为，或以适当的错误拒绝该请求。扩展**应当**文档化其预期的回退行为。

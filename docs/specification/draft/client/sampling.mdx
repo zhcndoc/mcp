@@ -42,7 +42,7 @@ MCP 中的采样允许服务器实现代理行为，通过使 LLM 调用能够 _
 
 ## 能力
 
-支持采样的客户端 **MUST** 在 [初始化](/specification/draft/basic/lifecycle#initialization) 期间声明 `sampling` 能力：
+支持采样的客户端 **MUST** 在每个请求中的 `_meta.io.modelcontextprotocol/clientCapabilities` 声明 `sampling` 能力：
 
 **基本采样：**
 
@@ -99,7 +99,7 @@ MCP 中的采样允许服务器实现代理行为，通过使 LLM 调用能够 _
         "role": "user",
         "content": {
           "type": "text",
-          "text": "What is the capital of France?"
+          "text": "法国的首都是哪里？"
         }
       }
     ],
@@ -114,7 +114,7 @@ MCP 中的采样允许服务器实现代理行为，通过使 LLM 调用能够 _
       "speedPriority": 0.5
     },
     "temperature": 0.1,
-    "systemPrompt": "You are a helpful assistant.",
+    "systemPrompt": "你是一个乐于助人的助手。",
     "includeContext": "thisServer",
     "maxTokens": 100
   }
@@ -129,7 +129,7 @@ MCP 中的采样允许服务器实现代理行为，通过使 LLM 调用能够 _
     "role": "assistant",
     "content": {
       "type": "text",
-      "text": "The capital of France is Paris."
+      "text": "法国的首都是巴黎。"
     },
     "model": "claude-3-sonnet-20240307",
     "stopReason": "endTurn"
@@ -195,20 +195,20 @@ sequenceDiagram
         "role": "user",
         "content": {
           "type": "text",
-          "text": "What's the weather like in Paris and London?"
+          "text": "巴黎和伦敦的天气怎么样？"
         }
       }
     ],
     "tools": [
       {
         "name": "get_weather",
-        "description": "Get current weather for a city",
+        "description": "获取某个城市的当前天气",
         "inputSchema": {
           "type": "object",
           "properties": {
             "city": {
               "type": "string",
-              "description": "City name"
+              "description": "城市名称"
             }
           },
           "required": ["city"]
@@ -273,7 +273,7 @@ sequenceDiagram
         "role": "user",
         "content": {
           "type": "text",
-          "text": "What's the weather like in Paris and London?"
+          "text": "巴黎和伦敦的天气怎么样？"
         }
       },
       {
@@ -302,7 +302,7 @@ sequenceDiagram
             "content": [
               {
                 "type": "text",
-                "text": "Weather in Paris: 18°C, partly cloudy"
+                "text": "巴黎天气：18°C，多云间晴"
               }
             ]
           },
@@ -312,7 +312,7 @@ sequenceDiagram
             "content": [
               {
                 "type": "text",
-                "text": "Weather in London: 15°C, rainy"
+                "text": "伦敦天气：15°C，有雨"
               }
             ]
           }
@@ -322,7 +322,7 @@ sequenceDiagram
     "tools": [
       {
         "name": "get_weather",
-        "description": "Get current weather for a city",
+        "description": "获取某个城市的当前天气",
         "inputSchema": {
           "type": "object",
           "properties": {
@@ -345,7 +345,7 @@ sequenceDiagram
     "role": "assistant",
     "content": {
       "type": "text",
-      "text": "Based on the current weather data:\n\n- **Paris**: 18°C and partly cloudy - quite pleasant!\n- **London**: 15°C and rainy - you'll want an umbrella.\n\nParis has slightly warmer and drier conditions today."
+      "text": "根据当前天气数据：\n\n- **巴黎**：18°C，多云间晴——相当宜人！\n- **伦敦**：15°C，有雨——你会需要一把伞。\n\n今天巴黎的天气稍微更暖和，也更干燥。"
     },
     "model": "claude-3-sonnet-20240307",
     "stopReason": "endTurn"
@@ -369,7 +369,7 @@ sequenceDiagram
   "content": {
     "type": "tool_result",
     "toolUseId": "call_123",
-    "content": [{ "type": "text", "text": "Result data" }]
+    "content": [{ "type": "text", "text": "结果数据" }]
   }
 }
 ```
@@ -383,12 +383,12 @@ sequenceDiagram
     {
       "type": "tool_result",
       "toolUseId": "call_123",
-      "content": [{ "type": "text", "text": "Result 1" }]
+      "content": [{ "type": "text", "text": "结果 1" }]
     },
     {
       "type": "tool_result",
       "toolUseId": "call_456",
-      "content": [{ "type": "text", "text": "Result 2" }]
+      "content": [{ "type": "text", "text": "结果 2" }]
     }
   ]
 }
@@ -402,12 +402,12 @@ sequenceDiagram
   "content": [
     {
       "type": "text",
-      "text": "Here are the results:"
+      "text": "这些是结果："
     },
     {
       "type": "tool_result",
       "toolUseId": "call_123",
-      "content": [{ "type": "text", "text": "Result data" }]
+      "content": [{ "type": "text", "text": "结果数据" }]
     }
   ]
 }
@@ -425,16 +425,16 @@ sequenceDiagram
 
 **有效序列示例：**
 
-1. 用户消息："What's the weather like in Paris and London?"
+1. 用户消息："巴黎和伦敦的天气怎么样？"
 2. 助手消息：`ToolUseContent` (`id: "call_abc123", name: "get_weather", input: {city: "Paris"}`) + `ToolUseContent` (`id: "call_def456", name: "get_weather", input: {city: "London"}`)
-3. 用户消息：`ToolResultContent` (`toolUseId: "call_abc123", content: "18°C, partly cloudy"`) + `ToolResultContent` (`toolUseId: "call_def456", content: "15°C, rainy"`)
+3. 用户消息：`ToolResultContent` (`toolUseId: "call_abc123", content: "18°C，多云间晴"`) + `ToolResultContent` (`toolUseId: "call_def456", content: "15°C，有雨"`)
 4. 助手消息：文本响应比较两个城市的天气
 
 **无效序列 - 缺失工具结果：**
 
-1. 用户消息："What's the weather like in Paris and London?"
+1. 用户消息："巴黎和伦敦的天气怎么样？"
 2. 助手消息：`ToolUseContent` (`id: "call_abc123", name: "get_weather", input: {city: "Paris"}`) + `ToolUseContent` (`id: "call_def456", name: "get_weather", input: {city: "London"}`)
-3. 用户消息：`ToolResultContent` (`toolUseId: "call_abc123", content: "18°C, partly cloudy"`) ← 缺失 call_def456 的结果
+3. 用户消息：`ToolResultContent` (`toolUseId: "call_abc123", content: "18°C，多云间晴"`) ← 缺失 call_def456 的结果
 4. 助手消息：文本响应（无效 - 并非所有工具使用都已解决）
 
 ## 跨 API 兼容性
@@ -477,7 +477,7 @@ sequenceDiagram
     participant LLM
 
     Client->>Server: tool/call(id:1)
-    note right of Server: Server needs more info
+    note right of Server: 服务器需要更多信息
     Server->>Client: IncompleteResponse(<br/>sampling/createMessage<br/>(messages + tools))
 
     Note over Client,User: 人工介入审查

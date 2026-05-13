@@ -47,7 +47,7 @@ MCP 客户端 **必须**：
 
 ## 能力
 
-支持信息征集的客户端 **必须** 在 [初始化](../basic/lifecycle#initialization) 期间声明 `elicitation` 能力：
+支持信息征集的客户端 **必须** 在每次请求中于 `_meta.io.modelcontextprotocol/clientCapabilities` 声明 `elicitation` 能力：
 
 ```json
 {
@@ -501,9 +501,8 @@ Elicitations 不要求服务器使用 [multi round-trip requests](/specification
 
 然而，如果存储了状态，实现 elicitation 的服务器 **必须** 按照 [security best practices](/docs/tutorials/security/security_best_practices) 文档中的指南，将此状态与单个用户安全关联。具体而言：
 
-- 状态 **不得** 仅与会话 ID 关联
 - 状态存储 **必须** 防止未经授权的访问
-- 对于远程 MCP 服务器，用户标识 **必须** 尽可能从通过 [MCP 授权](../basic/authorization) 获取的凭证中衍生（例如 `sub` 声明）
+- 对于远程 MCP 服务器，用户身份 **必须** 尽可能从通过 [MCP 授权](../basic/authorization) 获取的凭证中派生（例如 `sub` 声明）
 
 <Note>
   本节中的示例是非规范性的，并说明了信息收集的潜在用途。
