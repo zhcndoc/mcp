@@ -1,0 +1,238 @@
+---
+title: "SEP-2577: 弃用 Roots、Sampling 和 Logging"
+sidebarTitle: "SEP-2577: 弃用 Roots、Sampling 和 Logging"
+description: "弃用 Roots、Sampling 和 Logging"
+---
+
+<div className="flex items-center gap-2 mb-4">
+  <Badge color="green" shape="pill">
+    最终版
+  </Badge>
+  <Badge color="gray" shape="pill">
+    标准轨道
+  </Badge>
+</div>
+
+| 字段         | 值                                                                                 |
+| ------------- | ---------------------------------------------------------------------------------- |
+| **SEP**       | 2577                                                                               |
+| **Title**     | 弃用 Roots、Sampling 和 Logging                                                    |
+| **Status**    | 最终版                                                                             |
+| **Type**      | 标准轨道                                                                           |
+| **Created**   | 2026-04-14                                                                         |
+| **Author(s)** | Kurtis Van Gent ([@kurtisvg](https://github.com/kurtisvg))                      |
+| **Sponsor**   | [@kurtisvg](https://github.com/kurtisvg)                                           |
+| **PR**        | [#2577](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2577) |
+
+---
+
+## 摘要
+
+本 SEP 弃用以下核心协议特性：
+
+- **Roots** (`roots/list`, `notifications/roots/list_changed`)
+- **Sampling** (`sampling/createMessage`,
+  `ClientCapabilities.tasks.requests.sampling`)
+- **Logging** (`logging/setLevel`, `notifications/message`)
+
+这些特性自包含本 SEP 的规范版本开始即被弃用（预计为 2026 年 6 月）。在该版本发布后一年内发布的所有规范版本中，它们将继续完全可用。
+
+在此之后的每个版本中，这些特性也将继续支持其发布后一年的时间，前提是另一个 SEP 中提出的一年一版本支持策略得以采用。这为实现者提供了更长的迁移窗口，之后这些特性才会被完全移除。
+
+在弃用期间，线上协议行为保持不变。不会移除任何类型，不会更改能力协商，也不会破坏任何现有实现。弃用的作用是向生态系统发出信号：停止基于这些特性进行构建，并为其最终移除做好规划。
+
+## 动机
+
+MCP 规范旨在保持精简和聚焦。那些采用率低、与现有替代方案重叠，或相对于其价值而言带来过高实现负担的特性，都是移除的候选对象。将此类特性保留在核心规范中，会增加每个客户端和服务端的负担，减缓协议演进，并使规范更难学习。以下三个特性符合这些标准。
+
+最近的一次核心贡献者会议提出了弃用这些特性的建议。此 SEP 将该建议形式化，并给出具体的实施计划。请参见 [discussion #2536][discussion-2536]。
+
+### Roots
+
+Roots 提供关于服务端应作用于哪些目录或文件的“信息性指导”。在实践中：
+
+- **采用率低**：很少有客户端实现 roots 支持，也很少有服务端依赖它。[特性支持矩阵][feature-matrix] 显示客户端覆盖率有限。
+- **语义模糊**：规范将 roots 描述为信息性内容——服务端并不要求必须遵守，这降低了它的实用性。
+- **重叠的替代方案**：工作目录上下文可以通过工具参数、资源 URI、服务端配置或环境变量提供——这些方式都更明确。
+
+### Sampling
+
+Sampling 允许服务端从客户端请求 LLM 补全。尽管概念上很强大，但其采用一直不理想：
+
+- **实现复杂**：正确实现 sampling 需要有人在环审批、模型选择逻辑、安全性考量，以及（自 SEP-1577 起）工具循环支持。这种复杂性导致客户端采用率较低。
+- **采用率低**：[特性支持矩阵][feature-matrix] 显示，尽管该特性自 2024 年 11 月规范起就已可用，但支持 sampling 的客户端很少。
+- **直接替代方案**：需要 LLM 能力的服务端可以直接集成 LLM 提供商 API，从而完全掌控模型选择、参数和流式传输。
+
+### Logging
+
+Logging 允许服务端通过协议向客户端发送结构化日志消息：
+
+- **基础设施重叠**：标准日志机制（stdio 传输使用 stderr，结构化可观测性使用 OpenTelemetry）已经成熟、被广泛采用，并且比应用协议通道更适合用于日志。
+- **相对于复杂度价值较低**：向核心规范添加日志消息类型、严重级别以及 `logging/setLevel` 请求，会增加所有客户端和服务端的实现面。
+
+[discussion-2536]: https://github.com/modelcontextprotocol/modelcontextprotocol/discussions/2536
+[feature-matrix]: https://modelcontextprotocol.io/clients#feature-support-matrix
+
+## 规范
+
+### 变更概览
+
+1. 在 schema 中使用 `@deprecated` 注解标记已弃用特性
+2. 在特性文档页面中添加弃用说明
+3. 在弃用期间不进行线上协议变更
+
+### Schema 变更
+
+在 `schema/draft/schema.ts` 中为以下项目添加 `@deprecated` JSDoc 注解。不移除任何类型、接口或联合成员。
+
+#### 已弃用的能力
+
+| 能力                                       | 位置                                   |
+| ------------------------------------------ | -------------------------------------- |
+| `ClientCapabilities.roots`                   | 用于列出 roots 的客户端能力            |
+| `ClientCapabilities.sampling`                | 用于 LLM sampling 的客户端能力         |
+| `ClientCapabilities.tasks.requests.sampling` | 任务增强的 sampling 子能力             |
+| `ServerCapabilities.logging`                | 用于日志消息的服务端能力               |
+
+#### 已弃用的类型 — Roots
+
+| 类型                           | 描述                                      |
+| ------------------------------ | ----------------------------------------- |
+| `Root`                         | 表示一个根目录或文件                      |
+| `ListRootsRequest`             | 从服务端发往客户端的 `roots/list` 请求    |
+| `ListRootsResult`              | 包含 roots 数组的结果                     |
+| `ListRootsResultResponse`      | JSON-RPC 响应包装器                      |
+| `RootsListChangedNotification` | roots 变更时的客户端通知                 |
+
+#### 已弃用的类型 — Sampling
+
+| 类型                          | 描述                                         |
+| ----------------------------- | -------------------------------------------- |
+| `CreateMessageRequestParams`  | `sampling/createMessage` 的参数             |
+| `CreateMessageRequest`        | 用于 sampling 的服务端到客户端请求          |
+| `CreateMessageResult`         | sampling 请求的结果                         |
+| `CreateMessageResultResponse` | JSON-RPC 响应包装器                         |
+| `SamplingMessage`             | sampling 对话中的一条消息                  |
+| `SamplingMessageContentBlock` | sampling 消息的内容块联合类型              |
+| `ToolChoice`                  | 在 sampling 期间控制模型工具选择           |
+| `ToolUseContent`              | sampling 消息中的工具使用内容块            |
+| `ToolResultContent`           | sampling 消息中的工具结果内容块            |
+| `ModelPreferences`            | 用于模型选择的服务端偏好                   |
+| `ModelHint`                   | 模型选择提示                               |
+
+#### 已弃用的类型 — Logging
+
+| 类型                               | 描述                                |
+| ---------------------------------- | ----------------------------------- |
+| `LoggingLevel`                     | Syslog 严重级别枚举                 |
+| `SetLevelRequestParams`            | `logging/setLevel` 的参数          |
+| `SetLevelRequest`                  | 用于设置级别的客户端到服务端请求    |
+| `SetLevelResultResponse`           | JSON-RPC 响应包装器                |
+| `LoggingMessageNotificationParams` | 日志消息通知的参数                 |
+| `LoggingMessageNotification`       | 服务端到客户端的日志消息           |
+
+#### 注解格式
+
+每个已弃用项都 SHOULD 添加一个简短说明的 JSDoc `@deprecated` 标签：
+
+```typescript
+/**
+ * 如果客户端支持列出 roots，则存在。
+ *
+ * @deprecated 自本规范版本起已弃用。将在一年内发布的所有版本中包含，
+ * 然后可能被移除。
+ */
+roots?: {
+  listChanged?: boolean;
+};
+```
+
+#### 联合类型
+
+以下联合类型引用了已弃用类型，但在弃用期间 MUST NOT 被修改。等已弃用类型被移除时，它们将一并更新：
+
+- `ClientNotification`（包含 `RootsListChangedNotification`）
+- `ClientResult`（包含 `CreateMessageResult`, `ListRootsResult`）
+- `ServerRequest`（包含 `CreateMessageRequest`, `ListRootsRequest`）
+- `ServerNotification`（包含 `LoggingMessageNotification`）
+
+### 文档变更
+
+在每个特性文档页面标题之后、页面顶部添加弃用警告块：
+
+**`docs/specification/draft/client/roots.mdx`:**
+
+```mdx
+<Warning>
+**已弃用**：Roots 特性自本规范版本起已弃用。它将在 `<YYYY-MM-DD>` 发布后一年内发布的所有规范版本中保持完全可用。此后的每个版本都将继续在其发布后的一年内支持它。
+</Warning>
+```
+
+**`docs/specification/draft/client/sampling.mdx`:**
+
+```mdx
+<Warning>
+**已弃用**：Sampling 特性自本规范版本起已弃用。它将在 `<YYYY-MM-DD>` 发布后一年内发布的所有规范版本中保持完全可用。此后的每个版本都将继续在其发布后的一年内支持它。
+</Warning>
+```
+
+**`docs/specification/draft/server/utilities/logging.mdx`:**
+
+```mdx
+<Warning>
+**已弃用**：Logging 特性自本规范版本起已弃用。它将在 `<YYYY-MM-DD>` 发布后一年内发布的所有规范版本中保持完全可用。此后的每个版本都将继续在其发布后的一年内支持它。
+</Warning>
+```
+
+### 能力协商
+
+在弃用期间，能力协商**保持不变**：
+
+- 支持已弃用特性的客户端和服务端 SHOULD 继续声明相应能力。
+- 遇到已弃用能力的实现 MUST 仍然正确处理它们。
+- 实现 SHOULD 在协商到已弃用能力时发出警告（例如在日志或开发者工具中）。
+- 新实现 SHOULD NOT 添加对已弃用特性的支持，除非为了与现有对端保持向后兼容所必需。
+
+### 时间线
+
+- **已弃用**：在下一次规范发布中（目前计划为 2026 年 6 月）。
+- **包含在后续发布中**：在本版本发布后一年内发布的所有规范版本 MUST 继续将这些特性作为已弃用特性包含在内。
+- **按版本支持**：每个包含这些特性的版本都将根据另一个 SEP 中提出的一年一版本支持策略，在该版本发布后支持它们一年。
+- **移除**：在本版本发布一年后发布的规范版本 MAY 完全移除这些特性。
+
+## 理由
+
+### 为什么要弃用，而不是迁移到扩展？
+
+这些功能已经在许多客户端和服务器中实现。扩展机制（SEP-2133）规定，除非提供了某个扩展，否则实现必须表现得像该扩展不存在一样。将这种逻辑改造进现有 SDK——尤其是跨多个协议版本——会非常复杂且容易出错。先弃用再移除的方式破坏性更小：实现可以在过渡期内继续按原样使用这些功能，然后在功能被移除时直接停止使用即可。
+
+### 为什么要弃用，而不是立即移除？
+
+虽然这些功能的采用率很低，但它们仍在使用中。立即移除会给用户、客户端和服务器所有者以及 SDK 开发者带来不必要的变动和干扰。弃用期通过给生态系统足够时间按自己的节奏迁移，来最小化这种影响。
+
+### 为什么特别是这三个功能？
+
+这是在一次核心贡献者会议中识别出的、采用率与复杂度比最弱的功能。每个功能在协议之外都有可行的替代方案，而且它们都不是定义 MCP 的核心资源/工具/提示交互模型所必需的。参见[讨论 #2536][discussion-2536]。
+
+## 向后兼容性
+
+在弃用期间，**没有向后兼容性问题**。所有已弃用功能都将继续以相同方式工作。不会引入任何线级别的变化。
+
+在移除之后（在比此版本晚一年以上发布的规范版本中）：
+
+- 协商较旧协议版本且包含这些功能的实现，仍可通过该版本的 schema 访问这些功能。
+- 协商已移除这些功能的版本的实现，将不再能够访问这些功能。
+
+## 安全影响
+
+弃用这些功能对安全性有**净正面**影响：
+
+- **Sampling** 是这三个功能中最敏感的安全点。它允许服务器通过客户端请求 LLM completions，这会为提示注入和数据外泄创造攻击面。移除它可降低这种风险。
+- **Roots** 会向服务器暴露客户端文件系统的信息。移除它可降低服务器利用 root 信息尝试目录遍历或访问意图边界之外文件的风险。
+- **Logging** 的安全影响很小，但移除它可以简化协议表面面积。
+
+弃用不会引入新的安全问题。
+
+## 参考实现
+
+不需要参考实现。此 SEP 只是将现有功能标记为已弃用——并未引入新的协议行为。

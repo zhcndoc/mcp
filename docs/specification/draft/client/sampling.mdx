@@ -4,7 +4,11 @@ title: 采样
 
 <div id="enable-section-numbers" />
 
-Model Context Protocol (MCP) 提供了一种标准化方式，允许服务器通过客户端请求大语言模型（LLM）采样（“补全”或“生成”）。此流程允许客户端保持对模型访问、选择和权限的控制，同时使服务器能够利用 AI 能力——无需服务器 API 密钥。服务器可以请求文本、音频或基于图像的交互，并可选择在其提示词中包含来自 MCP 服务器的上下文。
+<Warning>
+  **已弃用**：自协议版本 `DRAFT-2026-v1` 起，采样功能已被弃用。根据 [SEP-2596](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2596) 中概述的弃用策略，在 `DRAFT-2026-v1` 发布后 1 年内发布的任何 MCP 版本中，它将继续得到支持。
+</Warning>
+
+模型上下文协议（MCP）提供了一种标准化方式，使服务器能够通过客户端请求语言模型进行 LLM 采样（“补全”或“生成”）。此流程允许客户端保持对模型访问、选择和权限的控制，同时使服务器能够利用 AI 能力——且无需服务器 API 密钥。服务器可以请求基于文本、音频或图像的交互，并可选择性地在提示词中包含来自 MCP 服务器的上下文。
 
 ## 用户交互模型
 
@@ -86,7 +90,7 @@ MCP 中的采样允许服务器实现代理行为，通过使 LLM 调用能够 _
 
 ### 创建消息
 
-要在处理客户端请求期间请求大语言模型生成，服务器发送一个包含 `sampling/createMessage` 请求的 `IncompleteResponse`：
+要在处理客户端请求期间请求语言模型生成，服务器发送一个包含 `sampling/createMessage` 请求的 `InputRequiredResult`：
 
 **请求：**
 
@@ -149,37 +153,37 @@ sequenceDiagram
     participant LLM
 
     Client->>Server: tools/call(id:1)
-    note right of Server: Server needs more info
-    Server->>Client: IncompleteResponse(<br/>sampling/createMessage<br/>(messages + tools))
+    note right of Server: 服务器需要更多信息
+    Server->>Client: InputRequiredResult(<br/>sampling/createMessage<br/>(messages + tools))
 
-    Note over Client,User: Human-in-the-loop review
-    Client->>User: Present request for approval
-    User-->>Client: Approve/modify
+    Note over Client,User: 人工在环审查
+    Client->>User: 展示请求以供批准
+    User-->>Client: 批准/修改
 
-    Client->>LLM: Forward request with tools
-    LLM-->>Client: Response with tool_use<br/>(stopReason: "toolUse")
+    Client->>LLM: 转发带工具的请求
+    LLM-->>Client: 带有 tool_use 的响应<br/>(stopReason: "toolUse")
 
-    Client->>User: Present tool calls for review
-    User-->>Client: Approve tool calls
-    Client-->>Server: tools/call(id:2, Return tool_use response)
+    Client->>User: 展示工具调用以供审查
+    User-->>Client: 批准工具调用
+    Client-->>Server: tools/call(id:2, 返回 tool_use 响应)
 
-    Note over Server: Execute tool(s)
-    Server->>Server: Run get_weather("Paris")<br/>Run get_weather("London")
+    Note over Server: 执行工具
+    Server->>Server: 运行 get_weather("Paris")<br/>运行 get_weather("London")
 
-    Note over Server,Client: Continue with tool results
-    Server->>Client: IncompleteResponse(<br/>sampling/createMessage<br/>(history + tool_results + tools))
+    Note over Server,Client: 使用工具结果继续
+    Server->>Client: InputRequiredResult(<br/>sampling/createMessage<br/>(history + tool_results + tools))
 
-    Client->>User: Present continuation
-    User-->>Client: Approve
+    Client->>User: 展示后续请求
+    User-->>Client: 批准
 
-    Client->>LLM: Forward with tool results
-    LLM-->>Client: Final text response<br/>(stopReason: "endTurn")
+    Client->>LLM: 转发工具结果
+    LLM-->>Client: 最终文本响应<br/>(stopReason: "endTurn")
 
-    Client->>User: Present response
-    User-->>Client: Approve
-    Client-->>Server: tools/call(id:3, Return final response)
+    Client->>User: 展示响应
+    User-->>Client: 批准
+    Client-->>Server: tools/call(id:3, 返回最终响应)
 
-    Note over Server: Server processes result<br/>(may continue conversation...)
+    Note over Server: 服务器处理结果<br/>(可能继续对话...)
 ```
 
 要请求具有工具使用能力的 LLM 生成，服务器在请求中包含 `tools` 和可选的 `toolChoice`：
@@ -478,7 +482,7 @@ sequenceDiagram
 
     Client->>Server: tool/call(id:1)
     note right of Server: 服务器需要更多信息
-    Server->>Client: IncompleteResponse(<br/>sampling/createMessage<br/>(messages + tools))
+    Server->>Client: InputRequiredResult(<br/>sampling/createMessage<br/>(messages + tools))
 
     Note over Client,User: 人工介入审查
     Client->>User: 呈现请求以供批准
@@ -621,7 +625,7 @@ LLM 采样可以使用以下参数进行微调：
 
 ## 错误处理
 
-如果发生错误或用户拒绝采样请求，客户端不需要使用错误消息重放初始调用，因为服务器并不在等待 `IncompleteResponse` 模式下的响应。
+如果发生错误或用户拒绝采样请求，客户端无需使用错误消息重放初始调用，因为服务器并未通过 `InputRequiredResult` 模式等待响应。
 
 ## 安全考虑
 

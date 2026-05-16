@@ -109,16 +109,13 @@ stdio 是单一共享的双向通道，因此没有可关闭的按请求流。
 
 ### 向后兼容性
 
-同时支持现代（按请求元数据）MCP 版本和
-需要 `initialize` 握手的旧版本的客户端，**SHOULD** 在发送
-任何其他请求之前先通过 [`server/discover`][server-discover] 进行探测。如果服务器返回
-`Method not found`（`-32601`），客户端则回退到旧的
-`initialize` 握手。如果服务器返回
-`UnsupportedProtocolVersionError`，则表示它使用的是不带
-`initialize` 的 MCP 版本——客户端 **SHOULD** 使用其公布的
-`supportedVersions` 中的某一个重试，而不是回退到 `initialize`。详见
-[Lifecycle: Backward Compatibility][lifecycle-compat]
-。
+支持现代（按请求元数据）MCP 版本和需要 `initialize` 握手的旧版的客户端 **SHOULD** 在发送任何其他请求之前先通过
+[`server/discover`][server-discover] 进行探测。如果服务器返回 `Method not found`（`-32601`），
+客户端则回退到旧版 `initialize` 握手。如果服务器返回
+`UnsupportedProtocolVersionError`，则表示其使用的是不含
+`initialize` 的 MCP 版本——客户端 **SHOULD** 改用所宣传的 `supported`
+列表中的某个版本重试，而不是回退到 `initialize`。参见
+[Lifecycle: Backward Compatibility][lifecycle-compat]。
 
 仅支持现代版本的客户端不需要探测。
 
@@ -195,35 +192,35 @@ HTTP POST 请求。
 
 - 服务器 **MAY** 发送 JSON-RPC _notifications_——例如
   [`notifications/progress`][notifications-progress]
-  或 [`notifications/message`][notifications-message]——
-  这些通知会在最终响应之前发送。这些通知 **MUST** 与
-  发起它们的客户端请求相关。
+  或 [`notifications/message`][notifications-message] —
+  在最终响应之前发送。这些通知 **MUST** 与
+  发起该请求的客户端请求相关联。
 - 服务器 **MUST NOT** 在此流上发送独立的 JSON-RPC _requests_。
-  服务器到客户端的交互（采样、询问、列根）会作为输入请求嵌入到
-  一个 [`IncompleteResult`][incomplete-result] 中，
-  依据 [SEP-2322 (MRTR)][sep-2322]，而不是作为单独请求
-  在此流或任何其他流上投递。
+  服务器到客户端的交互（sampling、elicitation、list-roots）被嵌入为
+  [`InputRequiredResult`][input-required-result] 中的输入请求，遵循
+  [SEP-2322 (MRTR)][sep-2322]，而不是作为单独的请求在此或其他任何流上
+  传递。
 - 最终的 JSON-RPC _response_ **SHOULD** 终止该流。
 
 长生命周期的通知流可通过发送
 [`subscriptions/listen`][subscriptions-listen]
-请求获得。服务器的响应本身就是一个保持打开的 SSE 流，并为客户端选择订阅的通知类型投递
-`notifications/tools/list_changed`、
-`notifications/resources/updated`、`notifications/message` 等。
+request。服务器的响应本身是一个保持打开的 SSE 流，并
+投递客户端选择订阅的变更通知（例如
+`notifications/tools/list_changed` 或 `notifications/resources/updated`）。
+诸如 `notifications/progress` 和
+`notifications/message` 之类按请求作用域的通知 **不会** 在 listen 流上投递——它们
+只会在其所关联请求的响应流中传输。
 
 在启动 SSE 流时，服务器 **SHOULD** 在 HTTP 响应中包含
 `X-Accel-Buffering: no` 头。这会指示反向代理（例如 nginx）禁用响应缓冲，确保 SSE 事件能够立即传递给客户端，而不是被保留在缓冲区中。没有该头时，代理可能会在发送给客户端之前累积消息，从而引入不必要的延迟，并可能破坏 SSE 通信的实时特性。
 
-对于需要在连接中断后仍具持久性的工作负载，请使用
-[tasks primitive][tasks]；不支持通过 `Last-Event-ID` 恢复的 SSE
-流。
+不支持通过 `Last-Event-ID` 进行可恢复的 SSE 流。
 
 [notifications-progress]: /specification/draft/basic/utilities/progress
 [notifications-message]: /specification/draft/server/utilities/logging
-[incomplete-result]: /specification/draft/schema#inputrequiredresult
+[input-required-result]: /specification/draft/schema#inputrequiredresult
 [sep-2322]: /seps/2322-MRTR
 [subscriptions-listen]: /specification/draft/basic/utilities/subscriptions
-[tasks]: /specification/draft/basic/utilities/tasks
 
 ### 取消
 
@@ -260,12 +257,10 @@ Streamable HTTP 传输会将选定的 JSON-RPC 正文字段镜像到 HTTP
 的协商流程。
 
 如果服务器不实现所请求的 RPC 方法，它 **MUST** 响应
-`404 Not Found` 和一个错误码为 `-32601`
-（`Method not found`）的 JSON-RPC 错误。
+`404 Not Found` 和 JSON-RPC 错误码 `-32601`
+（`Method not found`）。JSON-RPC 错误正文可将此情况与由未托管现代 MCP endpoint 的旧版 [HTTP+SSE][http-sse] 服务器返回的 `404` 区分开来（见 [Backward Compatibility](#backward-compatibility-1)）。
 
-为了向后兼容，如果服务器未收到
-`MCP-Protocol-Version` 头且没有其他方式识别版本，
-服务器 **SHOULD** 假定协议版本为 `2025-03-26`。
+支持早于 `2025-06-18` 的协议版本客户端（该版本未定义 `MCP-Protocol-Version` 头）的服务器 **MAY** 将缺少该头的请求视为协议版本 `2025-03-26`。不支持此类客户端的服务器 **MUST** 按照 [Server Validation](#server-validation) 拒绝缺少该头的请求。
 
 [unsupported-version]: /specification/draft/schema#unsupportedprotocolversionerror
 [lifecycle-version]: /specification/draft/basic/lifecycle#protocol-version-negotiation
@@ -550,36 +545,43 @@ JSON-RPC 错误响应。
 
 ### 向后兼容性
 
-同时支持现代（按请求元数据）MCP 版本和
-需要 `initialize` 握手的旧版本的客户端，**MAY** 通过先尝试现代请求来检测服务器实现的是哪个时代的协议。如果
-服务器返回 `400 Bad Request`（或任何其他表明
-服务器未实现现代协议的版本错误），客户端会回退到
-`initialize`，并在后续请求中继续使用旧版本。详见
-[Lifecycle: Backward Compatibility][lifecycle-compat]
-。
+支持现代（按请求元数据）MCP 版本和需要 `initialize` 握手的旧版的客户端 **MAY** 通过先尝试现代请求来检测服务器实现的是哪个时代。在
+`400 Bad Request` 时，客户端 **SHOULD** 在回退前检查响应正文：
+现代服务器也会对
+[`UnsupportedProtocolVersionError`][unsupported-version]、
+`MissingRequiredClientCapabilityError` 和头验证失败使用 `400`。
+
+- 如果正文包含可识别的现代 JSON-RPC 错误，则表示服务器支持
+  现代版本的 MCP——应改用宣传的 `supported` 版本重试
+  或修正请求，而不是回退。
+- 如果正文为空或不是可识别的现代 JSON-RPC 错误，则
+  回退到 `initialize`，并在后续请求中继续使用旧版。
+
+详情请参见 [Lifecycle: Backward Compatibility][lifecycle-compat]。
 
 另外，客户端和服务器可以按如下方式与已弃用的 [HTTP+SSE 传输][http-sse]（来自
 协议版本 2024-11-05）保持向后兼容：
 
 **想要支持旧客户端的服务器** 应该：
 
-- Continue to host both the SSE and POST endpoints of the old transport,
-  alongside the new "MCP endpoint" defined for the Streamable HTTP transport.
-  - It is also possible to combine the old POST endpoint and the new MCP
-    endpoint, but this may introduce unneeded complexity.
+- 继续同时托管旧传输的 SSE 和 POST 端点，
+  以及为 Streamable HTTP 传输定义的新 “MCP endpoint”。
+  - 也可以将旧的 POST 端点与新的 MCP
+    endpoint 合并，但这可能会引入不必要的复杂性。
 
 **想要支持旧服务器的客户端** 应该：
 
-1. 接受来自用户的 MCP 服务器 URL，该 URL 可能指向使用旧传输或
-   新传输的服务器。
-2. 尝试向服务器 URL 发起 POST 请求，并使用上文定义的 `Accept` 头：
-   - 如果成功，客户端可以假定这是一个支持
+1. 接受来自用户的 MCP 服务器 URL，该 URL 可能指向使用旧传输或新传输的服务器。
+2. 尝试向该服务器 URL 发送 POST 请求，并使用如上所定义的 `Accept` 头：
+   - 如果成功，客户端可以假定这是支持
      新 Streamable HTTP 传输的服务器。
-   - 如果失败并返回 HTTP 状态码 "400 Bad Request"、"404 Not Found" 或 "405 Method Not Allowed"：
+   - 如果失败并返回 HTTP 状态码 `400 Bad Request`、`404 Not Found`
+     或 `405 Method Not Allowed`，且响应正文不是
+     可识别的现代 JSON-RPC 错误（现代服务器会为不支持的版本、未知方法或头验证失败返回此类错误）：
      - 向服务器 URL 发起 GET 请求，期望这会打开
-       SSE 流并返回一个作为第一个事件的 `endpoint` 事件。
-     - 当 `endpoint` 事件到达时，客户端可以假定这是一个运行
-       旧 HTTP+SSE 传输的服务器，并应在后续所有通信中使用该
+       一个 SSE 流，并将 `endpoint` 事件作为第一个事件返回。
+     - 当收到 `endpoint` 事件时，客户端可以假定这是
+       运行旧 HTTP+SSE 传输的服务器，并应在后续所有通信中使用该
        传输。
 
 [lifecycle-compat]: /specification/draft/basic/lifecycle#backward-compatibility-with-initialization-based-versions

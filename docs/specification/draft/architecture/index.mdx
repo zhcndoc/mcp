@@ -68,9 +68,9 @@ graph LR
 
 服务器提供专用的上下文和能力：
 
-- 通过 MCP 原语公开资源、工具和提示词
-- 独立运行，职责聚焦
-- 通过 `IncompleteResponse` 在回复中请求客户端输入（采样、询问、根）
+- 通过 MCP 基元暴露资源、工具和提示
+- 独立运行，职责明确
+- 通过回复中的 `InputRequiredResult` 请求客户端输入（采样、询问、根）
 - 必须遵守安全约束
 - 可以是本地进程或远程服务
 
@@ -125,14 +125,14 @@ sequenceDiagram
         Server-->>Client: supported versions + capabilities
     end
 
-    loop 客户端请求
-        Host->>Client: 用户或模型发起的操作
-        Client->>Server: 请求（带有 _meta: version, clientInfo, clientCapabilities）
-        alt 服务器需要客户端输入
-            Server-->>Client: IncompleteResponse（例如 sampling/createMessage）
-            Client->>Host: 转发给 AI
-            Host-->>Client: AI 响应
-            Client->>Server: 原始请求（带输入）
+    loop Client Requests
+        Host->>Client: User- or model-initiated action
+        Client->>Server: Request (with _meta: version, clientInfo, clientCapabilities)
+        alt Server requires client input
+            Server-->>Client: InputRequiredResult (e.g. sampling/createMessage)
+            Client->>Host: Forward to AI
+            Host-->>Client: AI response
+            Client->>Server: Original request (with input)
         end
         Server-->>Client: 响应
         Client-->>Host: 更新 UI 或向模型返回结果

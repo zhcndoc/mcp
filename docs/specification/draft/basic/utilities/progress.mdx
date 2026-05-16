@@ -30,8 +30,8 @@ title: 进度
 
 - 原始进度令牌
 - 当前的进度值
-- 一个可选的 "total" 值
-- 一个可选的 "message" 值
+- 一个可选的 "总计" 值
+- 一个可选的 "消息" 值
 
 ```json
 {
@@ -61,25 +61,21 @@ title: 进度
    - 以其认为合适的任何频率发送通知
    - 如果未知则省略 total 值
 
-3. 对于 [任务增强请求](./tasks)，原始请求中提供的 `progressToken` **必须** 在整个任务生命周期内继续用于进度通知，即使在 `CreateTaskResult` 返回之后。进度令牌保持有效并与任务关联，直到任务达到终端状态。
-   - 任务的进度通知 **必须** 使用与初始任务增强请求中提供的相同的 `progressToken`
-   - 任务的进度通知 **必须** 在任务达到终端状态（`completed`、`failed` 或 `cancelled`）后停止
-
 ```mermaid
 sequenceDiagram
     participant Sender
     participant Receiver
 
-    Note over Sender,Receiver: Request with progress token
-    Sender->>Receiver: Method request with progressToken
+    Note over Sender,Receiver: 带有进度令牌的请求
+    Sender->>Receiver: 带有 progressToken 的方法请求
 
-    Note over Sender,Receiver: Progress updates
-    Receiver-->>Sender: Progress notification (0.2/1.0)
-    Receiver-->>Sender: Progress notification (0.6/1.0)
-    Receiver-->>Sender: Progress notification (1.0/1.0)
+    Note over Sender,Receiver: 进度更新
+    Receiver-->>Sender: 进度通知 (0.2/1.0)
+    Receiver-->>Sender: 进度通知 (0.6/1.0)
+    Receiver-->>Sender: 进度通知 (1.0/1.0)
 
-    Note over Sender,Receiver: Operation complete
-    Receiver->>Sender: Method response
+    Note over Sender,Receiver: 操作完成
+    Receiver->>Sender: 方法响应
 ```
 
 ## 实现说明

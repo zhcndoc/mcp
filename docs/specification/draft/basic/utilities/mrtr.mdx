@@ -1,5 +1,5 @@
 ---
-title: Multi Round-Trip Requests
+title: 多轮往返请求
 ---
 
 <div id="enable-section-numbers" />
@@ -8,7 +8,7 @@ title: Multi Round-Trip Requests
   多轮往返请求（MRTR）是在本版本的 MCP 规范中引入的。这取代了之前发送由服务器发起请求的方法。服务器 **MUST** 使用 MRTR 模式发送服务器到客户端的请求（例如 `roots/list`、`sampling/createMessage` 或 `elicitation/create`）。之前的服务器发起请求模式不再受支持。这是一个破坏性变更。
 </Note>
 
-## Multi Round-Trip Requests
+## 多轮往返请求
 
 模型上下文协议（MCP）定义了服务器在处理客户端请求期间向用户请求额外信息的几种方式（例如 `roots/list`、`sampling/createMessage` 或 `elicitation/create`）。**多轮往返请求**模式提供了一种标准化方式来处理这些服务器请求，而无需在服务器实例之间共享存储层，也无需有状态负载均衡。
 
@@ -47,7 +47,7 @@ sequenceDiagram
     "method": "elicitation/create",
     "params": {
       "mode": "form",
-      "message": "Please provide your GitHub username",
+      "message": "请提供您的 GitHub 用户名",
       "requestedSchema": {
         "type": "object",
         "properties": {
@@ -65,11 +65,11 @@ sequenceDiagram
           "role": "user",
           "content": {
             "type": "text",
-            "text": "What is the capital of France?"
+            "text": "法国的首都是什么？"
           }
         }
       ],
-      "systemPrompt": "You are a helpful assistant.",
+      "systemPrompt": "你是一个乐于助人的助手。",
       "maxTokens": 100
     }
   }
@@ -119,7 +119,7 @@ sequenceDiagram
         "method": "elicitation/create",
         "params": {
           "mode": "form",
-          "message": "Please provide your GitHub username",
+          "message": "请提供您的 GitHub 用户名",
           "requestedSchema": {
             "type": "object",
             "properties": {
@@ -138,7 +138,7 @@ sequenceDiagram
               "role": "user",
               "content": {
                 "type": "text",
-                "text": "What is the capital of France?"
+                "text": "法国的首都是什么？"
               }
             }
           ],
@@ -147,7 +147,7 @@ sequenceDiagram
             "intelligencePriority": 0.8,
             "speedPriority": 0.5
           },
-          "systemPrompt": "You are a helpful assistant.",
+          "systemPrompt": "你是一个乐于助人的助手。",
           "maxTokens": 100
         }
       }
@@ -161,12 +161,11 @@ sequenceDiagram
 
 服务器 **MAY** 在以下客户端请求上发送 `InputRequiredResult` 响应：
 
-| 客户端请求                                                                       | 支持 InputRequiredResult |
-| ------------------------------------------------------------------------------------ | ---------------------------- |
-| [`prompts/get`](/specification/draft/server/prompts#getting-a-prompt)                | 是                           |
-| [`resources/read`](/specification/draft/server/resources#reading-resources)          | 是                           |
-| [`tools/call`](/specification/draft/server/tools#calling-tools)                      | 是                           |
-| [`tasks/result`](/specification/draft/basic/utilities/tasks#retrieving-task-results) | 是                           |
+| Client Request                                                              | Supports InputRequiredResult |
+| --------------------------------------------------------------------------- | ---------------------------- |
+| [`prompts/get`](/specification/draft/server/prompts#getting-a-prompt)       | Yes                          |
+| [`resources/read`](/specification/draft/server/resources#reading-resources) | Yes                          |
+| [`tools/call`](/specification/draft/server/tools#calling-tools)             | Yes                          |
 
 服务器 **MUST NOT** 在任何其他客户端请求上发送 `InputRequiredResult` 响应。
 
@@ -232,56 +231,7 @@ sequenceDiagram
 1. JSON-RPC `id` 在初始请求和重试之间 **MUST** 不同，因为它们是独立的请求。
 1. `inputRequests` 和 `requestState` 字段仅影响客户端对原始请求的重试。它们 **MUST NOT** 用于客户端可能并行发送的任何其他请求。
 
-### Tasks Workflow
-
-对于需要服务器端状态的长时间运行操作，持久化工作流利用 [Tasks](/specification/draft/basic/utilities/tasks)。“input_required” 任务状态表示需要额外信息。
-
-```mermaid
-sequenceDiagram
-    participant U as User
-    participant C as Client
-    participant S as Server
-    C->>S: tools/call (id: 1, task config)
-    S-->>C: Result (id: 1, taskId, status: working)
-
-    note over C,S: 客户端在服务器处理请求时轮询任务状态
-
-    note over S: 服务器需要通过询问获取更多信息 <br/> 将状态设为 input_required
-    C->>S: tasks/get (id: 2, taskId)
-    S-->>C: Result (id: 2, status: input_required)
-
-    C->>S: tasks/result (id: 3, taskId)
-    S-->>C: InputRequiredResult (id: 3, ElicitRequest)
-
-    C->>U: 提示用户输入
-    U-->>C: 提供响应
-
-    C->>S: tasks/input_response (id: 4, taskId, ElicitResult)
-    S-->>C: Result (id: 4, acknowledged)
-
-    note over C,S: 处理继续，客户端轮询
-    C->>S: tasks/get (id: 5, taskId)
-    S-->>C: Result (id: 5, status: completed)
-
-    C->>S: tasks/result (id: 6, taskId)
-    S-->>C: Result (id: 6, final content)
-```
-
-#### 服务器要求（Tasks）
-
-1. 服务器 **MAY** 通过指示任务处于 `input_required` 状态来响应 `tasks/get`。
-1. 当任务处于 `input_required` 状态时，服务器 **MUST** 在 `tasks/result` 响应中包含 `inputRequests` 字段。
-1. `inputRequests` 的键是服务器分配的标识符，并且在一个 `Task` 的范围内 **MUST** 唯一。
-
-1. 当任务处于 `input_required` 状态时，服务器 **MAY** 在 `tasks/result` 响应中包含 `requestState` 字段。
-
-#### 客户端要求（Tasks）
-
-1. 当 `tasks/get` 显示状态为 `input_required` 时，客户端 **MUST** 调用 `tasks/result` 以获取 `inputRequests` 和可选的 `requestState`。
-1. 客户端 **SHOULD** 构造这些请求的结果，并使用 `inputResponses` 和 `requestState`（如果存在）调用 [`tasks/input_response`](/specification/draft/basic/utilities/tasks#providing-input-for-tasks)。
-1. 客户端 **MAY** 选择不完成这些输入请求，在这种情况下，客户端 **MAY** 取消任务。
-
-### 错误处理
+### Error Handling
 
 服务器 **SHOULD** 验证客户端提供的数据是否为有效的 `InputResponses` 对象，以及其中的信息是否可以被正确解析。
 协议错误（格式错误的 JSON、无效的 schema、内部服务器错误）**SHOULD** 返回带有适当错误码和消息的 JSON-RPC 错误响应。

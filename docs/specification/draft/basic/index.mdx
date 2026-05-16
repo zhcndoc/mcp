@@ -57,26 +57,26 @@ MCP 客户端和服务器之间的所有消息 **必须** 遵循
   jsonrpc: "2.0";
   id: string | number;
   result: {
+    resultType: string;
     [key: string]: unknown;
   };
-  resultType: string;
 }
 ```
 
 - 结果响应 **必须** 包含与其对应请求相同的 ID。
 - 结果响应 **必须** 包含 `result` 字段。
-- `result` **可以** 遵循任何 JSON 对象结构。
-- `resultType` 字段 **必须** 包含在内，以指示结果的类型。如果未指定 `resultType`，则应假定为 `"complete"`。
+- `result` **可以** 采用任何 JSON 对象结构。
+- `result` **必须** 包含 `resultType` 字段，以指示结果的类型。
 
 ##### ResultType
 
-结果响应中的 `resultType` 字段表示所返回结果的类型。MCP 支持多态结果类型，
+结果中的 `resultType` 字段表示所返回结果的类型。MCP 支持多态结果类型，
 允许服务器根据请求结果返回不同的结构。`resultType` 字段是一个字符串，客户端
-可据此确定如何解析和处理 `result` 对象。
+可以用它来确定如何解析和处理 `result` 对象。
 
 - `resultType` 为 `"complete"` 表示请求已成功完成，结果包含最终内容。
-- `resultType` 为 `"input_required"` 表示请求尚未完成，需要更多信息才能处理该请求。结果包含一个带有额外所需信息的 `InputRequiredResult` 对象。
-- 如果未指定 `resultType`，客户端 **必须** 为向后兼容而假定默认值 `"complete"`。
+- `resultType` 为 `"input_required"` 表示请求尚未完成，处理请求还需要更多信息。结果包含一个 `InputRequiredResult` 对象，其中包含所需的附加信息。
+- 为了向后兼容较早协议版本的服务器（这些版本不包含 `resultType`），客户端 **必须** 将缺失的 `resultType` 视为 `"complete"`。
 
 #### 错误响应
 

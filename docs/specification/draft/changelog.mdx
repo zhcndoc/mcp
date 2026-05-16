@@ -14,16 +14,26 @@ title: 主要变更
 
 3. 添加 `server/discover`：服务器必须实现此 RPC，以公布其支持的协议版本、能力和标识。客户端可以在任何其他请求之前调用它，以便提前选择版本；或者在 STDIO 上将其用作向后兼容探测 ([SEP-2575](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2575))。
 
-4. 用 `subscriptions/listen` 替换 HTTP GET 端点以及 `resources/subscribe`/`resources/unsubscribe`：为所有服务器到客户端通知提供一个单一的、长连接的 POST 响应流。客户端可选择订阅特定类型（`toolsListChanged`、`promptsListChanged`、`resourcesListChanged`、`resourceSubscriptions`）；服务器会确认并使用 `io.modelcontextprotocol/subscriptionId` 标记通知 ([SEP-2575](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2575))。
+4. 将 HTTP GET 端点以及 `resources/subscribe`/`resources/unsubscribe` 替换为 `subscriptions/listen`：为已选择接收的服务器到客户端变更通知提供单个长生命周期的 POST-响应流。客户端可针对特定类型选择订阅（`toolsListChanged`、`promptsListChanged`、`resourcesListChanged`、`resourceSubscriptions`）；服务器会确认并使用 `io.modelcontextprotocol/subscriptionId` 为通知打标签。诸如 `notifications/progress` 和 `notifications/message` 这类与请求作用域相关的通知，继续沿它们所关联请求的响应流传递，而不是 `subscriptions/listen` 流 ([SEP-2575](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2575))。
 
 5. 移除 `ping`、`logging/setLevel` 和 `notifications/roots/list_changed`。日志级别现在通过 `_meta` 中的 `io.modelcontextprotocol/logLevel` 按请求设置；对于未包含此字段的请求，服务器**不得**发送 `notifications/message` ([SEP-2575](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2575))。
 
+6. 将实验性任务移出核心协议，纳入官方扩展（`io.modelcontextprotocol/tasks`）。重新设计后的扩展以通过 `tasks/get` 轮询和新的 `tasks/update` 接收客户端到服务器的输入，取代了阻塞式 `tasks/result` 方法，移除了 `tasks/list`，并允许服务器无需按请求显式选择即可返回任务句柄 ([SEP-2663](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2663))。
+
+7. 引入多轮往返请求（MRTR）模式，用以替代此前发送服务器发起请求的方式，例如 `roots/list`、`sampling/createMessage` 或 `elicitation/create`。服务器返回 `inputRequests`，这是一种新的 resultType，包含处理该请求所需的附加信息。客户端随后在下一次请求中通过 `inputResponses` 响应并提供所请求的信息。([SEP-2322](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2322))。
+
+8. 弃用 Roots、Sampling 和 Logging 功能
+   ([SEP-2577](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2577))。
+   这些功能在弃用窗口期间仍然完全可用，但新的
+   实现不应再为其添加支持。
+
 ## 次要变更
 
-1. 向 `ClientCapabilities` 和 `ServerCapabilities` 添加 `extensions` 字段，以支持核心协议之外的可选 [扩展](/docs/extensions/overview)。
-2. 记录 `_meta` 键（`traceparent`、`tracestate`、`baggage`）的 OpenTelemetry 跟踪上下文传播约定（[SEP-414](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/414)）。
-3. 服务器 **应当** 以确定性顺序从 `tools/list` 返回工具，以便启用客户端缓存并提高 LLM 提示缓存命中率。
-4. 要求 Streamable HTTP POST 请求包含标准 MCP 请求头（`Mcp-Method`、`Mcp-Name`），并增加通过工具参数中的 `x-mcp-header` 支持自定义请求头的能力（[SEP-2243](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2243)）。
+1. 为 `ClientCapabilities` 和 `ServerCapabilities` 添加 `extensions` 字段，以支持核心协议之外的可选 [extensions](/docs/extensions/overview)。
+2. 记录 `_meta` 键（`traceparent`、`tracestate`、`baggage`）的 OpenTelemetry 跟踪上下文传播约定 ([SEP-414](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/414))。
+3. 服务器 **应当** 以确定性顺序返回 `tools/list` 中的工具，以便支持客户端侧缓存并提高 LLM 提示缓存命中率。
+4. 要求 Streamable HTTP POST 请求包含标准 MCP 请求标头（`Mcp-Method`、`Mcp-Name`），并通过 `x-mcp-header` 支持从工具参数传递自定义标头 ([SEP-2243](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2243))。
+5. 通过新的 `CacheableResult` 接口，为 `tools/list`、`prompts/list`、`resources/list`、`resources/read` 和 `resources/templates/list` 返回的结果添加 `ttlMs` 和 `cacheScope` 字段。`ttlMs` 是新鲜度提示（以毫秒为单位），允许客户端缓存响应并减少轮询；`cacheScope`（`"public"` 或 `"private"`）控制共享中介是否可以缓存响应。这两个字段与现有的 `listChanged` 通知相辅相成 ([SEP-2549](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2549))。
 
 ## 其他架构变更
 

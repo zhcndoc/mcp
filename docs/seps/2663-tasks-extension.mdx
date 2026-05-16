@@ -1,0 +1,980 @@
+---
+title: "SEP-2663: 任务扩展"
+sidebarTitle: "SEP-2663: 任务扩展"
+description: "任务扩展"
+---
+
+<div className="flex items-center gap-2 mb-4">
+  <Badge color="green" shape="pill">
+    最终版
+  </Badge>
+  <Badge color="gray" shape="pill">
+    扩展轨道
+  </Badge>
+</div>
+
+| 字段          | 值                                                                                                                                                                 |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **SEP**       | 2663                                                                                                                                                                  |
+| **Title**     | 任务扩展                                                                                                                                                       |
+| **Status**    | 最终版                                                                                                                                                                 |
+| **Type**      | 扩展轨道                                                                                                                                                      |
+| **Created**   | 2026-04-27                                                                                                                                                            |
+| **Author(s)** | Luca Chang ([@LucaButBoring](https://github.com/LucaButBoring)), Caitie McCaffrey ([@CaitieM20](https://github.com/CaitieM20)); 代表 Agents Working Group |
+| **Sponsor**   | Caitie McCaffrey ([@CaitieM20](https://github.com/CaitieM20))                                                                                                         |
+| **PR**        | [#2663](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2663)                                                                                       |
+
+---
+
+## 摘要
+
+本 SEP 定义了一种扩展，使服务器能够以异步 _task handle_ 代替最终结果来响应 `tools/call` 请求，从而允许客户端通过轮询来获取最终结果。该扩展引入了三种方法：`tasks/get`、`tasks/update` 和 `tasks/cancel`；一个多态结果判别器（`resultType: "task"`）；以及一个 `Task` 结构，用于携带任务状态、进行中的 server-to-client 请求，以及最终结果或错误。任务的创建由服务器驱动：客户端通过在其每个请求的能力中包含该扩展来表明支持，服务器则按请求逐一决定是否实例化任务。
+
+任务将成为 MCP 的基础构建块，预计会在未来的协议版本中得到支持。`2025-11-25` 规范中的实验性 `tasks` 特性曾作为权宜之计，直到协议的扩展机制可用为止。现在 [extensions](https://modelcontextprotocol.io/extensions/overview) 已经被 [正式化](./2133-extensions.md)，将 tasks 迁移为官方扩展可以让该特性有时间孵化并基于更多真实世界的实现反馈进行演进，而不必受核心规范发布节奏的限制。一旦该扩展稳定并获得广泛采用，计划将其提升回核心协议。
+
+本提案将 `2025-11-25` 版本中定义的 [tasks](https://modelcontextprotocol.io/specification/2025-11-25/basic/utilities/tasks) 从核心协议中 _移除_ 并迁移为扩展。它还提出了基于自该版本以来的实现反馈，以及 `2026-06-30` 规范中包含的若干对基础协议的变更而对 Tasks 所做的更新：
+
+- [SEP-2260: 要求 Server 请求与 Client 请求关联](./2260-Require-Server-requests-to-be-associated-with-Client-requests.md)
+- [SEP-2322: 多轮往返请求](./2322-MRTR.md)
+- [SEP-2243: 流式 HTTP 传输的 HTTP Header 标准化](./2243-http-standardization.md)
+- [SEP-2567: 通过显式状态句柄实现无会话 MCP](./2567-sessionless-mcp.md)
+- [SEP-2575: 让 MCP 变为无状态](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2575)
+
+## 动机
+
+实验性的 [tasks](https://modelcontextprotocol.io/specification/2025-11-25/basic/utilities/tasks) 特性作为工具调用、elicitation 和 sampling 的替代执行模式，允许接收方返回一个轮询句柄，而不是阻塞直到最终结果准备好。实现经验暴露出几个挑战：
+
+1. **握手流程脆弱。** 当前的 Tasks 同时暴露了方法级能力（`tasks.requests.tools.call` 声明 `tools/call` **MAY** 被 task 增强）和工具级的 `execution.taskSupport` 字段，用来声明某个特定工具是否会接受该增强。客户端通过在请求中传递 `task` 参数来表达自身对 tasks 的支持，但如果该方法/工具不支持 tasks，则 **MUST NOT** 包含它。因此，想要启用 tasks 的客户端必须先通过一次 `tools/list` 调用来预热状态，然后才能发起任何 task 增强请求；也不能为了以同构方式处理所有工具而盲目地给每个请求附加 `task` 参数。这令人困惑、隐式，而且很容易出错。
+
+2. **`tasks/result` 是一个会阻塞的陷阱。** 在当前流程中，观察到 `input_required` 的客户端必须提前调用 `tasks/result`，以便服务器获得一个 SSE 流，从而在侧通道发送 elicitation 或 sampling 请求。随后 `tasks/result` 会一直阻塞到整个操作完成。这迫使客户端和服务器实现长连接，而许多客户端和服务器并不希望这么做；同时它也与 [SEP-2260](./2260-Require-Server-requests-to-be-associated-with-Client-requests.md) 相冲突，因为后者直接禁止未请求的 server-to-client 请求。在 SEP-2260 下，支持阻塞行为的 SSE 语义已经不再适用。
+
+3. **`tasks/list` 的作用域无法定义。** 为了避免客户端取消或获取它们不应访问的任务结果，所有任务都应绑定到某种“授权上下文”，其实现则留给各服务器根据其既有的自定义权限模型来决定。然而，在很多情况下，这种绑定并不可行，此时任务 ID 就成了防止污染的唯一防线。在这种场景下，服务器完全不应该支持 `tasks/list`。虽然 tasks 也可以绑定到 session 上，[SEP-2567](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2567) 已经把 session 从协议中移除了。服务器无法单方面定义其他自然作用域——task ID 可以是服务器一次只识别一个的不可猜测句柄，但如果没有额外状态，服务器无法可靠地把两个互不相关的句柄关联到同一个调用方。
+
+除了实现上的挑战之外，tasks 还面临另一个结构性问题：**客户端托管的 tasks 已经无法表达。** [SEP-1686](./1686-tasks.md) 允许客户端为 elicitation 和 sampling 托管 tasks，部分原因是为了避免将 tasks 与工具调用耦合。[SEP-2260](./2260-Require-Server-requests-to-be-associated-with-Client-requests.md) 使任何未请求的 server-to-client 请求都无效；在客户端托管 tasks 下，所有 server-to-client 的轮询请求按定义都会是未请求的。
+
+本提案旨在通过重设计该特性的某些方面并将 tasks 移出为官方扩展来解决上述问题。将 tasks 重新定义为官方扩展，可以让该特性有更多时间在核心规范之外孵化并独立演进，从而促进采用。作为重设计的一部分，本提案将轮询生命周期整合到 `tasks/get` 和新的 `tasks/update` 中，以移除阻塞式的 `tasks/result` 方法。该重设计允许服务器返回未请求的 tasks（作为对普通、未带 `task` 标记请求的响应），从而消除按请求显式 opt-in 以及 `tools/list` 预热的需要，转而依赖扩展能力作为唯一握手点。最后，本提案还为符合 [SEP-2260](./2260-Require-Server-requests-to-be-associated-with-Client-requests.md) 而移除客户端托管的 elicitation 和 sampling tasks。
+
+## 规范
+
+MCP Tasks 扩展允许某些请求被 **tasks** 增强。Tasks 是持久化状态机，携带其所增强请求的底层执行状态信息，旨在供客户端轮询和延迟结果获取。每个 task 都由服务器生成的 **task ID** 唯一标识。
+
+Tasks 适合表示昂贵的计算和批处理请求，并且与外部作业 API 自然契合。
+
+### 扩展标识符
+
+此扩展的标识为：`io.modelcontextprotocol/tasks`。
+
+### 能力协商
+
+客户端和服务器在各自的能力对象中声明对 tasks 扩展的支持（使用 [SEP-2575: 让 MCP 变为无状态](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2575) 中更新后的形式）：
+
+```jsonc
+// Client to server, in per-request capabilities
+{
+  // 其他请求参数...
+  "params": {
+    "_meta": {
+      "io.modelcontextprotocol/clientCapabilities": {
+        "extensions": {
+          "io.modelcontextprotocol/tasks": {},
+        },
+      },
+    },
+  },
+}
+```
+
+```jsonc
+// Server to client, in response to server/discover
+{
+  "result": {
+    // 其他响应参数...
+    "capabilities": {
+      "extensions": {
+        "io.modelcontextprotocol/tasks": {},
+      },
+    },
+  },
+}
+```
+
+当前未定义任何扩展特定设置；空对象表示支持。
+
+已协商该扩展的服务器 **MAY** 在其自行决定并按请求逐一判断的情况下，以 `CreateTaskResult` 代替标准结果（例如 `CallToolResult`）来响应任何受支持的请求。由服务器单独决定；客户端不会在请求本身上表明对 task 的偏好。客户端声明扩展能力并不意味着它要求该请求返回 `CreateTaskResult`。
+
+如果客户端在其请求中未包含该扩展能力，服务器 **MUST NOT** 向其返回 `CreateTaskResult`，不论之前是否有其他声明。已协商该扩展的客户端 **MUST** 准备好在其发出的任何受支持请求中处理 `CallToolResult` 或 `CreateTaskResult` 之一。如果客户端在对不受支持的请求类型收到 `CreateTaskResult`，**MUST** 将其解释为该请求的无效响应。
+
+如果服务器无法在不返回 `CreateTaskResult` 的情况下为一个未声明该扩展能力的客户端处理请求，服务器 **MUST** 返回代码为 `-32003`（缺少所需客户端能力）的错误，并在错误响应中指明所需扩展：
+
+```jsonl
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "error": {
+    // MISSING_REQUIRED_CLIENT_CAPABILITY
+    "code": -32003,
+    // 此处的消息仅为示例用途。该示例消息内容不具规范性。
+    "message": "缺少所需客户端能力",
+    "data": {
+      "requiredCapabilities": {
+        "extensions": {
+          "io.modelcontextprotocol/tasks": {}
+        }
+      }
+    }
+  }
+}
+```
+
+### 支持的方法
+
+当前支持 task 增强执行的方法如下：
+
+- `tools/call`
+
+本规范未来可能扩展以支持其他请求类型上的 tasks；实现 **SHOULD** 设计为可适配本规范未来修订中额外的请求类型。
+
+### 多态结果
+
+符合 task 增强条件的请求可以返回两种不同的结果形态之一——该请求的标准结果，或 `CreateTaskResult`。判别器是结果对象上的 `resultType` 字段，由 [SEP-2322](./2322-MRTR.md) 引入：
+
+```typescript
+// "task" is introduced by this extension.
+type ResultType = "complete" | "input_required" | "task";
+```
+
+服务器在返回 `CreateTaskResult` 时 **MUST** 将 `resultType` 设为 `"task"`，以便客户端将其与标准结果区分开来。服务器在 `CreateTaskResult` 之外的结果类型上 **MUST NOT** 将 `resultType` 设为 `"task"`。
+
+建议客户端实现者注意：现有返回固定形态的代码（例如返回 `CallToolResult` 的 `tools/call` 方法）无需更改其对外契约——它们可以在内部透明地驱动轮询流程，并仅向外暴露最终完成结果。新的实现层 **MAY** 直接暴露任务生命周期，以便应用程序利用。
+
+### Tasks
+
+`Task` 携带有关进行中工作的运行时元数据。
+
+```typescript
+interface Task {
+  /** 该 task 的稳定标识符。 */
+  taskId: string;
+
+  /** 当前 task 状态。 */
+  status: "working" | "input_required" | "completed" | "cancelled" | "failed";
+
+  /**
+   * 描述当前 task 状态的可选消息。
+   * 这可以为任何状态提供上下文，例如（不具规范性）：
+   * - "working" 的进度描述
+   * - 在 "input_required" 上被阻塞的工作
+   * - "cancelled" 状态的原因
+   * - "completed" 状态的摘要
+   * - "failed" 状态的附加信息（例如错误详情、出错原因）
+   *
+   * 这 MAY 向终端用户或模型暴露。
+   */
+  statusMessage?: string;
+
+  /** task 创建时的 ISO 8601 时间戳。 */
+  createdAt: string;
+
+  /** task 上次更新时的 ISO 8601 时间戳。 */
+  lastUpdatedAt: string;
+
+  /**
+   * 从创建时刻起的生存时间（毫秒整数）；若为无限则为 null。
+   * 服务器可以在 TTL 到期后丢弃该 task。该值在 task 的生命周期内
+   * MAY 变化。
+   */
+  ttlMs: number | null;
+
+  /**
+   * 建议的轮询间隔（毫秒整数）。客户端 SHOULD 遵守该值，以避免
+   * 压垮服务器。该值在 task 的生命周期内 MAY 变化。
+   */
+  pollIntervalMs?: number;
+}
+```
+
+#### Task 状态
+
+Tasks 可以处于以下状态之一：
+
+- `working`：请求正在处理中。
+- `input_required`：服务器在 task 继续之前需要来自客户端的输入。`tasks/get` 响应将在 `inputRequests` 字段中包含未完成的请求。客户端 **MUST** 检查此字段，并且 **SHOULD** 在后续 `tasks/update` 请求中通过 `inputResponses` 字段提供响应。
+- `completed`：请求已成功完成，结果可在 `result` 字段中获取。这包括返回结果且 `isError: true` 的工具调用。
+- `failed`：请求在执行期间因 JSON-RPC 错误而失败。该 task 会在 `error` 字段中包含 JSON-RPC 错误详情。此状态 **MUST NOT** 用于非 JSON-RPC 错误。
+- `cancelled`：请求在完成前被取消。
+
+`Task` 的派生结构会内联状态特定的载荷字段，并用于 `tasks/get` 响应和 `notifications/tasks` 通知：
+
+```ts
+/**
+ * 处于正常 working 状态的 task。
+ * 用于 tasks/get 和 notifications/tasks。
+ */
+export interface WorkingTask extends Task {
+  status: "working";
+}
+
+/**
+ * 正在等待来自客户端输入的 task。
+ * 用于 tasks/get 和 notifications/tasks。
+ */
+export interface InputRequiredTask extends Task {
+  status: "input_required";
+  /**
+   * 在 task 执行期间需要完成的 server-to-client 请求。
+   * 键是用于将请求与响应匹配的任意标识符。
+   */
+  inputRequests: InputRequests;
+}
+
+/**
+ * 已成功完成的 task。
+ * 用于 tasks/get 和 notifications/tasks。
+ */
+export interface CompletedTask extends Task {
+  status: "completed";
+  /**
+   * task 的最终结果。
+   * 其结构与原始请求的结果类型一致。
+   * 例如，CallToolRequest task 会返回 CallToolResult 结构。
+   */
+  result: JSONObject;
+}
+
+/**
+ * 因 JSON-RPC 错误而失败的 task。
+ * 用于 tasks/get 和 notifications/tasks。
+ */
+export interface FailedTask extends Task {
+  status: "failed";
+  /**
+   * 导致 task 失败的 JSON-RPC 错误。
+   */
+  error: JSONObject;
+}
+
+/**
+ * 已被取消的 task。
+ * 用于 tasks/get 和 notifications/tasks。
+ */
+export interface CancelledTask extends Task {
+  status: "cancelled";
+}
+
+/**
+ * 表示带有可选内联 result/error/inputRequests 字段的 task 的联合类型。
+ * 此类型用于 tasks/get 和 notifications/tasks，以提供完整的 task 状态，
+ * 包括终态结果或待处理的输入请求。
+ */
+export type DetailedTask =
+  | WorkingTask
+  | InputRequiredTask
+  | CompletedTask
+  | FailedTask
+  | CancelledTask;
+```
+
+### Task 创建
+
+服务器会针对某个请求返回 `CreateTaskResult`，以代替标准结果形态，表示该请求将异步处理。
+
+```typescript
+// resultType: "task"
+type CreateTaskResult = Result & Task;
+```
+
+**示例请求（CallToolRequest）：**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "get_weather",
+    "arguments": {
+      "city": "New York"
+    }
+  }
+}
+```
+
+**示例响应（CreateTaskResult）：**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "resultType": "task",
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840",
+    "status": "working",
+    "statusMessage": "该操作现已开始进行。",
+    "createdAt": "2025-11-25T10:30:00Z",
+    "lastUpdatedAt": "2025-11-25T10:40:00Z",
+    "ttlMs": 60000,
+    "pollIntervalMs": 5000
+  }
+}
+```
+
+嵌入的 `task` 是该 task 的初始状态，通常（但不一定）为 `status: "working"`。客户端会将 `task.taskId` 用于后续所有 `tasks/get`、`tasks/update` 和 `tasks/cancel` 调用。
+
+服务器 **MUST NOT** 在 task 可靠创建之前返回 `CreateTaskResult`——也就是说，直到返回的 `taskId` 对应的 `tasks/get` 能够成功解析之前，都不可以返回。在最终一致性环境中，服务器 **MUST** 在响应前等待一致性达成。此要求消除了客户端为 task 创建进行投机式轮询的需要。
+
+将多轮往返请求与 task 创建结合使用的服务器实现（例如，在创建 task 之前需要通过 `InputRequiredResult` 获取 eliciation 的工具）**SHOULD** 在返回 `CreateTaskResult` 之前 _同步_ 完成所有 MRTR 往返。
+
+### Task 轮询
+
+客户端通过发送 `tasks/get` 请求来轮询 task 的完成情况。
+
+客户端在决定轮询频率时 **SHOULD** 遵守响应中提供的 `pollIntervalMs`。`pollIntervalMs` 在 task 的生命周期内 **MAY** 变化。服务器 **MAY** 对轮询频率高于记录的 `pollIntervalMs` 的客户端进行限流。
+
+客户端 **SHOULD** 持续轮询，直到 task 达到终态，或直到调用 `tasks/cancel`。客户端 **SHOULD** 将 task ID 持久化到持久存储，以便在崩溃或重启后恢复轮询。
+
+#### 请求
+
+```typescript
+interface GetTaskRequest extends JSONRPCRequest {
+  method: "tasks/get";
+  params: {
+    /** 要查询的 task 标识符。 */
+    taskId: string;
+  };
+}
+```
+
+#### 响应
+
+收到 `tasks/get` 请求后，服务器 **MUST** 检查 task 的状态并相应响应：
+
+1. 如果状态是 `working`，服务器 **MUST** 返回一个状态为 `working` 的 `Task` 对象。
+2. 如果状态是 `input_required`，服务器 **MUST** 返回一个状态为 `input_required` 的 `Task` 对象，并带有 [Multi Round-Trip Requests](./2322-MRTR.md) 中定义的 `inputRequests` 字段。`inputRequests` 字段 **MUST** 包含所有尚未完成、且需要在 task 继续之前由服务器发给客户端并完成的请求。
+3. 如果状态是 `completed`，服务器 **MUST** 返回一个状态为 `completed` 的 `Task` 对象，并在 `result` 字段中包含 task 的最终结果。
+4. 如果状态是 `cancelled`，服务器 **MUST** 返回一个状态为 `cancelled` 的 `Task` 对象。
+5. 如果状态是 `failed`，服务器 **MUST** 返回一个状态为 `failed` 的 `Task` 对象，并包含执行过程中发生的错误。
+
+```typescript
+type GetTaskResult = Result & DetailedTask;
+```
+
+响应携带与 task 当前状态相匹配的相应响应变体（见 [Task 状态](#task-状态)）。由于这是 `tasks/get` 请求的标准结果形态，该对象上的 `resultType` 字段 **MUST** 设为 `"complete"`。
+
+如果 task 的 `ttlMs` 非空，客户端 **MAY** 将 TTL 视为最后保障：如果在 `createdAt` 加上 `ttlMs` 经过后，task 的可观测状态仍未反映更新，则客户端 **MAY** 认为该 task 不再可用。反过来，服务器 **MAY** 在 TTL 到期后的任意时间点将 task 标记为 `failed`，并随后在任何时候将其删除。`ttlMs` 的值在 task 的生命周期内 **MAY** 变化。
+
+### Task 更新请求
+
+当 task 需要来自客户端的输入时（由 `input_required` 状态指示），服务器会在 `tasks/get` 响应的 `inputRequests` 字段中包含未完成的请求（见 [Multi Round-Trip Requests](./2322-MRTR.md)）。客户端通过一个或多个后续 `tasks/update` 请求中的 `inputResponses` 字段提供响应。
+
+当客户端观察到带有 `status: "input_required"` 的 `tasks/get` 响应（或 `notifications/tasks` 通知）时，客户端 **SHOULD** 通过发送一个或多个带有相应 `inputResponses` 的 `tasks/update` 请求来完成 `inputRequests` 中尚未完成的请求。在发送 `tasks/update` 之后，客户端 **SHOULD** 继续通过轮询（`tasks/get`）或通知（`notifications/tasks`）观察 task 的状态，直到其进入终态。
+
+客户端 **MUST** 将 `inputRequests` 中的每一项视作与其对应的独立 server-to-client 请求等价——例如，通过 `inputRequests` 暴露的 elicitation 请求，其信任模型和面向用户的行为与直接的 `elicitation/create` 请求相同。客户端 **SHOULD** 在连续轮询之间对 `inputRequests` 键去重，以避免向用户或模型多次呈现同一请求。
+
+`inputRequests` 中的每个请求键在单个 task 的生命周期内 **MUST** 唯一。服务器 **MUST NOT** 在某个键的响应已交付后，在后续 server-to-client 请求中复用该键，也 **MUST NOT** 在 task 生命周期内用同一个键指代两个不同的请求。这样可以保证以相同标识符键入的 `inputResponses` 始终指向客户端所期望的请求，消除客户端跨轮询去重时的歧义，并允许服务器忽略对未知或已满足请求的 `inputResponses`。
+
+#### 请求
+
+```typescript
+interface UpdateTaskRequest extends JSONRPCRequest {
+  method: "tasks/update";
+  params: {
+    /** 要更新的 task 标识符。 */
+    taskId: string;
+
+    /**
+     * 对先前由服务器暴露出来的未完成 inputRequests 的响应。
+     * 形状遵循 MRTR。每个键 MUST 对应当前未完成的 inputRequest 键。
+     */
+    inputResponses: InputResponses;
+  };
+}
+```
+
+#### 响应
+
+```typescript
+type UpdateTaskResult = Result; // 空确认
+```
+
+成功时，服务器 **MUST** 以空结果确认该请求。该确认是 _最终一致_ 的：服务器 **MAY** 接受响应并在 task 的可观测状态（通过 `tasks/get` 或 `notifications/tasks`）反映出来之前先返回确认。若 `taskId` 不对应已知 task，服务器 **SHOULD** 返回 JSON-RPC 错误。客户端 **SHOULD** 跟踪 `inputRequests` 键，以避免对同一请求响应多次。
+
+服务器 **SHOULD** 忽略任何映射到当前并非 task 待处理项的 `inputResponses` 响应——包括从未发出过的键、已经被回答过的键，以及其对应请求已被替代的键。服务器 **MAY** 接受部分响应（当前未完成键的严格子集）；
+
+`UpdateTaskResult` 上的 `resultType` 字段 **MUST** 设为 `"complete"`，因为这是 `tasks/update` 请求的标准结果形态。
+
+### Task 取消
+
+客户端发送 `tasks/cancel` 请求以表明其希望取消一个进行中的 task。`notifications/cancelled` 通知 **MUST NOT** 用于 task 取消。
+
+#### 请求
+
+```typescript
+interface CancelTaskRequest extends JSONRPCRequest {
+  method: "tasks/cancel";
+  params: {
+    taskId: string;
+  };
+}
+```
+
+#### 响应
+
+```typescript
+type CancelTaskResult = Result; // 空确认
+```
+
+服务器 **MUST** 以空结果确认该请求。若 `taskId` 不对应已知 task，服务器 **SHOULD** 返回 JSON-RPC 错误。取消处理是 _最终一致_ 的——在确认之后，task 的可观测状态 **MAY** 仍保持 `working`（或其他非终态），并且如果工作在取消生效前已完成，最终 **MAY** 到达一个非 `cancelled` 的终态。
+
+取消是 **协作式** 的：请求表达意图，由服务器决定是否以及何时遵从。服务器没有义务真正停止工作；它仅有义务确认该请求。最终变为 `cancelled` 并不保证一定发生。
+
+客户端在发送取消后 **MAY** 立即删除与该 task 相关的全部状态（例如，不再需要保留它已经响应过的 `inputRequests` 键列表）。客户端无需再次轮询 `tasks/get` 来等待 task 进入 `cancelled` 状态。
+
+`CancelTaskResult` 上的 `resultType` 字段 **MUST** 设为 `"complete"`，因为这是 `tasks/cancel` 请求的标准结果形态。
+
+### Task 状态通知
+
+除处理客户端轮询之外，服务器 **MAY** 通过 `notifications/tasks` 通知推送状态更新：
+
+```typescript
+export type TaskStatusNotificationParams = NotificationParams & Task;
+
+export interface TaskStatusNotification extends JSONRPCNotification {
+  method: "notifications/tasks";
+  params: TaskStatusNotificationParams;
+}
+```
+
+要开始监听 task 状态通知，客户端会向服务器发送 `subscriptions/listen` 请求，并包含一份其感兴趣的 task ID 列表（见 [SEP-2575](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2575)）：
+
+```typescript
+export interface SubscriptionsListenRequest extends Request {
+  method: "subscriptions/listen";
+  params: {
+    // 其他现有字段...
+    notifications: {
+      taskIds?: string[];
+      // 其他现有字段...
+    };
+  };
+}
+```
+
+在其确认通知中，服务器会包含其同意发送 task 状态通知的 task ID 列表（如果有）：
+
+```typescript
+export interface SubscriptionsAcknowledgedNotification extends Notification {
+  method: "notifications/subscriptions/acknowledged";
+  params: {
+    notifications: {
+      /**
+       * 为特定 task ID 订阅 notifications/tasks。
+       */
+      taskIds?: string[];
+      // 其他现有字段...
+    };
+  };
+}
+```
+
+如果客户端请求 task 状态通知，但未声明 `io.modelcontextprotocol/tasks` 扩展能力，服务器 **MUST** 返回指定缺失能力的 JSON-RPC 错误：
+
+```jsonl
+{
+  "jsonrpc": "2.0",
+  "id": 12,
+  "error": {
+    // MISSING_REQUIRED_CLIENT_CAPABILITY
+    "code": -32003,
+    // 此处的消息仅为示例用途。该示例消息内容不具规范性。
+    "message": "缺少所需客户端能力",
+    "data": {
+      "requiredCapabilities": {
+        "extensions": {
+          "io.modelcontextprotocol/tasks": {}
+        }
+      }
+    }
+  }
+}
+```
+
+每条通知都携带当前状态下完整的 `DetailedTask`，与 `tasks/get` 在该时刻会返回的内容完全相同。
+
+**通知：**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "notifications/tasks",
+  "params": {
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840",
+    "status": "completed",
+    "createdAt": "2025-11-25T10:30:00Z",
+    "lastUpdatedAt": "2025-11-25T10:50:00Z",
+    "ttlMs": 60000,
+    "pollIntervalMs": 5000,
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "操作已成功完成。"
+        }
+      ],
+      "isError": false
+    }
+  }
+}
+```
+
+该通知包含完整的 task 对象，使客户端无需轮询 `tasks/get` 方法即可访问完整的 task 状态和最终结果。客户端 **MAY** 在订阅 task 状态通知之外继续轮询 `tasks/get`，但并非必需。
+
+`notifications/progress` 和 `notifications/message` 通知 **MUST NOT** 在 task 的 `subscriptions/listen` 流上发送，并且本规范一般也不支持在 tasks 上使用它们。
+
+### Streamable HTTP：路由头
+
+当通过 Streamable HTTP 传输发送 `tasks/get`、`tasks/update` 或 `tasks/cancel` 时，客户端 **MUST** 将 [SEP-2243](./2243-http-standardization.md) 定义的 `Mcp-Name` 头设置为 `params.taskId` 的值。这样可以让传输中间件和负载均衡器将同一 task 的后续请求路由到持有其状态的服务器实例，这通常是正确性所必需的。`Mcp-Method` 头按 [SEP-2243](./2243-http-standardization.md) 设置为 JSON-RPC 方法名。
+
+### 示例消息流
+
+考虑一个简单的工具调用 `hello_world`，它需要通过 elicitation 让用户提供姓名。该工具本身不接受任何参数。
+
+要调用此工具，客户端如下发起 `CallToolRequest`：
+
+```jsonc
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "tools/call",
+  "params": {
+    "name": "hello_world",
+    "arguments": {},
+    "_meta": {
+      // 其他元数据...
+      "io.modelcontextprotocol/clientCapabilities": {
+        "extensions": {
+          "io.modelcontextprotocol/tasks": {},
+        },
+      },
+    },
+  },
+}
+```
+
+服务器通过（自定义逻辑）判断它希望为这项工作创建一个 task，并立即返回 `CreateTaskResult`：
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "result": {
+    "resultType": "task",
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840",
+    "status": "working",
+    "createdAt": "2025-11-25T10:30:00Z",
+    "lastUpdatedAt": "2025-11-25T10:50:00Z",
+    "ttlMs": 3600000,
+    "pollIntervalMs": 5000
+  }
+}
+```
+
+一旦客户端收到 `CreateTaskResult`，它就开始轮询 `tasks/get`：
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "method": "tasks/get",
+  "params": {
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840"
+  }
+}
+```
+
+在 task 处于 `"working"` 状态期间，每次请求服务器都会返回常规的 task 响应：
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "result": {
+    "resultType": "complete",
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840",
+    "status": "working",
+    "createdAt": "2025-11-25T10:30:00Z",
+    "lastUpdatedAt": "2025-11-25T10:50:00Z",
+    "ttlMs": 3600000,
+    "pollIntervalMs": 5000
+  }
+}
+```
+
+最终，服务器走到需要向用户发送 elicitation 的时刻。它将 task 状态设为 `"input_required"` 来表明这一点。在客户端下一次 `tasks/get` 请求时，服务器通过 `inputRequests` 字段发送 elicitation 载荷。请注意，虽然 task 的 `inputRequests` 与 [SEP-2322](./2322-MRTR.md) 多轮往返请求在结构上相似，但它们是不同的机制：task 的 `inputRequests` 通过 `tasks/get` 暴露，并通过 `tasks/update` 完成，而不是通过对原始方法的重试。需要在返回 `CreateTaskResult` 之前就获得客户端输入的服务器（例如为了决定是否继续）会在原始请求上使用多轮往返请求流；而需要在 task 执行期间获得客户端输入的服务器，则使用这里描述的 `inputRequests`/`inputResponses` 机制。
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 4,
+  "method": "tasks/get",
+  "params": {
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840"
+  }
+}
+```
+
+```json
+{
+  "id": 4,
+  "jsonrpc": "2.0",
+  "result": {
+    "resultType": "complete",
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840",
+    "status": "input_required",
+    "createdAt": "2025-11-25T10:30:00Z",
+    "lastUpdatedAt": "2025-11-25T10:50:00Z",
+    "ttlMs": 3600000,
+    "pollIntervalMs": 5000,
+    "inputRequests": {
+      "name": {
+        "method": "elicitation/create",
+        "params": {
+          "mode": "form",
+          "message": "请输入你的名字。",
+          "requestedSchema": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" }
+            },
+            "required": ["name"]
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+为了更完整起见，考虑这样一种情况：客户端碰巧在用户尚未完成 elicitation 请求之前又轮询了一次 `tasks/get`。由于 `inputRequests` 本质上是与该 task 相关的所有未完成 server-to-client 请求的某一时刻快照，因此服务器会再次包含相同请求，即使客户端已经看过这条信息（为了用户体验，建议客户端对相同键的 `inputRequests` 去重）：
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 5,
+  "method": "tasks/get",
+  "params": {
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840"
+  }
+}
+```
+
+```json
+{
+  "id": 5,
+  "jsonrpc": "2.0",
+  "result": {
+    "resultType": "complete",
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840",
+    "status": "input_required",
+    "createdAt": "2025-11-25T10:30:00Z",
+    "lastUpdatedAt": "2025-11-25T10:50:00Z",
+    "ttlMs": 3600000,
+    "pollIntervalMs": 5000,
+    "inputRequests": {
+      "name": {
+        "method": "elicitation/create",
+        "params": {
+          "mode": "form",
+          "message": "请输入你的名字。",
+          "requestedSchema": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" }
+            },
+            "required": ["name"]
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+用户输入了姓名，客户端使用满足条件的信息发起 `tasks/update` 请求：
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 6,
+  "method": "tasks/update",
+  "params": {
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840",
+    "inputResponses": {
+      "name": {
+        "action": "accept",
+        "content": {
+          "input": "Luca"
+        }
+      }
+    }
+  }
+}
+```
+
+服务器确认该请求：
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 6,
+  "result": {
+    "resultType": "complete"
+  }
+}
+```
+
+随后，服务器异步处理它，并将 task 重新置回 `working` 状态：
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 7,
+  "method": "tasks/get",
+  "params": {
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840"
+  }
+}
+```
+
+```json
+{
+  "id": 7,
+  "jsonrpc": "2.0",
+  "result": {
+    "resultType": "complete",
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840",
+    "status": "working",
+    "createdAt": "2025-11-25T10:30:00Z",
+    "lastUpdatedAt": "2025-11-25T10:50:00Z",
+    "ttlMs": 3600000,
+    "pollIntervalMs": 5000
+  }
+}
+```
+
+最终，服务器完成请求，因此它存储最终的 `CallToolResult` 并将 task 置为 `"completed"` 状态。在下一次 `tasks/get` 请求中，服务器将最终的工具结果内联到 task 对象中发送：
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 8,
+  "method": "tasks/get",
+  "params": {
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840"
+  }
+}
+```
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 8,
+  "result": {
+    "resultType": "complete",
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840",
+    "status": "completed",
+    "createdAt": "2025-11-25T10:30:00Z",
+    "lastUpdatedAt": "2025-11-25T10:50:00Z",
+    "ttlMs": 3600000,
+    "pollIntervalMs": 5000,
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Hello, Luca!"
+        }
+      ],
+      "isError": false
+    }
+  }
+}
+```
+
+### 错误处理
+
+Tasks 使用两种错误报告机制：
+
+1. **协议错误**：协议层问题的标准 JSON-RPC 错误
+2. **Task 执行错误**：底层请求执行中的错误，通过 task 状态报告
+
+#### 协议错误
+
+对于以下协议错误情况，服务器 **MUST** 返回标准 JSON-RPC 错误：
+
+- 无效或不存在的 `taskId`：`-32602`（Invalid params）
+  - 服务器 **MUST** 对 `tasks/get` 返回此错误。
+  - 服务器 **SHOULD** 对 `tasks/update` 和 `tasks/cancel` 返回此错误。
+- 内部错误：`-32603`（Internal error）
+
+服务器 **SHOULD** 提供信息充分的错误消息来描述错误原因。
+
+**示例：未找到 task**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 70,
+  "error": {
+    "code": -32602,
+    "message": "获取 task 失败：未找到 task"
+  }
+}
+```
+
+**示例：task 已过期**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 71,
+  "error": {
+    "code": -32602,
+    "message": "获取 task 失败：task 已过期"
+  }
+}
+```
+
+服务器无需无限期保留 task。如果服务器已清理过期 task，则返回说明无法找到该 task 的错误是符合规范的行为。
+
+#### Task 执行错误
+
+当底层请求在执行期间遇到 JSON-RPC 协议错误时，task 会进入 `failed` 状态。`tasks/get` 响应 **SHOULD** 包含带有失败诊断信息的 `statusMessage` 字段，并且 **MUST** 包含带有 JSON-RPC 错误的 `error` 字段。
+
+`failed` 状态 **MUST NOT** 用于表示非 JSON-RPC 错误，例如工具结果虽完成但 `isError: true`。在协议方法结果上下文中的错误 **MUST** 使用 `completed` 状态，并在 `result` 字段中包含错误详情。这样可以保持协议层故障（使用 `failed` 状态）与其他故障之间的清晰分离。
+
+**示例：带有 JSON-RPC 执行错误的 task**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 4,
+  "result": {
+    "resultType": "task",
+    "taskId": "786512e2-9e0d-44bd-8f29-789f820fe840",
+    "status": "failed",
+    "createdAt": "2025-11-25T10:30:00Z",
+    "lastUpdatedAt": "2025-11-25T10:40:00Z",
+    "ttlMs": 3600000,
+    "statusMessage": "工具执行失败：API 速率限制已超出",
+    "error": {
+      "code": -32603,
+      "message": "API 速率限制已超出"
+    }
+  }
+}
+```
+
+**示例：工具调用成功完成但带有工具错误（isError: true）**
+
+对于在协议层成功完成、但返回工具级错误（在工具结果中以 `isError: true` 表示）的工具调用，task 会进入 `completed` 状态，并将工具结果放入 `result` 字段：
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 5,
+  "result": {
+    "resultType": "task",
+    "taskId": "786512e2-9e0d-44bd-8f29-789f820fe840",
+    "status": "completed",
+    "createdAt": "2025-11-25T10:30:00Z",
+    "lastUpdatedAt": "2025-11-25T10:40:00Z",
+    "ttlMs": 3600000,
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "处理请求失败：输入无效"
+        }
+      ],
+      "isError": true
+    }
+  }
+}
+```
+
+`tasks/get` 端点返回的内容与底层请求原本会返回的内容完全一致：
+
+- 如果底层请求导致 JSON-RPC 错误，则 task 使用 `failed` 状态，且 `error` 字段 **MUST** 包含该 JSON-RPC 错误。
+- 如果请求完成并返回了结果（即使工具结果的 `isError: true`），则 task 使用 `completed` 状态，且 `result` 字段 **MUST** 包含该结果。
+
+### 保留项
+
+- `tasks/` 方法前缀和 `notifications/tasks/` 通知前缀保留给此扩展使用。
+- `resultType` 的结果判别值 `"task"` 保留给此扩展使用。
+- 标识 `io.modelcontextprotocol/tasks` 保留给此扩展使用。
+
+## 理由
+
+### 非请求式任务 vs. 立即结果
+
+一个[替代提案](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1905)原本会分别处理立即结果的情况，并采用略有不同的前置条件：_如果_ 支持任务，_并且_ 客户端支持立即任务结果，_那么_ 服务器可以在响应带任务增强的请求时返回常规结果。就当时而言，这种立即结果的版本似乎是更好的选择，因为它意味着在最初的任务规范之上没有破坏性更改。
+
+然而，随着我们希望[摆脱](https://blog.modelcontextprotocol.io/posts/2025-12-19-mcp-transport-future/)有状态的协议交互，并且考虑到任务整体目前仍处于实验状态，现在看来提出一种更激进的变更是值得的，它可以降低整体规范的复杂性，并使任务在当前更“原生”于 MCP。特别是，允许非请求式任务（_此外_ 还支持立即结果）的选择，意味着将任务提升为一个一等概念，旨在用于所有持久化操作，而不再是一个并行且略为专门化的概念。
+
+这与拟议中的 [SEP-2322](./2322-MRTR.md) 相吻合，但二者并不相互绑定。
+
+### 拆分读取（`tasks/get`）和写入（`tasks/update`）
+
+该重设计的早期草案允许 `tasks/get` 携带 `inputResponses`，这样一次往返就能既提交响应又观察结果状态。这种混合有其代价：它使读取路径变得非幂等（重试的 `tasks/get` 可能会重新提交响应），它迫使读取路径共享写入的最终一致性模型，并且使希望缓存或去重读取的中间层变得复杂。将这些方法拆分后，`tasks/get` 仍然是一个纯粹、幂等的读取，任何层都可以安全地缓存或重放，而写语义——包括其最终一致性窗口——则被限定在 `tasks/update` 中。
+
+`tasks/update` 仅返回 ack 的响应形状，同样源于这种分离：服务器无需返回客户端不能通过后续 `tasks/get` 获取的读取数据，而且如果在响应中嵌入一个 `Task`，又会重新引入我们试图避免的非幂等性。代价是每轮输入多一次往返——但只有在任务确实需要客户端请求时才会支付。
+
+### 任务创建一致性
+
+引入如下新要求：
+
+> 服务器 **MUST NOT** 在任务持久创建完成之前返回 `CreateTaskResult`——也就是说，在返回的 `taskId` 上执行 `tasks/get` 时应当能够解析出结果。在最终一致的环境中，服务器 **MUST** 在响应前等待一致性达成。此要求消除了客户端为任务创建进行推测性轮询的需要。
+
+与 `tasks/update` 和 `tasks/cancel` 不同，任务创建是强一致的。必须如此，才能避免请求方对 `tasks/get` 发起推测性请求；否则，请求方无法知道某个任务是被悄然丢弃了，还是只是尚未创建完成。相反，`tasks/update` 和 `tasks/cancel` 中的最终一致性之所以可行，是因为客户端行为并不取决于这些操作的结果（无论如何，客户端都可以继续轮询）。虽然在原本并非如此运行的分布式系统中，引入一致的任务创建确实会增加延迟成本，但明确加入这一要求简化了客户端实现，并消除了一个未定义行为来源。
+
+这也与通用的长时运行操作 API 保持一致，这类 API 通常要求：一旦某个操作已被确认，它就必须能够通过轮询端点被找到。
+
+### 仅确认取消
+
+在 `2025-11-25` 版的任务设计中，`tasks/cancel` 会返回一个任务对象，用于描述取消尝试之后任务的状态。这样的返回形状意味着一次同步读取——服务器必须查询任务状态才能填充返回值——但在许多应用中，取消本质上是异步的（由单独的 worker 决定是否以及何时接受取消），因此返回的任务对象在很多情况下其实只是重复了下一次 `tasks/get` 会显示的内容。将 `tasks/cancel` 简化为仅返回 ack 更符合该操作的真实语义：该请求是一个信号，而不是状态查询。想要知道取消后的状态的客户端，可以通过同一路径上的 `tasks/get` 获取，就像它们观察其他所有状态一样。
+
+ack 上的最终一致性与 `tasks/update` 的分离方式相同：服务器可以先记录取消请求并返回，而此时 worker 可能尚未真正将任务状态迁移，客户端不能将该 ack 解释为强一致。
+
+虽然出于上述原因，`tasks/update` 和 `tasks/cancel` 使用仅确认的响应形状，但服务器 **SHOULD** 仍然对明显无效的请求返回错误——例如未知的 `taskId`。仅确认设计的重点是在成功路径上避免对任务状态进行同步读取，而不是抑制服务器在请求时就能检测到的错误。对无效输入返回错误可以让客户端更快得知出了问题，而不是迫使它们通过后续的 `tasks/get` 轮询间接发现问题。
+
+### 与多轮往返请求的组合
+
+引入如下新要求：
+
+> 在与任务创建结合使用多轮往返请求的服务器实现中（例如，在创建任务之前，需要通过 `InputRequiredResult` 进行引导的工具），**SHOULD** 在返回 `CreateTaskResult` 之前 _同步_ 解决所有 MRTR 交换。
+
+同时支持 MRTR（[SEP-2322](./2322-MRTR.md)）和此扩展的 `tools/call` 可以按顺序使用它们：先发送一次或多次 `InputRequiredResult` 交换以同步收集输入，然后通过 `CreateTaskResult` 交给异步执行。这样的组合是 `resultType` 判别器的结果——每个响应都被独立类型化，客户端根据收到的值切换行为，_而无需_ 在两种模式之间维护任何状态。禁止这种做法就需要施加一个人为约束，而协议层面并没有机制去强制它，因为客户端并不知道服务器会提前创建任务。
+
+尽管字段名相同，这两个流程仍然维护各自独立的状态。MRTR 阶段在服务器返回任何非 `"input_required"` 的 `resultType` 时结束，此时其 `inputRequests` 键被消费。任务阶段从 `CreateTaskResult` 开始，并独立维护 _自己的_ `inputRequests` 键。任务 `inputRequests` 的键唯一性仅限于任务生命周期，不延伸到前一个 MRTR 阶段的键。客户端无需在这两个流程之间去重。
+
+## 向后兼容性
+
+`2025-11-25` 发布中的实验性任务特性与此扩展 **不具备线级兼容性**。具体而言：
+
+- `tasks/result` 被移除。客户端在 `2026-06-30` 规范下对支持此扩展的服务器调用 `tasks/result` 时，**MUST** 收到 `-32601`（方法未找到）。
+- `CallToolRequest` 上的 `task` 参数被移除。服务器在 `2026-06-30` 规范下收到带有 `task` 参数的请求时，**MUST** 将其忽略（把该字段视为未知字段），而不是将其作为可选启用项。
+- `tasks.requests.*` 以及 `tasks.cancel`/`tasks.list` 的能力声明不属于此扩展。此前声明这些能力的服务器 **MUST** 从 `2026-06-30` 规范开始迁移为声明 `io.modelcontextprotocol/tasks`，并且 **MUST NOT** 在任何包含此扩展的协议版本下继续声明旧版能力。
+
+需要桥接旧客户端的实现可以在 SDK 层进行适配：服务器可以并行实现实验性接口和扩展接口，并根据客户端协商出的能力与协议版本进行分发。
+
+返回标准 `CallToolResult` 形状的服务器——也就是从不选择创建任务的服务器——在此扩展下仍然完全符合规范。已协商该扩展的客户端 **MUST** 对任何增强请求同时处理这两种结果形状。
+
+## 安全影响
+
+- **任务 ID 不可猜测性。** 服务器 **MAY** 将任务 ID 作为服务器存储状态的持有者令牌。服务器 **MUST** 生成具有足够熵的 ID，以防第三方枚举或猜测。
+- **认证绑定。** 服务器 **MUST** 对每个与任务相关的请求执行身份验证和授权检查，以确保客户端有权限访问该任务。
+- **跨调用方关联。** 由于不存在 `tasks/list`，服务器不会意外泄露某个调用方任务的存在给另一个调用方。这比 `2025-11-25` 版任务规范有所改进，后者若列表作用域划分不当，可能暴露无关的任务 ID。
+- **输入请求信任模型。** `inputRequests` 通过客户端从服务器传递引导和采样负载给用户或模型。主机 **MUST** 对这些负载应用与标准引导/采样请求相同的信任模型。任务并不是一个更高信任级别的通道。
+
+## 参考实现
+
+已在 [mcpkit](https://github.com/panyam/mcpkit/blob/02cfbe0d2cada8167b9043b9130804c8638b0aa5/core/task_v2.go) 中实现（参见[使用示例](https://github.com/panyam/mcpkit/tree/02cfbe0d2cada8167b9043b9130804c8638b0aa5/examples/tasks-v2)）。

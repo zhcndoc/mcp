@@ -66,8 +66,20 @@ sequenceDiagram
 
 希望同时支持旧版客户端（它们期望 `initialize` 握手）和现代客户端（它们使用按请求元数据）的服务器**可以**同时实现这两种行为。需要与这两类服务器互操作的客户端可以检测当前是哪一种：
 
-- **HTTP.** 直接尝试发送现代请求。如果服务器返回 `400 Bad Request`（或其他表明服务器未实现现代协议的版本错误），则回退到 `initialize`，并在后续请求中继续使用旧版协议。
-- **STDIO.** 由于没有按请求状态码可用于驱动回退，支持两个时代的客户端**应当**先探测 [`server/discover`](/specification/draft/server/discover)，并在 `_meta` 中设置其首选的现代版本。如果服务器返回 `Method not found`（`-32601`），则回退到旧版 `initialize` 握手。如果服务器返回 `UnsupportedProtocolVersionError`，则说明服务器运行的是一种不使用 `initialize` 的 MCP 版本——应使用其公布的 `supportedVersions` 之一，而不是回退到 `initialize`。
+- **HTTP.** 直接尝试发送现代请求。在收到 `400 Bad Request` 时，在决定回退之前检查响应体：`400` 也会被现代服务器用于 `UnsupportedProtocolVersionError`、`MissingRequiredClientCapabilityError` 和 header 验证失败，因此仅凭状态码无法判断是否为旧版服务器。
+  - 如果响应体包含可识别的现代 JSON-RPC 错误，例如
+    [`UnsupportedProtocolVersionError`](/specification/draft/schema#unsupportedprotocolversionerror)，
+    则服务器使用的是现代版本的 MCP——请改用其公布的 `supported` 版本之一重试，或修正请求。不要回退到 `initialize`。
+  - 如果响应体为空，或不包含可识别的现代 JSON-RPC 错误，则回退到 `initialize`，并在后续请求中继续使用旧版协议。
+- **STDIO.** 由于没有可用于驱动回退的逐请求状态码，
+  同时支持两个时代的客户端**应当**先通过
+  [`server/discover`](/specification/draft/server/discover) 探测，
+  并在 `_meta` 中设置其首选的现代版本。如果服务器返回
+  `Method not found`（`-32601`），则回退到旧版 `initialize`
+  握手。如果服务器返回 `UnsupportedProtocolVersionError`，则
+  服务器使用的是一种不带 `initialize` 的 MCP 版本——请使用其公布的
+  `supported` 列表中的某个版本，而不是回退到
+  `initialize`。
 
 只支持现代（按请求元数据）版本的客户端不需要探测——它只需发送自己首选的版本，并正常处理 `UnsupportedProtocolVersionError` 即可。
 

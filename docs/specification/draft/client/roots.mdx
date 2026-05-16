@@ -4,7 +4,13 @@ title: 根目录
 
 <div id="enable-section-numbers" />
 
-模型上下文协议（MCP）为客户端向服务器公开文件系统“根目录”提供了一种标准化方式。根目录会向服务器告知客户端认为相关的目录和文件，以便服务器相应地聚焦其操作。它们是信息性指导，而不是访问控制机制。该协议不强制服务器必须停留在根目录内。服务器可以向支持的客户端请求根目录列表。
+<Warning>
+  **已弃用**：Roots 功能自协议版本
+  `DRAFT-2026-v1` 起已被弃用。根据
+  [SEP-2596](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2596) 中概述的弃用政策，它将在 `DRAFT-2026-v1` 发布后 1 年内发布的任何 MCP 版本中继续受支持。
+</Warning>
+
+模型上下文协议（MCP）为客户端向服务器公开文件系统“根目录”提供了一种标准化方式。根目录会告知服务器客户端认为相关的目录和文件，以便服务器相应地集中其操作。它们是信息性指导，而不是访问控制机制。该协议并不强制服务器必须停留在根目录内。服务器可以从受支持的客户端请求根目录列表。
 
 ## 用户交互模型
 
@@ -38,7 +44,7 @@ MCP 中的根目录通常通过工作区或项目配置界面暴露。
 
 ### 列出根目录
 
-要在处理客户端请求期间检索根目录，服务器会发送一个包含 `roots/list` 请求的 `IncompleteResponse`：
+要在处理客户端请求期间检索根目录，服务器会发送一个包含 `roots/list` 请求的 `InputRequiredResult`：
 
 **请求：**
 
@@ -72,8 +78,8 @@ sequenceDiagram
 
     Note over Server,Client: 发现
     Client->>Server: tool/call(id: 1)
-    Server-->>Client: IncompleteResponse(roots/list)
-    Client->>Server: tool/call(id: 2, 可用根目录)
+    Server-->>Client: InputRequiredResult(roots/list)
+    Client->>Server: tool/call(id: 2, 可用的根目录)
 ```
 
 ## 数据类型
@@ -113,7 +119,7 @@ sequenceDiagram
 
 ## 错误处理
 
-如果发生错误，客户端不需要使用错误消息重放初始调用，因为服务器并不在等待 `IncompleteResponse` 模式下的响应。
+如果发生错误，客户端无需使用错误消息重放初始调用，因为服务器并不是在等待 `InputRequiredResult` 模式下的响应。
 
 ## 安全考虑
 
