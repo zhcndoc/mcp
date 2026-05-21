@@ -64,7 +64,7 @@ flowchart TD
     InReview --> Decision
     Decision --> Accepted
     Decision --> Rejected
-    Accepted -->|"参考实现完成"| Final
+    Accepted -->|"Reference implementation +<br/>conformance test complete"| Final
 ```
 
 ### 逐步流程
@@ -97,20 +97,20 @@ flowchart TD
 
 8. **决议**：SEP 可能被 `accepted`、`rejected` 或返回修订。赞助人更新状态。
 
-9. **最终确定**：一旦被接受，必须完成参考实现。当完成并纳入规范后，赞助人将状态更新为 `final`。
+9. **定稿**：一旦接受，参考实现必须完成。对于具有可观察协议行为的标准轨道 SEP，还必须合并 [一致性测试](#conformance-test-requirement)。完成并纳入规范后，赞助人将状态更新为 `final`。
 
 ### SEP 状态
 
 | 状态         | 含义                                          |
 | ------------ | ------------------------------------------------ |
-| `draft`      | 已有赞助人，正在进行非正式审查        |
-| `in-review`  | 准备就绪，等待核心维护者正式审查          |
-| `accepted`   | 已批准，等待参考实现      |
-| `rejected`   | 被核心维护者拒绝                     |
-| `withdrawn`  | 作者撤回了提案                     |
-| `final`      | 完成，包含参考实现           |
-| `superseded` | 被更新的 SEP 取代                          |
-| `dormant`    | 6 个月内未找到赞助人；可恢复 |
+| `draft`      | 有赞助人，正在进行非正式审查                   |
+| `in-review`  | 已准备好接受核心维护者的正式审查               |
+| `accepted`   | 已批准，等待实现 + 一致性验证                  |
+| `rejected`   | 被核心维护者拒绝                               |
+| `withdrawn`  | 作者撤回了提案                                 |
+| `final`      | 已完成实现和一致性验证                         |
+| `superseded` | 已被更新的 SEP 取代                            |
+| `dormant`    | 6 个月内未找到赞助人；可重新激活               |
 
 **重要区别**：`dormant` 与 `rejected` 不同。休眠的 SEP 只是没有找到赞助人——想法可能仍然有效。如果情况发生变化（新的社区兴趣、新的用例），可以通过寻找赞助人并重新打开 PR 来恢复休眠的 SEP。
 
@@ -214,7 +214,32 @@ SEP 要被接受，必须满足以下标准：
 
 一旦 SEP 被接受，必须完成参考实现。完成后并入主仓库，状态变为 "Final"。
 
-## 被拒绝后
+## 一致性测试要求
+
+对于引入或修改可观察协议行为的**标准轨道 SEP**，在 SEP 能够达到 `Final` 状态之前，必须将一致性场景合并到 [一致性仓库](https://github.com/modelcontextprotocol/conformance) 中。
+
+**所需内容：**
+
+- 一个标记有 SEP 编号的一致性场景，目标为一致性仓库的 draft 规范版本标签
+- 一个结构化的可追踪性文件（`sep-NNNN.yaml`），将 SEP 的规范部分中的每个 MUST/MUST NOT 和 SHOULD/SHOULD NOT 映射到检查 ID 或已记录的排除项（如果是框架缺口，则附带跟踪 issue）
+- 该场景在 SEP 的参考实现上通过测试
+
+**豁免内容：**
+
+- 流程类和信息类 SEP
+- 没有可观察协议行为的标准轨道 SEP（文档澄清、非验证性 schema 注释、实现加固建议）
+
+**各方职责：**
+
+- **赞助人** 确保编写一致性场景，并验证可追踪性文件覆盖 SEP 中每一项 MUST/MUST NOT 和 SHOULD/SHOULD NOT
+- **一致性仓库维护者** 审查场景 PR 的技术正确性
+- 测试**作者**可以是任何人：SEP 作者、SDK 维护者、社区贡献者
+
+鼓励在 SEP 起草期间（在核心维护者审查之前）编写一致性场景，但这不是强制要求，因为它通常会提前暴露规范性语言中的歧义，而这些歧义越早修复成本越低。
+
+有关完整规范（包括可追踪性文件格式和争议流程），请参阅 [SEP-2484](/seps/2484-conformance-tests-required-for-final-seps)。
+
+## 拒绝后
 
 拒绝不是永久性的。你可以：
 

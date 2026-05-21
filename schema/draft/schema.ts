@@ -362,6 +362,14 @@ export interface InternalError extends Error {
 export const MISSING_REQUIRED_CLIENT_CAPABILITY = -32003;
 
 /**
+ * Error code returned when the request's protocol version is not supported
+ * by the server.
+ *
+ * @category Errors
+ */
+export const UNSUPPORTED_PROTOCOL_VERSION = -32004;
+
+/**
  * Returned when the request's protocol version is unknown to the server or
  * unsupported (e.g., a known experimental or draft version the server has
  * chosen not to implement). For HTTP, the response status code MUST be
@@ -377,7 +385,7 @@ export interface UnsupportedProtocolVersionError extends Omit<
   "error"
 > {
   error: Error & {
-    code: typeof INVALID_PARAMS;
+    code: typeof UNSUPPORTED_PROTOCOL_VERSION;
     data: {
       /**
        * Protocol versions the server supports. The client should choose a
@@ -1641,9 +1649,12 @@ export interface CallToolResult extends Result {
   content: ContentBlock[];
 
   /**
-   * An optional JSON object that represents the structured result of the tool call.
+   * An optional JSON value that represents the structured result of the tool call.
+   *
+   * This can be any JSON value (object, array, string, number, boolean, or null)
+   * that conforms to the tool's outputSchema if one is defined.
    */
-  structuredContent?: { [key: string]: unknown };
+  structuredContent?: unknown;
 
   /**
    * Whether the tool call ended in an error.
@@ -1805,27 +1816,24 @@ export interface Tool extends BaseMetadata, Icons {
 
   /**
    * A JSON Schema object defining the expected parameters for the tool.
+   *
+   * Tool arguments are always JSON objects, so `type: "object"` is required at the root.
+   * Beyond that, any JSON Schema 2020-12 keyword may appear alongside `type` — including
+   * composition keywords (`oneOf`, `anyOf`, `allOf`, `not`), conditional keywords
+   * (`if`/`then`/`else`), reference keywords (`$ref`, `$defs`, `$anchor`), and any other
+   * standard validation or annotation keywords.
+   *
+   * Defaults to JSON Schema 2020-12 when no explicit `$schema` is provided.
    */
-  inputSchema: {
-    $schema?: string;
-    type: "object";
-    properties?: { [key: string]: JSONValue };
-    required?: string[];
-  };
+  inputSchema: { $schema?: string; type: "object"; [key: string]: unknown };
 
   /**
    * An optional JSON Schema object defining the structure of the tool's output returned in
-   * the structuredContent field of a {@link CallToolResult}.
+   * the structuredContent field of a {@link CallToolResult}. This can be any valid JSON Schema 2020-12.
    *
    * Defaults to JSON Schema 2020-12 when no explicit `$schema` is provided.
-   * Currently restricted to `type: "object"` at the root level.
    */
-  outputSchema?: {
-    $schema?: string;
-    type: "object";
-    properties?: { [key: string]: JSONValue };
-    required?: string[];
-  };
+  outputSchema?: { $schema?: string; [key: string]: unknown };
 
   /**
    * Optional additional tool information.
@@ -2240,11 +2248,12 @@ export interface ToolResultContent {
   content: ContentBlock[];
 
   /**
-   * An optional structured result object.
+   * An optional structured result value.
    *
+   * This can be any JSON value (object, array, string, number, boolean, or null).
    * If the tool defined an {@link Tool.outputSchema}, this SHOULD conform to that schema.
    */
-  structuredContent?: { [key: string]: unknown };
+  structuredContent?: unknown;
 
   /**
    * Whether the tool use resulted in an error.

@@ -1,0 +1,196 @@
+---
+title: "SEP-2484: 要求标准轨道 SEPs 在达到最终状态前通过一致性测试"
+sidebarTitle: "SEP-2484: 要求标准轨道 SEPs 在达到最终状态前通过一致性测试…"
+description: "要求标准轨道 SEPs 在达到最终状态前通过一致性测试"
+---
+
+<div className="flex items-center gap-2 mb-4">
+  <Badge color="gray" shape="pill">
+    草案
+  </Badge>
+  <Badge color="gray" shape="pill">
+    流程
+  </Badge>
+</div>
+
+| 字段          | 值                                                                              |
+| ------------- | ------------------------------------------------------------------------------- |
+| **SEP**       | 2484                                                                            |
+| **标题**      | 要求标准轨道 SEPs 在达到最终状态前通过一致性测试                               |
+| **状态**      | 草案                                                                            |
+| **类型**      | 流程                                                                            |
+| **创建于**    | 2026-03-27                                                                      |
+| **作者**      | Paul Carleton ([@pcarleton](https://github.com/pcarleton))                      |
+| **赞助人**    | 无                                                                              |
+| **PR**        | [#2484](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2484) |
+
+---
+
+## 概述
+
+此 SEP 为标准轨道 SEPs 的 `Accepted → Final` 过渡增加了一项一致性测试要求。对于会改变可观察协议行为、并希望标记为 `Final` 的标准轨道 SEP，必须先将一个覆盖其规范性要求的一致性场景合并到一致性仓库中，并附带一个结构化的可追溯性文件，将每一项 MUST/MUST NOT 和 SHOULD/SHOULD NOT 映射到某个检查项或已文档化的排除项。这样可以让一致性套件随着规范演进而保持同步，为 SDK 维护者提供可执行的实现目标，并使 SEP-1730 的分层百分比成为对规范覆盖率有意义的衡量。流程类和信息类 SEPs 以及没有可观察协议行为的标准轨道 SEPs 免于此要求。
+
+## 动机
+
+### 规范与实现之间的差距
+
+MCP 规范是用英文写成的。SDK 维护者会把这些英文翻译成代码，而每一次翻译都有可能产生偏移。SEP-1730（SDK 分层）已经依赖一致性测试（Tier 1 需要 100% 通过率，Tier 2 需要 80%），但没有任何机制能让测试套件与规范保持同步。当某个 SEP 达到 `Final` 时，SDK 维护者会根据文字说明来实现，并希望自己和其他所有 SDK 的理解一致。一致性测试通常会更晚才出现，如果最终出现，它们有时会揭示两个“合规”的 SDK 其实并不一致。
+
+### 为什么现有的参考实现要求不够
+
+**参考实现** 证明该功能能够被构建出来：即一种有效解释。**一致性测试** 则定义了每个实现必须如何表现：把规范性要求写成可执行断言。TypeScript 的参考实现并不能告诉 Rust 维护者他们的代码是否正确。一致性测试则能明确告诉他们；如果不能，分歧就会暴露出规范本身存在歧义。
+
+### 让一致性测试套件持续更新
+
+一致性套件是 SEP-1730 分层百分比所依据的标尺。如果它落后了，某个 SDK 可能会在遗漏大量规范特性的情况下仍被称为“100% 合规”。把测试与 SEP 生命周期绑定起来，就形成了一种推动力：套件会与规范一样快地增长。
+
+## 规范
+
+### 范围
+
+此要求**仅**适用于引入或修改**可观察协议行为**的标准轨道 SEPs：即符合实现可以通过检查线上消息、传输层可观察的副作用（HTTP 状态码、头部、连接生命周期、OAuth 重定向），或本地传输的进程可观察副作用（stdio 流内容、退出码）来检测到的行为。
+
+以下内容**豁免**：
+
+- **流程类 SEPs**（治理、工作流、社区结构）
+- **信息类 SEPs**（没有规范性约束力的指南、最佳实践）
+- **没有可观察协议行为的标准轨道 SEPs**，例如：
+  - 仅对现有行为进行文档性澄清
+  - 不会改变校验或运行时行为的 schema 注释
+  - 描述实现加固而非线级要求的安全建议
+
+一致性套件本身并不局限于官方 SDK。任何实现（官方 SDK、社区 SDK 或自定义部署）都可以运行它并报告合规百分比。
+
+### 要求
+
+对于在适用范围内的标准轨道 SEP，要从 `Accepted` 过渡到 `Final`，必须满足：
+
+1. **一个带有 SEP 编号标签的一致性场景** 已合并到一致性仓库中，并以即将发布版本的一致性仓库草案 spec-version 标签为目标。
+2. **一个可追溯性文件** 与该场景一并提供。见下文。
+3. **该场景在 SEP 的参考实现上通过**。
+
+当该规范版本发布时，作为正常发布流程的一部分，该场景的 spec-version 标签会从草案标签更新为带日期的版本。一致性执行器和被测 SDK 都必须把草案标签识别为可协商的协议版本，这样新要求才能真正被执行。
+
+### 可追溯性文件
+
+可追溯性文件是一致性仓库中的一个结构化文件（`sep-NNNN.yaml`）。它将 SEP 的 Specification 部分中的每一条规范性要求映射到执行该要求的检查项，或者说明其被排除的原因：
+
+```yaml
+sep: 1234
+spec_url: https://modelcontextprotocol.io/specification/draft/section#anchor
+requirements:
+  - check: sep-1234-foo-present
+    text: "MUST include `foo` in the response"
+  - check: sep-1234-bar-absent
+    text: "MUST NOT send `bar` before initialization"
+  - check: sep-1234-qux-present
+    text: "SHOULD include `qux` when available"
+  - check: sep-1234-baz-rejected
+    text: "MUST reject requests with invalid `baz`"
+
+  - text: "MUST retry on 503"
+    excluded: "Requires fault injection; not currently supported by framework"
+    issue: https://github.com/modelcontextprotocol/conformance/issues/N
+  - text: "MUST be rendered in a monospace font"
+    excluded: "Client rendering; not observable at the protocol level"
+```
+
+结构化数据使工具能够把检查失败链接回规范章节，并让一致性 CLI 按 SEP 报告覆盖率。
+
+排除项有两种类型。**框架缺口**（该行为可观察，但框架暂时还不能表达）应链接到一个跟踪 `issue`。**非协议可观察**（该要求约束的是客户端渲染、实现内部，或类似内容）只需要 `excluded` 原因即可。若某个 SEP 的要求全部属于第二类，那么它本身就免于此要求，完全不需要场景。
+
+赞助人负责核实可追溯性文件是否完整：SEP 的 Specification 部分中的每一项 MUST、MUST NOT、SHOULD 和 SHOULD NOT（以及 RFC 2119 的等价项：SHALL、REQUIRED、RECOMMENDED）都必须有一行对应。SHOULD 级别要求的检查项应报告为警告而不是失败。MAY 要求不需要对应行。赞助人不审查测试代码；测试代码审查是一致性仓库正常的 PR 审查流程。哪些内容算作规范性要求，由赞助人判断。
+
+### 谁编写测试
+
+**赞助人** 负责确保一致性场景被编写出来。场景使用 TypeScript 编写；不熟悉一致性仓库的贡献者应先阅读其 [CONTRIBUTING 指南](https://github.com/modelcontextprotocol/conformance/blob/main/CONTRIBUTING.md)。实际上，SEP 作者通常最适合来做这件事，因为编写测试会暴露出规范性语言中的歧义，而在 `Final` 之前修正这些歧义要比之后便宜得多。
+
+### 规范文本具有权威性
+
+一致性测试源自规范文本，并且**从属于**规范文本。当测试与规范不一致时，以规范为准，而测试是错误的。
+
+### 一致性测试争议
+
+如果实现者认为某个已合并的一致性测试与规范相矛盾，他们应在一致性仓库中开 issue，并引用具体的规范文本。当一致性维护者加上 `disputed` 标签后，该测试即被视为存在争议；在争议解决之前，这类测试不会影响 SEP-1730 的分层评估。
+
+大多数争议会通过正常的 issue 分流流程解决：要么修正测试，要么澄清规范，要么带着理由关闭争议。如果分歧是根本性的（争议方与一致性维护者无法就规范含义达成一致），任一方都可以单方面升级给 Core Maintainers 进行裁定，尽管更推荐双方共同升级，因为目标是消除歧义，而不是赢得争论。如果某个场景 PR 因非技术原因受阻，赞助人也可以走同样的升级路径。
+
+### 测试稳定性与分层
+
+SEP-1730 的分层评估是在一个**固定的一致性发布版本**上运行的，而不是仓库最新提交上。某个 SEP 达到 `Final` 之后，新增加到该 SEP 场景中的检查项（无论是额外边界情况，还是对先前排除要求的覆盖）会进入一致性仓库主分支，但只有在下一次分层评估采用更新的一致性发布时，才会影响分层百分比。
+
+这意味着 SDK 维护者在两次分层评估之间拥有稳定目标，同时一致性套件可以持续演进，而不会在分层状态上带来意外回归。
+
+### 赞助人职责
+
+SEP-1850 规定，在将 SEP 标记为 `Final` 之前，赞助人需要负责跟踪参考实现的进展。此 SEP 扩展了这一职责：对于适用范围内的标准轨道 SEPs，赞助人还需确认：一个带有 SEP 编号标签的一致性场景已与完整的可追溯性文件一并合并，或者该 SEP 中已记录豁免。
+
+### 与 SEP-1730（SDK 分层）的关系
+
+此 SEP 在不改变 SEP-1730 的分层定义或阈值的前提下，加强了其基础。分层评估使用固定的一致性发布，因此新检查不会追溯性地影响分层状态。存在争议的测试在解决前不计入分层百分比。
+
+涵盖现有规范行为的场景贡献（即未绑定到新的 SEP）仍然受欢迎，而且不要求附带可追溯性文件。
+
+### 与 SEP-1627（一致性测试）的关系
+
+此 SEP 通过接受一致性仓库作为一致性测试的规范归宿，并将其在 SEP 生命周期中的角色正式化，**取代** 了 SEP-1627。SEP-1627 的 golden-trace 方法未被延续；scenario-and-checks 模型以运行时表达能力换取了语言中立的夹具。SEP-1627 关于协议调试器的想法仍然是有价值的未来工作。
+
+## 理由
+
+### 为什么以 `Final` 作为门槛，而不是 `Accepted`？
+
+如果以 `Accepted` 作为门槛，就需要在核心维护者尚未同意该特性应纳入规范之前先编写测试，这会把精力浪费在被拒绝的 SEP 上。
+
+话虽如此，在 SEP 起草期间编写一个一致性测试通常很有价值：它会强迫人们在 MUST/MUST NOT 语言上保持精确，并暴露出正文中一笔带过的边界情况。作者**被鼓励**在核心维护者评审之前起草一个一致性场景，尤其是对于具有复杂行为要求的 SEP。这不是强制要求，因为较小的 SEP 可能不足以值得这份前期投入，而被拒绝的 SEP 的测试也会变成白费功夫。
+
+以 `Final` 作为门槛，把硬性要求放在参考实现要求本来就所在的位置：SEP 已经达成共识，剩下的工作就是实现。
+
+### 为什么需要一个可追踪性文件？
+
+如果没有定义明确的覆盖标准，“有一个一致性测试”就会在每个 SEP 上被反复争论：一个检查是否足够，还是每一条 MUST 都必须覆盖？可追踪性文件使覆盖情况可审计：每条规范性陈述都有一行，而每一行要么是一个检查项，要么是一个有文档记录的排除项。“足够”就变成了“文件完整”。
+
+这个文件还能让缺口显而易见。一个有十条 MUST、却有八条排除项的 SEP 会释放出一个信号：要么这个 SEP 确实很难测试（跟踪问题里会说明原因），要么测试作者提前停手了（赞助人应当提出异议）。
+
+### 为什么把作者责任放在赞助人身上？
+
+赞助人已经负责推动 SEP 通过评审、跟踪参考实现，并管理状态转换。增加“确保编写一致性测试”只是对现有职责的小幅扩展，而且责任归属清晰。
+
+### 考虑过的替代方案
+
+**要求在 SEP PR 本身中就包含一致性测试。** 被拒绝：这会把两个彼此独立、由不同维护者和 CI 处理的评审流程耦合在一起。
+
+**只对“重大” SEPs 设门槛。** 被拒绝：“重大”是主观的。可观察行为的范围是客观的：一个符合规范的对等方要么能检测到这个变化，要么不能。
+
+**让一致性维护者来判断是否足够。** 被拒绝：这会把否决权集中到一个并非经选举批准规范变更的群体手中。可追踪性文件模型让赞助人无需阅读测试代码即可验证完整性。
+
+## 向后兼容性
+
+本 SEP **不具有追溯性**。在本 SEP 生效之前已经达到 `Final` 的 SEPs 不需要补充一致性测试，不过欢迎贡献。
+
+## 安全影响
+
+没有直接影响。运行会涉及安全相关行为（认证流程、输入验证、传输安全）的一致性测试，能够通过捕获回归来改善生态系统的安全态势，但本 SEP 除了底层 SEP 的 MUST 要求之外，并未强制任何特定的安全覆盖。
+
+## 参考实现
+
+一致性仓库已经展示了本 SEP 所形式化的场景标记模式：
+
+- [`JsonSchema2020_12Scenario`](https://github.com/modelcontextprotocol/conformance/blob/main/src/scenarios/server/json-schema-2020-12.ts) — SEP-1613
+- [`ElicitationDefaultsScenario`](https://github.com/modelcontextprotocol/conformance/blob/main/src/scenarios/server/elicitation-defaults.ts) — SEP-1034
+- [`ServerSSEPollingScenario`](https://github.com/modelcontextprotocol/conformance/blob/main/src/scenarios/server/sse-polling.ts) — SEP-1699
+- [`ElicitationEnumsScenario`](https://github.com/modelcontextprotocol/conformance/blob/main/src/scenarios/server/elicitation-enums.ts) — SEP-1330
+
+结构化的可追踪性文件格式以及场景脚手架工具（`npx @modelcontextprotocol/conformance new-scenario --sep <number>`）将在本 SEP 达到 `Final` 之前添加到一致性仓库中。
+
+流程变更通过更新 `docs/community/sep-guidelines.mdx` 来实现，以便在 `Accepted → Final` 的转换中加入一致性检查（参见本 PR 中随附的变更）。
+
+## 进入 Final 状态的前置条件
+
+在本 SEP 自身可以被标记为 `Final` 之前，以下一致性仓库工作必须完成：
+
+- 结构化可追踪性文件格式（`sep-NNNN.yaml`）及其 schema
+- 场景脚手架工具
+- 一致性测试框架支持将草案规范版本标记作为可协商的协议版本
+- `MAINTAINERS.md` 已发布，并且仓库已列入 MCP 治理文档
+
+这些是本 SEP 自己的参考实现清单，而不是持续性的流程要求。

@@ -13,7 +13,7 @@ description: "使 MCP 无状态"
   </Badge>
 </div>
 
-| Field         | Value                                                                                                                           |
+| 字段          | 值                                                                                                                            |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | **SEP**       | 2575                                                                                                                            |
 | **Title**     | 使 MCP 无状态                                                                                                                   |
@@ -113,12 +113,14 @@ export interface RequestMetaObject extends MetaObject {
 如果服务器收到一个其未实现的协议版本请求（无论该版本对服务器而言是未知的，还是已知但服务器选择不支持的，例如实验版或草案版），它 MUST 返回一个 JSON-RPC 错误响应。对于 HTTP，响应状态码 MUST 为 `400 Bad Request`。该错误 MUST 符合以下结构：
 
 ```ts
+export const UNSUPPORTED_PROTOCOL_VERSION = -32004;
+
 export interface UnsupportedProtocolVersionError extends Omit<
   JSONRPCErrorResponse,
   "error"
 > {
   error: Error & {
-    code: typeof INVALID_PARAMS;
+    code: typeof UNSUPPORTED_PROTOCOL_VERSION;
     data: {
       /**
        * 服务器支持的协议版本字符串数组。
@@ -456,15 +458,15 @@ export interface SubscriptionsAcknowledgedNotification extends Notification {
 
 #### 客户端（支持 vPrev, vPost）→ 服务器（vPrev）
 
-对于 HTTP，客户端可以尝试任何 vPost 请求（例如，带有 MCP 协议版本头的 `tools/list`）。服务器返回 `400 Bad Request`（或 `Unsupported protocol version`）；客户端随后回退到 vPrev（并执行初始化）以用于后续请求。
+对于 HTTP，客户端可以尝试任何 vPost 请求（例如，带有 MCP 协议版本头的 `tools/list`）。服务器返回 `400 Bad Request`（或“不支持的协议版本”）；客户端随后回退到 vPrev（并执行初始化）以用于后续请求。
 
 对于 STDIO，客户端无法依赖逐请求错误来检测服务器版本。支持 vPost（不需要初始化）**并且**支持需要 `initialize` 的旧版本的客户端，**应当**先用 `server/discover` 探测，以确定应使用哪一个：
 
 1. 客户端发送带有 MCP 协议版本 `_meta` 字段的 `server/discover`，并将其设置为首选的 vPost。
 2. 如果服务器支持 vPost（或客户端也支持的任何 vPost 风格版本），客户端将使用发现到的版本进行后续请求。
-3. 如果服务器返回 `Unsupported protocol version` 或 `Method not found`，客户端将回退到其支持的旧版本，并执行 `initialize` 握手。
+3. 如果服务器返回“不支持的协议版本”或“未找到方法”，客户端将回退到其支持的旧版本，并执行 `initialize` 握手。
 
-只支持 vPost 风格版本的客户端不需要探测——它只需使用其首选版本，并正常处理 `Unsupported protocol version` 错误。
+只支持 vPost 风格版本的客户端不需要探测——它只需使用其首选版本，并正常处理“不支持的协议版本”错误。
 
 ## 安全影响
 
@@ -474,7 +476,7 @@ export interface SubscriptionsAcknowledgedNotification extends Notification {
 
 ## 参考实现
 
-// TODO
+// 待办事项
 
 ## 常见问题
 

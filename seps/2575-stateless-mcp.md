@@ -22,7 +22,7 @@
 
 Model Context Protocol（MCP）规范目前要求进行有状态的初始化握手。这一设计选择给可扩展性、可靠性和实现简洁性带来了重大挑战。本 SEP 的动机是解决这些不足。
 
-### 有状态性的 პრობლემ
+### 有状态性的问题
 
 核心问题在于：服务器必须保留前面请求的会话状态，才能理解后续请求。这与现代云原生系统的设计理念直接相悖，后者更倾向于无状态服务，因为它们更具韧性和可扩展性。
 
@@ -96,12 +96,14 @@ export interface RequestMetaObject extends MetaObject {
 如果服务器收到其未实现的协议版本请求（无论该版本对服务器而言是未知版本，还是已知但服务器选择不支持的版本，例如实验版或草案版），它 MUST 返回 JSON-RPC 错误响应。对于 HTTP，响应状态码 MUST 为 `400 Bad Request`。该错误 MUST 符合以下结构：
 
 ```ts
+export const UNSUPPORTED_PROTOCOL_VERSION = -32004;
+
 export interface UnsupportedProtocolVersionError extends Omit<
   JSONRPCErrorResponse,
   "error"
 > {
   error: Error & {
-    code: typeof INVALID_PARAMS;
+    code: typeof UNSUPPORTED_PROTOCOL_VERSION;
     data: {
       /**
        * 服务器支持的协议版本字符串数组。

@@ -29,11 +29,12 @@ title: 主要变更
 
 ## 次要变更
 
-1. 为 `ClientCapabilities` 和 `ServerCapabilities` 添加 `extensions` 字段，以支持核心协议之外的可选 [extensions](/docs/extensions/overview)。
-2. 记录 `_meta` 键（`traceparent`、`tracestate`、`baggage`）的 OpenTelemetry 跟踪上下文传播约定 ([SEP-414](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/414))。
-3. 服务器 **应当** 以确定性顺序返回 `tools/list` 中的工具，以便支持客户端侧缓存并提高 LLM 提示缓存命中率。
-4. 要求 Streamable HTTP POST 请求包含标准 MCP 请求标头（`Mcp-Method`、`Mcp-Name`），并通过 `x-mcp-header` 支持从工具参数传递自定义标头 ([SEP-2243](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2243))。
-5. 通过新的 `CacheableResult` 接口，为 `tools/list`、`prompts/list`、`resources/list`、`resources/read` 和 `resources/templates/list` 返回的结果添加 `ttlMs` 和 `cacheScope` 字段。`ttlMs` 是新鲜度提示（以毫秒为单位），允许客户端缓存响应并减少轮询；`cacheScope`（`"public"` 或 `"private"`）控制共享中介是否可以缓存响应。这两个字段与现有的 `listChanged` 通知相辅相成 ([SEP-2549](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2549))。
+1. 为 `ClientCapabilities` 和 `ServerCapabilities` 添加 `extensions` 字段，以支持核心协议之外的可选 [扩展](/docs/extensions/overview)。
+2. 为 `_meta` 键（`traceparent`、`tracestate`、`baggage`）记录 OpenTelemetry 追踪上下文传播约定 ([SEP-414](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/414))。
+3. 服务器**应当**以确定性的顺序从 `tools/list` 返回工具，以便支持客户端缓存并提高 LLM 提示缓存命中率。
+4. 对 Streamable HTTP POST 请求要求使用标准 MCP 请求标头（`Mcp-Method`、`Mcp-Name`），并通过 `x-mcp-header` 支持将工具参数中的自定义标头传递出去 ([SEP-2243](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2243))。
+5. 通过新的 `CacheableResult` 接口，为 `tools/list`、`prompts/list`、`resources/list`、`resources/read` 和 `resources/templates/list` 返回的结果添加 `ttlMs` 和 `cacheScope` 字段。`ttlMs` 是新鲜度提示（以毫秒为单位），允许客户端缓存响应并减少轮询；`cacheScope`（`"public"` 或 `"private"`）控制共享中间代理是否可以缓存该响应。这两个字段是对现有 `listChanged` 通知的补充 ([SEP-2549](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2549))。
+6. 将资源未找到错误码从 `-32002` 更改为 `-32602`（无效参数），以与 JSON-RPC 规范保持一致。
 
 ## 其他架构变更
 
