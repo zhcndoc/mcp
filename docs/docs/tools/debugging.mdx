@@ -25,7 +25,7 @@ MCP 提供了多种在不同层级进行调试的工具：
 
 </Warning>
 
-对于使用 [Streamable HTTP 传输](/specification/latest/basic/transports#streamable-http) 的服务器，客户端不会捕获 stderr。请使用下方的日志消息通知、你自己的服务器端日志聚合，或标准 HTTP 工具（curl、浏览器 DevTools Network 面板）来检查请求、[`Mcp-Session-Id`  headers](/specification/latest/basic/transports#session-management) 和 SSE 流。
+对于使用 [Streamable HTTP 传输](/specification/latest/basic/transports#streamable-http) 的服务器，客户端不会捕获 stderr。请使用下方的日志消息通知、你自己的服务器端日志聚合，或标准 HTTP 工具（curl、浏览器 DevTools Network 面板）来检查请求、[`Mcp-Session-Id` 头](/specification/latest/basic/transports#session-management) 和 SSE 流。
 
 对于所有 [传输](/specification/latest/basic/transports)，你还可以通过发送日志消息通知向客户端提供日志记录：
 
@@ -68,7 +68,7 @@ MCP 定义了八个 [RFC 5424 严重性级别](/specification/latest/server/util
 
 当 MCP 客户端启动 stdio 服务器时：
 
-- 通过客户端配置启动的服务器的工 作目录可能是未定义的（如 macOS 上的 `/`），因为客户端可以从任何地方启动
+- 通过客户端配置启动的服务器的工作目录可能是未定义的（如 macOS 上的 `/`），因为客户端可以从任何地方启动
 - 始终在配置和 `.env` 文件中使用绝对路径以确保可靠运行
 - 对于通过命令行直接测试服务器，工作目录将是你运行命令的位置
 
@@ -142,11 +142,12 @@ MCP 定义了八个 [RFC 5424 严重性级别](/specification/latest/server/util
 
 ## 在 Claude Desktop 中调试
 
-Claude Desktop 是 [众多 MCP 客户端之一](/clients)。它可在 macOS 和 Windows 上使用。
+Claude Desktop 是众多 MCP 客户端之一。它可用于
+macOS 和 Windows。
 
 ### 检查服务器状态
 
-点击聊天输入框中的 "Add files, connectors, and more" 加号图标，然后悬停在 **Connectors** 菜单上以查看连接的服务器和可用工具。
+点击聊天输入框中的“添加文件、连接器等”加号图标，然后将鼠标悬停在 **Connectors** 菜单上以查看连接的服务器和可用工具。
 
 <img src="/images/available-mcp-tools.png" alt="可用的 MCP 工具" />
 

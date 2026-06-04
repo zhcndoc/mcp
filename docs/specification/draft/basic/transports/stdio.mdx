@@ -1,0 +1,93 @@
+---
+title: 标准输入输出
+---
+
+<div id="enable-section-numbers" />
+
+在 **stdio** 传输中，客户端将 MCP 服务器作为子进程启动。  
+两端通过该子进程的标准流进行通信：
+
+- 服务器从 `stdin` 读取 JSON-RPC 消息，并向 `stdout` 写入 JSON-RPC 消息。
+- 每条消息都是一条单独的 JSON-RPC 请求、通知或响应。
+- 消息以换行符分隔，且 **不得** 包含嵌入的换行符。
+- 服务器 **可以** 出于任何日志记录目的向 `stderr` 写入 UTF-8 字符串，包括信息、调试和错误消息。
+- 客户端 **可以** 捕获、转发或忽略服务器的 `stderr` 输出，且 **不应** 假定 `stderr` 输出表示错误状态。
+- 服务器 **不得** 向其 `stdout` 写入任何不是有效 MCP 消息的内容。
+- 客户端 **不得** 向服务器的 `stdin` 写入任何不是有效 MCP 消息的内容。
+
+标准流是规范通道，但除进程生命周期外，本绑定中的其他内容都不依赖它们。传输格式（在可靠的双向字节流上，每行一条以换行符分隔的 JSON-RPC 消息）可原样用于 Unix 域套接字、TCP 连接或任何类似通道。[自定义传输](/specification/draft/basic/transports#custom-transports)若基于此类流，**应当**复用本页中的这种分帧方式和消息规则；只有那些特定于子进程的方面（启动、`stderr`、通过关闭流进行关闭、进程重启）需要使用与通道相关的等价机制。
+
+## 发送消息
+
+客户端通过向服务器的 `stdin` 写入 JSON-RPC _requests_ 和 _notifications_ 来发送消息，每行一条。客户端 **不得** 写入 JSON-RPC _responses_。
+
+## 接收消息
+
+客户端从 `stdout` 读取服务器消息，每行一条。所有消息共享这一个通道；不存在按请求划分的独立流。
+
+服务器写入三类消息：
+
+1. 对客户端请求的 _responses_，通过 JSON-RPC `id` 进行关联。
+2. 与进行中的请求相关的 _notifications_，例如 `notifications/progress` 和 `notifications/message`。
+3. 为一个活跃的 [`subscriptions/listen`][subscriptions-listen] 请求而投递的 _notifications_。客户端 **必须** 使用 `_meta` 中的 `io.modelcontextprotocol/subscriptionId` 字段来关联这些消息；参见 [`SubscriptionsListenRequest`][subscriptions-listen-request]。
+
+服务器 **不得** 向 `stdout` 写入 JSON-RPC _requests_。  
+服务器到客户端的交互通过 [`InputRequiredResult`][mrtr-input-required] 回复来承载；参见 [多轮往返请求][mrtr]。
+
+[mrtr]: /specification/draft/basic/patterns/mrtr
+[mrtr-input-required]: /specification/draft/basic/patterns/mrtr#inputrequiredresult
+[subscriptions-listen]: /specification/draft/basic/patterns/subscriptions
+[subscriptions-listen-request]: /specification/draft/schema#subscriptionslistenrequest
+
+## 请求元数据
+
+stdio 传输的所有请求元数据都以内联方式携带在 JSON-RPC 消息体中。协议版本、客户端身份以及每个请求的能力声明都位于 [`_meta.io.modelcontextprotocol/*`][meta-fields]；方法名和参数则位于 JSON-RPC 规定的位置。这里没有头部层。
+
+[meta-fields]: /specification/draft/basic/index#meta
+
+## 取消
+
+要取消一个进行中的请求，客户端 **必须** 发送一条引用该请求 ID 的 `notifications/cancelled` 通知。由于 stdio 是一个共享的双向通道，因此不存在可关闭的按请求流。服务器 **应当** 尽快停止处理已取消的请求，且 **不得** 再为其发送任何后续消息。完整规则见 [取消][cancellation]。
+
+[cancellation]: /specification/draft/basic/patterns/cancellation
+
+## 关闭
+
+客户端 **应当** 按以下方式发起关闭：
+
+1. 关闭到子进程（服务器）的输入流。
+2. 等待服务器退出。
+3. 如果服务器未能在合理时间内退出，则使用适用于该操作系统的机制强制终止该进程。
+
+在 POSIX 系统上，强制终止通常会从 [`SIGTERM`][sigterm] 升级到 [`SIGKILL`][sigkill]。在没有 POSIX 信号的 Windows 上，客户端可以使用 [`TerminateProcess`][terminateprocess] 或 [作业对象][job-objects]。
+
+当标准输入被关闭或读取返回文件结束时，服务器 **应当** 立即退出。这是首选的优雅关闭信号，也是唯一可移植的信号，因此遵循它可以减少对强制终止的需求。
+
+服务器 **可以** 通过关闭到客户端的输出流并退出来发起关闭。
+
+## 异常终止
+
+如果服务器进程意外退出，客户端 **应当** 重新启动它。由于协议是无状态的，任何进行中的请求都会直接丢失，客户端可以在新的进程上重试这些请求。活跃的 [`subscriptions/listen`][subscriptions-listen] 流在重启后也必须重新建立。
+
+[sigterm]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/signal.h.html
+[sigkill]: https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/signal.h.html
+[terminateprocess]: https://learn.microsoft.com/windows/win32/api/processthreadsapi/nf-processthreadsapi-terminateprocess
+[job-objects]: https://learn.microsoft.com/windows/win32/procthread/job-objects
+
+## 向后兼容性
+
+同时支持现代（按请求元数据）MCP 版本以及需要 `initialize` 握手的旧版协议的客户端，**应当** 在发送任何其他请求之前，先通过 [`server/discover`][server-discover] 进行探测，并在 `_meta` 中设置其首选的现代版本。该探测有三种可能结果：
+
+- 服务器返回 `DiscoverResult`：该服务器是现代版本。请从 `supportedVersions` 中选择一个双方都支持的版本并继续。
+- 服务器返回一个可识别的现代 JSON-RPC 错误，例如 [`UnsupportedProtocolVersionError`][unsupported-version]：该服务器是现代版本，但不支持所请求的版本。请使用其公布的 `supported` 列表中的某个版本。**不要** 回退到 `initialize`。
+- 服务器返回其他任何错误，或者未在合理超时时间内响应：该服务器是旧版。请回退到 `initialize` 握手。
+
+回退逻辑 **不得** 仅绑定到某一个特定错误码：旧版服务器对 `initialize` 之前的未知请求会返回实现定义的错误（通常是 `-32601` 或 `-32602`），或者根本不返回。
+
+仅支持现代版本的客户端不需要探测，但仍然**推荐**进行探测：某些旧版服务器不会校验请求是否在 `initialize` 之后到达，而会在旧语义下处理一个时代不明确的方法（例如 `tools/call`）。探测可以避免这种情况，并给出确定性的失败结果。
+
+关于时代模型以及实现者兼容性矩阵，请参见 [版本管理：向后兼容性][lifecycle-compat]。
+
+[server-discover]: /specification/draft/schema#discoverrequest
+[unsupported-version]: /specification/draft/schema#unsupportedprotocolversionerror
+[lifecycle-compat]: /specification/draft/basic/versioning#backward-compatibility-with-initialization-based-versions

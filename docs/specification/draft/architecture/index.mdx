@@ -122,24 +122,24 @@ sequenceDiagram
 
     opt 发现
         Client->>Server: server/discover
-        Server-->>Client: supported versions + capabilities
+        Server-->>Client: 支持的版本 + 能力
     end
 
-    loop Client Requests
-        Host->>Client: User- or model-initiated action
-        Client->>Server: Request (with _meta: version, clientInfo, clientCapabilities)
-        alt Server requires client input
-            Server-->>Client: InputRequiredResult (e.g. sampling/createMessage)
-            Client->>Host: Forward to AI
-            Host-->>Client: AI response
-            Client->>Server: Original request (with input)
+    loop 客户端请求
+        Host->>Client: 用户或模型发起的操作
+        Client->>Server: 请求（包含 _meta：版本、clientInfo、clientCapabilities）
+        alt 服务器需要客户端输入
+            Server-->>Client: InputRequiredResult（例如 sampling/createMessage）
+            Client->>Host: 转发给 AI
+            Host-->>Client: AI 响应
+            Client->>Server: 原始请求（附带输入）
         end
         Server-->>Client: 响应
         Client-->>Host: 更新 UI 或向模型返回结果
     end
 
     opt 订阅
-        Client->>Server: subscriptions/listen (toolsListChanged, resourceSubscriptions, …)
+        Client->>Server: subscriptions/listen（toolsListChanged、resourceSubscriptions、…）
         Server--)Client: notifications/subscriptions/acknowledged
         loop 流式传输
             Server--)Client: notifications/*（附带 subscriptionId 标记）
@@ -149,10 +149,10 @@ sequenceDiagram
 
 每项能力都会在每个请求的基础上解锁特定的协议功能。例如：
 
-- 已实现的 [服务器功能](/specification/draft/server) 必须在服务器的能力中声明
+- 已实现的 [服务器功能](/specification/draft/server) 必须在服务器能力中公布
 - 接收资源更新通知需要打开一个带有所需资源 URI 的
-  [`subscriptions/listen`](/specification/draft/basic/utilities/subscriptions) 流
-- 调用工具要求服务器声明工具能力
-- [采样](/specification/draft/client) 要求客户端在其能力中声明支持
+  [`subscriptions/listen`](/specification/draft/basic/patterns/subscriptions) 流
+- [工具](/specification/draft/server/tools) 调用要求服务器声明工具能力
+- [采样](/specification/draft/client/sampling) 要求客户端在其能力中声明支持
 
 这种能力协商确保客户端和服务器对支持的功能有清晰的理解，同时保持协议的可扩展性。

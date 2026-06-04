@@ -18,7 +18,7 @@ title: 发现
   "method": "server/discover",
   "params": {
     "_meta": {
-      "io.modelcontextprotocol/protocolVersion": "DRAFT-2026-v1",
+      "io.modelcontextprotocol/protocolVersion": "2026-07-28",
       "io.modelcontextprotocol/clientInfo": {
         "name": "ExampleClient",
         "version": "1.0.0"
@@ -40,7 +40,7 @@ title: 发现
   "id": "discover-1",
   "result": {
     "resultType": "complete",
-    "supportedVersions": ["DRAFT-2026-v1"],
+    "supportedVersions": ["2026-07-28"],
     "capabilities": {
       "tools": {},
       "resources": {}
@@ -49,7 +49,7 @@ title: 发现
       "name": "ExampleServer",
       "version": "1.0.0"
     },
-    "instructions": "This server provides weather and resource utilities."
+    "instructions": "此服务器提供天气和资源实用工具。"
   }
 }
 ```
@@ -73,12 +73,13 @@ RPC，并在服务器不支持请求的版本时处理
 
 - **提前进行版本选择。** 客户端在发送任何其他请求之前先了解服务器支持的
   版本，从而避免一次往返错误。
-- **STDIO 向后兼容探测。** 在 stdio 上，没有逐请求的
-  HTTP 状态码来驱动回退。支持现代（逐请求 `_meta`）和旧版
- （`initialize` 握手）服务器的客户端 **应该**
-  先发送 `server/discover`。如果服务器返回 `Method not found`
-  （`-32601`），客户端回退到 `initialize` 握手。
+- **stdio 向后兼容探测。** 在 stdio 上，没有逐请求的
+  HTTP 状态码可用于驱动回退。一个同时支持现代（逐请求 `_meta`）和传统（`initialize` 握手）服务器的客户端 **SHOULD**
+  首先发送 `server/discover`；有关回退规则，请参见
+  [stdio: 向后兼容](/specification/draft/basic/transports/stdio#backward-compatibility)
+  。
 
-完整的版本选择流程请参见 [协议版本协商](/specification/draft/basic/lifecycle#protocol-version-negotiation)。
-有关未知方法返回的 HTTP 特定状态码，请参见 Transports 中的 [协议版本头](/specification/draft/basic/transports#protocol-version-header)
+参见 [协议版本协商](/specification/draft/basic/versioning#protocol-version-negotiation)
+了解完整的版本选择流程。对于未知方法返回的 HTTP 特定状态码，请参见传输中的
+[协议版本头](/specification/draft/basic/transports/streamable-http#protocol-version-header)
 部分。

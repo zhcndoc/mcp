@@ -1,11 +1,11 @@
 # SEP-2164：标准化资源未找到错误码
 
-- **状态**：草案
-- **类型**：标准跟踪
-- **创建时间**：2026-01-28
-- **作者**：Peter Alexander (@pja-ant)
-- **赞助人**：无（寻求赞助人）
-- **PR**：https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2164
+- **状态**: Final
+- **类型**: Standards Track
+- **创建时间**: 2026-01-28
+- **作者**: Peter Alexander (@pja-ant)
+- **赞助方**: 无（正在寻求赞助方）
+- **PR**: https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2164
 
 ## 摘要
 
@@ -19,13 +19,13 @@
 
 | SDK        | 当前错误码                           | 来源                                                                                                                                                                                    |
 | ---------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| TypeScript | `-32602` (InvalidParams)             | [mcp.ts#L561](https://github.com/modelcontextprotocol/typescript-sdk/blob/main/packages/server/src/server/mcp.ts#L561)                                                                    |
+| TypeScript | `-32602` (无效参数)                  | [mcp.ts#L561](https://github.com/modelcontextprotocol/typescript-sdk/blob/main/packages/server/src/server/mcp.ts#L561)                                                                    |
 | Python     | `0`（通用）                          | [server.py#L790](https://github.com/modelcontextprotocol/python-sdk/blob/main/src/mcp/server/lowlevel/server.py#L790)                                                                     |
 | C#         | `-32002`（自定义 RESOURCE_NOT_FOUND） | [McpServerImpl.cs#L289](https://github.com/modelcontextprotocol/csharp-sdk/blob/main/src/ModelContextProtocol.Core/Server/McpServerImpl.cs#L289)                                          |
 | Rust       | `-32002`（自定义 RESOURCE_NOT_FOUND） | [model.rs#L450](https://github.com/modelcontextprotocol/rust-sdk/blob/main/crates/rmcp/src/model.rs#L450)                                                                                 |
 | Java       | `-32002`（自定义 RESOURCE_NOT_FOUND） | [McpAsyncServer.java#L732](https://github.com/modelcontextprotocol/java-sdk/blob/main/mcp-core/src/main/java/io/modelcontextprotocol/server/McpAsyncServer.java#L732)                     |
 | Go         | `-32002`（自定义 RESOURCE_NOT_FOUND） | [server.go#L786](https://github.com/modelcontextprotocol/go-sdk/blob/main/mcp/server.go#L786)                                                                                             |
-| Kotlin     | `-32603`（INTERNAL_ERROR）            | [Server.kt#L618-L621](https://github.com/modelcontextprotocol/kotlin-sdk/blob/main/kotlin-sdk-server/src/commonMain/kotlin/io/modelcontextprotocol/kotlin/sdk/server/Server.kt#L618-L621) |
+| Kotlin     | `-32603`（内部错误）                 | [Server.kt#L618-L621](https://github.com/modelcontextprotocol/kotlin-sdk/blob/main/kotlin-sdk-server/src/commonMain/kotlin/io/modelcontextprotocol/kotlin/sdk/server/Server.kt#L618-L621) |
 | PHP        | `-32002`（自定义 RESOURCE_NOT_FOUND） | [Error.php#L37](https://github.com/modelcontextprotocol/php-sdk/blob/main/src/Schema/JsonRpc/Error.php#L37)                                                                               |
 | Ruby       | 不适用（留给实现者）                 | [server.rb#L375-L379](https://github.com/modelcontextprotocol/ruby-sdk/blob/main/lib/mcp/server.rb#L375-L379)                                                                             |
 | Swift      | 不适用（无内置处理程序）             | 不适用                                                                                                                                                                                       |

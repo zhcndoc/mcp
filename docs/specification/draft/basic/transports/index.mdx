@@ -1,0 +1,42 @@
+---
+title: 概览
+---
+
+<div id="enable-section-numbers" />
+
+本页定义了传输层为了承载 MCP 消息必须提供什么、标准传输绑定，以及定义新传输绑定的要求。
+
+协议语义在每一种传输上都完全相同。传输是一种**绑定**：它定义消息如何被分帧和传递、请求元数据如何携带，以及如何发出取消和终止信号。它不定义消息的含义：[消息模式](/specification/draft/basic/patterns)属于核心协议，并且在每一种绑定中都相同。各绑定页面指定了标准传输：
+
+1. [stdio](/specification/draft/basic/transports/stdio)：通过客户端启动的子进程的标准流传输以换行符分隔的消息。
+2. [可流式 HTTP](/specification/draft/basic/transports/streamable-http)：每条消息都是发送到单一 MCP 端点的 HTTP POST；回复以 JSON 对象或按请求作用域的 SSE 流到达。
+
+客户端和服务器也可以实现[自定义传输](#custom-transports)。
+
+## 消息
+
+MCP 使用 JSON-RPC 编码消息。JSON-RPC 消息**必须**使用 UTF-8 编码。
+
+绑定**必须**将客户端发送的 _请求_ 和 _通知_ 传递给服务器，并将服务器发送的 _响应_ 和 _通知_ 传递给客户端。不存在其他消息方向：根据[消息模式](/specification/draft/basic/patterns)，服务器不会发起 JSON-RPC 请求，客户端也不会发送 JSON-RPC 响应。
+
+## 请求元数据
+
+所有协议元数据都在消息体中传输：每个请求都在[`_meta.io.modelcontextprotocol/*`](/specification/draft/basic/index#meta)字段中携带其协议版本、客户端标识和客户端能力。
+
+绑定**可以**另外将选定的消息体字段镜像到信封元数据中。Streamable HTTP 传输会将它们镜像到[HTTP 标头](/specification/draft/basic/transports/streamable-http#request-metadata)中，以便中间件在不解析消息体的情况下路由和检查请求。消息体仍然是事实来源；镜像元数据的绑定会定义如何拒绝不匹配。
+
+## 取消
+
+每种绑定都定义了客户端如何放弃一个进行中的请求：在 stdio 上，客户端发送 `notifications/cancelled` 通知；在 Streamable HTTP 上，则关闭该请求的响应流。协议层面的规则在任何地方都相同；参见[取消](/specification/draft/basic/patterns/cancellation)。
+
+## 自定义传输
+
+客户端和服务器**可以**实现额外的自定义传输机制，以满足其特定需求。该协议与传输无关，可以在任何支持双向消息交换的通信通道上实现。
+
+选择支持自定义传输的实现者**必须**保留 JSON-RPC 消息格式、[消息模式](/specification/draft/basic/patterns)以及按请求的元数据模型。自定义传输**应当**记录其连接建立、消息分帧和取消模式，以帮助互操作性。
+
+运行在可靠双向字节流上的自定义传输（例如 Unix 域套接字或 TCP）**应当**复用[stdio 分帧](/specification/draft/basic/transports/stdio)，而不是定义新的分帧方式：stdio 绑定只是字节流上的以换行符分隔的 JSON-RPC，而它唯一特定于标准流的部分是进程生命周期规则。
+
+## 向后兼容性
+
+早期的协议版本建立了一个以连接为作用域、带有 `initialize` 握手的会话，并允许服务器发起 JSON-RPC 请求。与这些版本互操作的客户端和服务器会检测对端所处的时代，并按照[版本控制：向后兼容性](/specification/draft/basic/versioning#backward-compatibility-with-initialization-based-versions)中的描述退回兼容模式，其中包括供实现者参考的兼容矩阵。每个绑定页面都会描述其特定于传输的检测机制。

@@ -57,10 +57,11 @@ Agent 的技能调用语法直接调用它。
 
 基于发现结果，该技能会推荐四种路径之一并相应地搭建骨架：
 
-**远程 [Streamable HTTP](/specification/draft/basic/transports#streamable-http)**
-是封装云 API 的默认选项。零安装门槛，一次部署服务于所有用户，并且
-OAuth 流程能正常工作，因为服务器可以处理重定向和令牌存储。参考技能包含
-Cloudflare Workers 和便携式 Express/FastMCP 设置的骨架。
+**远程 [Streamable HTTP](/specification/draft/basic/transports/streamable-http)**
+是任何封装云 API 的默认选择。零安装摩擦，一个部署服务所有用户，
+并且 OAuth 流程可以正常工作，因为服务器
+可以处理重定向和令牌存储。参考技能包含
+Cloudflare Workers 和可移植 Express/FastMCP 设置的脚手架。
 
 **[MCP 应用](/extensions/apps/overview)** 通过交互式
 小部件扩展服务器，这些小部件在聊天中渲染，例如可搜索选择器、图表和实时
@@ -74,9 +75,9 @@ Cloudflare Workers 和便携式 Express/FastMCP 设置的骨架。
 访问用户机器时使用此路径：读取本地文件、驱动桌面应用，或
 与 localhost 服务通信。该技能会移交至 `build-mcpb`。
 
-**本地 [stdio](/specification/draft/basic/transports#stdio)** 仍可用于
-原型设计，并注意当你准备
-分发时有升级到 MCPB 的路径。
+**Local [stdio](/specification/draft/basic/transports/stdio)** 仍可用于
+原型开发，并注明在准备
+分发时可升级到 MCPB。
 
 ## 后续步骤
 

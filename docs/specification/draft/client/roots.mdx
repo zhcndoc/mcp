@@ -5,9 +5,10 @@ title: 根目录
 <div id="enable-section-numbers" />
 
 <Warning>
-  **已弃用**：Roots 功能自协议版本
-  `DRAFT-2026-v1` 起已被弃用。根据
-  [SEP-2596](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2596) 中概述的弃用政策，它将在 `DRAFT-2026-v1` 发布后 1 年内发布的任何 MCP 版本中继续受支持。
+  **已弃用**：自协议版本
+  `2026-07-28`
+  （[SEP-2577](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2577)）起，Roots 功能已被弃用。
+  根据[功能生命周期政策](/community/feature-lifecycle)，在本次修订发布后，它会在规范中至少保留十二个月，之后才有资格被移除。新的实现**不应**采用它；现有实现**应**迁移为通过工具参数、资源 URI 或服务器配置传递目录或文件。详见[已弃用功能登记表](/specification/draft/deprecated)。
 </Warning>
 
 模型上下文协议（MCP）为客户端向服务器公开文件系统“根目录”提供了一种标准化方式。根目录会告知服务器客户端认为相关的目录和文件，以便服务器相应地集中其操作。它们是信息性指导，而不是访问控制机制。该协议并不强制服务器必须停留在根目录内。服务器可以从受支持的客户端请求根目录列表。
@@ -19,14 +20,6 @@ MCP 中的根目录通常通过工作区或项目配置界面暴露。
 例如，实现可以提供工作区/项目选择器，允许用户选择服务器应有权访问的目录和文件。这可以与来自版本控制系统或项目文件的自动工作区检测相结合。
 
 然而，实现可以通过任何适合其需求的界面模式暴露根目录——协议本身不强制任何特定的用户交互模型。
-
-<Warning>
-
-服务器**必须**仅在与发起的客户端请求关联时发送服务器到客户端的请求（例如 `roots/list`、`sampling/createMessage` 或 `elicitation/create`）（例如，在 `tools/call`、`resources/read` 或 `prompts/get` 处理期间）。
-
-不支持在独立通信流上（与任何客户端请求无关）独立发起的此类服务器请求，且**不得**实现。未来的传输实现不需要支持此模式。
-
-</Warning>
 
 ## 能力
 
@@ -73,13 +66,13 @@ MCP 中的根目录通常通过工作区或项目配置界面暴露。
 
 ```mermaid
 sequenceDiagram
-    participant Server
-    participant Client
+    participant 服务器
+    participant 客户端
 
-    Note over Server,Client: 发现
-    Client->>Server: tool/call(id: 1)
-    Server-->>Client: InputRequiredResult(roots/list)
-    Client->>Server: tool/call(id: 2, 可用的根目录)
+    Note over 服务器,客户端: 初始请求
+    客户端->>服务器: tools/call(id: 1)
+    服务器-->>客户端: InputRequiredResult(roots/list)
+    客户端->>服务器: tools/call(id: 2, inputResponses{key: roots} + requestState)
 ```
 
 ## 数据类型

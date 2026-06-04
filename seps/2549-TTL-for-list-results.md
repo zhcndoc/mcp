@@ -1,10 +1,10 @@
 # SEP-2549: 列表结果的 TTL
 
-- **状态**: 已接受
-- **类型**: 标准轨道
+- **状态**: Final
+- **类型**: Standards Track
 - **创建时间**: 2026-04-09
 - **作者**: Caitie McCaffrey (@CaitieM20)
-- **赞助者**: @CaitieM20
+- **赞助人**: @CaitieM20
 - **PR**: https://github.com/modelcontextprotocol/specification/pull/2549
 
 ## 摘要

@@ -1,11 +1,11 @@
 # SEP-2468: 推荐在 MCP 认证响应中使用颁发者（iss）参数
 
-- **状态**：审阅中
-- **类型**：标准跟踪
-- **创建时间**：2026-03-25
-- **作者**：Emily Lauber (@EmLauber)
-- **赞助人**：@pcarleton
-- **PR**：https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2468
+- **Status**: Final
+- **Type**: Standards Track
+- **Created**: 2026-03-25
+- **Author(s)**: Emily Lauber (@EmLauber)
+- **Sponsor**: @pcarleton
+- **PR**: https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2468
 
 ## 摘要
 

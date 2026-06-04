@@ -140,7 +140,7 @@ Tasks 适合表示昂贵的计算和批处理请求，并且与外部作业 API 
 
 ```typescript
 // "task" is introduced by this extension.
-type ResultType = "complete" | "input_required" | "task";
+type ResultType = "complete" | "input_required" | "task" | string;
 ```
 
 服务器在返回 `CreateTaskResult` 时 **MUST** 将 `resultType` 设为 `"task"`，以便客户端将其与标准结果区分开来。服务器在 `CreateTaskResult` 之外的结果类型上 **MUST NOT** 将 `resultType` 设为 `"task"`。
@@ -256,7 +256,7 @@ export interface FailedTask extends Task {
 /**
  * 已被取消的 task。
  * 用于 tasks/get 和 notifications/tasks。
- */
+   */
 export interface CancelledTask extends Task {
   status: "cancelled";
 }
@@ -810,10 +810,13 @@ Tasks 使用两种错误报告机制：
 
 对于以下协议错误情况，服务器 **MUST** 返回标准 JSON-RPC 错误：
 
-- 无效或不存在的 `taskId`：`-32602`（Invalid params）
-  - 服务器 **MUST** 对 `tasks/get` 返回此错误。
-  - 服务器 **SHOULD** 对 `tasks/update` 和 `tasks/cancel` 返回此错误。
-- 内部错误：`-32603`（Internal error）
+- Invalid or nonexistent `taskId`: `-32602` (Invalid params)
+  - Servers **MUST** return this error for `tasks/get`.
+  - Servers **SHOULD** return this error for `tasks/update` and `tasks/cancel`.
+- Internal errors: `-32603` (Internal error)
+- Missing required client capabilities: `-32003` (Missing Required Client Capability)
+  - Servers **MUST** return this error for non-declaring clients requesting task notifications on `subscriptions/listen`.
+  - Servers **MUST** return this error for non-declaring clients issuing `tasks/get`, `tasks/update`, and `tasks/cancel` requests.
 
 服务器 **SHOULD** 提供信息充分的错误消息来描述错误原因。
 
@@ -883,7 +886,7 @@ Tasks 使用两种错误报告机制：
   "id": 5,
   "result": {
     "resultType": "task",
-    "taskId": "786512e2-9e0d-44bd-8f29-789f820fe840",
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840",
     "status": "completed",
     "createdAt": "2025-11-25T10:30:00Z",
     "lastUpdatedAt": "2025-11-25T10:40:00Z",
@@ -958,13 +961,12 @@ ack 上的最终一致性与 `tasks/update` 的分离方式相同：服务器可
 
 ## 向后兼容性
 
-`2025-11-25` 发布中的实验性任务特性与此扩展 **不具备线级兼容性**。具体而言：
+`2025-11-25` 版本中的实验性任务功能与此扩展 **不具备线缆兼容性**。需要同时与这两种表面互操作的实现，可以在 SDK 层面通过并行实现实验性流程与扩展流程，并根据协商出的协议版本和对端声明的客户端能力进行分发来进行适配。下表总结了每种组合下的预期行为：
 
-- `tasks/result` 被移除。客户端在 `2026-06-30` 规范下对支持此扩展的服务器调用 `tasks/result` 时，**MUST** 收到 `-32601`（方法未找到）。
-- `CallToolRequest` 上的 `task` 参数被移除。服务器在 `2026-06-30` 规范下收到带有 `task` 参数的请求时，**MUST** 将其忽略（把该字段视为未知字段），而不是将其作为可选启用项。
-- `tasks.requests.*` 以及 `tasks.cancel`/`tasks.list` 的能力声明不属于此扩展。此前声明这些能力的服务器 **MUST** 从 `2026-06-30` 规范开始迁移为声明 `io.modelcontextprotocol/tasks`，并且 **MUST NOT** 在任何包含此扩展的协议版本下继续声明旧版能力。
-
-需要桥接旧客户端的实现可以在 SDK 层进行适配：服务器可以并行实现实验性接口和扩展接口，并根据客户端协商出的能力与协议版本进行分发。
+| 协议版本 | `tasks.*`（旧版）                                                                                                                                                                                                                                                                                                                                                                                                 | `io.modelcontextprotocol/tasks`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `2025-11-25`     | `2025-11-25` 规范中的旧版实验性任务。客户端通过 `CallToolRequest` 上的 `task` 参数按请求选择是否启用任务增强；服务器按该规范使用 `tasks/result`、`tasks/get`、`tasks/cancel`，以及（在支持时）`tasks/list`。此扩展不适用。                                                                                           | 此扩展在 `2025-11-25` 协议版本下未定义。服务器 **MUST NOT** 将此能力视为在该协议版本下启用了任务；请求应继续处理，仿佛客户端根本没有声明任务能力。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `2026-06-30`     | 旧版能力不属于此扩展的一部分。服务器 **MUST** 将仅声明旧版能力的客户端视为未声明此扩展。若服务器同时支持 `2025-11-25` 任务规范和此扩展，**SHOULD** 继续允许此类客户端发起 `tasks/get` 和 `tasks/cancel` 请求，以便操作通过该流程创建的任务。 | 规范性的情况。完整的任务生命周期如本文所述，但与 `2025-11-25` 实验性功能相比，在线层面有如下差异：<ul><li>`tasks/result` 已移除；调用它的客户端 **MUST** 收到 `-32601`（Method Not Found）。</li><li>`CallToolRequest` 上的 `task` 参数已移除；服务器 **MUST** 忽略它（将该字段视为未知），而不是把它当作显式启用开关。</li><li>`tasks.requests.*`、`tasks.cancel` 和 `tasks.list` 这些能力声明不属于此扩展。此前声明这些能力的服务器 **MUST** 迁移为声明 `io.modelcontextprotocol/tasks`，并且在任何包含此扩展的协议版本下 **MUST NOT** 继续声明这些旧版能力。</li></ul> |
 
 返回标准 `CallToolResult` 形状的服务器——也就是从不选择创建任务的服务器——在此扩展下仍然完全符合规范。已协商该扩展的客户端 **MUST** 对任何增强请求同时处理这两种结果形状。
 

@@ -1,7 +1,7 @@
 # SEP-2575: 使 MCP 无状态化
 
-- **状态**: 已接受
-- **类型**: 标准化跟踪
+- **状态**: Final
+- **类型**: Standards Track
 - **创建时间**: 2025-06-18
 - **作者**: Jonathan Hefner (@jonathanhefner), Mark Roth (@markdroth),
   Shaun Smith (@evalstate), Harvey Tuch (@htuch), Kurtis Van Gent (@kurtisvg)

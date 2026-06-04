@@ -1,12 +1,12 @@
 # SEP-2484：要求标准轨道 SEP 在达到最终状态前必须通过一致性测试
 
-- **状态**：草案
-- **类型**：流程
-- **创建时间**：2026-03-27
-- **作者**：Paul Carleton (@pcarleton)
-- **赞助人**：无
-- **PR**：https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2484
-- **取代**：SEP-1627（Conformance Testing）
+- **Status**: Final
+- **Type**: Process
+- **Created**: 2026-03-27
+- **Author(s)**: Paul Carleton (@pcarleton)
+- **Sponsor**: None
+- **PR**: https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2484
+- **Supersedes**: SEP-1627 (Conformance Testing)
 
 ## 摘要
 
@@ -170,7 +170,7 @@ conformance 仓库已经演示了本 SEP 形式化的场景标记模式：
 
 在本 SEP 本身可以被标记为 `Final` 之前，以下 conformance 仓库工作必须完成：
 
-- 结构化可追踪性文件格式（`sep-NNNN.yaml`）及其 schema
+- 结构化可追溯性文件格式（`sep-NNNN.yaml`）及其 schema
 - 场景脚手架工具
 - Conformance harness 支持将 draft 规范版本标签作为可协商的协议版本
 - 已发布 `MAINTAINERS.md`，且仓库已列入 MCP 治理文档

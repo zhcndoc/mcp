@@ -5,24 +5,24 @@ description: "多轮往返请求"
 ---
 
 <div className="flex items-center gap-2 mb-4">
-  <Badge color="blue" shape="pill">
-    已接受
+  <Badge color="green" shape="pill">
+    最终
   </Badge>
   <Badge color="gray" shape="pill">
     标准跟踪
   </Badge>
 </div>
 
-| Field         | Value                                                                                                                     |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| **SEP**       | 2322                                                                                                                      |
-| **Title**     | 多轮往返请求                                                                                                               |
-| **Status**    | 已接受                                                                                                                    |
-| **Type**      | 标准跟踪                                                                                                                  |
-| **Created**   | 2026-02-03                                                                                                                |
-| **Author(s)** | Mark D. Roth ([@markdroth](https://github.com/markdroth)), Caitie McCaffrey ([@CaitieM20](https://github.com/CaitieM20)), |
-| **Sponsor**   | Caitie McCaffrey ([@CaitieM20](https://github.com/CaitieM20))                                                             |
-| **PR**        | [#2322](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2322)                                           |
+| 字段          | 值                                                                                                                     |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| **SEP**       | 2322                                                                                                                   |
+| **标题**      | 多轮往返请求                                                                                                           |
+| **状态**      | 最终                                                                                                                   |
+| **类型**      | 标准跟踪                                                                                                               |
+| **创建于**    | 2026-02-03                                                                                                             |
+| **作者**      | Mark D. Roth ([@markdroth](https://github.com/markdroth)), Caitie McCaffrey ([@CaitieM20](https://github.com/CaitieM20)), |
+| **赞助者**    | Caitie McCaffrey ([@CaitieM20](https://github.com/CaitieM20))                                                         |
+| **PR**        | [#2322](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2322)                                        |
 
 ---
 
@@ -262,7 +262,13 @@ export interface InputResponseRequestParams extends RequestParams {
 }
 ```
 
-由于这一变更为诸如 'tools/call' 之类的方法调用创建了一个多态响应，因此我们在 `Result` 中引入了一个新字段来指示 `ResultType`。客户端应解析该字段以确定消息中所包含 Result 的类型。如果未提供该字段，为了向后兼容，客户端应假定 `ResultType` 为 "complete"。Schema 变更如下：
+由于这一变更为像 `tools/call` 这样的 method call 引入了多态响应，我们正在向 `Result` 中引入一个新字段，用于指示 `ResultType`。客户端应解析该字段，以确定消息中所包含的 `Result` 类型。如果未提供该字段，为了向后兼容，客户端应假定 `ResultType` 为 `"complete"`。
+
+扩展 **MAY** 添加额外的 `ResultType` 值。支持的 `ResultType` 值集合 **MUST** 由核心协议中定义的集合加上通过 capabilities 公布的任何支持扩展的附加值构成。
+
+客户端 **SHOULD** 将无法识别的值视为无效协议响应。
+
+Schema 变更如下：
 
 ```typescript
 /**
@@ -279,7 +285,8 @@ export interface Result {
 
 export type ResultType =
   | "complete" // 请求已成功完成，结果包含最终内容。
-  | "input_required"; // 请求尚未完成，结果包含一个 {@link InputRequiredResult} 对象
+  | "input_required" // 请求尚未完成，结果包含一个 {@link InputRequiredResult} 对象。
+  | string; // 可扩展
 ```
 
 我们预计这个字段对未来的可扩展性会很有帮助，因为它允许我们引入新的结果类型，也可以同样适用于 `tasks`。
@@ -294,29 +301,29 @@ export type ResultType =
 
 | ClientRequest           | ServerResult           | 支持 InputRequiredResult |
 | ----------------------- | ---------------------- | ----------------------------- |
-| `GetPromptRequest`      | `GetPromptResult`      | Yes                           |
-| `ReadResourceRequest`   | `ReadResourceResult`   | Yes                           |
-| `CallToolRequest`       | `CallToolResult`       | Yes                           |
-| `GetTaskPayloadRequest` | `GetTaskPayloadResult` | Yes                           |
+| `GetPromptRequest`      | `GetPromptResult`      | 是                            |
+| `ReadResourceRequest`   | `ReadResourceResult`   | 是                            |
+| `CallToolRequest`       | `CallToolResult`       | 是                            |
+| `GetTaskPayloadRequest` | `GetTaskPayloadResult` | 是                            |
 
 服务器 MUST NOT 在任何其他 ClientRequest 上发送 `InputRequiredResult` 响应。下表表示在撰写本 SEP 时，这排除了哪些 `ClientRequest`。
 
 | ClientRequest                  | 支持 InputRequiredResult |
 | ------------------------------ | ----------------------------- |
-| `PingRequest`                  | No                            |
-| `InitializeRequest`            | No                            |
-| `CompleteRequest`              | No                            |
-| `SetLevelRequest`              | No                            |
-| `ListPromptsRequest`           | No                            |
-| `ListResourcesRequest`         | No                            |
-| `ListResourceTemplatesRequest` | No                            |
-| `SubscribeRequest`             | No                            |
-| `UnsubscribeRequest`           | No                            |
-| `ListToolsRequest`             | No                            |
-| `GetTaskRequest`               | No                            |
-| `ListTasksRequest`             | No                            |
-| `CancelTaskRequest`            | No                            |
-| `TaskInputResponseRequest`     | No                            |
+| `PingRequest`                  | 否                            |
+| `InitializeRequest`            | 否                            |
+| `CompleteRequest`              | 否                            |
+| `SetLevelRequest`              | 否                            |
+| `ListPromptsRequest`           | 否                            |
+| `ListResourcesRequest`         | 否                            |
+| `ListResourceTemplatesRequest` | 否                            |
+| `SubscribeRequest`             | 否                            |
+| `UnsubscribeRequest`           | 否                            |
+| `ListToolsRequest`             | 否                            |
+| `GetTaskRequest`               | 否                            |
+| `ListTasksRequest`             | 否                            |
+| `CancelTaskRequest`            | 否                            |
+| `TaskInputResponseRequest`     | 否                            |
 
 ### 短暂工具工作流
 

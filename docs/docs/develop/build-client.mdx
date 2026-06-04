@@ -1381,17 +1381,17 @@ sequenceDiagram
     participant MCP_Server as MCP Server
     participant Tools
 
-    User->>Client: Send query
-    Client<<->>MCP_Server: Get available tools
-    Client->>Claude: Send query with tool descriptions
-    Claude-->>Client: Decide tool execution
-    Client->>MCP_Server: Request tool execution
-    MCP_Server->>Tools: Execute chosen tools
-    Tools-->>MCP_Server: Return results
-    MCP_Server-->>Client: Send results
-    Client->>Claude: Send tool results
-    Claude-->>Client: Provide final response
-    Client-->>User: Display response
+    User->>Client: 发送查询
+    Client<<->>MCP_Server: 获取可用工具
+    Client->>Claude: 发送包含工具描述的查询
+    Claude-->>Client: 决定执行工具
+    Client->>MCP_Server: 请求执行工具
+    MCP_Server->>Tools: 执行选定的工具
+    Tools-->>MCP_Server: 返回结果
+    MCP_Server-->>Client: 发送结果
+    Client->>Claude: 发送工具结果
+    Claude-->>Client: 提供最终响应
+    Client-->>User: 显示响应
 ```
 
 当你提交一个查询时：
@@ -2046,7 +2046,7 @@ bundle exec ruby client.rb path/to/build/index.js # node server
 - 再次确认你的服务器脚本路径是否正确
 - 如果相对路径不起作用，请使用绝对路径
 - 对于 Windows 用户，请确保在路径中使用正斜杠（/）或转义的反斜杠（\\）
-- 验证服务器文件扩展名是否正确（Python 为 .py，Node.js 为 .js 或 Ruby 为 .rb）
+- 验证服务器文件的扩展名是否正确（Python 为 .py，Node.js 为 .js 或 Ruby 为 .rb）
 
 示例：正确的路径用法：
 
@@ -2085,13 +2085,10 @@ bundle exec ruby client.rb C:\\projects\\mcp-server\\weather.rb
 
 </Tabs>
 
-## Next Steps
+## 下一步
 
 <CardGroup cols={2}>
-  <Card title="Example Servers" icon="grid" href="/examples">
-    View our gallery of official MCP servers and implementations
-  </Card>
-  <Card title="Example Clients" icon="cubes" href="/clients">
-    View the list of clients that support MCP integration
+  <Card title="示例服务器" icon="grid" href="/examples">
+    查看我们的官方 MCP 服务器和实现库
   </Card>
 </CardGroup>

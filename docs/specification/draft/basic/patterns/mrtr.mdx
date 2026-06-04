@@ -102,7 +102,8 @@ sequenceDiagram
 
 #### InputRequiredResult
 
-[`InputRequiredResult`](/specification/draft/schema#InputRequiredResult) 是 [`Result`](https://modelcontextprotocol.io/specification/2025-11-25/basic#responses) 的一种类型，表示在完成请求之前需要额外输入。
+[`InputRequiredResult`](/specification/draft/schema#inputrequiredresult) 是 [`Result`](/specification/draft/basic#responses) 的一种类型，
+表示在请求完成之前需要额外输入。
 
 - `inputRequests` _(可选)_: 一个 [`InputRequests`](/specification/draft/schema#inputrequests) 映射，包含客户端必须完成的服务器发起请求。
 - `requestState` _(可选)_: 仅对服务器有意义的不透明字符串。客户端 **MUST NOT** 检查、解析、修改或对其内容作出任何假设。
@@ -205,18 +206,18 @@ sequenceDiagram
    - `inputRequests` 的键是服务器分配的标识符，并且在该请求范围内 **MUST** 唯一。
    - `inputRequests` 的值是请求对象，并且 **MUST** 为 [`ElicitRequest`](/specification/draft/schema#elicitrequest)、[`CreateMessageRequest`](/specification/draft/schema#createmessagerequest) 或 [`ListRootsRequest`](/specification/draft/schema#listrootsrequest) 之一
 
-1. `InputRequiredResult` **MAY** 包含 `requestState` 字段。如果指定，此字段是仅对服务器有意义的不透明字符串。服务器可以自由地以任何格式编码该状态（例如 base64 编码的 JSON、加密 JWT、序列化二进制数据）。
-1. 如果客户端请求包含 `requestState` 字段，服务器 **MUST** 将 `requestState` 视为攻击者可控输入。如果 `requestState` 会影响授权、资源访问或业务逻辑，服务器 **MUST** 保护其完整性（例如使用 HMAC 或 AEAD）
-   并且 **MUST** 拒绝验证失败的状态。只有在篡改造成的后果不比请求失败更严重时，才 **MAY** 省略完整性保护。
-1. 为防止重放，服务器 **SHOULD** 在受完整性保护的 `requestState` 载荷中包含以下内容，并在接收时逐一验证：
-   - 已认证主体，拒绝由不同主体 प्रस्तुत的状态。
-   - 一个较短的过期时间（TTL），拒绝在其过期后呈现的状态；
-   - 原始请求的标识符，例如方法名以及其关键参数的摘要，拒绝在不匹配的请求上呈现的状态。
+1. `InputRequiredResult` **MAY** 包含 `requestState` 字段。如果指定，则该字段是仅对服务器有意义的不透明字符串。服务器可以自由地以任何格式编码状态（例如 base64 编码 JSON、加密 JWT、序列化二进制）。
+1. 如果客户端请求包含 `requestState` 字段，服务器 **MUST** 将 `requestState` 视为攻击者可控输入。如果 `requestState` 会影响授权、资源访问或业务逻辑，服务器 **MUST** 保护其完整性（例如 HMAC 或 AEAD）
+   并且 **MUST** 拒绝校验失败的状态。只有在篡改不会造成比请求失败更严重后果时，才 **MAY** 省略完整性保护。
+1. 为防止重放，服务器 **SHOULD** 在完整性保护的 `requestState` 载荷中包含以下内容，并在收到时逐一验证：
+   - 经过身份验证的主体；若状态由不同主体提交，则拒绝。
+   - 一个较短的过期时间（TTL）；若在过期后提交，则拒绝；
+   - 原始请求的标识符，例如方法名及其关键参数的摘要；若提交到不匹配的请求，则拒绝。
      <Warning>
-       请注意，这些措施限制了重放窗口并防止跨用户
+       注意，这些措施限制了重放窗口并防止跨用户
        和跨请求复用，但本身并不能保证单次使用。
        对于某个 `requestState` 必须最多只被消费一次的服务器
-       （例如，一次性兑换），**MUST** 在服务器端强制执行该不变式。
+       （例如一次性兑换），**MUST** 在服务器端强制执行该不变量。
      </Warning>
 
 1. 服务器在每个 `InputRequiredResult` 响应中 **MUST** 至少包含 `inputRequests` 或 `requestState` 之一。
@@ -231,7 +232,7 @@ sequenceDiagram
 1. JSON-RPC `id` 在初始请求和重试之间 **MUST** 不同，因为它们是独立的请求。
 1. `inputRequests` 和 `requestState` 字段仅影响客户端对原始请求的重试。它们 **MUST NOT** 用于客户端可能并行发送的任何其他请求。
 
-### Error Handling
+### 错误处理
 
 服务器 **SHOULD** 验证客户端提供的数据是否为有效的 `InputResponses` 对象，以及其中的信息是否可以被正确解析。
 协议错误（格式错误的 JSON、无效的 schema、内部服务器错误）**SHOULD** 返回带有适当错误码和消息的 JSON-RPC 错误响应。
@@ -243,5 +244,5 @@ sequenceDiagram
 
 ### 安全注意事项
 
-由于 `requestState` 会经过客户端，恶意或被入侵的客户端可能尝试修改它以改变服务器行为、
-绕过授权检查或破坏服务器逻辑。服务器 **MUST** 按照上面的[服务器要求](#server-requirements-ephemeral)验证请求状态。
+由于 `requestState` 会经过客户端，恶意或被攻破的客户端可能试图修改它以改变服务器行为、
+绕过授权检查或破坏服务器逻辑。服务器 **MUST** 按照上面的[服务器要求（基本工作流）](#server-requirements-basic-workflow)验证请求状态。

@@ -58,7 +58,9 @@ description: "用于可流式 HTTP 传输的 HTTP 头标准化"
 
 > **理由**：该要求可防止当网络中的不同组件依赖不同事实来源时可能出现的安全漏洞和错误条件。例如，负载均衡器或网关可能使用头值做路由决策，而 MCP 服务器使用正文值执行操作。此要求适用于任何处理消息正文的网络中介，以及 MCP 服务器本身。
 
-**大小写敏感性**：头名称（在 [RFC 9110](https://datatracker.ietf.org/doc/html/rfc9110#name-field-names) 中称为“field names”）不区分大小写。客户端和服务器 MUST 对头名称使用不区分大小写的比较。
+> **Implementation Note**: When validating integer parameter values, servers SHOULD compare the header value and the body value numerically rather than as strings (e.g., `42.0` and `42` are considered equal).
+
+**Case Sensitivity**: Header names (called "field names" in [RFC 9110](https://datatracker.ietf.org/doc/html/rfc9110#name-field-names)) are case-insensitive. Clients and servers MUST use case-insensitive comparisons for header names.
 
 #### 示例：tools/call 请求
 
@@ -175,12 +177,14 @@ MCP 服务器 MAY 使用工具的 `inputSchema` 中参数 schema 里的 `x-mcp-h
 
 **`x-mcp-header` 值的约束**：
 
-- MUST NOT 为空
-- MUST 仅包含 ASCII 字符（不含空格和 `:`）
-- 在 `inputSchema` 中所有 `x-mcp-header` 值之间 MUST 以不区分大小写的方式唯一
-- MUST 仅适用于原始类型参数（number、string、boolean）
+- MUST NOT be empty
+- MUST match HTTP field-name token syntax (`1*tchar`, [RFC 9110 Section 5.1](https://datatracker.ietf.org/doc/html/rfc9110#section-5.1))
+- MUST NOT contain control characters, including carriage return (CR, `\r`) or line feed (LF, `\n`)
+- MUST be case-insensitively unique among all `x-mcp-header` values in the `inputSchema`
+- MUST only be applied to parameters with primitive types (integer, string, boolean). Parameters with type `number` are not permitted. Integer values MUST be within the safe range for JavaScript (−2^53+1 to 2^53−1)
+- MAY be applied to properties at any nesting depth within the `inputSchema`, not only top-level properties
 
-客户端 MUST 拒绝任何 `x-mcp-header` 值违反这些约束的工具定义。拒绝意味着客户端 MUST 将无效工具从 `tools/list` 的结果中排除。客户端 SHOULD 在拒绝工具定义时记录警告，包括工具名称和拒绝原因。此行为可确保单个格式错误的工具定义不会阻止其他有效工具被使用。
+Clients using the Streamable HTTP transport MUST reject tool definitions where any `x-mcp-header` value violates these constraints. Rejection means the client MUST exclude the invalid tool from the result of `tools/list`. Clients SHOULD log a warning when rejecting a tool definition, including the tool name and the reason for rejection. This behavior ensures that a single malformed tool definition does not prevent other valid tools from being used. Clients using other transports (e.g., stdio) MAY ignore `x-mcp-header` annotations entirely.
 
 **工具定义示例**：
 
@@ -404,10 +408,10 @@ HTTP 解析器通常会裁剪头值前后的空白。为了保留参数值中的
 
 客户端 MUST 按以下顺序应用编码规则：
 
-1. **类型转换**：将参数值转换为其字符串表示：
-   - `string`：按原样使用该值
-   - `number`：转换为十进制字符串表示（例如，`42`、`3.14`）
-   - `boolean`：转换为小写 `"true"` 或 `"false"`
+1. **Type conversion**: Convert the parameter value to its string representation:
+   - `string`: Use the value as-is
+   - `integer`: Convert to decimal string representation (e.g., `42`, `-7`)
+   - `boolean`: Convert to lowercase `"true"` or `"false"`
 
 2. **空白检查**：如果字符串以空白字符（空格或制表符）开头或结尾：
    - 应用 Base64 编码（见下文）
@@ -427,16 +431,19 @@ HTTP 解析器通常会裁剪头值前后的空白。为了保留参数值中的
 Mcp-Param-{Name}: =?base64?{Base64EncodedValue}?=
 ```
 
-前缀 `=?base64?` 和后缀 `?=` 表示该值已进行 Base64 编码。需要检查这些值的服务器和中介 MUST 相应地解码它们。
+前缀 `=?base64?` 和后缀 `?=` 表示该值已进行 Base64 编码。这些标记区分大小写，并且 MUST 按照所示形式精确出现（小写）。需要检查这些值的服务器和中介 MUST 相应地对其解码。
+
+为避免歧义，客户端 MUST 还对任何匹配哨兵模式的纯 ASCII 值进行 Base64 编码（即以 `=?base64?` 开头并以 `?=` 结尾）。
 
 **示例**：
 
-| Original Value   | Reason                  | Encoded Header Value                                  |
-| ---------------- | ----------------------- | ----------------------------------------------------- |
-| `"us-west1"`     | 纯 ASCII                | `Mcp-Param-Region: us-west1`                          |
-| `"Hello, 世界"`  | 包含非 ASCII            | `Mcp-Param-Greeting: =?base64?SGVsbG8sIOS4lueVjA==?=` |
-| `" padded "`     | 前导/尾随空格           | `Mcp-Param-Text: =?base64?IHBhZGRlZCA=?=`             |
-| `"line1\nline2"` | 包含换行符              | `Mcp-Param-Text: =?base64?bGluZTEKbGluZTI=?=`         |
+| Original Value         | Reason                   | Encoded Header Value                                  |
+| ---------------------- | ------------------------ | ----------------------------------------------------- |
+| `"us-west1"`           | Plain ASCII              | `Mcp-Param-Region: us-west1`                          |
+| `"Hello, 世界"`        | Contains non-ASCII       | `Mcp-Param-Greeting: =?base64?SGVsbG8sIOS4lueVjA==?=` |
+| `" padded "`           | Leading/trailing spaces  | `Mcp-Param-Text: =?base64?IHBhZGRlZCA=?=`             |
+| `"line1\nline2"`       | Contains newline         | `Mcp-Param-Text: =?base64?bGluZTEKbGluZTI=?=`         |
+| `"=?base64?literal?="` | Matches sentinel pattern | `Mcp-Param-Val: =?base64?PT9iYXNlNjQ/bGl0ZXJhbD89?=`  |
 
 #### 客户端行为
 
@@ -448,7 +455,9 @@ Mcp-Param-{Name}: =?base64?{Base64EncodedValue}?=
 1. 按照 [值编码](#value-encoding) 中的规则对这些值进行编码
 1. 将 `Mcp-Param-{Name}: {Value}` 头追加到请求中：
 
-#### 服务器行为
+> **Implementation Note**: If the client does not have the tool's `inputSchema` (e.g., `tools/list` has not yet been called) or the cached schema is stale (e.g., its TTL has expired), the client SHOULD send the request without custom `Mcp-Param-*` headers. If the server rejects the request because required custom headers are missing, the client SHOULD call `tools/list` to obtain the current `inputSchema`, then retry the original request with the appropriate headers. Clients MAY pre-load tool definitions via other means (e.g., from a previous session or configuration) to enable header emission without a prior `tools/list` call.
+
+#### Server Behavior
 
 在接收请求时，服务器 MUST 拒绝包含无效字符的 `Mcp-Param-{Name}` 头（见 [值编码](#value-encoding) 部分中的“字符限制”）。
 
@@ -486,7 +495,9 @@ Mcp-Param-{Name}: =?base64?{Base64EncodedValue}?=
 
 > **注意**：中介 MUST 在验证失败时返回适当的 HTTP 错误状态（例如 `400 Bad Request`），但不要求返回 JSON-RPC 错误响应。
 
-**自定义头处理**：
+> **Note**: Intermediaries that enforce policy based on mirrored headers (e.g., routing or rate-limiting by tenant) SHOULD verify that the `MCP-Protocol-Version` header indicates a version that requires header–body validation. If the version is older or the header is absent, the intermediary SHOULD reject the request rather than trusting unvalidated header values.
+
+**Custom Header Handling**:
 
 自定义头（通过 `x-mcp-header` 定义的头）遵循与标准头相同的验证规则：
 
@@ -520,12 +531,12 @@ Mcp-Param-{Name}: =?base64?{Base64EncodedValue}?=
 
 **权衡与框架考量**：
 
-| Framework         | 基于 Header 的路由                                               | 基于 Path 的路由                              |
+| 框架             | 基于 Header 的路由                                               | 基于 Path 的路由                              |
 | ----------------- | ------------------------------------------------------------------- | ------------------------------------------------ |
-| Flask (Python)    | 需要中间件或装饰器在路由前提取 header | 原生支持 `@app.route('/mcp/<method>')` |
-| Express (Node.js) | 可通过 `req.headers` 轻松实现，但需要自定义路由逻辑            | 原生支持 `app.post('/mcp/:method')`    |
-| Django (Python)   | 需要自定义中间件                                          | 原生 URL 模式                              |
-| Go (net/http)     | 可通过 `r.Header.Get()` 轻松实现                                           | 可通过 path 模式原生支持                         |
+| Flask（Python）   | 需要中间件或装饰器在路由前提取 header | 原生支持 `@app.route('/mcp/<method>')` |
+| Express（Node.js） | 可通过 `req.headers` 轻松实现，但需要自定义路由逻辑            | 原生支持 `app.post('/mcp/:method')`    |
+| Django（Python）  | 需要自定义中间件                                          | 原生 URL 模式                              |
+| Go（net/http）    | 可通过 `r.Header.Get()` 轻松实现                                           | 可通过 path 模式原生支持                         |
 | ASP.NET Core      | 可通过 `[FromHeader]` 属性轻松实现                                   | 可通过路由模板原生支持                       |
 
 对于像 Flask 这样强烈偏好基于 path 路由的框架，实现基于 header 的路由需要额外代码：
@@ -544,7 +555,7 @@ def mcp_handler():
 
 尽管某些框架中会增加额外复杂性，但最终仍选择基于 header 的路由，原因如下：
 
-1. **向后兼容** 引入基于 path 的路由将要求所有现有 MCP Server 进行重大更新，并且可能需要同时支持两套 endpoint 来支持多个版本。即使 SDK 可以在一定程度上掩盖这些问题，测试、指标等额外运维关注点仍然需要处理。基于 header 的路由只需极少的客户端改动。未选择 opt in 的客户端也仍可正常工作。
+1. **向后兼容**：引入基于 path 的路由将要求所有现有 MCP Server 进行重大更新，并且可能需要同时支持两套 endpoint 来支持多个版本。即使 SDK 可以在一定程度上掩盖这些问题，测试、指标等额外运维关注点仍然需要处理。基于 header 的路由只需极少的客户端改动。未选择 opt in 的客户端也仍可正常工作。
 
 2. **基础设施收益大于框架复杂度**：主要目标是让网络基础设施（负载均衡器、代理、WAF）无需解析 body 就能路由和处理请求。这一收益与服务器所使用的框架无关。
 
@@ -676,105 +687,105 @@ def mcp_handler():
 
 #### 大小写敏感性
 
-| Test Case                  | Input                    | Expected Behavior                                      |
+| 测试用例                  | 输入                    | 预期行为                                      |
 | -------------------------- | ------------------------ | ------------------------------------------------------ |
-| Header name case variation | `mcp-method: tools/call` | Server MUST accept (header names are case-insensitive) |
-| Header name mixed case     | `MCP-METHOD: tools/call` | Server MUST accept                                     |
-| Method value case          | `Mcp-Method: TOOLS/CALL` | Server MUST reject (method values are case-sensitive)  |
+| Header 名称大小写变化 | `mcp-method: tools/call` | 服务器 MUST 接受（header 名称不区分大小写） |
+| Header 名称混合大小写     | `MCP-METHOD: tools/call` | 服务器 MUST 接受                                     |
+| 方法值大小写          | `Mcp-Method: TOOLS/CALL` | 服务器 MUST 拒绝（方法值区分大小写）  |
 
 #### 头/正文不匹配
 
-| Test Case                  | Header Value             | Body Value                  | Expected Behavior                                   |
+| 测试用例                  | Header 值             | 正文值                  | 预期行为                                   |
 | -------------------------- | ------------------------ | --------------------------- | --------------------------------------------------- |
-| Method mismatch            | `Mcp-Method: tools/call` | `"method": "prompts/get"`   | Server MUST reject with 400 and error code `-32001` |
-| Tool name mismatch         | `Mcp-Name: foo`          | `"params": {"name": "bar"}` | Server MUST reject with 400 and error code `-32001` |
-| Missing required header    | (no `Mcp-Method`)        | Valid body                  | Server MUST reject with 400 and error code `-32001` |
-| Extra whitespace in header | `Mcp-Name:  foo `        | `"params": {"name": "foo"}` | Server MUST accept (trim whitespace per HTTP spec)  |
+| 方法不匹配            | `Mcp-Method: tools/call` | `"method": "prompts/get"`   | 服务器 MUST 拒绝，返回 400 和错误码 `-32001` |
+| 工具名称不匹配         | `Mcp-Name: foo`          | `"params": {"name": "bar"}` | 服务器 MUST 拒绝，返回 400 和错误码 `-32001` |
+| 缺少必需头    | （无 `Mcp-Method`）        | 有效正文                  | 服务器 MUST 拒绝，返回 400 和错误码 `-32001` |
+| Header 中多余空白 | `Mcp-Name:  foo `        | `"params": {"name": "foo"}` | 服务器 MUST 接受（按 HTTP 规范去除空白）  |
 
 #### 值中的特殊字符
 
-| Test Case                       | Value                                 | Expected Behavior                  |
+| 测试用例                       | 值                                 | 预期行为                  |
 | ------------------------------- | ------------------------------------- | ---------------------------------- |
-| Tool name with hyphen           | `my-tool-name`                        | Client sends as-is; server accepts |
-| Tool name with underscore       | `my_tool_name`                        | Client sends as-is; server accepts |
-| Resource URI with special chars | `file:///path/to/file%20name.txt`     | Client sends as-is; server accepts |
-| Resource URI with query string  | `https://example.com/resource?id=123` | Client sends as-is; server accepts |
+| 带连字符的工具名称           | `my-tool-name`                        | 客户端按原样发送；服务器接受 |
+| 带下划线的工具名称       | `my_tool_name`                        | 客户端按原样发送；服务器接受 |
+| 带特殊字符的资源 URI | `file:///path/to/file%20name.txt`     | 客户端按原样发送；服务器接受 |
+| 带查询字符串的资源 URI  | `https://example.com/resource?id=123` | 客户端按原样发送；服务器接受 |
 
 ### 自定义头边界情况
 
 #### x-mcp-header 名称冲突
 
-| Test Case                               | Schema                                                    | Expected Behavior                                                |
+| 测试用例                               | Schema                                                    | 预期行为                                                |
 | --------------------------------------- | --------------------------------------------------------- | ---------------------------------------------------------------- |
-| Duplicate header names (same case)      | Two properties with `"x-mcp-header": "Region"`            | Client MUST reject tool definition                               |
-| Duplicate header names (different case) | `"x-mcp-header": "Region"` and `"x-mcp-header": "REGION"` | Client MUST reject tool definition (case-insensitive uniqueness) |
-| Header name matches standard header     | `"x-mcp-header": "Method"`                                | Allowed (produces `Mcp-Param-Method`, not `Mcp-Method`)          |
-| Empty header name                       | `"x-mcp-header": ""`                                      | Client MUST reject tool definition                               |
+| 重复的 header 名称（相同大小写）      | 两个属性都使用 `"x-mcp-header": "Region"`            | 客户端 MUST 拒绝工具定义                               |
+| 重复的 header 名称（不同大小写） | `"x-mcp-header": "Region"` 和 `"x-mcp-header": "REGION"` | 客户端 MUST 拒绝工具定义（不区分大小写唯一性） |
+| Header 名称与标准头同名     | `"x-mcp-header": "Method"`                                | 允许（生成的是 `Mcp-Param-Method`，不是 `Mcp-Method`）          |
+| 空 Header 名称                       | `"x-mcp-header": ""`                                      | 客户端 MUST 拒绝工具定义                               |
 
 #### 无效的 x-mcp-header 值
 
-| Test Case                  | x-mcp-header Value                 | Expected Behavior                  |
+| 测试用例                  | x-mcp-header 值                 | 预期行为                  |
 | -------------------------- | ---------------------------------- | ---------------------------------- |
-| Contains space             | `"x-mcp-header": "My Region"`      | Client MUST reject tool definition |
-| Contains colon             | `"x-mcp-header": "Region:Primary"` | Client MUST reject tool definition |
-| Contains non-ASCII         | `"x-mcp-header": "Région"`         | Client MUST reject tool definition |
-| Contains control character | `"x-mcp-header": "Region\t1"`      | Client MUST reject tool definition |
+| 包含空格             | `"x-mcp-header": "My Region"`      | 客户端 MUST 拒绝工具定义 |
+| 包含冒号             | `"x-mcp-header": "Region:Primary"` | 客户端 MUST 拒绝工具定义 |
+| 包含非 ASCII 字符         | `"x-mcp-header": "Région"`         | 客户端 MUST 拒绝工具定义 |
+| 包含控制字符 | `"x-mcp-header": "Region\t1"`      | 客户端 MUST 拒绝工具定义 |
 
 #### 值编码边界情况
 
-| Test Case                           | Parameter Value    | Expected Header Value                           |
+| 测试用例                           | 参数值    | 预期 Header 值                           |
 | ----------------------------------- | ------------------ | ----------------------------------------------- |
-| Plain ASCII string                  | `"us-west1"`       | `Mcp-Param-Region: us-west1`                    |
-| String with leading space           | `" us-west1"`      | `Mcp-Param-Region: =?base64?IHVzLXdlc3Qx?=`     |
-| String with trailing space          | `"us-west1 "`      | `Mcp-Param-Region: =?base64?dXMtd2VzdDEg?=`     |
-| String with leading/trailing spaces | `" us-west1 "`     | `Mcp-Param-Region: =?base64?IHVzLXdlc3QxIA==?=` |
-| String with internal spaces only    | `"us west 1"`      | `Mcp-Param-Region: us west 1`                   |
-| Boolean true                        | `true`             | `Mcp-Param-Flag: true`                          |
-| Boolean false                       | `false`            | `Mcp-Param-Flag: false`                         |
-| Integer                             | `42`               | `Mcp-Param-Count: 42`                           |
-| Floating point                      | `3.14159`          | `Mcp-Param-Value: 3.14159`                      |
-| Non-ASCII characters                | `"日本語"`         | `Mcp-Param-Text: =?base64?5pel5pys6Kqe?=`       |
-| String with newline                 | `"line1\nline2"`   | `Mcp-Param-Text: =?base64?bGluZTEKbGluZTI=?=`   |
-| String with carriage return         | `"line1\r\nline2"` | `Mcp-Param-Text: =?base64?bGluZTENCmxpbmUy?=`   |
-| String with leading tab             | `"\tindented"`     | `Mcp-Param-Text: =?base64?CWluZGVudGVk?=`       |
-| Empty string                        | `""`               | `Mcp-Param-Name: ` (empty value)                |
+| 纯 ASCII 字符串                  | `"us-west1"`       | `Mcp-Param-Region: us-west1`                    |
+| 以空格开头的字符串           | `" us-west1"`      | `Mcp-Param-Region: =?base64?IHVzLXdlc3Qx?=`     |
+| 以空格结尾的字符串          | `"us-west1 "`      | `Mcp-Param-Region: =?base64?dXMtd2VzdDEg?=`     |
+| 前后都有空格的字符串 | `" us-west1 "`     | `Mcp-Param-Region: =?base64?IHVzLXdlc3QxIA==?=` |
+| 仅包含内部空格的字符串    | `"us west 1"`      | `Mcp-Param-Region: us west 1`                   |
+| 布尔值 true                        | `true`             | `Mcp-Param-Flag: true`                          |
+| 布尔值 false                        | `false`            | `Mcp-Param-Flag: false`                         |
+| 整数                             | `42`               | `Mcp-Param-Count: 42`                           |
+| 浮点数                      | `3.14159`          | `Mcp-Param-Value: 3.14159`                      |
+| 非 ASCII 字符                | `"日本語"`         | `Mcp-Param-Text: =?base64?5pel5pys6Kqe?=`       |
+| 包含换行符的字符串                 | `"line1\nline2"`   | `Mcp-Param-Text: =?base64?bGluZTEKbGluZTI=?=`   |
+| 包含回车符的字符串         | `"line1\r\nline2"` | `Mcp-Param-Text: =?base64?bGluZTENCmxpbmUy?=`   |
+| 以 tab 开头的字符串             | `"\tindented"`     | `Mcp-Param-Text: =?base64?CWluZGVudGVk?=`       |
+| 空字符串                        | `""`               | `Mcp-Param-Name: `（空值）                |
 
 #### 类型限制违规
 
-| Test Case       | Property Type          | x-mcp-header Present | Expected Behavior                  |
+| 测试用例       | 属性类型          | 存在 x-mcp-header | 预期行为                  |
 | --------------- | ---------------------- | -------------------- | ---------------------------------- |
-| Array type      | `"type": "array"`      | Yes                  | Server MUST reject tool definition |
-| Object type     | `"type": "object"`     | Yes                  | Server MUST reject tool definition |
-| Null type       | `"type": "null"`       | Yes                  | Server MUST reject tool definition |
-| Nested property | Property inside object | Yes                  | Server MUST reject tool definition |
+| 数组类型      | `"type": "array"`      | 是                  | 客户端 MUST 拒绝工具定义 |
+| 对象类型     | `"type": "object"`     | 是                  | 客户端 MUST 拒绝工具定义 |
+| 空类型       | `"type": "null"`       | 是                  | 客户端 MUST 拒绝工具定义 |
+| 嵌套属性 | 对象内部的属性 | 是                  | 客户端 MUST 拒绝工具定义 |
 
 ### 服务器验证边界情况
 
 #### Base64 解码
 
-| Test Case                 | Header Value             | Expected Behavior                                                                                 |
+| 测试用例                 | Header 值             | 预期行为                                                                                 |
 | ------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------- |
-| Valid Base64              | `=?base64?SGVsbG8=?=`    | Server decodes to `"Hello"` and validates                                                         |
-| Invalid Base64 padding    | `=?base64?SGVsbG8?=`     | Server MUST reject with 400 and error code `-32001`; Intermediary MAY reject with 400 status code |
-| Invalid Base64 characters | `=?base64?SGVs!!!bG8=?=` | Server MUST reject with 400 and error code `-32001`; Intermediary MAY reject with 400 status code |
-| Missing prefix            | `SGVsbG8=`               | Server treats as literal value, not Base64                                                        |
-| Missing suffix            | `=?base64?SGVsbG8=`      | Server treats as literal value, not Base64                                                        |
-| Malformed wrapper         | `=?BASE64?SGVsbG8=?=`    | Server MUST accept (case-insensitive prefix)                                                      |
+| 有效的 Base64              | `=?base64?SGVsbG8=?=`    | 服务器解码为 `"Hello"` 并进行验证                                                         |
+| Base64 补位无效    | `=?base64?SGVsbG8?=`     | 服务器 MUST 拒绝，返回 400 和错误码 `-32001`；中间设备 MAY 返回 400 状态码 |
+| Base64 字符无效 | `=?base64?SGVs!!!bG8=?=` | 服务器 MUST 拒绝，返回 400 和错误码 `-32001`；中间设备 MAY 返回 400 状态码 |
+| 缺少前缀            | `SGVsbG8=`               | 服务器将其视为字面值，而不是 Base64                                                        |
+| 缺少后缀            | `=?base64?SGVsbG8=`      | 服务器将其视为字面值，而不是 Base64                                                        |
+| 包装格式错误         | `=?BASE64?SGVsbG8=?=`    | 服务器 MUST 接受（前缀大小写不敏感）                                                      |
 
 #### 空值与缺失值
 
-| Test Case                              | Scenario                    | Expected Behavior          |
+| 测试用例                              | 场景                    | 预期行为          |
 | -------------------------------------- | --------------------------- | -------------------------- |
-| Parameter with x-mcp-header is null    | `"region": null`            | Client MUST omit header    |
-| Parameter with x-mcp-header is missing | Parameter not in arguments  | Client MUST omit header    |
-| Optional parameter present             | Optional parameter provided | Client MUST include header |
+| 带 x-mcp-header 的参数为 null    | `"region": null`            | 客户端 MUST 省略 header    |
+| 带 x-mcp-header 的参数缺失 | 参数不在 arguments 中  | 客户端 MUST 省略 header    |
+| 可选参数已提供             | 已提供可选参数 | 客户端 MUST 包含 header |
 
 #### 当正文中存在值但缺少自定义头时
 
-| Test Case                              | Header Present        | Body Value                  | Expected Behavior                                                                                 |
+| 测试用例                              | 是否存在 Header        | 正文值                  | 预期行为                                                                                 |
 | -------------------------------------- | --------------------- | --------------------------- | ------------------------------------------------------------------------------------------------- |
-| Standard header omitted, value in body | No `Mcp-Name`         | `"params": {"name": "foo"}` | Server MUST reject with 400 and error code `-32001`; Intermediary MAY reject with 400 status code |
-| Custom header omitted, value in body   | No `Mcp-Param-Region` | `"region": "us-west1"`      | Server MUST reject with 400 and error code `-32001`; Intermediary MAY reject with 400 status code |
+| 标准头被省略，但正文中有值 | 没有 `Mcp-Name`         | `"params": {"name": "foo"}` | 服务器 MUST 拒绝，返回 400 和错误码 `-32001`；中间设备 MAY 返回 400 状态码 |
+| 自定义头被省略，但正文中有值   | 没有 `Mcp-Param-Region` | `"region": "us-west1"`      | 服务器 MUST 拒绝，返回 400 和错误码 `-32001`；中间设备 MAY 返回 400 状态码 |
 
 ## 参考实现
 

@@ -121,13 +121,16 @@
 
 ### Registry
 
-- [Toby Padilla](https://github.com/toby)
 - [Tadas Antanavicius](https://github.com/tadasant)
-- [Adam Jones](https://github.com/domdomegg)
 - [Radoslav (Rado) Dimitrov](https://github.com/rdimitrov)
 - [Bob Dickinson](https://github.com/BobDickinson)
 
-### MCPB（Model Context Protocol Bundle）
+#### Registry Emeritus
+
+- [Adam Jones](https://github.com/domdomegg)
+- [Toby Padilla](https://github.com/toby)
+
+### MCPB (Model Context Protocol Bundle)
 
 - [Alexander Sklar](https://github.com/asklar)
 - [Adam Jones](https://github.com/domdomegg)
@@ -190,10 +193,11 @@
 - [Shaun Smith](https://github.com/evalstate)
 - [Harvey Tuch](https://github.com/htuch)
 
-### 服务器身份工作组
+### Server Card 工作组
 
+- [Tadas Antanavicius](https://github.com/tadasant)
 - [David Soria Parra](https://github.com/dsp-ant)
-- [Nick Cooper](https://github.com/nickcoai)
+- [Sam Morrow](https://github.com/SamMorrowDrums)
 
 ### 智能体工作组
 
@@ -209,6 +213,15 @@
 ### 基元分组兴趣组
 
 - [Tapan Chugh](https://github.com/chughtapan)
+- [Sam Morrow](https://github.com/SamMorrowDrums)
+
+### 工具注释兴趣组
+
+- [Sam Morrow](https://github.com/SamMorrowDrums)
+
+### 工具范围工作组
+
+- [Sam Morrow](https://github.com/SamMorrowDrums)
 
 ## 关于本文档
 

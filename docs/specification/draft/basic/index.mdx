@@ -7,27 +7,25 @@ title: 概述
 模型上下文协议由几个关键组件组成，它们协同工作：
 
 - **基础协议**：核心 JSON-RPC 消息类型
-- **生命周期管理**：协议版本协商和按请求能力声明
-- **授权**：基于 HTTP 传输的认证和授权框架
-- **服务器功能**：由服务器公开的资源、提示和工具
-- **客户端功能**：由客户端提供的采样和根目录列表
-- **实用工具**：日志记录和参数补全等横切关注点
+- **版本与兼容性**：协议版本协商、扩展协商，以及与早期协议修订版的互操作性
+- **消息模式**：核心协议支持的消息传递模式，包括请求和响应、多轮往返请求（MRTR），以及订阅和通知
+- **授权**：用于基于 HTTP 传输的身份验证和授权框架
+- **服务器特性**：服务器暴露的资源、提示和工具
+- **客户端特性**：客户端提供的提取、采样和根目录列表
+- **实用功能**：日志记录和参数补全等横切关注点
 
-所有实现 **必须** 支持基础协议和生命周期管理
-组件。其他组件 **可以** 根据应用程序的具体需求来实现。
+所有实现 **必须** 支持基础协议、版本管理和消息模式。其他组件 **可以** 根据应用程序的具体需求进行实现。
 
-这些协议层建立了清晰的关注点分离，同时支持客户端和服务器之间的丰富
-交互。模块化设计允许实现仅支持它们所需的功能。
+这些协议层建立了清晰的关注点分离，同时支持客户端和服务器之间的丰富交互。模块化设计允许实现仅支持它们所需的功能。
 
 ## 消息
 
 MCP 客户端和服务器之间的所有消息 **必须** 遵循
-[JSON-RPC 2.0](https://www.jsonrpc.org/specification) 规范。协议定义了
-以下类型的消息：
+[JSON-RPC 2.0](https://www.jsonrpc.org/specification) 规范。协议定义了以下类型的消息：
 
 ### 请求
 
-[请求](/specification/draft/schema#jsonrpcrequest) 由客户端发送给服务器，反之亦然，以启动操作。
+[请求](/specification/draft/schema#jsonrpcrequest) 从客户端发送到服务器，用于发起操作。
 
 ```typescript
 {
@@ -68,15 +66,15 @@ MCP 客户端和服务器之间的所有消息 **必须** 遵循
 - `result` **可以** 采用任何 JSON 对象结构。
 - `result` **必须** 包含 `resultType` 字段，以指示结果的类型。
 
-##### ResultType
+##### 结果类型
 
-结果中的 `resultType` 字段表示所返回结果的类型。MCP 支持多态结果类型，
-允许服务器根据请求结果返回不同的结构。`resultType` 字段是一个字符串，客户端
-可以用它来确定如何解析和处理 `result` 对象。
+结果中的 `resultType` 字段表示所返回结果的类型。MCP 支持多态结果类型，允许服务器根据请求结果返回不同的结构。`resultType` 字段是一个字符串，客户端可以用它来确定如何解析和处理 `result` 对象。
 
 - `resultType` 为 `"complete"` 表示请求已成功完成，结果包含最终内容。
-- `resultType` 为 `"input_required"` 表示请求尚未完成，处理请求还需要更多信息。结果包含一个 `InputRequiredResult` 对象，其中包含所需的附加信息。
-- 为了向后兼容较早协议版本的服务器（这些版本不包含 `resultType`），客户端 **必须** 将缺失的 `resultType` 视为 `"complete"`。
+- `resultType` 为 `"input_required"` 表示请求尚未完成，需要更多信息来处理请求。结果包含一个 [`InputRequiredResult`](/specification/draft/basic/patterns/mrtr#inputrequiredresult) 对象，其中包含所需的附加信息。
+- 扩展 **可以** 添加额外的 `ResultType` 值。支持的 `ResultType` 值集合 **必须** 由核心协议中定义的集合以及通过能力声明的任何受支持扩展的附加值共同构成。
+- 客户端无法识别的任何 `ResultType` 值 **必须** 被视为无效。
+- 为了与实现早期协议版本且不包含 `resultType` 的服务器保持向后兼容，客户端 **必须** 将缺失的 `resultType` 视为 `"complete"`。
 
 #### 错误响应
 
@@ -100,8 +98,7 @@ MCP 客户端和服务器之间的所有消息 **必须** 遵循
 
 ### 通知
 
-[通知](/specification/draft/schema#jsonrpcnotification) 由客户端发送给服务器，反之亦然，作为单向消息。
-接收者 **不得** 发送响应。
+[通知](/specification/draft/schema#jsonrpcnotification) 由客户端发送给服务器，反之亦然，作为单向消息。接收者 **不得** 发送响应。
 
 ```typescript
 {
@@ -115,15 +112,47 @@ MCP 客户端和服务器之间的所有消息 **必须** 遵循
 
 - 通知 **不得** 包含 ID。
 
+## 消息模式
+
+模型上下文协议（MCP）支持若干种[消息模式](/specification/draft/basic/patterns)，用于定义客户端与服务器如何交互：
+
+1. **[请求和响应](/specification/draft/basic/patterns#request-and-response)**：客户端向服务器发送请求，服务器以结果或错误进行响应。
+2. **[多轮往返请求（MRTR）](/specification/draft/basic/patterns#multi-round-trip-requests)**：服务器需要额外的客户端输入（采样、提取或根）才能完成请求。
+3. **[订阅和通知](/specification/draft/basic/patterns#subscribe-and-notify)**：客户端订阅来自服务器的通知流，通知会在发生时发送。
+
+## 无状态性
+
+模型上下文协议（MCP）是一个**无状态协议**：处理请求所需的所有信息都包含在请求本身中。服务器独立处理每个请求；不应从先前的请求中推断状态，即使这些请求来自同一连接或流。
+
+具体而言：
+
+- 服务器 **不得** 依赖同一连接上的先前请求来建立上下文（例如，能力、协议版本、客户端身份）。
+  每个请求都在其 [`_meta`](#meta) 字段中提供这些元数据。
+- 服务器 **应该** 能够处理与多个任务、线程或会话相关的请求。
+- 服务器 **不应** 要求客户端复用相同的连接或进程来执行相关操作。
+- 客户端 **不应** 将单个任务、线程或会话作为 stdio 进程的生命周期边界。
+- 需要跨多个请求存在的状态（例如，长时间运行的任务、应用级句柄）**必须** 通过客户端在每个请求中传递的显式标识符来引用。
+
+<Note>
+  这意味着，像 STDIO 进程这样的打开连接并不是一次对话或会话：客户端可以在同一传输上交错发送无关请求，而服务器不得将连接或进程身份视为对话或会话连续性的替代。
+</Note>
+
+像
+[`subscriptions/listen`](/specification/draft/basic/patterns/subscriptions) 这样的长生命周期请求仍然是请求/响应模式；响应只是一个开放的通知流。其状态作用域限定于请求本身，而不是底层连接。
+
+<Info>
+  关于请求级模型如何映射到 SDK 代码的演练，请参阅
+  [架构指南](/docs/learn/architecture#example)。
+</Info>
+
 ## 授权
 
-MCP 提供了一个用于 HTTP 的 [授权](/specification/draft/basic/authorization) 框架。
+MCP 提供了一个用于 HTTP 的[授权](/specification/draft/basic/authorization)框架。
 使用基于 HTTP 传输的实现 **应该** 符合此规范，
 而使用 STDIO 传输的实现 **不应该** 遵循此规范，
 而是从环境中检索凭据。
 
-此外，客户端和服务器 **可以** 协商它们自己的自定义认证和
-授权策略。
+此外，客户端和服务器 **可以** 协商它们自己的自定义认证和授权策略。
 
 如需进一步讨论并为 MCP 认证机制的发展做出贡献，请加入
 [GitHub 讨论区](https://github.com/modelcontextprotocol/specification/discussions)
@@ -223,16 +252,14 @@ MCP 支持带有以下规则的 JSON Schema：
 
 **每请求协议字段：**
 
-每个客户端请求 **必须** 在 `_meta` 中包含以下 `io.modelcontextprotocol/*` 字段。
-服务器使用这些字段来识别客户端和正在使用的协议版本，而无需依赖任何先前的连接状态。有关版本协商规则，请参见
-[生命周期][lifecycle]。
+每个客户端请求在 `_meta` 中 **必须** 包含以下 `io.modelcontextprotocol/*` 字段。服务器使用这些字段在不依赖任何先前连接状态的情况下识别客户端和正在使用的协议版本。版本协商规则请参见[版本与兼容性][lifecycle]。
 
-| Key                                          | Type                 | Required | Description                                                 |
-| -------------------------------------------- | -------------------- | -------- | ----------------------------------------------------------- |
-| `io.modelcontextprotocol/protocolVersion`    | `string`             | Yes      | 此请求的协议版本（例如 `"DRAFT-2026-v1"`） |
-| `io.modelcontextprotocol/clientInfo`         | `Implementation`     | Yes      | 客户端名称和版本                                     |
-| `io.modelcontextprotocol/clientCapabilities` | `ClientCapabilities` | Yes      | 与此请求相关的客户端能力                |
-| `io.modelcontextprotocol/logLevel`           | `LoggingLevel`       | No       | 服务器应为此请求输出的最低日志级别   |
+| 键                                           | 类型                 | 必需 | 描述                                                 |
+| -------------------------------------------- | -------------------- | ---- | ---------------------------------------------------- |
+| `io.modelcontextprotocol/protocolVersion`    | `string`             | 是   | 此请求的协议版本（例如，`"2026-07-28"`）             |
+| `io.modelcontextprotocol/clientInfo`         | `Implementation`     | 是   | 客户端名称和版本                                       |
+| `io.modelcontextprotocol/clientCapabilities` | `ClientCapabilities` | 是   | 与此请求相关的客户端能力                               |
+| `io.modelcontextprotocol/logLevel`           | `LoggingLevel`       | 否   | 服务器应为此请求发出的最低日志级别                     |
 
 服务器 **不得** 依赖客户端未声明的能力。如果处理请求需要客户端未在
 `io.modelcontextprotocol/clientCapabilities` 中包含的能力，服务器 **必须** 返回
@@ -244,8 +271,8 @@ HTTP 上，响应状态 **必须** 为 `400 Bad Request`。
 **必须** 在 `_meta` 中包含 `io.modelcontextprotocol/subscriptionId`，以便
 客户端可以将通知与源订阅请求关联起来。
 
-[lifecycle]: /specification/draft/basic/lifecycle
-[subscriptions-listen]: /specification/draft/basic/utilities/subscriptions
+[lifecycle]: /specification/draft/basic/versioning
+[subscriptions-listen]: /specification/draft/basic/patterns/subscriptions
 
 **OpenTelemetry 追踪上下文：**
 

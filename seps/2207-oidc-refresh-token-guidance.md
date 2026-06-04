@@ -1,192 +1,182 @@
-# SEP-2207: OIDC-Flavored Refresh Token Guidance
+# SEP-2207：OIDC 风格的刷新令牌指南
 
-- **Status**: Accepted
-- **Type**: Standards Track
-- **Created**: 2026-02-04
-- **Author(s)**: Wils Dawson (@wdawson)
-- **Sponsor**: Paul Carleton (@pcarleton)
-- **PR**: #2207
+- **状态**：最终
+- **类型**：标准轨道
+- **创建时间**：2026-02-04
+- **作者**：Wils Dawson (@wdawson)
+- **赞助人**：Paul Carleton (@pcarleton)
+- **PR**：#2207
 
-## Abstract
+## 摘要
 
-This proposal provides guidance for MCP implementations regarding refresh token
-issuance and requests, particularly when Authorization Servers support the
-`offline_access` scope. The `offline_access` scope originated in OIDC but can be
-adopted by any OAuth 2.1 Authorization Server as a mechanism to let clients
-explicitly request refresh tokens. This SEP clarifies the expected behavior for
-both Authorization Servers and MCP Clients when working with this pattern.
+本提案为 MCP 实现提供关于刷新令牌
+签发和请求的指导，尤其是在授权服务器支持
+`offline_access` 范围时。`offline_access` 范围起源于 OIDC，但可被
+任何 OAuth 2.1 授权服务器采用，作为一种让客户端
+显式请求刷新令牌的机制。本 SEP 明确了在使用此模式时，
+授权服务器和 MCP 客户端的预期行为。
 
-## Motivation
+## 动机
 
-MCP's authorization mechanism is based on OAuth 2.1, but many real-world
-deployments use Authorization Servers that also implement OpenID Connect (OIDC).
-A key difference between pure OAuth and OIDC is how refresh tokens are handled:
+MCP 的授权机制基于 OAuth 2.1，但许多实际
+部署使用的授权服务器也实现了 OpenID Connect (OIDC)。
+纯 OAuth 与 OIDC 的一个关键区别在于刷新令牌的处理方式：
 
-- In **pure OAuth 2.1**, there is no standard mechanism for a client to
-  explicitly request a refresh token. The Authorization Server determines
-  whether to issue one based on the client's capabilities (e.g., the
-  `refresh_token` grant type in client metadata) and its own policies.
-- In **OIDC** (and Authorization Servers that adopt this convention), the
-  `offline_access` scope exists to allow clients to explicitly request refresh
-  tokens, in addition to the OAuth logic.
+- 在**纯 OAuth 2.1**中，没有标准机制让客户端
+  显式请求刷新令牌。授权服务器会根据客户端的能力
+  （例如客户端元数据中的
+  `refresh_token` grant type）以及自身策略决定是否签发。
+- 在 **OIDC**（以及采用这一约定的授权服务器）中，
+  `offline_access` 范围的存在是为了让客户端显式请求刷新
+  令牌，作为 OAuth 逻辑之外的补充。
 
-This creates several problems in the MCP ecosystem:
+这在 MCP 生态系统中造成了若干问题：
 
-1. **Clients aren't requesting refresh tokens**: Major MCP clients (Cursor,
-   Claude, VS Code, etc.) aren't explicitly asking for refresh tokens via the
-   `offline_access` scope because they don't know whether the Authorization
-   Server supports, expects, or requires it.
+1. **客户端没有请求刷新令牌**：主要的 MCP 客户端（Cursor、
+   Claude、VS Code 等）并没有通过 `offline_access` 范围显式请求刷新令牌，
+   因为它们不知道授权服务器是否支持、期望或要求这样做。
 
-2. **Resource servers shouldn't specify `offline_access`**: The `offline_access`
-   scope is not a resource-specific scope—it's a concern between the client and
-   Authorization Server. Including it in the `WWW-Authenticate` header's `scope`
-   parameter or in the Protected Resource Metadata's `scopes_supported` would be
-   semantically incorrect since it implies the resource _requires_ refresh
-   tokens, which it never would.
+2. **资源服务器不应指定 `offline_access`**：`offline_access`
+   范围不是资源特定范围——它是客户端与
+   授权服务器之间的问题。将其包含在 `WWW-Authenticate` 头部的 `scope`
+   参数或受保护资源元数据的 `scopes_supported` 中都
+   在语义上是不正确的，因为这暗示资源 _需要_ 刷新
+   令牌，而它从不会有这样的要求。
 
-3. **Authorization Servers can be inconsistent**: When processing an
-   authorization code grant, different Authorization Servers may have different
-   behavior when issuing refresh tokens to different clients, especially when
-   the client doesn't specify `refresh_token` as a grant type or request the
-   `offline_access` scope.
+3. **授权服务器可能不一致**：在处理
+   authorization code grant 时，不同授权服务器在向不同客户端签发刷新令牌时，
+   行为可能不同，尤其是在客户端没有将 `refresh_token`
+   指定为 grant type 或请求 `offline_access` 范围时。
 
-4. **Interoperability gap**: Without this guidance, implementations may behave
-   inconsistently, leading to poor user experience (frequent re-authentication)
-   or security issues (issuing refresh tokens to clients that can't securely
-   store them).
+4. **互操作性差距**：若没有这些指导，实现之间可能表现不一致，
+   导致较差的用户体验（频繁重新认证）
+   或安全问题（向无法安全存储的客户端签发刷新令牌）。
 
-## Specification
+## 规范
 
-### MCP Client Requirements
+### MCP 客户端要求
 
-MCP Clients that intend to use refresh tokens and are capable of storing them
-securely **SHOULD** follow these guidelines:
+打算使用刷新令牌且能够安全存储它们的 MCP 客户端
+**SHOULD** 遵循以下指南：
 
-1. **Advertise capability**: Clients **SHOULD** include `refresh_token` in their
-   `grant_types` client metadata to indicate they support refresh tokens.
+1. **声明能力**：客户端 **SHOULD** 在其
+   `grant_types` 客户端元数据中包含 `refresh_token`，以表明其支持刷新令牌。
 
-2. **Scope augmentation**: When the client desires a refresh token and the
-   Authorization Server metadata contains `offline_access` in its
-   `scopes_supported` field, the client **MAY** add the `offline_access` scope
-   to the list of scopes from the resource server before making authorization
-   requests to the Authorization Server.
+2. **范围增强**：当客户端希望获得刷新令牌且授权服务器元数据在其
+   `scopes_supported` 字段中包含 `offline_access` 时，客户端
+   **MAY** 在向授权服务器发起授权请求之前，
+   将 `offline_access` 范围添加到来自资源服务器的范围列表中。
 
-3. **No guarantee**: Clients **MUST NOT** assume that advertising support or
-   requesting `offline_access` guarantees they will receive a refresh token. The
-   Authorization Server retains discretion based on its policies.
+3. **不保证**：客户端 **MUST NOT** 假设声明支持或
+   请求 `offline_access` 就能保证获得刷新令牌。授权服务器
+   仍保有基于其策略的裁量权。
 
-### MCP Server (Resource Server) Requirements
+### MCP 服务器（资源服务器）要求
 
-MCP Servers (acting as OAuth 2.0 Protected Resources):
+MCP 服务器（作为 OAuth 2.0 受保护资源）：
 
-1. **SHOULD NOT** include `offline_access` in the `scope` parameter of
-   `WWW-Authenticate` headers, as refresh tokens are not a resource requirement.
+1. **SHOULD NOT** 在 `WWW-Authenticate` 头中的
+   `scope` 参数里包含 `offline_access`，因为刷新令牌并不是资源需求。
 
-2. **SHOULD NOT** include `offline_access` in `scopes_supported` in Protected
-   Resource Metadata, as it is not a resource-specific scope.
+2. **SHOULD NOT** 在受保护资源元数据的 `scopes_supported` 中包含 `offline_access`，
+   因为它不是资源特定范围。
 
-## Rationale
+## 理由
 
-### Why not require `offline_access` in the 401 response?
+### 为什么不在 401 响应中要求 `offline_access`？
 
-The `offline_access` scope is fundamentally different from resource-specific
-scopes. It represents a client's desire for long-lived access, not a
-requirement of the resource. Per
-[OAuth 2.1 Section 5.3.1](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-13#section-5.3.1),
-the `scope` attribute in `WWW-Authenticate` indicates "the required scope of the
-access token for accessing the requested resource." Since the resource doesn't
-require `offline_access`, including it would be semantically incorrect.
+`offline_access` 范围在本质上不同于资源特定范围。它代表客户端对长期访问的
+需求，而不是资源的要求。根据
+[OAuth 2.1 第 5.3.1 节](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-13#section-5.3.1)，
+`WWW-Authenticate` 中的 `scope` 属性表示“访问所请求资源所需的
+访问令牌范围”。由于资源并不需要 `offline_access`，将其包含进去在语义上是不正确的。
 
-### Why check client metadata for grant types? Why not always issue refresh tokens?
+### 为什么检查客户端元数据中的 grant types？为什么不总是签发刷新令牌？
 
-OAuth 2.1 requires clients to register their supported grant types. A client
-that doesn't support the `refresh_token` grant either:
+OAuth 2.1 要求客户端注册其支持的 grant types。一个不支持
+`refresh_token` grant 的客户端要么：
 
-- Cannot securely store refresh tokens
-- Has no mechanism to use them
+- 无法安全存储刷新令牌
+- 没有机制使用它们
 
-Issuing refresh tokens to such clients wastes Authorization Server resources
-(tracking tokens that will never be used) and may pose security risks if the
-tokens are leaked.
+向这类客户端签发刷新令牌会浪费授权服务器资源（跟踪永远不会被使用的令牌），并且
+如果令牌泄露，还可能带来安全风险。
 
-### Why allow `offline_access` as an alternative signal?
+### 为什么允许将 `offline_access` 作为替代信号？
 
-Some Authorization Servers—whether fully OIDC-compliant or simply adopting this
-convention—only issue refresh tokens when `offline_access` is explicitly
-requested. Supporting this pattern provides a compatible path for such
-deployments. Clients can detect Authorization Servers that support this
-convention by checking for `offline_access` in `scopes_supported` in the
-Authorization Server Metadata and adapt their behavior accordingly.
+某些授权服务器——无论是完全符合 OIDC 规范，还是只是采用了这一
+约定——只有在显式请求 `offline_access` 时才签发刷新令牌。支持这一
+模式可为这类部署提供兼容路径。客户端可以通过检查授权服务器元数据中
+`scopes_supported` 里的 `offline_access` 来检测支持这一
+约定的授权服务器，并据此调整行为。
 
-### Alternative approaches considered
+### 考虑过的替代方案
 
-1. **Mandate `offline_access` in resource responses**: Rejected because it
-   misrepresents the resource's requirements and creates an anti-pattern.
+1. **在资源响应中强制要求 `offline_access`**：被拒绝，因为这
+   误述了资源的需求，并创建了一种反模式。
 
-2. **Always issue refresh tokens**: Rejected because it ignores client
-   capabilities and Authorization Server security policies.
+2. **始终签发刷新令牌**：被拒绝，因为这忽视了客户端
+   能力和授权服务器安全策略。
 
-3. **Separate OIDC-specific specification**: Rejected in favor of a unified
-   approach that works for both pure OAuth and OIDC deployments.
+3. **单独的 OIDC 专用规范**：被拒绝，转而采用
+   适用于纯 OAuth 和 OIDC 部署的统一方案。
 
-4. **Provide guidance for Authorization Servers**: Rejected in favor of
-   relying on OAuth and OIDC specs for this guidance as it can vary.
+4. **为授权服务器提供指导**：被拒绝，转而依赖
+   OAuth 和 OIDC 规范提供此类指导，因为这可能有所不同。
 
-## Backward Compatibility
+## 向后兼容性
 
-This proposal is fully backward-compatible:
+本提案完全向后兼容：
 
-- Clients that already request `offline_access` continue to work
-- Authorization Servers that already check client capabilities continue to work
-- MCP Servers are not required to make any changes
-- The guidance is additive and does not change existing required behavior
+- 已经请求 `offline_access` 的客户端可继续正常工作
+- 已经检查客户端能力的授权服务器可继续正常工作
+- MCP 服务器不需要做任何更改
+- 该指导是增量性的，不会改变现有的必需行为
 
-Implementations that don't follow this guidance may experience suboptimal
-behavior (missing refresh tokens or unnecessary token issuance) but will remain
-functional.
+不遵循此指导的实现可能会出现次优
+行为（缺少刷新令牌或不必要的令牌签发），但仍将保持
+功能正常。
 
-## Security Implications
+## 安全影响
 
-### Positive security implications
+### 正面安全影响
 
-1. **Reduced token leakage risk**: By not issuing refresh tokens to clients that
-   don't advertise support, we reduce the risk of long-lived tokens being stored
-   insecurely.
+1. **降低令牌泄露风险**：通过不向未声明支持的客户端签发刷新令牌，我们降低了长期有效令牌
+   被不安全存储的风险。
 
-2. **Defense in depth**: The risk-based assessment step gives Authorization Servers
-   flexibility to implement additional security controls.
+2. **纵深防御**：基于风险的评估步骤让授权服务器
+   能够灵活地实施额外安全控制。
 
-### Considerations
+### 注意事项
 
-1. **Client metadata may not be sufficient**: Since client metadata is
-   self-reported, a malicious actor could register a client claiming
-   `refresh_token` grant support to obtain long-lived tokens. Authorization
-   Servers MAY use the risk-based assessment step (see Specification) to apply
-   additional restrictions—such as domain allowlists, reputation checks, or
-   verification requirements—rather than solely relying on client metadata
-   claims when deciding whether to issue refresh tokens.
+1. **客户端元数据可能不足**：由于客户端元数据是
+   自我声明的，恶意行为者可能注册一个声称支持
+   `refresh_token` grant 的客户端，以获取长期有效令牌。授权
+   服务器 MAY 使用基于风险的评估步骤（见规范）来应用额外限制——例如域名白名单、信誉检查或
+   验证要求——而不是在决定是否签发刷新令牌时仅依赖客户端元数据
+   声明。
 
-2. **Scope injection**: Clients adding `offline_access` should ensure this
-   doesn't interfere with other scope-related logic or create unexpected
-   authorization prompts.
+2. **范围注入**：添加 `offline_access` 的客户端应确保这
+   不会干扰其他与范围相关的逻辑或引发意外的
+   授权提示。
 
-## Reference Implementation
+## 参考实现
 
-Reference implementations demonstrating this guidance will be provided in the
-official MCP SDKs:
+演示此指导的参考实现将提供在
+官方 MCP SDK 中：
 
-- **TypeScript SDK**: Client-side `offline_access` scope handling
-- **Python SDK**: Client-side `offline_access` scope handling
-- **Authorization Server example**: Demonstration of client capability checking
-- **Client conformance test**: Allowing for easy validation of SDK implementations
+- **TypeScript SDK**：客户端侧 `offline_access` 范围处理
+- **Python SDK**：客户端侧 `offline_access` 范围处理
+- **授权服务器示例**：演示客户端能力检查
+- **客户端一致性测试**：便于对 SDK 实现进行简单验证
 
-Links to implementations will be added once the SEP is accepted.
+实现链接将在 SEP 被接受后添加。
 
-## Acknowledgments
+## 致谢
 
-This proposal was developed through discussion in the MCP Discord's
-authorization channel, with input from:
+本提案是在 MCP Discord 的
+授权频道讨论中形成的，并获得以下人员的意见：
 
-- Aaron Parecki (OAuth/OIDC expertise)
-- Paul Carleton (MCP authorization guidance)
-- Simon Russell (OIDC deployment experience)
+- Aaron Parecki（OAuth/OIDC 专业知识）
+- Paul Carleton（MCP 授权指导）
+- Simon Russell（OIDC 部署经验）
