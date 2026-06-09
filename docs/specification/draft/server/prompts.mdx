@@ -40,7 +40,7 @@ Model Context Protocol (MCP) 提供了一种标准化方式，使服务器能够
 
 ### 列出提示词
 
-要检索可用提示词，客户端发送 `prompts/list` 请求。此操作支持 [分页](/specification/draft/server/utilities/pagination)。
+要检索可用的提示词，客户端发送 `prompts/list` 请求。此操作支持 [分页](/specification/draft/server/utilities/pagination) 和 [缓存](/specification/draft/server/utilities/caching)。
 
 **请求：**
 
@@ -246,7 +246,7 @@ sequenceDiagram
 数据。在这种情况下，提示消息
 返回一个可由客户端获取的 URI：
 
-````json
+```json
 {
   "type": "resource_link",
   "uri": "file:///project/src/main.rs",
@@ -254,6 +254,7 @@ sequenceDiagram
   "description": "主要应用程序入口点",
   "mimeType": "text/x-rust"
 }
+```
 
 资源链接支持与常规资源相同的 [资源注释](/specification/draft/server/resources#annotations)，
 以帮助客户端理解如何使用它们。
@@ -271,7 +272,7 @@ sequenceDiagram
     "text": "资源内容"
   }
 }
-````
+```
 
 资源可以包含文本或二进制（blob）数据，并且**必须**包括：
 

@@ -97,7 +97,10 @@ sequenceDiagram
 
 ## 通知
 
-服务器可以通过 `notifications/tasks/status` 推送状态更新。客户端通过 `subscriptions/listen` 机制选择订阅这些通知。每条通知都携带完整的任务状态，从而无需额外一次 `tasks/get` 往返。
+Servers can push status updates via `notifications/tasks`. Clients opt
+into these through the `subscriptions/listen` mechanism. Each notification
+carries the full task state, eliminating the need for an extra `tasks/get`
+round-trip.
 
 轮询是默认方式。如果服务器支持通知，客户端可以改为依赖通知而不是轮询。
 
@@ -200,7 +203,8 @@ sequenceDiagram
 
 <Note>
 
-MCP Tasks 是 [核心 MCP 规范](/specification) 的一个扩展。宿主支持因客户端而异。
+MCP Tasks 是 [core MCP specification](/specification/latest) 的一个扩展。主机
+支持因客户端而异。
 
 </Note>
 

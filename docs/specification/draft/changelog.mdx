@@ -25,11 +25,15 @@ title: 主要变更
 ## 次要变更
 
 1. 为 `ClientCapabilities` 和 `ServerCapabilities` 添加 `extensions` 字段，以支持核心协议之外的可选[扩展](/docs/extensions/overview)。
-2. 为 `_meta` 键（`traceparent`、`tracestate`、`baggage`）记录 OpenTelemetry 追踪上下文传播约定 ([SEP-414](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/414))。
-3. 服务器**应当**以确定性顺序从 `tools/list` 返回工具，以支持客户端缓存并提高 LLM 提示缓存命中率。
-4. 要求 Streamable HTTP POST 请求包含标准 MCP 请求标头（`Mcp-Method`、`Mcp-Name`），并通过 `x-mcp-header` 支持从工具参数传递自定义标头 ([SEP-2243](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2243))。
-5. 通过新的 `CacheableResult` 接口，要求 `tools/list`、`prompts/list`、`resources/list`、`resources/read` 和 `resources/templates/list` 返回的结果包含 `ttlMs` 和 `cacheScope` 字段。`ttlMs` 是新鲜度提示（以毫秒为单位），允许客户端缓存响应并减少轮询；`cacheScope`（`"public"` 或 `"private"`）控制共享中介是否可以缓存该响应。这两个字段与现有的 `listChanged` 通知相辅相成 ([SEP-2549](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2549))。
-6. 将资源未找到错误码从 `-32002` 改为 `-32602`（无效参数），以符合 JSON-RPC 规范。
+2. 为 `_meta` 键（`traceparent`、`tracestate`、`baggage`）补充 OpenTelemetry 跟踪上下文传播约定文档 ([SEP-414](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/414))。
+3. 服务器 **SHOULD** 以确定性顺序返回 `tools/list` 中的工具，以支持客户端侧缓存并提高 LLM 提示缓存命中率。
+4. 对 Streamable HTTP `POST` 请求要求标准 MCP 请求标头（`Mcp-Method`、`Mcp-Name`），并通过 `x-mcp-header` 支持从工具参数传入自定义标头 ([SEP-2243](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2243))。
+5. 通过新的 `CacheableResult` 接口，要求 `tools/list`、`prompts/list`、`resources/list`、`resources/read` 和 `resources/templates/list` 返回结果时包含 `ttlMs` 和 `cacheScope` 字段。`ttlMs` 是以毫秒为单位的新鲜度提示，允许客户端缓存响应并减少轮询；`cacheScope`（`"public"` 或 `"private"`）控制共享中介是否可以缓存响应。这两个字段是对现有 `listChanged` 通知的补充 ([SEP-2549](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2549))。
+6. 将资源未找到错误码从 `-32002` 改为 `-32602`（无效参数），以与 JSON-RPC 规范保持一致。
+7. 授权服务器 **SHOULD** 按 [RFC 9207](https://datatracker.ietf.org/doc/html/rfc9207) 在授权响应中包含 `iss` 参数，且 MCP 客户端 **MUST** 在兑换授权码之前，验证出现的 `iss` 是否与已记录的颁发者一致 ([SEP-2468](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2468))。
+8. 要求 MCP 客户端在动态客户端注册期间指定适当的 `application_type`，以避免 OpenID Connect 重定向 URI 冲突 ([SEP-837](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/837))。
+9. 明确客户端凭据与颁发它们的授权服务器绑定：客户端 **MUST** 按颁发者标识符为持久化凭据建立索引，**MUST NOT** 将其与不同的授权服务器复用，并且在授权服务器变更时 **MUST** 重新注册 ([SEP-2352](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2352))。
+10. 放宽 `inputSchema` 和 `outputSchema`，允许任意 JSON Schema 2020-12 关键字，并允许 `structuredContent` 使用任意 JSON 值。新增 `$ref` 解析要求以及组合关键字资源边界 ([SEP-2106](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2106))。
 
 ## 已弃用
 
@@ -52,6 +56,13 @@ title: 主要变更
    ([SEP-2596](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2596))。
    省略该字段或使用 `"none"`；这些值最迟将在
    Sampling 功能本身移除时一并删除。
+
+4. 将 OAuth 2.0 动态客户端注册协议
+   ([RFC7591](https://datatracker.ietf.org/doc/html/rfc7591)) 作为客户端注册
+   机制弃用，改用
+   [Client ID Metadata Documents](/specification/draft/basic/authorization/client-registration#client-id-metadata-documents)
+   ([PR #2858](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2858))。
+   这仍然可用于与不支持 Client ID Metadata Documents 的授权服务器保持向后兼容。
 
 ## 其他 schema 变更
 

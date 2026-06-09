@@ -31,8 +31,8 @@ title: 发现
 
 ## 响应
 
-服务器将返回其支持的协议版本、能力和
-标识：
+服务器会返回其支持的协议版本、能力和
+标识。此操作支持 [缓存](/specification/draft/server/utilities/caching)。
 
 ```json
 {
@@ -49,7 +49,9 @@ title: 发现
       "name": "ExampleServer",
       "version": "1.0.0"
     },
-    "instructions": "此服务器提供天气和资源实用工具。"
+    "instructions": "This server provides weather and resource utilities.",
+    "ttlMs": 3600000,
+    "cacheScope": "public"
   }
 }
 ```

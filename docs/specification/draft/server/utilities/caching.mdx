@@ -4,13 +4,15 @@ title: 缓存
 
 <div id="enable-section-numbers" />
 
-模型上下文协议（MCP）支持对列表和资源读取结果进行缓存。这使客户端能够缓存响应并减少不必要的重复获取。
-缓存与[变更通知](#interaction-with-notifications)是互补的——两种机制可以共存。
+模型上下文协议（MCP）支持对某些结果进行缓存。这使客户端能够缓存响应并减少不必要的重复获取。
+缓存与[变更通知](#interaction-with-notifications)是互补的——两种
+机制可以共存。
 
 ## 可缓存结果
 
 服务器 MUST 在以下操作返回的结果中包含缓存提示：
 
+- `server/discover`
 - `tools/list`
 - `prompts/list`
 - `resources/list`
@@ -21,8 +23,8 @@ title: 缓存
 
 MCP 中的可缓存结果使用两个字段向客户端提供缓存提示：
 
-- <b>生存时间（TTL）字段</b>，`ttlMs`，表示客户端 MAY 认为结果保持新鲜的时长。
-- <b>缓存范围字段</b>，`cacheScope`，表示缓存响应的预期作用范围，可以是 `"public"` 或 `"private"`。
+- <b>生存时间（TTL）字段</b>，`ttlMs`，是一个以毫秒为单位的整数值，用于指定客户端 MAY 将结果视为新鲜的时长。
+- <b>缓存范围字段</b>，`cacheScope`，表示缓存响应的预期范围，取值可以是 `"public"` 或 `"private"`。
 
 ### 生存时间（TTL）字段
 
@@ -121,12 +123,16 @@ sequenceDiagram
 - 需要完整列表一致性快照的客户端 **SHOULD** 从头开始重新获取（不带游标）。
 - 如果某个游标变得无效（例如，服务器对之前有效的游标返回错误），客户端 **SHOULD** 丢弃所有已缓存页面并从头开始重新获取。
 
+服务器 **MUST** 将相同的 `cacheScope` 应用于给定列表请求的所有响应页。例如，如果 `tools/list` 响应的第一页具有
+`cacheScope: "private"`，则该请求的后续所有页面 **MUST** 也为
+`"private"`。
+
 ## 安全注意事项
 
 `cacheScope` 为 `"public"` 表示响应不包含用户特定数据，并且可以安全共享。服务器 MUST 意识到，带有 `"public"` `cacheScope` 的响应即使来自经过身份验证的端点，也可能在调用者之间共享。例如，来自经过身份验证的 `tools/list` 调用且 `cacheScope` 为 `"public"` 的结果，可能会被客户端缓存，并可能在初始请求的授权上下文之外共享。（即，不同的访问令牌可以利用同一个缓存）。
 
 服务器实现者：
 
-- should 确保 `cacheScope` 正确反映原语的预期可见性。
+- 应确保 `cacheScope` 正确反映原语的预期可见性。
 - MUST 对每个原语应用适当的访问控制，且 MUST NOT 仅依赖
   `cacheScope` 来防止对原语的未授权访问。

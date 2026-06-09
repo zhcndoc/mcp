@@ -14,12 +14,12 @@ sequenceDiagram
     participant Client
     participant Server
 
-    Client->>Server: request (with `_meta`)
-    alt server supports requested version
-        Server-->>Client: result
-    else version unsupported
+    Client->>Server: 请求（带有 `_meta`）
+    alt 服务器支持所请求的版本
+        Server-->>Client: 结果
+    else 版本不受支持
         Server-->>Client: UnsupportedProtocolVersionError
-        Note over Client,Server: Client retries with a mutually supported version
+        Note over Client,Server: 客户端使用双方都支持的版本重试
     end
 ```
 
@@ -45,7 +45,7 @@ sequenceDiagram
   "id": 1,
   "error": {
     "code": -32004,
-    "message": "Unsupported protocol version",
+    "message": "不支持的协议版本",
     "data": {
       "supported": ["2026-07-28", "2025-11-25"],
       "requested": "1900-01-01"
@@ -62,10 +62,15 @@ sequenceDiagram
 
 ## 扩展协商
 
-客户端和服务器可以协商支持核心协议之外的可选[扩展](/docs/extensions/overview)。扩展在能力的 `extensions` 字段中声明，该字段是一个从扩展标识符到各自设置对象的映射。
+客户端和服务器可以协商对核心协议之外的可选
+[扩展](/docs/extensions/overview) 的支持。扩展
+会在能力的 `extensions` 字段中声明，该字段是一个从
+扩展标识符到各扩展设置对象的映射。扩展标识符
+**MUST** 遵循带有强制前缀的
+[`_meta` 键命名规则](/specification/draft/basic/index#meta)。
 
 以下是一个声明了
-[MCP Apps extension](/extensions/apps/overview) 的客户端示例，其标识符为 `io.modelcontextprotocol/ui`：
+[MCP Apps 扩展](/extensions/apps/overview) 的客户端示例，其标识符为 `io.modelcontextprotocol/ui`：
 
 ```json
 {
@@ -80,7 +85,7 @@ sequenceDiagram
 }
 ```
 
-以下是一个 [Tasks extension](/extensions/tasks/overview) 的示例，其标识符为 `io.modelcontextprotocol/tasks`：
+以下是一个 [Tasks 扩展](/extensions/tasks/overview) 的示例，其标识符为 `io.modelcontextprotocol/tasks`：
 
 ```json
 {
@@ -114,19 +119,21 @@ sequenceDiagram
 
 时代判断是服务器的属性，而不是单个请求的属性。客户端 **SHOULD** 在服务器进程（stdio）或源站（HTTP）生命周期内缓存该结果，并 **MAY** 将其持久化到同一服务器配置的重启之间；如果缓存的假设之后失败，则重新探测。
 
+一个仅支持[现代](#terminology)版本的服务器 **SHOULD** 在其对任何传输上的 `initialize` 请求返回的任何错误中写明其支持的协议版本；传统客户端没有向前回退机制，而这条消息可能是它们能够向用户呈现的唯一诊断信息。
+
 ### 兼容性矩阵
 
 下表总结了客户端与服务器各时代组合时的预期结果：
 
-| 客户端   | 服务器   | 结果                                                                                                                                                                                                                                                                                                                                         |
-| -------- | -------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 现代   | 现代   | 正常工作。`server/discover` 可选；版本不匹配会表现为 `UnsupportedProtocolVersionError`，客户端会重试一个双方都支持的版本。                                                                                                                                                                                                                         |
-| 现代   | 传统   | 失败。服务器可能以实现定义的错误拒绝请求、保持静默，甚至以传统语义处理一个时代模糊的方法。在 stdio 上，客户端 **SHOULD** 先发送 `server/discover` 以确定性地失败；随后客户端会向用户呈现可操作的错误。 |
-| 双时代 | 现代   | 正常工作。stdio 探测返回 `DiscoverResult`（或 `UnsupportedProtocolVersionError`）；在 HTTP 上，首个现代请求成功或返回现代错误。客户端保持现代模式。                                                                                                                                                        |
-| 双时代 | 传统   | 正常工作。stdio：探测返回非现代错误或超时，客户端回退到 `initialize`。HTTP：现代请求返回 `4xx`，且响应体中没有可识别的现代错误，客户端回退到 `initialize`（并且可能进一步回退到已弃用的 HTTP+SSE 传输）。                                             |
-| 传统   | 现代   | 失败。`initialize` 是未知方法：服务器返回 `Method not found`（`-32601`）；在 HTTP 上，这会是一个 `404`，其响应体中包含 JSON-RPC 错误。传统客户端没有前向回退机制。现代服务器 **SHOULD** 在错误消息中包含其支持的协议版本，因为传统客户端会将其展示给用户。 |
-| 传统   | 双时代 | 正常工作。服务器响应 `initialize`，并根据协商出的传统修订版为客户端提供服务。                                                                                                                                                                                                                                       |
-| 传统   | 传统   | 按传统修订版正常工作；超出本文档范围。                                                                                                                                                                                                                                                                         |
+| Client   | Server   | Outcome                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| -------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Modern   | Modern   | 可工作。`server/discover` 是可选的；版本不匹配会表现为 `UnsupportedProtocolVersionError`，客户端会使用双方都支持的版本重试。                                                                                                                                                                                                                                                                                                                                                                                                         |
+| Modern   | Legacy   | 失败。服务器可能以实现定义的错误拒绝请求、保持静默，或者甚至按传统语义处理一个时代不明确的方法。在 stdio 上，客户端 **SHOULD** 先发送 `server/discover` 以确定性地失败；随后客户端向用户展示可操作的错误。                                                                                                                                                                                                                                                                                             |
+| Dual-era | Modern   | 可工作。stdio 探测返回 `DiscoverResult`（或 `UnsupportedProtocolVersionError`）；在 HTTP 上，第一个现代请求成功或返回现代错误。客户端保持现代模式。                                                                                                                                                                                                                                                                                                                                                                                  |
+| Dual-era | Legacy   | 可工作。stdio：探测返回非现代错误或超时，客户端回退到 `initialize`。HTTP：现代请求返回 `4xx`，且响应体中没有可识别的现代错误，客户端回退到 `initialize`（并且在必要时进一步回退到已废弃的 HTTP+SSE 传输）。                                                                                                                                                                                                                                                                                         |
+| Legacy   | Modern   | 失败。stdio：服务器以 JSON-RPC 错误拒绝 `initialize`；具体错误码由实现决定（`initialize` 是未知方法，且请求还缺少必需的 `_meta` 字段）。HTTP：请求缺少必需的头部，并根据 [server validation](/specification/draft/basic/transports/streamable-http#server-validation) 被拒绝为 `400 Bad Request`（处于已废弃 HTTP+SSE 传输上的客户端则会在其初始 `GET` 时失败）。传统客户端没有向前回退机制。 |
+| Legacy   | Dual-era | 可工作。服务器响应 `initialize`，并根据协商得到的传统修订版为客户端提供服务。                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| Legacy   | Legacy   | 根据传统修订版可工作；不在本文档范围内。                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
 
 一个双时代 **server** 会根据客户端的打开方式选择其行为：
 

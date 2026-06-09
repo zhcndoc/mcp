@@ -464,9 +464,9 @@ Mcp-Param-{Name}: =?base64?{Base64EncodedValue}?=
 
 </Note>
 
-当因头验证失败而拒绝请求时，服务器 **MUST**
-返回 HTTP 状态 `400 Bad Request`，并且 **SHOULD** 使用以下错误码包含一个 JSON-RPC 错误
-响应：
+当由于头验证失败而拒绝请求时，服务器 **MUST**
+返回 HTTP 状态 `400 Bad Request`，并且 **MUST** 使用以下错误码
+包含一个 JSON-RPC 错误响应：
 
 | Code     | Name             | Description                                                                                                            |
 | ---------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------- |
@@ -513,81 +513,63 @@ JSON-RPC 错误响应。
 
 </Note>
 
-## 向后兼容性
+## Backward Compatibility
 
-支持现代（按请求元数据）MCP 版本和需要 `initialize` 握手的旧版的客户端 **MAY** 通过先尝试现代请求来检测服务器实现的是哪个时代。在
-`400 Bad Request` 时，客户端 **SHOULD** 在回退前检查响应正文：
-现代服务器也会对
-[`UnsupportedProtocolVersionError`][unsupported-version]、
-`MissingRequiredClientCapabilityError` 和头验证失败使用 `400`。
+Support for modern MCP versions (as indicated by request metadata) and older versions that require an `initialize` handshake **MAY** be detected by clients by first attempting a modern request to see which era the server implements. On `400 Bad Request`, clients **SHOULD** inspect the response body before falling back: modern servers also use `400` for [`UnsupportedProtocolVersionError`][unsupported-version], `MissingRequiredClientCapabilityError`, and header validation failures.
 
-- 如果正文包含可识别的现代 JSON-RPC 错误，则表示服务器支持
-  现代版本的 MCP——应改用宣传的 `supported` 版本重试
-  或修正请求，而不是回退。
-- 如果正文为空或不是可识别的现代 JSON-RPC 错误，则
-  回退到 `initialize`，并在后续请求中继续使用旧版。
+- If the body contains a recognizable modern JSON-RPC error, the server supports a modern MCP version — retry using the advertised `supported` version or fix the request, rather than falling back.
+- If the body is empty or not a recognizable modern JSON-RPC error, fall back to `initialize` and continue using the older version for subsequent requests.
 
-参见 [版本管理：向后兼容性][lifecycle-compat]，了解该时代模型
-以及面向实现者的兼容性矩阵。
+See [Versioning: Backward Compatibility][lifecycle-compat] for the era model and implementation-oriented compatibility matrix.
 
-### 更早的 Streamable HTTP 修订版
+### Earlier Streamable HTTP Revisions
 
-协议版本 `2025-03-26` 到 [`2025-11-25`](/specification/2025-11-25/basic/transports)
-也使用了 Streamable HTTP 传输，但形式不同：服务器可以通过
-`Mcp-Session-Id` 头分配会话（通过 HTTP DELETE 终止），客户端可以通过 HTTP GET 打开
-一个独立的 SSE 流来接收服务器发起的消息，
-服务器可以在 SSE 流上发送 JSON-RPC _请求_，并且流可以通过
-`Last-Event-ID` 恢复。这些机制都不属于本修订版。
+Protocol versions `2025-03-26` through [`2025-11-25`](/specification/2025-11-25/basic/transports) also used the Streamable HTTP transport, but in a different form: servers could assign sessions via an `Mcp-Session-Id` header (terminated via HTTP DELETE), clients could open a separate SSE stream with HTTP GET to receive server-initiated messages, servers could send JSON-RPC _requests_ on the SSE stream, and the stream could be resumed via `Last-Event-ID`. None of these mechanisms are part of this revision.
 
-仅支持此修订版并收到来自旧客户端此类流量的服务器 **SHOULD** 如下响应：
+Servers that only support this revision and receive such traffic from older clients **SHOULD** respond as follows:
 
-- 向 MCP 端点发送 HTTP GET 或 DELETE：响应
-  `405 Method Not Allowed`。
-- 请求中的 `Mcp-Session-Id` 头：忽略它，不要生成或回显
-  会话 ID。
-- `Last-Event-ID` 头：忽略它；流不可恢复。
+- HTTP GET or DELETE to the MCP endpoint: respond with `405 Method Not Allowed`.
+- `Mcp-Session-Id` header in the request: ignore it; do not generate or echo session IDs.
+- `Last-Event-ID` header: ignore it; the stream is not resumable.
 
-需要与使用这些协议版本的对端互操作的服务器和客户端，
-除了使用上文描述的版本协商回退之外，还应实现对应
-修订版中描述的行为（例如，
-[2025-11-25: Streamable HTTP](/specification/2025-11-25/basic/transports#streamable-http)）。
+Servers and clients that need to interoperate with peers using these protocol versions should also implement the behavior described in the corresponding revision, in addition to the version-negotiation fallback described above (for example, [2025-11-25: Streamable HTTP](/specification/2025-11-25/basic/transports#streamable-http)).
 
-### HTTP+SSE 传输（2024-11-05）
+### HTTP+SSE Transport (2024-11-05)
 
 <Warning>
-  **已弃用**：来自协议版本
-  2024-11-05 的 [HTTP+SSE 传输][http-sse] 自协议版本 `2025-03-26` 起已被弃用，并
-  根据 [功能生命周期策略](/community/feature-lifecycle#deprecating-a-feature)
-  （[SEP-2596](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2596)）被归类为已弃用。
-  新实现 **SHOULD NOT** 采用它；现有实现 **SHOULD** 迁移到 [Streamable
-  HTTP](/specification/draft/basic/transports/streamable-http)。它有望在未来修订版中被移除；请参见
-  [已弃用功能注册表](/specification/draft/deprecated)。
+  **Deprecated**: The [HTTP+SSE transport][http-sse] from protocol version
+  2024-11-05 has been deprecated since protocol version `2025-03-26` and is
+  classified as deprecated under the [Feature Lifecycle Policy](/community/feature-lifecycle#deprecating-a-feature)
+  ([SEP-2596](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2596)).
+  New implementations **SHOULD NOT** adopt it; existing implementations **SHOULD**
+  migrate to [Streamable HTTP](/specification/draft/basic/transports/streamable-http). It is expected
+  to be removed in a future revision; see the
+  [Deprecated Features Registry](/specification/draft/deprecated).
 </Warning>
 
-客户端和服务器可以按如下方式保持与已弃用的
-[HTTP+SSE 传输][http-sse]（来自
-协议版本 2024-11-05）的向后兼容：
+Clients and servers can maintain backward compatibility with the deprecated
+[HTTP+SSE transport][http-sse] (from protocol version 2024-11-05) as follows:
 
-**想要支持旧客户端的服务器** 应该：
+**Servers wanting to support older clients** should:
 
-- 继续同时托管旧传输的 SSE 和 POST 端点，
-  以及为 Streamable HTTP 传输定义的新 “MCP endpoint”。
-  - 也可以将旧的 POST 端点与新的 MCP
-    endpoint 合并，但这可能会引入不必要的复杂性。
+- Continue to host both the old transport's SSE and POST endpoints,
+  as well as the new “MCP endpoint” defined for Streamable HTTP transport.
+  - It is also possible to merge the old POST endpoint with the new MCP
+    endpoint, but this may introduce unnecessary complexity.
 
-**想要支持旧服务器的客户端** 应该：
+**Clients wanting to support older servers** should:
 
-1. 接受来自用户的 MCP 服务器 URL，该 URL 可能指向使用旧传输或新传输的服务器。
-2. 尝试向该服务器 URL 发送 POST 请求，并使用如上所定义的 `Accept` 头：
-   - 如果成功，客户端可以假定这是支持
-     新 Streamable HTTP 传输的服务器。
-   - 如果失败并返回 HTTP 状态码 `400 Bad Request`、`404 Not Found`
-     或 `405 Method Not Allowed`，且响应正文不是
-     可识别的现代 JSON-RPC 错误（现代服务器会为不支持的版本、未知方法或头验证失败返回此类错误）：
-     - 向服务器 URL 发起 GET 请求，期望这会打开
-       一个 SSE 流，并将 `endpoint` 事件作为第一个事件返回。
-     - 当收到 `endpoint` 事件时，客户端可以假定这是
-       运行旧 HTTP+SSE 传输的服务器，并应在后续所有通信中使用该
-       传输。
+1. Accept an MCP server URL from the user, which may point to a server using either the old or new transport.
+2. Attempt a POST request to that server URL, using the `Accept` header as defined above:
+   - If successful, the client can assume this is a server that supports
+     the new Streamable HTTP transport.
+   - If it fails with HTTP status code `400 Bad Request`, `404 Not Found`
+     or `405 Method Not Allowed`, and the response body is not a
+     recognizable modern JSON-RPC error (such errors are returned by modern servers for unsupported versions, unknown methods, or header validation failures):
+     - Issue a GET request to the server URL, expecting this to open
+       an SSE stream and return an `endpoint` event as the first event.
+     - When the `endpoint` event is received, the client can assume this is
+       a server running the old HTTP+SSE transport and should use that
+       transport for all subsequent communication.
 
 [lifecycle-compat]: /specification/draft/basic/versioning#backward-compatibility-with-initialization-based-versions

@@ -149,10 +149,11 @@ sequenceDiagram
 
 每项能力都会在每个请求的基础上解锁特定的协议功能。例如：
 
-- 已实现的 [服务器功能](/specification/draft/server) 必须在服务器能力中公布
-- 接收资源更新通知需要打开一个带有所需资源 URI 的
+- 已实现的 [服务器功能](/specification/draft/server) 必须在
+  服务器的能力中进行声明
+- 接收资源更新通知需要打开一个
+  带有所需资源 URI 的
   [`subscriptions/listen`](/specification/draft/basic/patterns/subscriptions) 流
 - [工具](/specification/draft/server/tools) 调用要求服务器声明工具能力
-- [采样](/specification/draft/client/sampling) 要求客户端在其能力中声明支持
 
 这种能力协商确保客户端和服务器对支持的功能有清晰的理解，同时保持协议的可扩展性。

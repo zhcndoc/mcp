@@ -28,11 +28,11 @@ MCP 使用标准化的授权流程在 MCP 客户端和 MCP 服务器之间建立
 
 ## 授权流程：逐步指南
 
-让我们 walkthrough 当客户端想要连接到受保护的 MCP 服务器时会发生什么：
+让我们逐步了解当客户端想要连接到受保护的 MCP 服务器时会发生什么：
 
 <Steps>
 <Step title="初始握手">
-当您的 MCP 客户端首次尝试连接时，您的服务器会响应 `401 Unauthorized` 并告诉客户端在哪里可以找到授权信息，这些信息捕获在 [受保护资源元数据 (PRM) 文档](https://datatracker.ietf.org/doc/html/rfc9728) 中。该文档由 MCP 服务器托管，遵循可预测的路径模式，并在 `WWW-Authenticate`  header 中的 `resource_metadata` 参数中提供给客户端。
+当您的 MCP 客户端首次尝试连接时，您的服务器会响应 `401 Unauthorized` 并告诉客户端在哪里可以找到授权信息，这些信息捕获在 [受保护资源元数据 (PRM) 文档](https://datatracker.ietf.org/doc/html/rfc9728) 中。该文档由 MCP 服务器托管，遵循可预测的路径模式，并在 `WWW-Authenticate` header 中的 `resource_metadata` 参数中提供给客户端。
 
 ```http
 HTTP/1.1 401 Unauthorized
@@ -45,7 +45,7 @@ WWW-Authenticate: Bearer realm="mcp",
 </Step>
 
 <Step title="受保护资源元数据发现">
-有了指向 PRM 文档的 URI 指针，客户端将获取元数据以了解授权服务器、支持的作用域和其他资源信息。数据通常封装在 JSON  blob 中，类似于以下内容。
+有了指向 PRM 文档的 URI 指针，客户端将获取元数据以了解授权服务器、支持的作用域和其他资源信息。数据通常封装在 JSON blob 中，类似于以下内容。
 
 ```json
 {
@@ -183,7 +183,7 @@ http://localhost:8080/realms/master/.well-known/openid-configuration
 
 创建作用域后，确保将其类型分配为 **Default** 并翻转 **Include in token scope** 开关，因为这将需要用于令牌验证。
 
-现在让我们也为 Keycloak 颁发的令牌设置一个 **audience**。配置 audience 很重要，因为它将预期的目的地直接嵌入到颁发的访问令牌中。这有助于您的 MCP 服务器验证它获得的令牌实际上是 meant for it 而不是其他 API。这对于帮助避免令牌传递场景至关重要。
+现在让我们也为 Keycloak 颁发的令牌设置一个 **audience**。配置 audience 很重要，因为它将预期的目的地直接嵌入到颁发的访问令牌中。这有助于您的 MCP 服务器验证它获得的令牌实际上是专门为它而不是其他 API 签发的。这对于帮助避免令牌传递场景至关重要。
 
 为此，打开您的 `mcp:tools` 客户端作用域并点击 **Mappers**，然后点击 **Configure a new mapper**。选择 **Audience**。
 
@@ -227,7 +227,7 @@ http://localhost:8080/realms/master/.well-known/openid-configuration
 1. 启用 **Client authentication** 并点击 **Next**。
 1. 点击 **Save**。
 
-值得注意的是，令牌内省只是验证令牌的可用方法之 _一_。这也可以借助特定于每种语言和平台的独立库来完成。
+值得注意的是，令牌内省只是验证令牌的可用方法之一。这也可以借助特定于每种语言和平台的独立库来完成。
 
 当您打开客户端详细信息时，转到 **Credentials** 并注意 **Client Secret**。
 
@@ -615,9 +615,9 @@ app.listen(CONFIG.port, CONFIG.host, () => {
 
 <Tab title='Python'>
 
-您可以在 [示例存储库](https://github.com/localden/min-py-mcp-auth) 中查看完整的 Python 项目。
+您可以在 [示例存储库](https://github.com/modelcontextprotocol/python-sdk/tree/main/examples/servers/simple-auth) 中查看完整的 Python 项目。
 
-为了简化我们的授权交互，在 Python 场景中我们依赖 [FastMCP](https://gofastmcp.com/getting-started/welcome)。许多关于授权的约定，如端点和令牌验证逻辑， Across 语言是一致的，但有些提供了更简单的方法将它们集成到生产场景中。
+为了简化我们的授权交互，在 Python 场景中我们依赖 [FastMCP](https://gofastmcp.com/getting-started/welcome)。许多关于授权的约定，如端点和令牌验证逻辑，在不同语言中是一致的，但有些提供了更简单的方法将它们集成到生产场景中。
 
 在编写实际服务器之前，我们需要在 `config.py` 中设置我们的配置 - 内容完全基于您的本地服务器设置：
 
@@ -1026,7 +1026,7 @@ app.Run(serverUrl);
 
 为了测试目的，我们将使用 [Visual Studio Code](https://code.visualstudio.com)，但任何支持 MCP 和新授权规范的客户端都适用。
 
-按 <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> 并选择 **MCP: Add server...**。选择 **HTTP** 并输入 `http://localhost:3000`。给服务器起一个在 Visual Studio Code 内部使用的唯一名称。在 `mcp.json` 中你现在应该能看到如下条目：
+按 <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd> 并选择 **MCP: 添加服务器...**。选择 **HTTP** 并输入 `http://localhost:3000`。给服务器起一个在 Visual Studio Code 内部使用的唯一名称。在 `mcp.json` 中你现在应该能看到如下条目：
 
 ```json
 "my-mcp-server-18676652": {

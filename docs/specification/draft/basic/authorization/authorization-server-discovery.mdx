@@ -1,0 +1,121 @@
+---
+title: 授权服务器发现
+---
+
+<div id="enable-section-numbers" />
+
+本文档描述了 MCP 服务器向 MCP 客户端公布其关联授权服务器的机制，以及 MCP 客户端用于确定授权服务器端点和受支持能力的发现过程。
+
+## 授权服务器位置
+
+MCP 服务器 **必须** 实现 OAuth 2.0 受保护资源元数据（[RFC9728](https://datatracker.ietf.org/doc/html/rfc9728)）规范，以指示授权服务器的位置。MCP 服务器返回的受保护资源元数据文档 **必须** 包含 `authorization_servers` 字段，且至少包含一个授权服务器。
+
+`authorization_servers` 的具体用途超出本规范的范围；实现者应查阅 OAuth 2.0 受保护资源元数据（[RFC9728](https://datatracker.ietf.org/doc/html/rfc9728)）以获取实现细节方面的指导。
+
+实现者应注意，受保护资源元数据文档可以定义多个授权服务器。选择使用哪个授权服务器的责任由 MCP 客户端承担，并应遵循
+[RFC9728 第 7.6 节“授权服务器”](https://datatracker.ietf.org/doc/html/rfc9728#name-authorization-servers) 中规定的指南。
+
+当 `authorization_servers` 中列出多个授权服务器时，每个都是独立的 OAuth 2.0 授权服务器。与
+[RFC 6749 第 2.2 节](https://datatracker.ietf.org/doc/html/rfc6749#section-2.2) 一致，客户端标识符对签发它们的授权服务器是唯一的。客户端 **必须** 针对每个授权服务器维护独立的注册状态（客户端凭据、令牌），并且 **不得** 假定对某个授权服务器有效的凭据会被另一个授权服务器接受。关于如何将客户端凭据与签发它们的授权服务器关联的要求，请参见
+[授权服务器绑定](/specification/draft/basic/authorization/client-registration#authorization-server-binding)。
+
+## 受保护资源元数据发现要求
+
+MCP 服务器 **必须** 实现以下发现机制之一，以向 MCP 客户端提供授权服务器位置信息：
+
+1. **WWW-Authenticate 标头**：在返回 `401 Unauthorized` 响应时，如 [RFC9728 第 5.1 节](https://datatracker.ietf.org/doc/html/rfc9728#name-www-authenticate-response) 所述，在 `WWW-Authenticate` HTTP 标头中的 `resource_metadata` 下包含资源元数据 URL。
+
+2. **Well-Known URI**：按照 [RFC9728](https://datatracker.ietf.org/doc/html/rfc9728) 的规定，在一个 well-known URI 上提供元数据。这可以是：
+   - 位于服务器 MCP 端点的路径下：`https://example.com/public/mcp` 可在 `https://example.com/.well-known/oauth-protected-resource/public/mcp` 提供元数据
+   - 位于根路径：`https://example.com/.well-known/oauth-protected-resource`
+
+MCP 客户端 **必须** 同时支持这两种发现机制，并在存在解析后的 `WWW-Authenticate` 标头时使用其中的资源元数据 URL；否则，**必须** 按照上面列出的顺序回退到构造并请求对应的 well-known URI。
+
+MCP 客户端 **必须** 能够解析 `WWW-Authenticate` 标头，并对来自 MCP 服务器的 `HTTP 401 Unauthorized` 响应作出适当处理。
+
+服务器还可以在 `WWW-Authenticate` 挑战中包含 `scope` 参数，以指示访问该资源所需的作用域；作用域语义及相关客户端行为在 [作用域选择策略](/specification/draft/basic/authorization#scope-selection-strategy) 一节中定义。
+
+## 授权服务器元数据发现
+
+MCP 使用
+[RFC 8414 第 3.1 节](https://datatracker.ietf.org/doc/html/rfc8414#section-3.1)
+中定义的默认 `oauth-authorization-server` well-known URI 后缀进行授权服务器元数据发现。MCP 不定义应用特定的 well-known URI 后缀。
+
+为处理不同的颁发者 URL 格式，并确保与 OAuth 2.0 授权服务器元数据和 OpenID Connect Discovery 1.0 规范的互操作性，MCP 客户端 **必须** 在发现授权服务器元数据时尝试多个 well-known 端点。
+
+该发现方式基于
+[RFC 8414 第 3.1 节“Authorization Server Metadata Request”](https://datatracker.ietf.org/doc/html/rfc8414#section-3.1)
+用于 OAuth 2.0 授权服务器元数据发现，以及
+[RFC 8414 第 5 节“Compatibility Notes”](https://datatracker.ietf.org/doc/html/rfc8414#section-5)
+用于 OpenID Connect Discovery 1.0 互操作性。
+
+对于包含路径组件的颁发者 URL
+（例如，`https://auth.example.com/tenant1`），客户端 **必须**
+按以下优先级顺序尝试端点：
+
+1. 带路径插入的 OAuth 2.0 授权服务器元数据：
+   `https://auth.example.com/.well-known/oauth-authorization-server/tenant1`
+2. 带路径插入的 OpenID Connect Discovery 1.0：
+   `https://auth.example.com/.well-known/openid-configuration/tenant1`
+3. OpenID Connect Discovery 1.0 路径追加：
+   `https://auth.example.com/tenant1/.well-known/openid-configuration`
+
+对于不包含路径组件的颁发者 URL
+（例如，`https://auth.example.com`），客户端 **必须** 尝试：
+
+1. OAuth 2.0 授权服务器元数据：
+   `https://auth.example.com/.well-known/oauth-authorization-server`
+2. OpenID Connect Discovery 1.0：
+   `https://auth.example.com/.well-known/openid-configuration`
+
+在检索到元数据文档后，MCP 客户端 **必须** 按 [RFC8414 第 3.3 节](https://datatracker.ietf.org/doc/html/rfc8414#section-3.3) 或 [OpenID Connect Discovery 第 4.3 节](https://openid.net/specs/openid-connect-discovery-1_0.html#ProviderConfigurationValidation) 的要求进行验证：文档中的 `issuer` 值 **必须** 与用于构造 well-known URL 的颁发者标识符完全一致。如果二者不同，客户端 **不得** 使用该元数据。例如，从 `https://attacker.example/.well-known/oauth-authorization-server` 获取且包含 `"issuer": "https://honest.example"` 的文档 **必须** 被拒绝。
+
+## 序列图
+
+下图展示了一个示例流程：
+
+```mermaid
+sequenceDiagram
+    participant C as 客户端
+    participant M as MCP 服务器（资源服务器）
+    participant A as 授权服务器
+
+    Note over C: 尝试未认证的 MCP 请求
+    C->>M: 不带令牌的 MCP 请求
+    M-->>C: HTTP 401 Unauthorized（可能包含 WWW-Authenticate 标头）
+
+    alt 标头包含 resource_metadata
+        Note over C: 从标头中提取 resource_metadata URL
+        C->>M: GET resource_metadata URI
+        M-->>C: 包含授权服务器 URL 的资源元数据
+    else 标头中没有 resource_metadata
+        Note over C: 回退到 well-known URI 探测
+        Note over M: _如果 MCP 服务器位于根路径，则不适用_
+        C->>M: GET /.well-known/oauth-protected-resource/mcp
+        alt 找到子路径元数据
+            M-->>C: 包含授权服务器 URL 的资源元数据
+        else 未找到子路径
+            C->>M: GET /.well-known/oauth-protected-resource
+            alt 找到根路径元数据
+                M-->>C: 包含授权服务器 URL 的资源元数据
+            else 未找到根路径元数据
+                Note over C: 中止或使用预配置值
+            end
+        end
+    end
+
+    Note over C: 验证 RS 元数据,<br />构建 AS 元数据 URL
+
+    C->>A: GET 授权服务器元数据端点
+    Note over C,A: 按优先级顺序尝试 OAuth 2.0 和 OpenID Connect<br/>发现端点
+    A-->>C: 授权服务器元数据
+
+    Note over C,A: OAuth 2.1 授权流程在此发生
+
+    C->>A: 令牌请求
+    A-->>C: 访问令牌
+
+    C->>M: 携带访问令牌的 MCP 请求
+    M-->>C: MCP 响应
+    Note over C,M: 使用有效令牌继续 MCP 通信
+```

@@ -66,6 +66,9 @@ Deprecated、Removed）、它们之间迁移的标准与流程、弃用到移除
 - 必须在其下一个版本中，使用该语言的原生机制将对应 API 面标记为 deprecated（例如 Java 中的 `@Deprecated`、.NET 中的 `[Obsolete]`、TypeScript 中的 `@deprecated` JSDoc、Go 中的 `Deprecated:` 文档约定），并在机制允许时引用弃用 SEP 以及最早移除日期。
 - 当使用了已弃用功能时，应使用该语言惯用的机制发出运行时警告（例如 Python 的 `DeprecationWarning`、Node.js 的 `process.emitWarning`，或可配置的日志记录器）。
 
+A Tier 1 SDK that consistently fails to surface a Deprecated feature is subject to the
+[Tier Relegation Process](/community/sdk-tiers#tier-relegation).
+
 ## 移除一个功能
 
 1. 一旦某个功能被设定为移除，Core Maintainers 可在最短弃用窗口届满后自行决定执行移除。
@@ -74,6 +77,21 @@ Deprecated、Removed）、它们之间迁移的标准与流程、弃用到移除
    ([加速移除](#expedited-removal))，或将功能恢复为 Active
    ([功能状态](#feature-states))。
 
+功能在超过最短弃用窗口之后，也可以继续保持 Deprecated，而不必移除。
+
 ## 加速移除
 
-当该功能带来正在发生的安全风险时，十二个月的下限可以缩短；这里的安全风险是指存在已发布安全公告的漏洞，或有文档记录的真实环境利用，且不存在就地缓解措施。缩短窗口需要按照 [治理决策流程](/community/governance#decision-process) 获得 Core Maintainer 批准，并记录在弃用 SEP 中；如果风险在该 SEP 已经达到 Final 之后才出现，则需在一份简短的加速移除 SEP 中引用该 SEP。缩短后的窗口仍必须保证该功能变为 Deprecated 与其最早移除之间至少有九十天。
+当功能带来主动安全风险时，十二个月的下限可以缩短；这里的主动安全风险是指存在已发布安全公告或有文档记载的真实世界利用、且无法就地缓解的漏洞。缩短窗口需要按照 [治理决策流程](/community/governance#decision-process) 获得 Core Maintainer 批准，并记录在弃用 SEP 中；如果风险在该 SEP 已经 Final 之后才浮现，则应记录在一份引用该 SEP 的简短加速移除 SEP 中。缩短后的窗口从功能变为 Deprecated 到其最早可移除时间之间，仍必须至少保留九十天。
+
+## 角色
+
+| 操作                                         | 负责方                                                                                            |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| 提议弃用、延长或恢复                            | 任何贡献者，依 SEP 流程而定                                                                     |
+| 发起支持                                      | 一名 Maintainer 或 Core Maintainer，依 SEP 流程而定                                              |
+| 批准弃用 SEP                                   | Core Maintainers，依 [治理决策流程](/community/governance#decision-process)                     |
+| 在发布准备期间决定是否移除                       | Core Maintainers，依 [治理决策流程](/community/governance#decision-process)                     |
+| 批准延长或恢复 SEP                               | Core Maintainers，依 [治理决策流程](/community/governance#decision-process)                     |
+| 批准加速移除                                   | Core Maintainers，依 [治理决策流程](/community/governance#decision-process)                     |
+
+Lead Maintainers 依据 [治理角色](/community/governance#roles) 的定义，对上述每一项批准保留否决权。

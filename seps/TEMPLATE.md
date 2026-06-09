@@ -3,10 +3,10 @@
 > **注意**: 此模板为 SEPs 提供了标准结构。你可以根据提案的具体需求调整各部分。例如，流程类 SEP 可能不需要“向后兼容性”部分，而标准跟踪类 SEP 应包含详细的技术规范。
 
 - **状态**: Draft | In-Review | Accepted | Rejected | Withdrawn | Final | Superseded | Dormant
-- **类型**: Standards Track | Informational | Process
-- **创建时间**: YYYY-MM-DD
-- **作者**: 姓名 <email> (@github-username)
-- **赞助人**: @github-username（如果在寻求赞助，则为 "None"）
+- **类型**: Standards Track | Informational | Process | Extensions Track
+- **创建日期**: YYYY-MM-DD
+- **作者**: Name <email> (@github-username)
+- **赞助人**: @github-username（如果正在寻找赞助人，则为 "None"）
 - **PR**: https://github.com/modelcontextprotocol/modelcontextprotocol/pull/{NUMBER}
 
 ## 摘要

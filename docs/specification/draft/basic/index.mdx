@@ -112,7 +112,7 @@ MCP 客户端和服务器之间的所有消息 **必须** 遵循
 
 - 通知 **不得** 包含 ID。
 
-## 消息模式
+### 消息模式
 
 模型上下文协议（MCP）支持若干种[消息模式](/specification/draft/basic/patterns)，用于定义客户端与服务器如何交互：
 
@@ -221,6 +221,25 @@ MCP 支持带有以下规则的 JSON Schema：
 
 - 模式 **必须** 根据其声明的或默认的方言有效
 
+### `$ref` Resolution
+
+JSON Schema 2020-12 允许 `$ref` 指向绝对 URI。实现 **不得**
+自动解析会解析到网络 URI 的 `$ref` 值。
+
+实现 **可以** 提供可选模式以获取非本地 `$ref`，但该模式
+**必须** 默认禁用，并且 **应该** 强制执行主机允许列表，或者至少拒绝回环、本地链路和私有网络地址，应用超时和
+大小限制，并记录已解析的 URI。
+
+由于未解析的外部 `$ref` 导致验证失败的模式 **应该** 被拒绝，
+而不是静默地视为宽松通过。
+
+### Composition-Keyword Resource Use
+
+组合关键字（`anyOf`、`oneOf`、`allOf`、`if`/`then`/`else`）和 `$defs` 支持
+表达能力强的模式，但验证成本可能很高。实现 **应该** 应用合理的限制，例如最大模式深度、子模式总数上限，
+或者每次验证的时间预算，以防止恶意模式成为针对验证器的拒绝服务
+向量。
+
 ## 通用字段
 
 ### `_meta`
@@ -261,8 +280,13 @@ MCP 支持带有以下规则的 JSON Schema：
 | `io.modelcontextprotocol/clientCapabilities` | `ClientCapabilities` | 是   | 与此请求相关的客户端能力                               |
 | `io.modelcontextprotocol/logLevel`           | `LoggingLevel`       | 否   | 服务器应为此请求发出的最低日志级别                     |
 
-服务器 **不得** 依赖客户端未声明的能力。如果处理请求需要客户端未在
-`io.modelcontextprotocol/clientCapabilities` 中包含的能力，服务器 **必须** 返回
+A request missing any required field is malformed; the server **MUST** reject it with
+JSON-RPC error code `-32602` (Invalid params). On HTTP, the response status **MUST** be
+`400 Bad Request`.
+
+A server **MUST NOT** rely on capabilities the client has not declared. If
+processing a request requires a capability the client did not include in
+`io.modelcontextprotocol/clientCapabilities`, the server **MUST** return a
 [`MissingRequiredClientCapabilityError`](/specification/draft/schema#missingrequiredclientcapabilityerror)
 （`-32003`），其 `data.requiredCapabilities` 列出缺失的能力。在
 HTTP 上，响应状态 **必须** 为 `400 Bad Request`。

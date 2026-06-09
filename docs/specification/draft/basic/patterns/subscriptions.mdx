@@ -90,9 +90,13 @@ title: 订阅
 
 订阅在以下情况下结束：
 
-- **客户端** 取消它——关闭 SSE 流（HTTP）或发送引用监听请求 ID 的 `notifications/cancelled`（stdio）。
-- **服务器** 将其拆除（例如，在关闭期间）——它会关闭底层传输连接。
-- 底层传输关闭（HTTP 超时、TCP 断开连接、stdio 进程退出）。
+- 客户端 **取消** 它——关闭 SSE 流（HTTP）或发送
+  `notifications/cancelled`，并引用 `subscriptions/listen` 请求 ID（stdio）。
+- 服务器 **终止** 它（例如，在关闭期间）——它 **必须** 关闭 SSE
+  流（HTTP）或发送 `notifications/cancelled`，并引用
+  `subscriptions/listen` 请求 ID（stdio）。
+- 底层传输关闭（HTTP 超时、TCP 断开、stdio 进程
+  退出）。
 
 在 **stdio** 下，如果连接被终止后又重新建立，客户端 **必须** 重新发送 `subscriptions/listen` 以重建其订阅——服务器不会在重连之间保留任何订阅状态。
 
