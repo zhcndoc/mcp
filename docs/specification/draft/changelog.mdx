@@ -20,20 +20,28 @@ title: 主要变更
 
 6. 将实验性任务移出核心协议，纳入官方扩展（`io.modelcontextprotocol/tasks`）。重新设计后的扩展以通过 `tasks/get` 轮询和新的 `tasks/update` 接收客户端到服务器的输入，取代了阻塞式 `tasks/result` 方法，移除了 `tasks/list`，并允许服务器无需按请求显式选择即可返回任务句柄 ([SEP-2663](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2663))。
 
-7. 引入多轮往返请求（MRTR）模式，用以替代此前发送服务器发起请求的方式，例如 `roots/list`、`sampling/createMessage` 或 `elicitation/create`。服务器返回 `inputRequests`，这是一种新的 resultType，包含处理该请求所需的附加信息。客户端随后在下一次请求中通过 `inputResponses` 响应并提供所请求的信息。([SEP-2322](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2322))。
+7. 引入多轮往返请求（Multi Round-Trip Requests, MRTR）模式，用于替代此前发送服务器发起请求的方法，例如 `roots/list`、`sampling/createMessage` 或 `elicitation/create`。服务器返回一个 `InputRequiredResult`（`resultType: "input_required"`），其 `inputRequests` 字段携带处理该请求所需的附加信息请求。客户端在重试原始请求时通过 `inputResponses` 响应，并提供所请求的信息。([SEP-2322](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2322))。
+
+8. 现在所有结果都带有必需的 `resultType` 字段：普通结果为 `"complete"`，而 [multi round-trip request](/specification/draft/basic/patterns/mrtr) 的中间结果为 `"input_required"`。客户端**必须**将来自早期协议服务器且省略该字段的结果视为 `"complete"` ([SEP-2322](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2322))。
+
+9. 从 Streamable HTTP 传输中移除 SSE 流恢复能力和消息重投递（`Last-Event-ID` 标头和 SSE 事件 ID）。响应流中断将丢失进行中的请求；客户端**必须**以新的请求 ID 重新发起一个新请求 ([SEP-2575](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2575))。
 
 ## 次要变更
 
 1. 为 `ClientCapabilities` 和 `ServerCapabilities` 添加 `extensions` 字段，以支持核心协议之外的可选[扩展](/docs/extensions/overview)。
-2. 为 `_meta` 键（`traceparent`、`tracestate`、`baggage`）补充 OpenTelemetry 跟踪上下文传播约定文档 ([SEP-414](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/414))。
-3. 服务器 **SHOULD** 以确定性顺序返回 `tools/list` 中的工具，以支持客户端侧缓存并提高 LLM 提示缓存命中率。
-4. 对 Streamable HTTP `POST` 请求要求标准 MCP 请求标头（`Mcp-Method`、`Mcp-Name`），并通过 `x-mcp-header` 支持从工具参数传入自定义标头 ([SEP-2243](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2243))。
-5. 通过新的 `CacheableResult` 接口，要求 `tools/list`、`prompts/list`、`resources/list`、`resources/read` 和 `resources/templates/list` 返回结果时包含 `ttlMs` 和 `cacheScope` 字段。`ttlMs` 是以毫秒为单位的新鲜度提示，允许客户端缓存响应并减少轮询；`cacheScope`（`"public"` 或 `"private"`）控制共享中介是否可以缓存响应。这两个字段是对现有 `listChanged` 通知的补充 ([SEP-2549](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2549))。
+2. 记录 `_meta` 键（`traceparent`、`tracestate`、`baggage`）的 OpenTelemetry 跟踪上下文传播约定 ([SEP-414](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/414))。
+3. 服务器**应当**以确定性顺序从 `tools/list` 返回工具，以支持客户端缓存并提高 LLM 提示缓存命中率。
+4. 要求 Streamable HTTP POST 请求使用标准 MCP 请求标头（`Mcp-Method`、`Mcp-Name`），并支持通过工具参数中的 `x-mcp-header` 传递自定义标头 ([SEP-2243](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2243))。
+5. 通过新的 `CacheableResult` 接口，要求 `tools/list`、`prompts/list`、`resources/list`、`resources/read` 和 `resources/templates/list` 返回的结果包含 `ttlMs` 和 `cacheScope` 字段。`ttlMs` 是一个新鲜度提示（毫秒），允许客户端缓存响应并减少轮询；`cacheScope`（`"public"` 或 `"private"`）控制共享中介是否可以缓存响应。这两个字段与现有的 `listChanged` 通知相辅相成 ([SEP-2549](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2549))。
 6. 将资源未找到错误码从 `-32002` 改为 `-32602`（无效参数），以与 JSON-RPC 规范保持一致。
-7. 授权服务器 **SHOULD** 按 [RFC 9207](https://datatracker.ietf.org/doc/html/rfc9207) 在授权响应中包含 `iss` 参数，且 MCP 客户端 **MUST** 在兑换授权码之前，验证出现的 `iss` 是否与已记录的颁发者一致 ([SEP-2468](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2468))。
+7. 授权服务器**应当**按 [RFC 9207](https://datatracker.ietf.org/doc/html/rfc9207) 在授权响应中包含 `iss` 参数，而 MCP 客户端**必须**在兑换授权码前，将收到的 `iss` 与记录的颁发者进行校验 ([SEP-2468](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2468))。
 8. 要求 MCP 客户端在动态客户端注册期间指定适当的 `application_type`，以避免 OpenID Connect 重定向 URI 冲突 ([SEP-837](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/837))。
-9. 明确客户端凭据与颁发它们的授权服务器绑定：客户端 **MUST** 按颁发者标识符为持久化凭据建立索引，**MUST NOT** 将其与不同的授权服务器复用，并且在授权服务器变更时 **MUST** 重新注册 ([SEP-2352](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2352))。
-10. 放宽 `inputSchema` 和 `outputSchema`，允许任意 JSON Schema 2020-12 关键字，并允许 `structuredContent` 使用任意 JSON 值。新增 `$ref` 解析要求以及组合关键字资源边界 ([SEP-2106](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2106))。
+9. 明确客户端凭据与签发它们的授权服务器绑定：客户端**必须**按颁发者标识符对持久化凭据建立键，**不得**与其他授权服务器复用这些凭据，并且在授权服务器变更时**必须**重新注册 ([SEP-2352](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2352))。
+10. 放宽 `inputSchema` 和 `outputSchema`，允许任何 JSON Schema 2020-12 关键字，并允许 `structuredContent` 接受任意 JSON 值。添加 `$ref` 解析要求和组合关键字资源边界
+    ([SEP-2106](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2106))。
+11. 移除 `notifications/elicitation/complete` 通知以及 URL 模式 elicitation 请求的 `elicitationId` 字段，这两者都引入于 `2025-11-25`。在
+    [Multi Round-Trip Requests](/specification/draft/basic/patterns/mrtr) 模式下，客户端通过重试原始请求来了解带外交互的结果，因此服务器发起的完成信号——以及用于关联它的标识符——不再适合该协议。需要跨重试关联一次 elicitation 的服务器，应将自己的标识符编码到 `requestState` 中。
+12. 定义一项[错误码分配策略](/specification/draft/basic/index#error-codes)，将 JSON-RPC 服务器错误范围进行划分：`-32000` 到 `-32019` 保持实现定义（现有 SDK 用法予以保留），`-32020` 到 `-32099` 保留给 MCP 规范。相应地重编号本草案中引入的错误码——`HeaderMismatch` `-32001` → `-32020`、`MissingRequiredClientCapability` `-32003` → `-32021`、`UnsupportedProtocolVersion` `-32004` → `-32022`——并将此前仅存在于传输说明中的 `HeaderMismatchError` 添加到 schema 中。
 
 ## 已弃用
 

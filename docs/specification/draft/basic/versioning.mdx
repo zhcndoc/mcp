@@ -18,7 +18,7 @@ sequenceDiagram
     alt 服务器支持所请求的版本
         Server-->>Client: 结果
     else 版本不受支持
-        Server-->>Client: UnsupportedProtocolVersionError
+        Server-->>Client: 不支持的协议版本错误
         Note over Client,Server: 客户端使用双方都支持的版本重试
     end
 ```
@@ -44,7 +44,7 @@ sequenceDiagram
   "jsonrpc": "2.0",
   "id": 1,
   "error": {
-    "code": -32004,
+    "code": -32022,
     "message": "不支持的协议版本",
     "data": {
       "supported": ["2026-07-28", "2025-11-25"],

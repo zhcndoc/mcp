@@ -1,0 +1,66 @@
+---
+title: 企业托管授权章程
+description: MCP 企业托管授权兴趣组章程。
+---
+
+## 组类型
+
+**兴趣组**
+
+## 使命声明
+
+企业托管授权兴趣组为身份提供商厂商、MCP 客户端实现者以及 MCP 服务器运营者提供一个协作场所，以便围绕 [企业托管授权扩展](/extensions/auth/enterprise-managed-authorization)（`io.modelcontextprotocol/enterprise-managed-authorization`）的实际采用进行协调。只有当企业 IdP、MCP 客户端以及 MCP 服务器的授权服务器端到端互操作时，该扩展的 ID-JAG 流程才会产生价值——本组旨在收集部署经验、发现独立实现之间的兼容性差距，并将已验证的问题反馈给 [授权 IG](/community/interest-groups/auth) 和 [ext-auth](https://github.com/modelcontextprotocol/ext-auth) 规范。
+
+## 范围
+
+### 范围内
+
+- **互操作报告**：记录将特定 IdP、MCP 客户端和 MCP 授权服务器通过完整的 ID-JAG 交换进行配对后的结果，包括哪些可行、哪些需要变通方案、哪些失败
+- **一致性场景输入**：确定 EMA 一致性测试套件应进行的断言（ID-JAG 验证、受众和签发方检查、声明映射、账户关联、错误处理），并向 [conformance](https://github.com/modelcontextprotocol/conformance) 仓库贡献场景
+- **部署模式**：比较生产部署中观察到的租户隔离、管理员同意流程、JIT 预配、声明到权限的映射，以及令牌有效期选择等经验
+- **IdP 能力缺口**：整理现有 IdP 产品目前无法按规范签发或验证 ID-JAG 的地方，以便实现者知道预期情况，并让 IdP 厂商拥有共享的待办事项列表
+- **规范澄清请求**：收集实现过程中发现的歧义和规定不充分的行为，并将其作为 issue 或 PR 路由到 [ext-auth](https://github.com/modelcontextprotocol/ext-auth) 仓库
+
+### 范围外
+
+- **其他授权配置文件**：客户端凭据、DPoP、工作负载身份联合以及核心 OAuth 2.1 流程属于 [授权 IG](/community/interest-groups/auth)
+- **通用企业部署主题**：与 ID-JAG 流程无直接关联的网络、打包以及宿主应用上线相关问题
+- **面向终端用户的产品配置演示**：该 IG 讨论的是模式，而不是针对单个 IdP 或客户端产品的逐步设置。厂商报告的关于 IdP 能够或不能够实现的限制 _属于_ 范围内内容，作为部署经验
+- **竞争敏感或非公开的商业信息**，依据 [MCP 反垄断政策](/community/antitrust)
+
+### 相关组
+
+- **[授权 IG](/community/interest-groups/auth)**：所有 MCP 授权工作的上级组；EMA 规范变更首先在此孵化，本 IG 的发现会纳入其议程
+- **[安全 IG](/community/interest-groups/security)**：ID-JAG 流程中的令牌受众混淆、签发方验证和账户关联风险处于两个小组的交界处
+- **SDK 维护者**：SDK 会提供 EMA 客户端实现；互操作发现会影响跨 SDK 行为和默认设置
+
+## 领导层
+
+| Role        | Name          | Organization | GitHub                                     | Term    |
+| ----------- | ------------- | ------------ | ------------------------------------------ | ------- |
+| Facilitator | Paul Carleton | Anthropic    | [@pcarleton](https://github.com/pcarleton) | Initial |
+| Facilitator | Aaron Parecki | Okta         | [@aaronpk](https://github.com/aaronpk)     | Initial |
+
+由 Den Delimarsky 赞助（[@localden](https://github.com/localden)，首席维护者）。
+
+## 成员资格
+
+对所有人开放；加入频道、参加会议或贡献都不需要正式成员资格或审批步骤。该组尤其寻求来自企业 IdP 厂商、提供 EMA 支持的 MCP 客户端实现者，以及与企业 IdP 集成的 MCP 服务器运营者参与。
+
+加入 [MCP Contributors Discord](/community/communication#discord) 上的 `#enterprise-managed-auth-ig` 频道，或在 [GitHub Discussions](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions) 的 Authorization 分类下开启一个线程。会议公开，是否出席可自由选择——通过 Discord 和 GitHub 进行异步参与同样受到重视。
+
+## 运营
+
+| Meeting      | Frequency     | Duration | Purpose                                                               |
+| ------------ | ------------- | -------- | --------------------------------------------------------------------- |
+| Interop Call | Every 2 weeks | 45 min   | 部署报告、兼容性矩阵审查、规范反馈分流 |
+
+每次会议前，都会在 `#enterprise-managed-auth-ig` 中共享议程。会议记录会发布到 [GitHub Discussions](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions) 的 Authorization 分类中。
+
+Discord: [#enterprise-managed-auth-ig](https://discord.com/channels/1358869848138059966/1516754292294287360) · [invite](https://discord.gg/xw55W9Sw5s)
+
+## 变更日志
+
+| Date       | Change          |
+| ---------- | --------------- |
+| 2026-06-16 | 初始章程 |

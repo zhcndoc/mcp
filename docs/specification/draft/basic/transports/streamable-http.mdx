@@ -64,6 +64,18 @@ HTTP POST 请求。
    - 如果服务器无法接受它，它 **MUST** 返回一个 HTTP 错误状态码（例如 `400 Bad Request`）。HTTP 响应体 **MAY** 包含一个没有 `id` 的 JSON-RPC _错误响应_。
 6. 如果主体是 JSON-RPC _request_，服务器 **MUST** 返回 `Content-Type: application/json`（单个 JSON 对象）或 `Content-Type: text/event-stream`（SSE 响应流）之一。客户端 **MUST** 同时支持两者。
 
+<Note>
+
+本核心协议的此修订版未定义通过 Streamable HTTP 的客户端到服务器的
+_notifications_。核心协议中唯一由客户端发送的通知
+`notifications/cancelled` 仅用于 [stdio](/specification/draft/basic/transports/stdio)
+传输；在 Streamable HTTP 中，关闭 SSE 响应流本身就是取消
+信号，并且不期望出现 `notifications/cancelled` 消息（见
+[取消][cancellation]）。上面的通知规则描述的是通知 POST 的传输机制；
+本修订版未定义通知 POST 的头要求。
+
+</Note>
+
 ## 接收消息
 
 当服务器返回 SSE 响应流
@@ -205,12 +217,15 @@ Streamable HTTP 传输会将选定的 JSON-RPC 正文字段镜像到 HTTP
 
 | 头名称 | 来源字段 | 适用范围 |
 | ------------ | ----------------------------- | ------------------------------------------------------ |
-| `Mcp-Method` | `method` | 所有请求和通知 |
+| `Mcp-Method` | `method`                      | 所有请求                                           |
 | `Mcp-Name`   | `params.name` or `params.uri` | `tools/call`、`resources/read`、`prompts/get` 请求 |
 
 这些头对于符合规范是 **必需的**。
 
-**`tools/call` 请求：**
+如果 `Mcp-Name` 的来源值无法安全地表示为普通 ASCII
+头值，客户端 **MUST** 按照 [值编码](#value-encoding) 中描述的 Base64 哨兵格式对其进行编码。
+
+**`tools/call` request:**
 
 ```http
 POST /mcp HTTP/1.1
@@ -288,14 +303,26 @@ HTTP 头中。详见
 
 **`x-mcp-header` 值的约束**：
 
-- **MUST NOT** 为空
-- **MUST** 符合 HTTP field-name token 语法（`1*tchar`，[RFC 9110 Section 5.1](https://datatracker.ietf.org/doc/html/rfc9110#section-5.1)）
-- **MUST NOT** 包含控制字符，包括回车符（CR，`\r`）
-  或换行符（LF，`\n`）
-- 在 `inputSchema` 中所有 `x-mcp-header` 值之间，**MUST** 进行不区分大小写的唯一性保证
-- **MUST** 仅应用于原始类型（integer、string、boolean）的参数。不允许类型为 `number` 的参数。整数值 **MUST** 位于 JavaScript 的安全范围内
-  （−2<sup>53</sup>+1 到 2<sup>53</sup>−1）
-- **MAY** 应用于 `inputSchema` 中任意嵌套层级的属性，而不仅限于顶层属性
+- **MUST NOT** be empty
+- **MUST** match HTTP field-name token syntax (`1*tchar`, [RFC 9110 Section 5.1](https://datatracker.ietf.org/doc/html/rfc9110#section-5.1))
+- **MUST NOT** contain control characters, including carriage return (CR, `\r`)
+  or line feed (LF, `\n`)
+- **MUST** be case-insensitively unique among all `x-mcp-header` values in
+  the `inputSchema`
+- **MUST** only be applied to parameters with primitive types (integer,
+  string, boolean). Parameters with type `number` are not permitted.
+  Integer values **MUST** be within the safe range for JavaScript
+  (−2<sup>53</sup>+1 to 2<sup>53</sup>−1)
+- **MUST** only be applied to properties that are _statically reachable_
+  from the schema root: reachable via a chain consisting solely of
+  `properties` keys. The chain **MUST NOT** pass through `items` (or any
+  other array keyword), composition keywords (`oneOf`, `anyOf`, `allOf`,
+  `not`), conditional keywords (`if`/`then`/`else`), or `$ref`. Nested
+  object properties are permitted as long as every step in the chain is a
+  `properties` key. An `x-mcp-header` annotation anywhere else makes the
+  annotation — and thus the tool definition — invalid.
+
+头提取被定义为读取带注解属性的精确属性路径上的实例值（通往它的 `properties` 键链）。如果调用参数中该路径没有值，则省略该头。
 
 使用 Streamable HTTP 传输的客户端 **MUST** 拒绝任何 `x-mcp-header` 值违反这些约束的工具定义。拒绝意味着客户端 **MUST** 将该无效工具从 `tools/list` 的结果中排除。客户端 **SHOULD** 在拒绝工具定义时记录警告，包括工具名称和被拒绝的原因。这样可以确保单个格式错误的工具定义不会阻止其他有效工具的使用。使用其他传输方式（例如 stdio）的客户端 **MAY** 完全忽略 `x-mcp-header` 注解。
 
@@ -378,7 +405,19 @@ HTTP 头字段值必须由可见 ASCII 字符
 Mcp-Param-{Name}: =?base64?{Base64EncodedValue}?=
 ```
 
-前缀 `=?base64?` 和后缀 `?=` 表示该值已进行 Base64 编码。这些标记区分大小写，并且 **MUST** 完全按所示形式出现（小写）。需要检查这些值的服务器和中介层 **MUST** 相应地对其解码。
+相同的编码规则适用于 `Mcp-Name` 头值。工具和
+提示名称仅 **SHOULD** 受限于对头部安全的字符，因此超出安全集合的名称（或资源 URI）将按如下方式传递：
+
+```text
+Mcp-Name: =?base64?{Base64EncodedValue}?=
+```
+
+前缀 `=?base64?` 和后缀 `?=` 表示该值已
+使用 Base64 编码。这些标记区分大小写，并且 **MUST** 以
+所示的精确形式出现（小写）。需要检查这些值的服务器和中介组件 **MUST** 进行相应解码。特别是，服务器 **MUST**
+在将编码后的 `Mcp-Name` 或 `Mcp-Param-{Name}` 值与
+请求正文中的相应值进行比较之前先对其解码，
+参见 [Server Validation](#server-validation)。
 
 为避免歧义，客户端 **MUST** 还要对任何匹配哨兵模式的纯 ASCII 值进行 Base64 编码（即，以 `=?base64?` 开头并以 `?=` 结尾）。
 
@@ -404,8 +443,10 @@ Mcp-Param-{Name}: =?base64?{Base64EncodedValue}?=
 2. 将 `Mcp-Method` 头以及（如适用）`Mcp-Name` 头附加到
    请求中。
 3. 检查工具的 `inputSchema` 中标记了
-   `x-mcp-header` 的属性，并提取每个参数的值。
-4. 按照 [值编码](#value-encoding)
+   `x-mcp-header` 的属性，并提取每个已注解属性精确
+   属性路径上的值；如果没有值则省略该头（见
+   [Schema Extension](#schema-extension)）。
+4. 按照 [Value Encoding](#value-encoding)
    规则对这些值进行编码。
 5. 将 `Mcp-Param-{Name}: {Value}` 头附加到请求中。
 
@@ -424,11 +465,11 @@ Mcp-Param-{Name}: =?base64?{Base64EncodedValue}?=
 服务器 **MUST** 拒绝包含无效字符的、被识别的 `Mcp-Param-{Name}` 头
 （见 [值编码](#value-encoding)）。
 
-任何处理消息正文的服务器 **MUST** 验证已编码的
-头值（若为 Base64 编码，则在解码后）是否与请求正文中的相应
-值匹配。若任何验证失败，服务器 **MUST** 以
-`400 Bad Request` HTTP 状态和 JSON-RPC 错误码
-`-32001`（`HeaderMismatch`）拒绝请求。
+任何处理消息正文的服务器 **MUST** 验证编码后的
+头值（如果是 Base64 编码，则在解码后）与正文中的相应
+值匹配。若任何验证失败，服务器 **MUST** 返回
+HTTP 状态 `400 Bad Request`，并使用 JSON-RPC 错误码
+`-32020`（`HeaderMismatch`）拒绝该请求。
 
 | 场景                                 | 客户端行为                | 服务器行为                          |
 | ---------------------------------------- | ------------------------------ | ---------------------------------------- |
@@ -468,12 +509,12 @@ Mcp-Param-{Name}: =?base64?{Base64EncodedValue}?=
 返回 HTTP 状态 `400 Bad Request`，并且 **MUST** 使用以下错误码
 包含一个 JSON-RPC 错误响应：
 
-| Code     | Name             | Description                                                                                                            |
-| ---------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `-32001` | `HeaderMismatch` | HTTP 头与请求正文中的相应值不匹配，或者必需的头缺失/格式错误。 |
+| Code     | Name                                                                | Description                                                                                                            |
+| ----------- | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `-32020` | [`HeaderMismatch`](/specification/draft/schema#headermismatcherror) | HTTP 头与请求正文中的相应值不匹配，或者缺少/格式错误的必需头。 |
 
-此错误码位于 JSON-RPC 实现定义的服务器错误范围
-（`-32000` 到 `-32099`）内。
+该错误码从 MCP 规范为协议定义错误保留的子范围中分配。请参见
+[错误码](/specification/draft/basic/index#error-codes)。
 
 **错误响应示例：**
 
@@ -482,7 +523,7 @@ Mcp-Param-{Name}: =?base64?{Base64EncodedValue}?=
   "jsonrpc": "2.0",
   "id": 1,
   "error": {
-    "code": -32001,
+    "code": -32020,
     "message": "Header mismatch: Mcp-Name header value 'foo' does not match body value 'bar'"
   }
 }
@@ -493,6 +534,9 @@ Mcp-Param-{Name}: =?base64?{Base64EncodedValue}?=
 - 缺少必需的标准头（`MCP-Protocol-Version`、`Mcp-Method`、
   `Mcp-Name`）。
 - 头值与对应的请求正文值不匹配。
+  对于允许使用 Base64 哨兵编码的头（`Mcp-Name` 和
+  `Mcp-Param-{Name}`），服务器 **MUST** 在将编码值与正文值比较前先将其解码（见
+  [值编码](#value-encoding)）。
 - 头值包含无效字符。
 
 <Note>
@@ -513,63 +557,61 @@ JSON-RPC 错误响应。
 
 </Note>
 
-## Backward Compatibility
+## 向后兼容性
 
-Support for modern MCP versions (as indicated by request metadata) and older versions that require an `initialize` handshake **MAY** be detected by clients by first attempting a modern request to see which era the server implements. On `400 Bad Request`, clients **SHOULD** inspect the response body before falling back: modern servers also use `400` for [`UnsupportedProtocolVersionError`][unsupported-version], `MissingRequiredClientCapabilityError`, and header validation failures.
+客户端**可以**通过首先尝试现代请求来检测对现代 MCP 版本（如请求元数据所示）以及需要 `initialize` 握手的旧版本，以判断服务器实现的是哪个时代。若收到 `400 Bad Request`，客户端**应当**在回退之前检查响应体：现代服务器也会对 [`UnsupportedProtocolVersionError`][unsupported-version]、`MissingRequiredClientCapabilityError` 和请求头验证失败使用 `400`。
 
-- If the body contains a recognizable modern JSON-RPC error, the server supports a modern MCP version — retry using the advertised `supported` version or fix the request, rather than falling back.
-- If the body is empty or not a recognizable modern JSON-RPC error, fall back to `initialize` and continue using the older version for subsequent requests.
+- 如果响应体包含可识别的现代 JSON-RPC 错误，则说明服务器支持现代 MCP 版本——应根据公布的 `supported` 版本重试，或修正请求，而不是回退。
+- 如果响应体为空，或不包含可识别的现代 JSON-RPC 错误，则回退到 `initialize`，并在后续请求中继续使用旧版本。
 
-See [Versioning: Backward Compatibility][lifecycle-compat] for the era model and implementation-oriented compatibility matrix.
+关于时代模型和面向实现的兼容性矩阵，请参见 [版本管理：向后兼容性][lifecycle-compat]。
 
-### Earlier Streamable HTTP Revisions
+### 更早的 Streamable HTTP 修订版
 
-Protocol versions `2025-03-26` through [`2025-11-25`](/specification/2025-11-25/basic/transports) also used the Streamable HTTP transport, but in a different form: servers could assign sessions via an `Mcp-Session-Id` header (terminated via HTTP DELETE), clients could open a separate SSE stream with HTTP GET to receive server-initiated messages, servers could send JSON-RPC _requests_ on the SSE stream, and the stream could be resumed via `Last-Event-ID`. None of these mechanisms are part of this revision.
+协议版本 `2025-03-26` 到 [`2025-11-25`](/specification/2025-11-25/basic/transports) 也使用了 Streamable HTTP 传输，但形式不同：服务器可以通过 `Mcp-Session-Id` 头分配会话（通过 HTTP DELETE 终止），客户端可以通过 HTTP GET 打开单独的 SSE 流以接收服务器发起的消息，服务器可以在 SSE 流上发送 JSON-RPC _requests_，并且流可以通过 `Last-Event-ID` 恢复。这些机制都不属于本修订版。
 
-Servers that only support this revision and receive such traffic from older clients **SHOULD** respond as follows:
+只支持此修订版并接收到来自旧客户端的此类流量的服务器**应当**如下响应：
 
-- HTTP GET or DELETE to the MCP endpoint: respond with `405 Method Not Allowed`.
-- `Mcp-Session-Id` header in the request: ignore it; do not generate or echo session IDs.
-- `Last-Event-ID` header: ignore it; the stream is not resumable.
+- 对 MCP 端点的 HTTP GET 或 DELETE：返回 `405 Method Not Allowed`。
+- 请求中的 `Mcp-Session-Id` 头：忽略它；不要生成或回显会话 ID。
+- `Last-Event-ID` 头：忽略它；该流不可恢复。
 
-Servers and clients that need to interoperate with peers using these protocol versions should also implement the behavior described in the corresponding revision, in addition to the version-negotiation fallback described above (for example, [2025-11-25: Streamable HTTP](/specification/2025-11-25/basic/transports#streamable-http)).
+需要与使用这些协议版本的对端互操作的服务器和客户端，除了实现上文所述的版本协商回退外，还应实现相应修订版中描述的行为（例如，[2025-11-25: Streamable HTTP](/specification/2025-11-25/basic/transports#streamable-http)）。
 
-### HTTP+SSE Transport (2024-11-05)
+### HTTP+SSE 传输（2024-11-05）
 
 <Warning>
-  **Deprecated**: The [HTTP+SSE transport][http-sse] from protocol version
-  2024-11-05 has been deprecated since protocol version `2025-03-26` and is
-  classified as deprecated under the [Feature Lifecycle Policy](/community/feature-lifecycle#deprecating-a-feature)
-  ([SEP-2596](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2596)).
-  New implementations **SHOULD NOT** adopt it; existing implementations **SHOULD**
-  migrate to [Streamable HTTP](/specification/draft/basic/transports/streamable-http). It is expected
-  to be removed in a future revision; see the
-  [Deprecated Features Registry](/specification/draft/deprecated).
+  **已弃用**：协议版本
+  2024-11-05 中的 [HTTP+SSE 传输][http-sse] 自协议版本 `2025-03-26` 起已被弃用，并且根据 [功能生命周期策略](/community/feature-lifecycle#deprecating-a-feature)
+  （[SEP-2596](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2596)）被归类为已弃用。
+  新实现**不应**采用它；现有实现**应当**
+  迁移到 [Streamable HTTP](/specification/draft/basic/transports/streamable-http)。预计它将在未来的修订版中被移除；请参见
+  [已弃用功能登记表](/specification/draft/deprecated)。
 </Warning>
 
-Clients and servers can maintain backward compatibility with the deprecated
-[HTTP+SSE transport][http-sse] (from protocol version 2024-11-05) as follows:
+客户端和服务器可以通过以下方式保持与已弃用的
+[HTTP+SSE 传输][http-sse]（来自协议版本 2024-11-05）的向后兼容性：
 
-**Servers wanting to support older clients** should:
+**希望支持旧客户端的服务器**应当：
 
-- Continue to host both the old transport's SSE and POST endpoints,
-  as well as the new “MCP endpoint” defined for Streamable HTTP transport.
-  - It is also possible to merge the old POST endpoint with the new MCP
-    endpoint, but this may introduce unnecessary complexity.
+- 继续同时提供旧传输的 SSE 和 POST 端点，
+  以及为 Streamable HTTP 传输定义的新 “MCP 端点”。
+  - 也可以将旧的 POST 端点与新的 MCP
+    端点合并，但这可能会引入不必要的复杂性。
 
-**Clients wanting to support older servers** should:
+**希望支持旧服务器的客户端**应当：
 
-1. Accept an MCP server URL from the user, which may point to a server using either the old or new transport.
-2. Attempt a POST request to that server URL, using the `Accept` header as defined above:
-   - If successful, the client can assume this is a server that supports
-     the new Streamable HTTP transport.
-   - If it fails with HTTP status code `400 Bad Request`, `404 Not Found`
-     or `405 Method Not Allowed`, and the response body is not a
-     recognizable modern JSON-RPC error (such errors are returned by modern servers for unsupported versions, unknown methods, or header validation failures):
-     - Issue a GET request to the server URL, expecting this to open
-       an SSE stream and return an `endpoint` event as the first event.
-     - When the `endpoint` event is received, the client can assume this is
-       a server running the old HTTP+SSE transport and should use that
-       transport for all subsequent communication.
+1. 从用户处接受一个 MCP 服务器 URL，该 URL 可能指向使用旧传输或新传输的服务器。
+2. 对该服务器 URL 发起 POST 请求，并使用上文定义的 `Accept` 头：
+   - 如果成功，客户端可以假定这是支持
+     新的 Streamable HTTP 传输的服务器。
+   - 如果失败并返回 HTTP 状态码 `400 Bad Request`、`404 Not Found`
+     或 `405 Method Not Allowed`，且响应体不是一个
+     可识别的现代 JSON-RPC 错误（现代服务器会针对不支持的版本、未知方法或头验证失败返回此类错误）：
+     - 向服务器 URL 发起 GET 请求，期望这会打开
+       一个 SSE 流，并将 `endpoint` 事件作为第一个事件返回。
+     - 收到 `endpoint` 事件后，客户端可以假定这是
+       运行旧 HTTP+SSE 传输的服务器，并应在后续所有通信中使用该
+       传输。
 
 [lifecycle-compat]: /specification/draft/basic/versioning#backward-compatibility-with-initialization-based-versions

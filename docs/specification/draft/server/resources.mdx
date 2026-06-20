@@ -6,7 +6,15 @@ title: 资源
 
 Model Context Protocol (MCP) 提供了一种标准化方式，使服务器能够向客户端暴露资源。资源允许服务器共享为语言模型提供上下文的数据，例如文件、数据库模式或特定于应用程序的信息。每个资源都由一个 [URI](https://datatracker.ietf.org/doc/html/rfc3986) 唯一标识。
 
-## 用户交互模型
+<Note>
+  为简洁起见，本页中的请求示例省略了必需的 `_meta`
+  请求元数据（`io.modelcontextprotocol/protocolVersion`、
+  `io.modelcontextprotocol/clientInfo` 和
+  `io.modelcontextprotocol/clientCapabilities`）。每个请求 **必须** 包含
+  这些字段；请参见 [`_meta`](/specification/draft/basic/index#meta)。
+</Note>
+
+## User Interaction Model
 
 MCP 中的资源设计为 **应用驱动** 的，由宿主应用程序根据其需求决定如何整合上下文。
 
@@ -216,7 +224,7 @@ Servers **MAY** also respond to `resources/read` with an [`InputRequiredResult`]
   "jsonrpc": "2.0",
   "method": "notifications/resources/updated",
   "params": {
-    "_meta": { "io.modelcontextprotocol/subscriptionId": "4" },
+    "_meta": { "io.modelcontextprotocol/subscriptionId": 4 },
     "uri": "file:///project/src/main.rs"
   }
 }

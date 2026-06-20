@@ -8,6 +8,14 @@ Model Context Protocol (MCP) 支持对可能返回大型结果集的列表操作
 
 当通过互联网连接外部服务时，分页尤为重要，但对于本地集成也很有用，可以避免大型数据集带来的性能问题。
 
+<Note>
+  为简洁起见，本页中的请求示例省略了必需的 `_meta`
+  请求元数据（`io.modelcontextprotocol/protocolVersion`、
+  `io.modelcontextprotocol/clientInfo` 和
+  `io.modelcontextprotocol/clientCapabilities`）。每个请求**MUST**包含
+  这些字段；请参见 [`_meta`](/specification/draft/basic/index#meta)。
+</Note>
+
 ## 分页模型
 
 MCP 中的分页使用基于不透明游标的方法，而不是编号页。
@@ -27,8 +35,11 @@ MCP 中的分页使用基于不透明游标的方法，而不是编号页。
   "jsonrpc": "2.0",
   "id": "123",
   "result": {
+    "resultType": "complete",
     "resources": [...],
-    "nextCursor": "eyJwYWdlIjogM30="
+    "nextCursor": "eyJwYWdlIjogM30=",
+    "ttlMs": 300000,
+    "cacheScope": "public"
   }
 }
 ```

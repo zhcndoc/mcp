@@ -1,0 +1,94 @@
+---
+title: 安全章程
+description: MCP 安全兴趣组章程。
+---
+
+## 组类型
+
+**兴趣组**
+
+## 使命声明
+
+安全兴趣组负责梳理 MCP 特有的威胁，审查与安全相关的提案，并将已验证的问题范围收敛到聚焦的工作组或 [SEP](/community/sep-guidelines)。
+
+## 范围
+
+### 范围内
+
+- **威胁建模**：开发并维护一套共享的、分层的 MCP 攻击面视图，涵盖接入与身份、调用方治理、运行时行为、拦截与强制执行以及可审计性，为单个提案提供统一的参考框架
+- **服务器身份、证明与接入**：在客户端向服务器分发请求之前，确立服务器确实如其所声称的那样的要求，包括签名断言、信任根，以及协议级验证与注册表级验证之间的边界
+- **供应链与来源证明**：本地执行的服务器二进制文件和软件包的完整性（拼写抢注、未锁定的依赖、未签名的制品）以及客户端如何验证其启动的内容
+- **运行时漂移与接入后的变更**：服务器获批后，工具、模式或行为发生变更时如何处理，以及此类变更应被视为版本变更、重新审批还是安全事件
+- **可审计性与可观测性**：关于工具调用做了什么、在何种授权下进行的防篡改记录要求，用于合规与事件审查
+- **传输相关安全**：针对 stdio 和其他非 HTTP 传输的密钥处理、进程隔离以及未认证的攻击面，因为 HTTP 授权规范不适用
+- **安全最佳实践文档**：编写并审查 [安全最佳实践](/docs/tutorials/security/security_best_practices) 指南中的条目，包括与 OWASP GenAI 和 CoSAI 等外部机构就 MCP 特定内容进行联络
+- **漏洞披露路由**：为已针对 MCP 仓库提交私密安全公告、并需要帮助联系到合适维护者的报告者提供一个已知联系点
+
+### 范围外
+
+- **授权协议机制**：OAuth 流程、作用域、客户端注册和令牌处理属于 [授权 IG](/community/interest-groups/auth) 及其衍生的工作组
+- **传输层线缆安全**：TLS、mTLS 和证书处理属于 Transports WG
+- **工具注解设计**：注解模型本身属于 [工具注解 IG](/community/interest-groups/tool-annotations)。该组提供安全要求作为输入
+- **注册表服务运维**：运行和保护托管的 Registry 服务属于 [Registry WG](/community/working-groups/registry)。该组就来源证明和发布提供威胁输入
+- **产品特定的加固指南**：面向单个宿主应用或云平台的逐步配置说明属于这些产品的文档，而非协议工作
+- **具有竞争敏感性或非公开的商业信息**，依据 [MCP 反垄断政策](/community/antitrust)
+
+### 相关组
+
+- **[授权 IG](/community/interest-groups/auth)**：令牌混淆、受众不匹配以及元数据发现中的 SSRF 位于两个组的边界上
+- **[工具注解 IG](/community/interest-groups/tool-annotations)**：信任与敏感性注解（[SEP-1913](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1913)）跨越两个组
+- **[拦截器 WG](/community/working-groups/interceptors)**：拦截器是此处暴露的运行时安全决策的主要强制执行点
+- **[Server Card WG](/community/working-groups/server-card) / [Registry WG](/community/working-groups/registry)**：服务器身份、来源证明和发现元数据与接入和供应链相关问题相交
+- **Transports WG**：stdio 进程隔离和未认证的方法面
+- **SDK 维护者**：协调处理 SDK 安全公告以及跨 SDK 的安全默认设置
+
+## 领导层
+
+| 角色 | 姓名 | 组织 | GitHub | 任期 |
+| --- | --- | --- | --- | --- |
+| 召集人 | Den Delimarsky | Anthropic | [@localden](https://github.com/localden) | 初始 |
+| 召集人 | Paul Carleton | Anthropic | [@pcarleton](https://github.com/pcarleton) | 初始 |
+
+## 成员
+
+| 姓名 | 组织 | GitHub | Discord | 级别 |
+| ------------------------ | ------------ | ---------------------------------------------------- | ---------------- | ----------- |
+| Sam Morrow               | GitHub       | [@SamMorrowDrums](https://github.com/SamMorrowDrums) | `sammorrowdrums` | 参与者 |
+| Ola Hungerford           | Nordstrom    | [@olaservo](https://github.com/olaservo)             | `olaservo`       | 参与者 |
+| Peder Holdgaard Pedersen | Saxo Bank    | [@PederHP](https://github.com/PederHP)               | `pederhp`        | 参与者 |
+| Stefano Ortolani         | Broadcom     | [@ostefano](https://github.com/ostefano)             | `ostefano.`      | 参与者 |
+
+欢迎任何人加入。请加入 [MCP Contributors Discord](/community/communication#discord) 中的 `#security-ig` 频道。会议对外开放，且非常鼓励积极参与。该组正在寻找愿意参与提案并帮助推动工作前进，而不只是旁观的贡献者。
+
+## 运作
+
+| 会议 | 频率 | 时长 | 目的 |
+| ------------ | ------------- | -------- | ----------------------------------------------------------------------- |
+| 办公时间 | 每 2 周一次 | 45 分钟 | 威胁审查、提案分流、部署报告、WG 提案范围界定 |
+
+每次会议前都会在 `#security-ig` 中共享议程。
+
+Discord: [#security-ig](https://discord.com/channels/1358869848138059966/1379811011669921883)
+
+会议记录会发布到 GitHub Discussions 中的
+[Meeting Notes - Security IG](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions/categories/meeting-notes-security-ig)
+分类下。
+
+## 讨论主题
+
+以下项目构成该 IG 当前的讨论议程。该列表并不详尽，会随着该组识别出新的兴趣领域而不断演进。
+
+| 项目 | 名称 | 状态 | 负责人 |
+| ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ----------- | -------------------------------------------------------- |
+| [SEP-2809](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2809) | 已证明的工具-服务器接入（ATSA） | 草案 | [@metereconsulting](https://github.com/metereconsulting) |
+| — | SDK 漏洞披露 | 进行中 | 召集人 |
+| — | 运行时漂移：批准后的 `list_changed` 语义 | 开放 | — |
+| — | 供应链完整性：协议、注册表或配套标准 | 开放 | — |
+| — | 跨服务器的工具身份 | 开放 | — |
+| — | 能力声明：提示或契约（与 [工具注解 IG](/community/interest-groups/tool-annotations) 联合） | 开放 | — |
+
+## 更新日志
+
+| 日期 | 变更 |
+| ---------- | --------------- |
+| 2026-06-13 | 初始章程 |

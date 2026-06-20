@@ -6,6 +6,14 @@ title: 提示词
 
 Model Context Protocol (MCP) 提供了一种标准化方式，使服务器能够向客户端暴露提示词模板。提示词允许服务器提供结构化的消息和指令，以便与语言模型进行交互。客户端可以发现可用的提示词，检索其内容，并提供参数以自定义它们。
 
+<Note>
+  为简洁起见，此页面上的请求示例省略了必需的 `_meta`
+  请求元数据（`io.modelcontextprotocol/protocolVersion`、
+  `io.modelcontextprotocol/clientInfo` 和
+  `io.modelcontextprotocol/clientCapabilities`）。每个请求**必须**包含
+  这些字段；请参见[`_meta`](/specification/draft/basic/index#meta)。
+</Note>
+
 ## 用户交互模型
 
 提示词旨在成为**用户控制**的，这意味着它们从服务器暴露给客户端，目的是让用户能够明确选择使用它们。这指的是谁决定何时使用提示词，而不是谁编写其内容。提示词内容由服务器定义。

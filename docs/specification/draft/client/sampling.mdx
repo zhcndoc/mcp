@@ -46,8 +46,10 @@ MCP 中的采样允许服务器实现代理行为，通过使 LLM 调用能够 _
 
 ```json
 {
-  "capabilities": {
-    "sampling": {}
+  "_meta": {
+    "io.modelcontextprotocol/clientCapabilities": {
+      "sampling": {}
+    }
   }
 }
 ```
@@ -56,9 +58,11 @@ MCP 中的采样允许服务器实现代理行为，通过使 LLM 调用能够 _
 
 ```json
 {
-  "capabilities": {
-    "sampling": {
-      "tools": {}
+  "_meta": {
+    "io.modelcontextprotocol/clientCapabilities": {
+      "sampling": {
+        "tools": {}
+      }
     }
   }
 }
@@ -68,9 +72,11 @@ MCP 中的采样允许服务器实现代理行为，通过使 LLM 调用能够 _
 
 ```json
 {
-  "capabilities": {
-    "sampling": {
-      "context": {}
+  "_meta": {
+    "io.modelcontextprotocol/clientCapabilities": {
+      "sampling": {
+        "context": {}
+      }
     }
   }
 }
@@ -92,7 +98,7 @@ MCP 中的采样允许服务器实现代理行为，通过使 LLM 调用能够 _
 
 要在处理客户端请求期间请求语言模型生成，服务器发送一个包含 `sampling/createMessage` 请求的 `InputRequiredResult`：
 
-**请求：**
+**输入请求（在 [`InputRequiredResult.inputRequests`](/specification/draft/basic/patterns/mrtr#inputrequests) 中传递）：**
 
 ```json
 {
@@ -125,19 +131,17 @@ MCP 中的采样允许服务器实现代理行为，通过使 LLM 调用能够 _
 }
 ```
 
-**响应：**
+**客户端结果（在重试请求的 `inputResponses` 中返回）：**
 
 ```json
 {
-  "result": {
-    "role": "assistant",
-    "content": {
-      "type": "text",
-      "text": "法国的首都是巴黎。"
-    },
-    "model": "claude-3-sonnet-20240307",
-    "stopReason": "endTurn"
-  }
+  "role": "assistant",
+  "content": {
+    "type": "text",
+    "text": "法国的首都是巴黎。"
+  },
+  "model": "claude-3-sonnet-20240307",
+  "stopReason": "endTurn"
 }
 ```
 
@@ -188,7 +192,7 @@ sequenceDiagram
 
 要请求具有工具使用能力的 LLM 生成，服务器在请求中包含 `tools` 和可选的 `toolChoice`：
 
-**请求（服务器 -> 客户端）：**
+**输入请求（Server -> Client，在 `InputRequiredResult.inputRequests` 中传递）：**
 
 ```json
 {
@@ -227,33 +231,31 @@ sequenceDiagram
 }
 ```
 
-**响应（客户端 -> 服务器）：**
+**客户端结果（Client -> Server，在重试请求的 `inputResponses` 中返回）：**
 
 ```json
 {
-  "result": {
-    "role": "assistant",
-    "content": [
-      {
-        "type": "tool_use",
-        "id": "call_abc123",
-        "name": "get_weather",
-        "input": {
-          "city": "Paris"
-        }
-      },
-      {
-        "type": "tool_use",
-        "id": "call_def456",
-        "name": "get_weather",
-        "input": {
-          "city": "London"
-        }
+  "role": "assistant",
+  "content": [
+    {
+      "type": "tool_use",
+      "id": "call_abc123",
+      "name": "get_weather",
+      "input": {
+        "city": "Paris"
       }
-    ],
-    "model": "claude-3-sonnet-20240307",
-    "stopReason": "toolUse"
-  }
+    },
+    {
+      "type": "tool_use",
+      "id": "call_def456",
+      "name": "get_weather",
+      "input": {
+        "city": "London"
+      }
+    }
+  ],
+  "model": "claude-3-sonnet-20240307",
+  "stopReason": "toolUse"
 }
 ```
 
@@ -266,7 +268,7 @@ sequenceDiagram
 3. 接收 LLM 的响应（其中可能包含新的工具使用）
 4. 根据需要重复多次（服务器可能会限制最大迭代次数，例如在最后一次迭代传递 `toolChoice: {mode: "none"}` 以强制最终结果）
 
-**后续请求（服务器 -> 客户端）带工具结果：**
+**后续输入请求（Server -> Client，在 `InputRequiredResult.inputRequests` 中传递）并附带工具结果：**
 
 ```json
 {
@@ -341,19 +343,17 @@ sequenceDiagram
 }
 ```
 
-**最终响应（客户端 -> 服务器）：**
+**最终客户端结果（Client -> Server，在重试请求的 `inputResponses` 中返回）：**
 
 ```json
 {
-  "result": {
-    "role": "assistant",
-    "content": {
-      "type": "text",
-      "text": "根据当前天气数据：\n\n- **巴黎**：18°C，多云间晴——相当宜人！\n- **伦敦**：15°C，有雨——你会需要一把伞。\n\n今天巴黎的天气稍微更暖和，也更干燥。"
-    },
-    "model": "claude-3-sonnet-20240307",
-    "stopReason": "endTurn"
-  }
+  "role": "assistant",
+  "content": {
+    "type": "text",
+    "text": "根据当前天气数据：\n\n- **巴黎**：18°C，局部多云，天气相当宜人！\n- **伦敦**：15°C，有雨——你会需要一把伞。\n\n今天巴黎的天气略微更暖和也更干燥。"
+  },
+  "model": "claude-3-sonnet-20240307",
+  "stopReason": "endTurn"
 }
 ```
 
@@ -481,7 +481,7 @@ sequenceDiagram
     participant LLM
 
     Client->>Server: tools/call(id:1)
-    note right of Server: Server needs more info
+    note right of Server: Server 需要更多信息
     Server->>Client: InputRequiredResult(<br/>sampling/createMessage<br/>(messages + tools))
 
     Note over Client,User: 人工介入审查

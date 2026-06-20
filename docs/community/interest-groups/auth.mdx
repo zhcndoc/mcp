@@ -15,30 +15,31 @@ description: MCP 授权兴趣组的章程。
 
 ### In Scope
 
-- **Deployment experience reports**：实现者如何将当前授权规范（OAuth 2.1、[RFC 9728](https://www.rfc-editor.org/rfc/rfc9728) Protected Resource Metadata、[RFC 7591](https://www.rfc-editor.org/rfc/rfc7591) Dynamic Client Registration、Client ID Metadata Documents）与真实授权服务器集成，以及它有哪些不足
-- **Enterprise identity integration**：连接 MCP 服务器与企业 IdP（Okta、Entra ID、Ping、Keycloak 等）时的需求和摩擦点，包括 SSO、租户隔离和管理员同意流程
-- **Delegated and agentic access**：当 MCP 客户端通过代理链或工具链行事时，代用户代办令牌交换、下游资源访问、受众限制和同意的用例
-- **Scope and permission granularity**：MCP 服务器是否以及如何应当公开细粒度范围（按工具、按资源），以及客户端应如何请求和展示这些范围
-- **Credentials for non-HTTP transports**：适用于 stdio、WebSocket 以及未来那些 HTTP 授权规范无法直接应用的传输方式的模式
-- **Client identity and registration**：关于动态客户端注册、Client ID Metadata Documents、软件声明和预注册客户端的运营体验
-- **Threat modelling input**：整理与授权相关的攻击面（令牌混淆、混淆代理、受众不匹配、重定向处理），为安全最佳实践文档提供依据
-- **Proposing Working Groups**：当某个问题被验证并且范围明确后，IG 会通过标准的 `#wg-ig-group-creation` 流程提交工作组创建提案；批准权仍归社区版主和核心维护者所有
-- **Problem statements and requirements**：发布到 GitHub Discussions 的用例目录和建议，供 SEP 作者和工作组使用
+- **部署经验报告**：实现者如何将当前授权规范（OAuth 2.1、[RFC 9728](https://www.rfc-editor.org/rfc/rfc9728) Protected Resource Metadata、[RFC 7591](https://www.rfc-editor.org/rfc/rfc7591) Dynamic Client Registration、Client ID Metadata Documents）与真实授权服务器集成，以及它有哪些不足
+- **企业身份集成**：连接 MCP 服务器与企业 IdP（Okta、Entra ID、Ping、Keycloak 等）时的需求和摩擦点，包括 SSO、租户隔离和管理员同意流程
+- **委托与代理式访问**：当 MCP 客户端通过代理链或工具链行事时，代用户代办令牌交换、下游资源访问、受众限制和同意的用例
+- **范围与权限粒度**：MCP 服务器是否以及如何应当公开细粒度范围（按工具、按资源），以及客户端应如何请求和展示这些范围
+- **非 HTTP 传输的凭据**：适用于 stdio、WebSocket 以及未来那些 HTTP 授权规范无法直接应用的传输方式的模式
+- **客户端身份与注册**：关于动态客户端注册、Client ID Metadata Documents、软件声明和预注册客户端的运营体验
+- **威胁建模输入**：整理与授权相关的攻击面（令牌混淆、混淆代理、受众不匹配、重定向处理），为安全最佳实践文档提供依据
+- **提议工作组**：当某个问题被验证并且范围明确后，IG 会通过标准的 `#wg-ig-group-creation` 流程提交工作组创建提案；批准权仍归社区版主和核心维护者所有
+- **问题陈述与需求**：发布到 GitHub Discussions 的用例目录和建议，供 SEP 作者和工作组使用
 
 ### Out of Scope
 
-- **Authentication of end users to MCP clients**：宿主应用如何认证其自身用户属于宿主问题，不属于协议问题
-- **Transport security (TLS, mTLS, certificate handling)**：属于 Transports WG
-- **Server identity, provenance, and trust signalling**：属于 Server Card / Registry 工作
-- **End-user product configuration walk-throughs**：IG 讨论的是模式，而不是针对单个 IdP 产品的逐步配置。厂商报告的授权服务器可实现或不可实现的约束 _属于_ 部署经验的范围
-- **Competitively sensitive or non-public business information**，根据 [MCP Antitrust Policy](/community/antitrust)
+- **MCP 客户端对终端用户的认证**：宿主应用如何认证其自身用户属于宿主问题，不属于协议问题
+- **传输安全（TLS、mTLS、证书处理）**：属于 Transports WG
+- **服务器身份、来源和信任信号**：属于 Server Card / Registry 工作
+- **终端用户产品配置操作指南**：IG 讨论的是模式，而不是针对单个 IdP 产品的逐步配置。厂商报告的授权服务器可实现或不可实现的约束 _属于_ 部署经验的范围
+- **具有竞争敏感性或非公开的商业信息**，根据 [MCP Antitrust Policy](/community/antitrust)
 
 ### Related Groups
 
-- **Transports WG**：授权目前是在 HTTP 传输层面规定的；传输的变化会影响凭据的携带位置
-- **Agents WG**：代用户代办/代理式访问，以及多代理链中的同意，与 agentic 用例高度重叠
-- **[Server Card WG](/community/server-card/charter) / [Registry](/community/registry/charter)**：客户端和服务器身份、发现元数据以及信任建立，与授权服务器和资源服务器的定位与验证存在交集
-- **SDK Maintainers**：SDK 提供 auth 客户端实现；IG 的发现应当为跨 SDK 的 auth 易用性提供参考
+- **[Enterprise-Managed Authorization IG](/community/interest-groups/enterprise-managed-authorization)**: 协调由 Profiles WG 制定的 EMA 扩展的 IdP、客户端和服务器互操作性测试；在此提出的规范变更请求会被转回本组
+- **Transports WG**：授权目前是在 HTTP 传输层级规范的；对传输的更改会影响凭据的携带位置
+- **Agents WG**：多智能体链中的委托/代表行事访问和同意，与代理式用例高度重叠
+- **[Server Card WG](/community/working-groups/server-card) / [Registry](/community/working-groups/registry)**：客户端和服务器身份、发现元数据以及信任建立，与授权服务器和资源服务器如何被定位和验证相交叉
+- **SDK Maintainers**：SDK 会发布 auth 客户端实现；IG 的发现应为跨 SDK 的 auth 易用性提供参考
 
 ## Leadership
 

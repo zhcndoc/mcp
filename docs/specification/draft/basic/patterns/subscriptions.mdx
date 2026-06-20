@@ -53,7 +53,7 @@ title: 订阅
   "method": "notifications/subscriptions/acknowledged",
   "params": {
     "_meta": {
-      "io.modelcontextprotocol/subscriptionId": "1"
+      "io.modelcontextprotocol/subscriptionId": 1
     },
     "notifications": {
       "toolsListChanged": true,
@@ -67,7 +67,7 @@ title: 订阅
 
 ## 接收通知
 
-流上发送的所有通知都会在 `_meta` 中携带 `io.modelcontextprotocol/subscriptionId`，该值与打开流的 `subscriptions/listen` 请求 ID 相匹配。对于 stdio，由于所有消息共享单一通道，客户端 **必须** 使用此字段将通知与其来源订阅关联起来。
+流上发送的所有通知都会在 `_meta` 中携带 `io.modelcontextprotocol/subscriptionId`，用于标识打开该流的 `subscriptions/listen` 请求。该值就是 `subscriptions/listen` 请求的 JSON-RPC ID。在上面的示例中，请求使用了 `"id": 1`，因此确认消息以及后续所有通知都会携带订阅 ID `1`。在 stdio 中，所有消息共享单一通道，客户端 **必须** 使用该字段将通知与其来源订阅进行关联。
 
 ```json
 {
@@ -75,7 +75,7 @@ title: 订阅
   "method": "notifications/resources/updated",
   "params": {
     "_meta": {
-      "io.modelcontextprotocol/subscriptionId": "1"
+      "io.modelcontextprotocol/subscriptionId": 1
     },
     "uri": "file:///project/config.json"
   }
@@ -84,7 +84,7 @@ title: 订阅
 
 ## 多个并发订阅
 
-客户端 **可以** 同时拥有多个活动订阅——例如，一个监听工具列表变更，另一个监听资源更新。每个订阅都由其 `subscriptions/listen` 请求的 JSON-RPC 请求 ID 标识，而流上的每条通知都会在 `io.modelcontextprotocol/subscriptionId` 中携带该 ID，以便客户端进行分流。
+客户端 **可以** 同时拥有多个活跃订阅——例如，一个监听工具列表变更，另一个监听资源更新。每个订阅都由其 `subscriptions/listen` 请求的 JSON-RPC 请求 ID 标识，并且流上的每条通知都会在 `io.modelcontextprotocol/subscriptionId` 中携带该 ID，以便客户端对它们进行解复用。
 
 ## 取消
 

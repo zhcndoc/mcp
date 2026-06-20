@@ -27,8 +27,10 @@ MCP 中的根目录通常通过工作区或项目配置界面暴露。
 
 ```json
 {
-  "capabilities": {
-    "roots": {}
+  "_meta": {
+    "io.modelcontextprotocol/clientCapabilities": {
+      "roots": {}
+    }
   }
 }
 ```
@@ -39,7 +41,7 @@ MCP 中的根目录通常通过工作区或项目配置界面暴露。
 
 要在处理客户端请求期间检索根目录，服务器会发送一个包含 `roots/list` 请求的 `InputRequiredResult`：
 
-**请求：**
+**Input request (delivered inside [`InputRequiredResult.inputRequests`](/specification/draft/basic/patterns/mrtr#inputrequests)):**
 
 ```json
 {
@@ -47,18 +49,16 @@ MCP 中的根目录通常通过工作区或项目配置界面暴露。
 }
 ```
 
-**响应：**
+**Client result (returned inside `inputResponses` on the retried request):**
 
 ```json
 {
-  "result": {
-    "roots": [
-      {
-        "uri": "file:///home/user/projects/myproject",
-        "name": "我的项目"
-      }
-    ]
-  }
+  "roots": [
+    {
+      "uri": "file:///home/user/projects/myproject",
+      "name": "我的项目"
+    }
+  ]
 }
 ```
 

@@ -96,6 +96,42 @@ MCP 客户端和服务器之间的所有消息 **必须** 遵循
 - 错误响应 **必须** 包含带有 `code` 和 `message` 的 `error` 字段。
 - 错误代码 **必须** 是整数。
 
+#### 错误代码
+
+MCP 使用标准的 JSON-RPC 2.0 错误代码（`-32700`、`-32600` 到 `-32603`）
+表示一般协议失败。
+
+JSON-RPC 2.0 保留了 `-32000` 到 `-32099` 的范围用于实现定义的
+服务器错误。MCP 对该范围作如下划分：
+
+- **`-32000` 到 `-32019` — 旧版。** 该子范围中的代码是在
+  本策略引入之前由实现分配的。新的代码 **不得** 分配到
+  此子范围，而新的实现 **不应** 使用此子范围中的代码。
+  除了 `-32002`（见下文）之外，接收方
+  **不得** 假定这些代码具有任何特定含义。
+- **`-32020` 到 `-32099` — 保留给 MCP 规范。** 该子范围中的错误代码
+  仅由 MCP 规范定义并记录在 [schema](/specification/draft/schema) 中。实现
+  **不得** 发出任何本规范未定义的该子范围内的代码，并且 **必须**
+  仅以其指定含义使用已定义的代码。
+
+MCP 定义了以下错误代码：
+
+| 代码     | 名称                                                                                                  |
+| -------- | ----------------------------------------------------------------------------------------------------- |
+| `-32020` | [`HeaderMismatch`](/specification/draft/schema#headermismatcherror)                                   |
+| `-32021` | [`MissingRequiredClientCapability`](/specification/draft/schema#missingrequiredclientcapabilityerror) |
+| `-32022` | [`UnsupportedProtocolVersion`](/specification/draft/schema#unsupportedprotocolversionerror)           |
+
+早期协议版本定义的代码仍然保留，不会被重复使用。此协议版本的实现 **不得** 发出这些代码：
+
+- `-32002` — 未找到资源（2025-11-25 及更早版本；已由 `-32602` 取代）。
+  客户端 [**应该** 仍接受 `-32002`](/specification/draft/server/resources#error-handling) 来自实现早期版本的服务器。
+- `-32042` — 需要 URL 提供（仅限 2025-11-25）。
+
+纯粹属于实现本地的错误（例如，在 SDK 内部引发的请求超时）目前未由本规范分配代码。将本地错误以 JSON-RPC 形式结构暴露的实现应确保它们不会被误认为是从对端接收到的错误。未来版本的规范可能会在保留子范围内为常见的本地错误条件定义标准代码。
+
+对于本规范未定义用途的新错误代码，**应该** 分配在 JSON-RPC 保留范围（`-32768` 到 `-32000`）之外；其余整数空间可用于应用定义的错误。
+
 ### 通知
 
 [通知](/specification/draft/schema#jsonrpcnotification) 由客户端发送给服务器，反之亦然，作为单向消息。接收者 **不得** 发送响应。
@@ -221,7 +257,7 @@ MCP 支持带有以下规则的 JSON Schema：
 
 - 模式 **必须** 根据其声明的或默认的方言有效
 
-### `$ref` Resolution
+### `$ref` 解析
 
 JSON Schema 2020-12 允许 `$ref` 指向绝对 URI。实现 **不得**
 自动解析会解析到网络 URI 的 `$ref` 值。
@@ -233,7 +269,7 @@ JSON Schema 2020-12 允许 `$ref` 指向绝对 URI。实现 **不得**
 由于未解析的外部 `$ref` 导致验证失败的模式 **应该** 被拒绝，
 而不是静默地视为宽松通过。
 
-### Composition-Keyword Resource Use
+### 组合关键字资源使用
 
 组合关键字（`anyOf`、`oneOf`、`allOf`、`if`/`then`/`else`）和 `$defs` 支持
 表达能力强的模式，但验证成本可能很高。实现 **应该** 应用合理的限制，例如最大模式深度、子模式总数上限，
@@ -280,15 +316,14 @@ JSON Schema 2020-12 允许 `$ref` 指向绝对 URI。实现 **不得**
 | `io.modelcontextprotocol/clientCapabilities` | `ClientCapabilities` | 是   | 与此请求相关的客户端能力                               |
 | `io.modelcontextprotocol/logLevel`           | `LoggingLevel`       | 否   | 服务器应为此请求发出的最低日志级别                     |
 
-A request missing any required field is malformed; the server **MUST** reject it with
-JSON-RPC error code `-32602` (Invalid params). On HTTP, the response status **MUST** be
-`400 Bad Request`.
+缺少任何必需字段的请求都属于格式错误；服务器 **必须** 使用
+JSON-RPC 错误码 `-32602`（无效参数）拒绝它。在 HTTP 上，响应状态 **必须** 为
+`400 Bad Request`。
 
-A server **MUST NOT** rely on capabilities the client has not declared. If
-processing a request requires a capability the client did not include in
-`io.modelcontextprotocol/clientCapabilities`, the server **MUST** return a
+服务器 **不得** 依赖客户端未声明的能力。如果处理请求需要某个客户端未在
+`io.modelcontextprotocol/clientCapabilities` 中包含的能力，服务器 **必须** 返回
 [`MissingRequiredClientCapabilityError`](/specification/draft/schema#missingrequiredclientcapabilityerror)
-（`-32003`），其 `data.requiredCapabilities` 列出缺失的能力。在
+（`-32021`），其 `data.requiredCapabilities` 列出缺失的能力。在
 HTTP 上，响应状态 **必须** 为 `400 Bad Request`。
 
 对于通过 [`subscriptions/listen`][subscriptions-listen] 流传递的通知，服务器

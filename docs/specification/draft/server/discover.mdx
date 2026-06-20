@@ -56,15 +56,6 @@ title: 发现
 }
 ```
 
-### 响应字段
-
-| 字段                | 类型                 | 必需 | 描述                                                                                  |
-| ------------------- | -------------------- | ---- | -------------------------------------------------------------------------------------------- |
-| `supportedVersions` | `string[]`           | 是   | 服务器支持的协议版本。客户端应为后续请求选择其中一个。 |
-| `capabilities`      | `ServerCapabilities` | 是   | 服务器支持的能力（工具、资源、提示等）。                          |
-| `serverInfo`        | `Implementation`     | 是   | 服务器软件的名称和版本。                                                     |
-| `instructions`      | `string`             | 否   | 用自然语言为 LLM 提供如何有效使用该服务器的指导。                    |
-
 ## 何时调用
 
 对于客户端来说，调用 `server/discover` 是可选的——客户端可以内联发起任何
@@ -81,7 +72,21 @@ RPC，并在服务器不支持请求的版本时处理
   [stdio: 向后兼容](/specification/draft/basic/transports/stdio#backward-compatibility)
   。
 
-参见 [协议版本协商](/specification/draft/basic/versioning#protocol-version-negotiation)
-了解完整的版本选择流程。对于未知方法返回的 HTTP 特定状态码，请参见传输中的
-[协议版本头](/specification/draft/basic/transports/streamable-http#protocol-version-header)
+有关完整的版本选择流程，请参见 [协议版本协商](/specification/draft/basic/versioning#protocol-version-negotiation)。
+有关为未知方法返回的 HTTP 特定状态码，请参见传输中的
+[协议版本标头](/specification/draft/basic/transports/streamable-http#protocol-version-header)
 部分。
+
+## 数据类型
+
+### DiscoverResult
+
+发现结果包括：
+
+- `supportedVersions`：服务器支持的协议版本。客户端应
+  为后续请求选择其中之一。
+- `capabilities`：服务器支持的能力（tools、resources、prompts
+  等）
+- `serverInfo`：服务器软件的名称和版本
+- `instructions`：可选的自然语言指导，供 LLM 了解如何有效使用
+  此服务器
