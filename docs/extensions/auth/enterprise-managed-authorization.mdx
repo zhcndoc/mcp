@@ -8,7 +8,7 @@ Enterprise-Managed Authorization 扩展（`io.modelcontextprotocol/enterprise-ma
 <Card
   title="规范"
   icon="file-lines"
-  href="https://github.com/modelcontextprotocol/ext-auth/blob/main/specification/draft/enterprise-managed-authorization.mdx"
+  href="https://github.com/modelcontextprotocol/ext-auth/blob/main/specification/stable/enterprise-managed-authorization.mdx"
 >
   Enterprise-Managed Authorization 扩展的完整技术规范。
 </Card>
@@ -122,7 +122,7 @@ sequenceDiagram
 
 2. **将 IdP 声明映射到权限** —— ID-JAG 令牌携带声明（范围和资源信息），你的服务器使用这些声明来确定员工是谁以及员工可以访问什么。基于这些声明定义你的授权逻辑。
 
-3. **处理账户链接** - ID-JAG 令牌将始终包含主题声明，并且可能另外包含一个可用于
+3. **处理账户关联** —— ID-JAG 令牌始终会包含 `subject` 声明，并且还可能包含 `email` 声明，可用于将企业身份链接到你系统中的现有账户。将 `subject` 声明用作用户的主要稳定标识符，并在匹配企业托管授权配置之前已创建的现有账户时，将 `email` 声明作为回退。
 
 ## 客户端支持
 
@@ -147,7 +147,7 @@ sequenceDiagram
   <Card
     title="完整规范"
     icon="file-lines"
-    href="https://github.com/modelcontextprotocol/ext-auth/blob/main/specification/draft/enterprise-managed-authorization.mdx"
+    href="https://github.com/modelcontextprotocol/ext-auth/blob/main/specification/stable/enterprise-managed-authorization.mdx"
   >
     带有规范性要求的技术规范
   </Card>

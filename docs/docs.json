@@ -491,6 +491,7 @@
               "community/contributor-ladder",
               "community/feature-lifecycle",
               "community/sdk-tiers",
+              "community/security",
               "community/antitrust"
             ]
           },
@@ -512,6 +513,8 @@
             "pages": [
               "community/interest-groups/auth",
               "community/interest-groups/enterprise-managed-authorization",
+              "community/interest-groups/financial-services",
+              "community/interest-groups/primitive-grouping",
               "community/interest-groups/security",
               "community/interest-groups/tool-annotations"
             ]

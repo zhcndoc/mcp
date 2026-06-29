@@ -90,15 +90,46 @@ title: 订阅
 
 订阅在以下情况下结束：
 
-- 客户端 **取消** 它——关闭 SSE 流（HTTP）或发送
-  `notifications/cancelled`，并引用 `subscriptions/listen` 请求 ID（stdio）。
-- 服务器 **终止** 它（例如，在关闭期间）——它 **必须** 关闭 SSE
-  流（HTTP）或发送 `notifications/cancelled`，并引用
-  `subscriptions/listen` 请求 ID（stdio）。
+- **客户端** 取消它——关闭 SSE 流（HTTP）或发送
+  `notifications/cancelled`，引用 `subscriptions/listen` 请求 ID（stdio）。
+- **服务器** 主动终止它（例如，在关闭期间）——它 **应该** 发送
+  空的 `subscriptions/listen` 响应以表示正常结束（参见
+  [优雅关闭](#graceful-closure)），然后关闭流。
 - 底层传输关闭（HTTP 超时、TCP 断开、stdio 进程
   退出）。
 
-在 **stdio** 下，如果连接被终止后又重新建立，客户端 **必须** 重新发送 `subscriptions/listen` 以重建其订阅——服务器不会在重连之间保留任何订阅状态。
+### 优雅关闭
+
+当服务器主动结束订阅时（例如，在
+关闭期间），它 **应该** 在关闭流之前，先对原始的 `subscriptions/listen` 请求
+返回一个空结果。 这是对这个长生命周期请求的 JSON-RPC 响应，通过其 `id` 关联，并表明订阅
+已优雅结束——而不是突发的传输中断，后者不会携带任何
+响应。
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "resultType": "complete",
+    "_meta": {
+      "io.modelcontextprotocol/subscriptionId": 1
+    }
+  }
+}
+```
+
+与流上的其他消息一样，该响应在 `_meta` 中携带
+`io.modelcontextprotocol/subscriptionId`，用于标识它关闭的是哪一个
+订阅。该值与原始
+`subscriptions/listen` 请求的 JSON-RPC `id` 相匹配。
+
+收到此响应的客户端会知道订阅已正常关闭；而没有该响应就关闭的
+传输则表示一次意外断开，客户端 **可以** 将其视为重新连接的触发条件。
+
+在 **stdio** 中，如果连接被终止后又重新建立，
+客户端 **必须** 重新发送 `subscriptions/listen` 以重新建立其
+订阅——服务器不会在重连之间保留任何订阅状态。
 
 完整规则请参见 [取消][cancellation]。
 

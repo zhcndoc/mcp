@@ -6,13 +6,13 @@ title: Streamable HTTP
 
 <Info>
 
-Streamable HTTP 于协议版本 2025-03-26 引入，用作协议版本 2024-11-05 中 [HTTP+SSE 传输][http-sse] 的替代方案。
+Streamable HTTP 在协议版本 2025-03-26 中引入，作为协议版本 2024-11-05 中 [HTTP+SSE 传输][http-sse] 的替代方案。
 
 </Info>
 
 <Info>
 
-2026-07-28 修订更改了 Streamable HTTP 的行为。客户端必须确保正确处理向后兼容性。变更包括：
+2026-07-28 的修订更改了 Streamable HTTP 的行为。客户端必须确保正确处理向后兼容性。变更包括：
 
 - 移除了 GET 流端点。
 - 移除了协议级会话。
@@ -103,7 +103,15 @@ request。服务器的响应本身是一个保持打开的 SSE 流，并
 在启动 SSE 流时，服务器 **SHOULD** 在 HTTP 响应中包含
 `X-Accel-Buffering: no` 头。这会指示反向代理（例如 nginx）禁用响应缓冲，确保 SSE 事件能够立即传递给客户端，而不是被保留在缓冲区中。没有该头时，代理可能会在发送给客户端之前累积消息，从而引入不必要的延迟，并可能破坏 SSE 通信的实时特性。
 
-不支持通过 `Last-Event-ID` 进行可恢复的 SSE 流。
+<Note>
+
+对于长生命周期流——尤其是
+[`subscriptions/listen`][subscriptions-listen] 响应流——建议服务器
+定期发送一行 SSE 注释（以冒号开头的行，例如 `:\r\n`）作为保活。这样可以避免在空闲期没有通知流动时，连接被中间代理或客户端空闲超时关闭。根据 [SSE 规范][sse]，任何以冒号开头的行都是不携带事件数据的注释；客户端必须忽略此类行，且不得将其视为格式错误的输入。
+
+</Note>
+
+不支持通过 `Last-Event-ID` 恢复 SSE 流。
 
 [notifications-progress]: /specification/draft/basic/patterns/progress
 [notifications-message]: /specification/draft/server/utilities/logging
@@ -174,9 +182,9 @@ sequenceDiagram
 
 ## 取消
 
-关闭 SSE 响应流 **MUST** 被服务器视为该请求的取消。由于
-每个请求都有自己的响应流，因此传输级断开是明确无歧义的。服务器 **SHOULD**
-尽快停止已取消请求的工作，并且 **MUST NOT** 为其发送任何后续消息。完整规则请参见
+关闭 SSE 响应流 **必须** 被服务器视为该请求的取消。由于
+每个请求都有自己的响应流，因此传输级断开是明确无歧义的。服务器 **应该**
+尽快停止已取消请求的工作，并且 **不得** 为其发送任何后续消息。完整规则请参见
 [Cancellation][cancellation]。
 
 [cancellation]: /specification/draft/basic/patterns/cancellation
@@ -189,26 +197,26 @@ Streamable HTTP 传输会将选定的 JSON-RPC 正文字段镜像到 HTTP
 
 ### 协议版本头
 
-发送到 MCP endpoint 的每个 POST 请求 **MUST** 包含一个
+发送到 MCP endpoint 的每个 POST 请求 **必须** 包含一个
 `MCP-Protocol-Version` 头。
 
 例如：`MCP-Protocol-Version: 2026-07-28`
 
-该头值 **MUST** 与请求正文的
+该头值 **必须** 与请求正文的
 `_meta` 中携带的 `io.modelcontextprotocol/protocolVersion` 字段匹配。
-如果这些值不匹配，服务器 **MUST** 拒绝该请求，
+如果这些值不匹配，服务器 **必须** 拒绝该请求，
 返回 `400 Bad Request` 和一个 `HeaderMismatch` JSON-RPC 错误
 （见 [Server Validation](#server-validation)）。
 
-如果服务器未实现所请求的协议版本（无论该版本对服务器而言是未知版本，还是服务器已知但选择不支持的版本），它 **MUST** 返回 `400 Bad Request` 和一个
+如果服务器未实现所请求的协议版本（无论该版本对服务器而言是未知版本，还是服务器已知但选择不支持的版本），它 **必须** 返回 `400 Bad Request` 和一个
 [`UnsupportedProtocolVersionError`][unsupported-version]，列出其支持的版本。请参见
 [Versioning: Protocol Version Negotiation][lifecycle-version] 了解协商流程。
 
-如果服务器未实现所请求的 RPC 方法，它 **MUST** 返回
+如果服务器未实现所请求的 RPC 方法，它 **必须** 返回
 `404 Not Found` 和一个错误码为 `-32601`
 （`Method not found`）的 JSON-RPC 错误。该 JSON-RPC 错误体将此情形与由不托管现代 MCP endpoint 的旧版 [HTTP+SSE][http-sse] 服务器返回的 `404` 区分开来（见 [Backward Compatibility](#backward-compatibility)）。
 
-支持早于 `2025-06-18` 的协议版本客户端（该版本未定义 `MCP-Protocol-Version` 头）的服务器 **MAY** 将缺少该头的请求视为协议版本 `2025-03-26`。不支持此类客户端的服务器 **MUST** 按照 [Server Validation](#server-validation) 拒绝缺少该头的请求。
+支持早于 `2025-06-18` 的协议版本客户端（该版本未定义 `MCP-Protocol-Version` 头）的服务器 **可以** 将缺少该头的请求视为协议版本 `2025-03-26`。不支持此类客户端的服务器 **必须** 按照 [Server Validation](#server-validation) 拒绝缺少该头的请求。
 
 [unsupported-version]: /specification/draft/schema#unsupportedprotocolversionerror
 [lifecycle-version]: /specification/draft/basic/versioning#protocol-version-negotiation
@@ -223,7 +231,7 @@ Streamable HTTP 传输会将选定的 JSON-RPC 正文字段镜像到 HTTP
 这些头对于符合规范是 **必需的**。
 
 如果 `Mcp-Name` 的来源值无法安全地表示为普通 ASCII
-头值，客户端 **MUST** 按照 [值编码](#value-encoding) 中描述的 Base64 哨兵格式对其进行编码。
+头值，客户端 **必须** 按照 [值编码](#value-encoding) 中描述的 Base64 哨兵格式对其进行编码。
 
 **`tools/call` request:**
 
@@ -284,15 +292,15 @@ Mcp-Name: file:///projects/myapp/config.json
 
 ### 来自工具参数的自定义头
 
-MCP 服务器 **MAY** 使用参数的 schema 中的 `inputSchema` 内的
+MCP 服务器 **可以** 使用参数的 schema 中的 `inputSchema` 内的
 `x-mcp-header` 扩展属性，将特定工具参数映射到
 HTTP 头中。详见
 [Tool Definitions][tool-definitions]
 ，了解如何为工具参数添加注解。
 
-虽然服务器使用 `x-mcp-header` 是可选的，但客户端 **MUST**
+虽然服务器使用 `x-mcp-header` 是可选的，但客户端 **必须**
 支持此功能。当服务器的工具定义包含
-`x-mcp-header` 注解时，符合规范的客户端 **MUST** 将指定的参数值映射到 HTTP 头中。
+`x-mcp-header` 注解时，符合规范的客户端 **必须** 将指定的参数值映射到 HTTP 头中。
 
 [tool-definitions]: /specification/draft/server/tools#x-mcp-header
 
@@ -303,24 +311,19 @@ HTTP 头中。详见
 
 **`x-mcp-header` 值的约束**：
 
-- **MUST NOT** be empty
-- **MUST** match HTTP field-name token syntax (`1*tchar`, [RFC 9110 Section 5.1](https://datatracker.ietf.org/doc/html/rfc9110#section-5.1))
-- **MUST NOT** contain control characters, including carriage return (CR, `\r`)
-  or line feed (LF, `\n`)
-- **MUST** be case-insensitively unique among all `x-mcp-header` values in
-  the `inputSchema`
-- **MUST** only be applied to parameters with primitive types (integer,
-  string, boolean). Parameters with type `number` are not permitted.
-  Integer values **MUST** be within the safe range for JavaScript
-  (−2<sup>53</sup>+1 to 2<sup>53</sup>−1)
-- **MUST** only be applied to properties that are _statically reachable_
-  from the schema root: reachable via a chain consisting solely of
-  `properties` keys. The chain **MUST NOT** pass through `items` (or any
-  other array keyword), composition keywords (`oneOf`, `anyOf`, `allOf`,
-  `not`), conditional keywords (`if`/`then`/`else`), or `$ref`. Nested
-  object properties are permitted as long as every step in the chain is a
-  `properties` key. An `x-mcp-header` annotation anywhere else makes the
-  annotation — and thus the tool definition — invalid.
+- **不得** 为空
+- **必须** 符合 HTTP field-name token 语法（`1*tchar`，[RFC 9110 第 5.1 节](https://datatracker.ietf.org/doc/html/rfc9110#section-5.1)）
+- **不得** 包含控制字符，包括回车符（CR，`\r`）
+  或换行符（LF，`\n`）
+- **必须** 在 `inputSchema` 中所有 `x-mcp-header` 值之间大小写不敏感地唯一
+- **必须** 仅应用于原始类型（integer、string、boolean）的参数。不允许类型为 `number` 的参数。
+  整数值 **必须** 位于 JavaScript 的安全范围内
+  （−2<sup>53</sup>+1 到 2<sup>53</sup>−1）
+- **必须** 仅应用于从 schema 根 _静态可达_ 的属性：即仅通过由
+  `properties` 键组成的链可达。该链 **不得** 穿过 `items`（或任何
+  其他数组关键字）、组合关键字（`oneOf`、`anyOf`、`allOf`、`not`）、
+  条件关键字（`if`/`then`/`else`），或 `$ref`。只要链中的每一步都是
+  `properties` 键，就允许嵌套对象属性。任何其他位置的 `x-mcp-header` 注解都会使该注解——从而使工具定义——无效。
 
 头提取被定义为读取带注解属性的精确属性路径上的实例值（通往它的 `properties` 键链）。如果调用参数中该路径没有值，则省略该头。
 
@@ -472,7 +475,7 @@ HTTP 状态 `400 Bad Request`，并使用 JSON-RPC 错误码
 `-32020`（`HeaderMismatch`）拒绝该请求。
 
 | 场景                                 | 客户端行为                | 服务器行为                          |
-| ---------------------------------------- | ------------------------------ | ---------------------------------------- |
+| ---------------------------------------- | ------------------------------------ | ---------------------------------------- |
 | 提供了参数值                 | 客户端必须包含该头 | 服务器必须验证头与正文匹配 |
 | 参数值为 `null`                | 客户端必须省略该头 | 服务器不得期望该头 |
 | 参数未出现在参数中               | 客户端必须省略该头 | 服务器不得期望该头 |
@@ -524,7 +527,7 @@ HTTP 状态 `400 Bad Request`，并使用 JSON-RPC 错误码
   "id": 1,
   "error": {
     "code": -32020,
-    "message": "Header mismatch: Mcp-Name header value 'foo' does not match body value 'bar'"
+    "message": "头不匹配：Mcp-Name 头值 'foo' 与正文值 'bar' 不匹配"
   }
 }
 ```

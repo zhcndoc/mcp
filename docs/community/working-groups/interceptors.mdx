@@ -1,92 +1,93 @@
 ---
-title: Interceptors Charter
-description: Charter for the MCP Interceptors Working Group.
+title: 拦截器宪章
+description: MCP 拦截器工作组的宪章。
 ---
 
-## Group Type
+## 组类型
 
-**Working Group**
+**工作组**
 
-## Mission Statement
+## 使命声明
 
-The Interceptors Working Group exists to standardize how context operations are intercepted, validated, and transformed at key points in the agentic lifecycle. This covers MCP-defined operations such as tool invocations, resource access, prompt handling, sampling, and elicitation, as well as any other operation that shapes agent context — including LLM completions and custom application-specific workflows. The ecosystem is developing a sprawling landscape of sidecars, proxies, and gateways for cross-cutting concerns that are largely non-reusable and non-interoperable, creating an M × N integration problem. The WG will produce specification extensions and reference implementations that define interceptors as a new MCP primitive with two types — validators (inspect and return pass/fail decisions) and mutators (transform context payloads) — discoverable and invocable through MCP's existing JSON-RPC patterns across deployment models including in-process, sidecar, and remote service.
+拦截器工作组旨在标准化在代理生命周期的关键节点中，如何对上下文操作进行拦截、验证和转换。这涵盖了 MCP 定义的操作，例如工具调用、资源访问、提示处理、采样和提取，以及任何其他塑造代理上下文的操作——包括 LLM 补全和自定义的特定应用工作流。当前生态正在形成一片庞杂的边车、代理和网关景观，用于处理横切关注点，但这些方案大多不可复用且互操作性差，造成了 M × N 的集成问题。该工作组将产出规范扩展和参考实现，将拦截器定义为一种新的 MCP 原语，并包含两种类型——验证器（检查并返回通过/失败决策）和变换器（转换上下文负载）——它们可通过 MCP 现有的 JSON-RPC 模式进行发现和调用，并支持包括进程内、边车和远程服务在内的多种部署模型。
 
-## Scope
+## 范围
 
-### In Scope
+### 范围内
 
-- **Specification Work**: SEPs defining the interceptor primitive — validator and mutator types, lifecycle event hooks for MCP operations (tool calls, resource reads, prompt gets, sampling, elicitation) and extensible to non-MCP context operations (LLM completions, custom workflows), trust-boundary-aware execution model, priority-based chain ordering, and audit mode semantics.
-- **Reference Implementations**: Multi-language SDK libraries for building interceptors, sample interceptors (PII redaction, schema validation, audit logging), a common interceptor sidecar/proxy runtime, and a CLI client for interceptor invocation and testing.
-- **Cross-Cutting Concerns**: Transport-level interception points, gateway-based deployment patterns, and interplay with routing and policy layers (see Related Groups).
-- **Documentation**: Specification sections covering interceptor authoring, deployment models (in-process, sidecar, remote service), chain configuration, and migration guidance from ad-hoc middleware approaches.
+- **规范工作**：定义拦截器原语的 SEP，包括验证器和变换器类型、MCP 操作的生命周期事件钩子（工具调用、资源读取、提示获取、采样、提取），并可扩展到非 MCP 上下文操作（LLM 补全、自定义工作流）、面向信任边界的执行模型、基于优先级的链式排序以及审计模式语义。
+- **参考实现**：用于构建拦截器的多语言 SDK 库、示例拦截器（PII 脱敏、模式校验、审计日志记录）、通用拦截器边车/代理运行时，以及用于拦截器调用和测试的 CLI 客户端。
+- **横切关注点**：传输层拦截点、基于网关的部署模式，以及与路由和策略层的协同（见相关工作组）。
+- **文档**：涵盖拦截器编写、部署模型（进程内、边车、远程服务）、链配置以及从临时中间件方案迁移的规范章节。
 
-### Out of Scope
+### 范围外
 
-- Client-specific hook implementation details (e.g., Claude Code's internal hook execution engine) — the WG standardizes the protocol-level interface, not host internals.
-- Transport-layer wire format or session model changes (owned by the Transports WG).
-- General-purpose middleware or proxy infrastructure beyond what the MCP protocol requires.
+- 客户端特定的钩子实现细节（例如 Claude Code 的内部钩子执行引擎）——该工作组标准化的是协议层接口，而不是宿主内部实现。
+- 传输层线格式或会话模型更改（由 Transports WG 负责）。
+- 超出 MCP 协议所需范围的通用中间件或代理基础设施。
 
-### Related Groups
+### 相关工作组
 
-- **Transports WG** — interceptors operate on MCP message flows whose delivery behavior depends on the transport; coordination needed on transport-level interception points.
-- **Gateways IG** — gateways are a key deployment model for interceptors; coordination needed on gateway-based interceptor patterns and shared concerns around routing, policy, and observability.
+- **Transports WG** — 拦截器作用于 MCP 消息流，而其传递行为取决于传输层；因此需要就传输层拦截点进行协同。
+- **Gateways IG** — 网关是拦截器的一种关键部署模型；需要就基于网关的拦截器模式以及路由、策略和可观测性方面的共同关注点进行协同。
 
-## Leadership
+## 领导层
 
-| Role | Name                     | Organization | GitHub                                       | Term    |
+| 角色 | 姓名                     | 组织 | GitHub                                       | 任期    |
 | ---- | ------------------------ | ------------ | -------------------------------------------- | ------- |
-| Lead | Sambhav Kothari          | Bloomberg    | [@sambhav](https://github.com/sambhav)       | Initial |
-| Lead | Peder Holdgaard Pedersen | Saxo Bank    | [@PederHP](https://github.com/PederHP)       | Initial |
-| Lead | Kurt Degiorgio           | Bloomberg    | [@degiorgio](https://github.com/degiorgio)   | Initial |
-| Lead | Uk-Jae Jeong             | Bloomberg    | [@jeongukjae](https://github.com/jeongukjae) | Initial |
+| 负责人 | Sambhav Kothari          | Bloomberg    | [@sambhav](https://github.com/sambhav)       | 初始 |
+| 负责人 | Peder Holdgaard Pedersen | Saxo Bank    | [@PederHP](https://github.com/PederHP)       | 初始 |
+| 负责人 | Kurt Degiorgio           | Bloomberg    | [@degiorgio](https://github.com/degiorgio)   | 初始 |
+| 负责人 | Uk-Jae Jeong             | Bloomberg    | [@jeongukjae](https://github.com/jeongukjae) | 初始 |
+| 负责人 | Ola Hungerford           | Nordstrom    | [@olaservo](https://github.com/olaservo)     | 初始 |
 
-## Authority & Decision Rights
+## 权限与决策权
 
-| Decision Type                       | Authority Level                                        |
+| 决策类型                       | 权限级别                                        |
 | ----------------------------------- | ------------------------------------------------------ |
-| Meeting logistics & scheduling      | WG Leads (autonomous)                                  |
-| Proposal prioritization within WG   | WG Leads (autonomous)                                  |
-| SEP triage & closure (in scope)     | WG Leads (autonomous, with documented rationale)       |
-| Technical design within scope       | WG consensus                                           |
-| Spec changes (additive)             | WG consensus → Core Maintainer approval                |
-| Spec changes (breaking/fundamental) | WG consensus → Core Maintainer approval + wider review |
-| Scope expansion                     | Core Maintainer approval required                      |
-| WG Member approval                  | WG Member sponsors                                     |
+| 会议后勤与安排      | WG 负责人（自主）                                  |
+| WG 内提案优先级排序   | WG 负责人（自主）                                  |
+| SEP 分流与关闭（在范围内）     | WG 负责人（自主，需记录理由）       |
+| 范围内的技术设计       | WG 共识                                           |
+| 规范变更（增量）             | WG 共识 → 核心维护者批准                |
+| 规范变更（破坏性/基础性） | WG 共识 → 核心维护者批准 + 更广泛审查 |
+| 范围扩展                     | 需要核心维护者批准                      |
+| WG 成员批准                  | WG 成员赞助者                                     |
 
-## Operations
+## 运营
 
-| Meeting         | Frequency | Duration   | Purpose                               |
-| --------------- | --------- | ---------- | ------------------------------------- |
-| Working Session | Biweekly  | 60 minutes | Technical discussion, proposal review |
+| 会议            | 频率    | 时长       | 目的                 |
+| --------------- | ------- | ---------- | -------------------- |
+| 工作会议       | 每两周一次 | 60 分钟    | 技术讨论、提案评审   |
 
-## Resources
+## 资源
 
-- Experimental extension repository: [modelcontextprotocol/experimental-ext-interceptors](https://github.com/modelcontextprotocol/experimental-ext-interceptors)
-- Motivation: [SEP-1763](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1763)
+- 实验性扩展仓库: [modelcontextprotocol/experimental-ext-interceptors](https://github.com/modelcontextprotocol/experimental-ext-interceptors)
+- 动机: [SEP-1763](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1763)
 
-## Deliverables & Success Metrics
+## 交付物与成功指标
 
-### Active Work Items
+### 当前工作项
 
-| Item                                                                  | Status      | Target Date | Champion |
+| 项目                                                                  | 状态      | 目标日期 | 负责人 |
 | --------------------------------------------------------------------- | ----------- | ----------- | -------- |
-| SEP-1763: Interceptors                                                | Draft       |             | TBD      |
-| Sample interceptors (PII redaction, schema validation, audit logging) | In Progress |             | TBD      |
-| Common interceptor sidecar runtime                                    | Ideating    |             | TBD      |
-| CLI client for interceptor invocation and testing                     | Ideating    |             | TBD      |
-| Reference implementation in Go SDK                                    | In Progress |             | TBD      |
-| Reference implementation in C# SDK                                    | In Progress |             | TBD      |
+| SEP-1763: 拦截器                                                      | 草案       |             | 待定      |
+| 示例拦截器（PII 脱敏、模式校验、审计日志）                             | 进行中     |             | 待定      |
+| 通用拦截器 sidecar 运行时                                              | 构思中     |             | 待定      |
+| 用于拦截器调用和测试的 CLI 客户端                                     | 构思中     |             | 待定      |
+| Go SDK 中的参考实现                                                   | 进行中     |             | 待定      |
+| C# SDK 中的参考实现                                                   | 进行中     |             | 待定      |
 
-### Success Criteria
+### 成功标准
 
-- An accepted SEP defining the interceptor primitive (validators, mutators), lifecycle event hooks, and trust-boundary-aware chain execution.
-- Reference implementations in at least two Tier-1 SDKs (Go, C#).
-- A common interceptor sidecar runtime enabling platform teams to deploy interceptors without modifying individual MCP servers.
-- CLI tooling for interceptor invocation and testing.
-- Demonstrated interoperability across deployment models (in-process, sidecar, remote service).
+- 一份已被接受的 SEP，定义拦截器原语（验证器、变换器）、生命周期事件钩子，以及感知信任边界的链式执行。
+- 至少在两个 Tier-1 SDK（Go、C#）中提供参考实现。
+- 一个通用拦截器 sidecar 运行时，使平台团队无需修改各个 MCP 服务器即可部署拦截器。
+- 用于拦截器调用和测试的 CLI 工具。
+- 在不同部署模型（进程内、sidecar、远程服务）之间展示可互操作性。
 
-## Changelog
+## 更新日志
 
-| Date       | Change          |
+| 日期       | 变更          |
 | ---------- | --------------- |
-| 2026-04-21 | Initial charter |
+| 2026-04-21 | 初始章程 |

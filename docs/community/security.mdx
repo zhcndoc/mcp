@@ -1,0 +1,40 @@
+---
+title: 安全政策
+description: 如何报告 Model Context Protocol 规范和 SDK 中的安全漏洞，哪些内容属于或不属于范围，以及 SDK 维护者如何协调披露。
+---
+
+本页面总结了在 Model Context Protocol 项目中如何处理安全报告。完整政策，包括信任模型以及所有被视为有意设计、因此不符合漏洞条件的行为列表，位于规范仓库中的 [SECURITY.md](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/SECURITY.md) 。
+
+## 报告漏洞
+
+请通过受影响仓库上的 GitHub Security Advisories 报告安全问题。规范仓库以及 [modelcontextprotocol](https://github.com/modelcontextprotocol) 组织中的每个官方 SDK 仓库都已启用私密漏洞报告功能。
+
+请不要通过公开 issue、讨论或 pull request 报告安全问题。
+
+## SDK 披露与跨 SDK 协调
+
+当某个 SDK 收到报告时，该 SDK 的维护者会评估同一问题是否也影响其他官方 SDK。许多 MCP 漏洞源于共享模式、传输实现，或多个 SDK 以相同方式实现的规范级行为。接收报告的维护者会与其他可能受影响的 SDK 维护者协调，确定哪些 SDK 受到影响以及影响程度，以便修复和安全公告能够一起发布，而不是让某些 SDK 在其他 SDK 已发布后仍处于暴露状态。
+
+如果根本原因是规范中的缺陷，而不是实现中的 bug，协调维护者会与规范维护者讨论此事。
+
+CVE 通过 GitHub 的 CNA 作为 GHSA 工作流的一部分分配。
+
+## 范围
+
+当以下问题源于规范或官方 SDK 的缺陷时，它们被视为安全漏洞：协议层漏洞、认证或授权绕过、实现缺陷（例如注入或内存安全问题）、沙箱逃逸、会话劫持、令牌泄露以及跨租户访问。
+
+完整的
+[SECURITY.md](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/SECURITY.md)
+文档说明了 MCP 信任模型，以及一系列故意设计的行为，这些行为不属于漏洞。其中最常见的一类是 stdio 对等方攻击，摘要如下。
+
+### Stdio 传输信任边界
+
+使用 stdio 传输时，客户端会将服务器作为本地子进程启动，二者可能运行在等同的环境级权限下。SDK 不会在 stdio 通道上防御任一对等方免受恶意另一方的影响：恶意服务器在被运行时就已经拥有任意代码执行能力，而恶意客户端对其启动的服务器已经拥有完整的进程控制权。
+
+其唯一影响只是一个 stdio 对等方能够使另一个对等方崩溃、卡住、耗尽资源或以其他方式拒绝服务的报告，均不在范围内，应作为普通 issue 提交，而不是作为 GHSA 提交。如果受影响的 SDK 代码可通过任何受支持的远程传输方式触达，或会导致沙箱逃逸，则该报告仍在范围内。在受限权限下运行 stdio 服务器的部署，负责在该边界上强制执行隔离。SDK 的 stdio 传输不是沙箱。
+
+## 安全兴趣组
+
+[安全兴趣组](/community/interest-groups/security) 是用于讨论
+MCP 特定威胁、审查与安全相关的提案，以及处理
+不适合单个仓库的披露问题的场所。

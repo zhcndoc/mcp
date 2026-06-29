@@ -627,6 +627,150 @@ MCP 客户端 **应该** 实施额外的检查和护栏，以
   - 使用具有受限访问的 unix 域套接字或其他进程间通信 (IPC)
     机制
 
+### OAuth 授权 URL 验证
+
+恶意 MCP 服务器提供的 OAuth 授权 URL 可能利用客户端侧 URL 处理漏洞，导致跨站脚本（XSS）攻击和远程代码执行（RCE）。
+
+#### 攻击描述
+
+在 OAuth 授权流程期间，MCP 服务器会提供授权 URL，由客户端在浏览器中打开或以编程方式处理。恶意服务器可以通过以下攻击向量利用 MCP 客户端中不足的 URL 验证：
+
+**JavaScript URL 注入（XSS）**
+
+1. 恶意 MCP 服务器将 `javascript:` URL 作为授权端点提供
+2. MCP 客户端将此 URL 直接传递给 `window.open()` 或类似的浏览器 API
+3. 浏览器执行 URL 中嵌入的 JavaScript 代码
+4. 攻击者获得客户端应用程序中的 JavaScript 执行上下文，可能导致会话劫持、凭据窃取或进一步利用
+
+**通过 Shell 执行进行命令注入**
+
+1. 恶意 MCP 服务器提供包含 shell 命令注入载荷的 URL
+2. MCP 客户端使用 shell 命令（例如 `cmd.exe`、PowerShell 或 shell 脚本）打开该 URL
+3. shell 将 URL 的部分内容解释为要执行的额外命令
+4. 攻击者在用户系统上实现任意代码执行
+
+**stdio 传输权限提升**
+
+当 XSS 漏洞与 `stdio` 传输能力结合时，
+攻击者可以将基于 Web 的攻击升级为完整系统入侵。请参阅
+[代理场景中的 stdio 传输安全](#stdio-transport-security-in-proxy-scenarios)
+以了解详细的攻击向量和缓解措施。
+
+```mermaid
+sequenceDiagram
+    participant MaliciousMCP as 恶意 MCP 服务器
+    participant Client as MCP 客户端
+    participant Proxy as MCP 代理
+    participant System as 主机系统
+
+    MaliciousMCP->>Client: 恶意授权 URL（javascript:）
+    Client->>Client: 执行 JavaScript（XSS）
+    Client->>Client: 提取代理认证令牌
+    Client->>Proxy: 恶意 stdio 命令请求
+    Note over Client,Proxy: 使用窃取的认证令牌
+    Proxy->>System: 执行任意命令
+    System-->>Proxy: 命令输出
+    Proxy-->>Client: 命令结果
+    Client-->>MaliciousMCP: 窃取数据/建立持久化
+```
+
+#### 风险
+
+OAuth 授权 URL 漏洞会引入若干严重的安全风险：
+
+- **跨站脚本（XSS）**。恶意 JavaScript 的执行可能导致会话劫持、凭据窃取，以及在客户端应用内执行未授权操作。
+- **远程代码执行（RCE）**。通过 shell 执行发生命令注入后，攻击者可在用户权限下运行任意代码。
+- **权限提升**。XSS 结合 `stdio` 传输可将基于 Web 的攻击升级为对整个系统的完全控制。
+- **数据窃取**。攻击者可访问存储在用户系统上的敏感数据、配置文件和凭据。
+- **持久化**。攻击者可安装恶意软件、创建后门或修改系统配置，以便长期访问。
+
+#### 缓解措施
+
+**URL Scheme 验证**
+
+MCP 客户端 **必须** 验证授权 URL 并拒绝危险的 scheme：
+
+- **必须** 仅允许授权 URL 使用 `http://` 和 `https://` scheme。
+  `http://` scheme 仅在本地开发期间针对回环地址（如
+  `localhost`、`127.0.0.1` 或 `::1`）可接受；生产环境中的授权
+  服务器 **必须** 使用 `https://`。
+- **必须** 拒绝 `javascript:`、`data:`、`file:`、`vbscript:` 以及其他潜在危险的 scheme
+- **应当** 使用基于允许列表的验证，而不是基于阻止列表的方法
+
+**安全打开 URL**
+
+MCP 客户端 **必须** 在打开 URL 时避免执行 shell：
+
+- **不得** 使用 shell 命令（例如 `cmd.exe`、`sh`、PowerShell）来打开 URL
+- **应当** 使用平台特定的、非 shell 的 URL 打开机制
+
+**内容安全策略（CSP）**
+
+基于 Web 的 MCP 客户端 **应当** 实现内容安全策略头，以防止 JavaScript 执行：
+
+- 设置 `script-src 'self'` 以阻止内联 JavaScript 的执行
+- 使用 `default-src 'self'` 来限制资源加载
+- 对于需要内联脚本的动态内容，可考虑使用 `script-src 'nonce-<random>'`
+
+**输入清理**
+
+MCP 客户端 **必须** 对从 MCP 服务器接收的所有 URL 进行清理和验证：
+
+- 实施严格的 URL 解析和验证
+- 拒绝包含可能被 shell 解释的特殊字符的 URL
+- 考虑使用专用的 URL 清理库
+- 记录可疑的授权 URL，用于安全监控
+
+### 代理场景中的 stdio 传输安全
+
+`stdio` 传输本身并非固有脆弱。然而，在代理架构中，如果一个独立的代理服务管理 `stdio` 连接，并且可以将 MCP 服务器作为子进程启动，那么它就可能提供一条从基于 Web 的攻击升级到完全系统控制的关键路径。
+
+#### 攻击描述
+
+**重要**：此攻击向量仅适用于使用代理架构的 MCP 实现，不适用于直接使用 `stdio` 传输的场景。
+
+在基于代理的 MCP 实现中，本地代理服务位于客户端与 MCP 服务器之间，通过 `stdio` 传输将服务器作为子进程启动。当与客户端侧漏洞结合时，这种架构会形成一条特权升级路径：
+
+1. 攻击者通过 XSS 或其他客户端侧代码执行（例如，通过 OAuth URL 漏洞）获得执行能力
+2. 利用上面的攻击向量，恶意行为者从客户端环境中访问客户端与代理之间建立的 MCP 代理认证令牌
+3. 恶意行为者向本地 MCP 代理服务发起经过认证的请求
+4. 代理通过 `stdio` 传输启动任意命令（认为它们是合法的 MCP 服务器命令）
+5. 攻击者以用户权限实现远程代码执行
+
+#### 风险
+
+- **权限提升**。基于 Web 的漏洞（XSS）可通过代理命令执行升级为主机系统上的任意代码执行
+- **认证绕过**。被盗的代理认证令牌允许未授权访问 stdio 进程启动能力
+- **系统入侵**。攻击者可以执行 MCP 代理进程有权限运行的任何命令
+
+#### 缓解措施
+
+主要防御是阻止能够使此攻击向量成立的各类漏洞：
+
+- 实施在[OAuth 授权 URL 验证](#oauth-authorization-url-validation)中描述的缓解措施
+- 使用内容安全策略（CSP）防止来自不受信任来源的 JavaScript 执行
+- 在处理来自 MCP 服务器的所有输入之前，对其进行验证和清理
+
+由于 XSS 从根本上会破坏客户端的安全上下文，因此应重点限制损害：
+
+**stdio 传输限制**
+
+MCP 代理服务 **SHOULD** 为 `stdio` 传输实施额外的安全控制：
+
+- 为生成的进程实施沙箱或容器化
+- 限制生成的 MCP 服务器的文件系统访问
+- 记录所有 `stdio` 传输的使用情况以便进行安全监控
+- 对潜在危险命令要求额外授权
+
+**客户端侧防护**
+
+MCP 客户端 **SHOULD** 实施纵深防御措施：
+
+- 在可能时，将代理通信隔离在独立的安全上下文中
+- 对代理进程权限使用最小权限原则
+- 为代理服务本身实施进程级沙箱
+- 考虑在容器或受限环境中运行代理
+
 ### 范围最小化
 
 糟糕的范围设计会增加令牌泄露影响，提升用户

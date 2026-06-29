@@ -49,7 +49,7 @@ title: 发现
       "name": "ExampleServer",
       "version": "1.0.0"
     },
-    "instructions": "This server provides weather and resource utilities.",
+    "instructions": "该服务器提供天气和资源工具。",
     "ttlMs": 3600000,
     "cacheScope": "public"
   }
@@ -64,14 +64,16 @@ RPC，并在服务器不支持请求的版本时处理
 不过，`server/discover`
 在以下两种场景中很有用：
 
-- **提前进行版本选择。** 客户端在发送任何其他请求之前先了解服务器支持的
-  版本，从而避免一次往返错误。
-- **stdio 向后兼容探测。** 在 stdio 上，没有逐请求的
-  HTTP 状态码可用于驱动回退。一个同时支持现代（逐请求 `_meta`）和传统（`initialize` 握手）服务器的客户端 **SHOULD**
-  首先发送 `server/discover`；有关回退规则，请参见
-  [stdio: 向后兼容](/specification/draft/basic/transports/stdio#backward-compatibility)
-  。
-
+- **展示服务器信息。** 虽然客户端不需要调用
+  `server/discover` 就能使用服务器，但它是一次性获取
+  服务器标识、能力和支持版本的便捷方式。例如，客户端可以根据
+  单个 `server/discover` 响应展示服务器支持的能力，而不必分别通过
+  `tools/list`、`prompts/list` 和 `resources/list` 请求进行探测。
+- **stdio 向后兼容探测。** 在 stdio 中，没有按请求划分的
+  HTTP 状态码可用于驱动回退。支持现代（按请求 `_meta`）和旧版（`initialize` 握手）服务器的客户端 **SHOULD**
+  先发送 `server/discover`；有关回退规则，请参见
+  [stdio: 向后兼容](/specification/draft/basic/transports/stdio#backward-compatibility)。
+  
 有关完整的版本选择流程，请参见 [协议版本协商](/specification/draft/basic/versioning#protocol-version-negotiation)。
 有关为未知方法返回的 HTTP 特定状态码，请参见传输中的
 [协议版本标头](/specification/draft/basic/transports/streamable-http#protocol-version-header)

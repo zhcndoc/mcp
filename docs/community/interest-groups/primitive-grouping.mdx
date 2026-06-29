@@ -1,0 +1,130 @@
+---
+title: Primitive Grouping Charter
+description: MCP 原语分组兴趣组章程。
+---
+
+## Group Type
+
+**兴趣组**
+
+## Mission Statement
+
+Primitive Grouping Interest Group 探索如何在协议维护的扁平列表之外，对 MCP 原语（Tools、Resources、Prompts、Tasks）进行组织，以及这种组织方式如何同时惠及 MCP 服务器和客户端。该组记录来自客户端、服务器和网关的多样化需求，支持不同组织策略的参考扩展，并将建议反馈到 [SEP process](/community/sep-guidelines)，而不是过早选择某一种唯一的规范模式。
+
+## Scope
+
+### In Scope
+
+- **Requirements gathering**：记录用例和约束
+- **Pattern exploration**：测试并评估各种方法
+- **Proof of concepts**：维护一个共享仓库，用于存放参考实现和实验结果
+
+### Out of Scope
+
+- **Approving spec changes**：此 IG 无权批准协议变更；建议通过 SEP 流程传递
+- **Implementation mandates**：该组可以记录模式，但不能要求特定的客户端或服务器行为
+
+### Related Groups
+
+- **[Tool Annotations IG](/community/interest-groups/tool-annotations)** - 基于注解的原语过滤和选择与原语如何组织和呈现密切相关
+- **[Skills Over MCP WG](/community/working-groups/skills-over-mcp)** - MCP 与 Skills 的工作正在评估如何发现和组织能力，这与分组存在重叠
+- **[Registry WG](/community/working-groups/registry)** - 组织 MCP 服务器（超出本组职责范围）在此处进行评估
+- **[Security IG](/community/interest-groups/security)** - 按权限级别组织并公开原语属于安全问题，超出本组范围
+
+## 问题陈述
+
+扁平的 MCP 原语列表可能会因为多种原因变得冗长且难以使用。许多这类问题都属于本工作组的范围，但有些不属于。
+
+**在范围内**
+
+- **上下文过载** - 当加载到 LLM 的上下文中时，原语列表可能会让模型不堪重负，导致混淆和选择不佳
+- **低效操作** - 上下文中的长列表会消耗许多 token，从而增加处理成本和响应延迟
+- **较差的开发者体验** - 缺少对原语进行组织的工具，使它们更难管理和维护
+
+**超出范围**
+
+- **安全性的组织管理** - 根据权限级别对原语进行组织并向客户端披露，是一个重要问题，但超出了本工作组的职责范围
+- **组织 MCP 服务器** - MCP Registry 和 MCP-and-Skills 工作组正在评估应如何组织不同的服务器，以改善客户端体验
+
+## 目标
+
+1. **记录需求和经验** - 记录实现这些扩展的不同客户端、服务器和网关的多样化需求。我们**不会**在早期尝试达成共识，而是旨在根据真实世界经验的反馈记录权衡取舍。
+2. **参考扩展** - 许多可能的组织机制正在出现，可能现在就选择一种规范性的模式还为时过早。不同的服务器正在实现类似的功能，但缺乏标准化限制了客户端有效利用这些功能的能力。该工作组将支持多种组织策略的参考扩展，例如分组、工具搜索、代码模式。
+3. **推动标准化** - 邀请大型 MCP 服务器和客户端的开发者与维护者提供反馈，从定制实现迁移到标准化扩展。
+
+## 组织策略
+
+有关每种策略的详细说明，包括前人工作、示例和讨论链接，请参见[方法](https://github.com/modelcontextprotocol/experimental-ext-grouping/blob/main/docs/approaches.md)。
+
+## IG 原则
+
+1. **记录讨论** - IG 旨在记录权衡取舍和讨论，而不是规定某一种具体实现。相较于在 Discord 上进行冗长的线程讨论，更建议在 IG 仓库上使用 GitHub Discussions。同步 IG 会议的会议记录也会上传到 GitHub Discussions 供将来参考。
+2. **实验性扩展** - 该仓库存放了针对不同方法的实验性扩展。这些扩展 SHOULD 至少支持 Python 和 TypeScript 实现，并包含 (1) 端到端可运行演示，以及 (2) 其他人如何与之集成的详细说明。
+3. **来自部署的反馈** - IG 会征集扩展用户的部署经验和反馈，以优先安排功能开发和变更。
+
+## 领导层
+
+| 角色        | 姓名         | 组织                     | GitHub                                               | 任期    |
+| ----------- | ----------- | ------------------------ | ---------------------------------------------------- | ------- |
+| 促进人      | Tapan Chugh | 华盛顿大学               | [@chughtapan](https://github.com/chughtapan)         | 初始    |
+| 促进人      | Sam Morrow  | GitHub                   | [@SamMorrowDrums](https://github.com/SamMorrowDrums) | 初始    |
+
+## 成员
+
+| 姓名         | 组织                     | GitHub                                               | Discord | 级别        |
+| ------------ | ------------------------ | ---------------------------------------------------- | ------- | ----------- |
+| Tapan Chugh  | 华盛顿大学               | [@chughtapan](https://github.com/chughtapan)         |         | 协调员      |
+| Sam Morrow   | GitHub                   | [@SamMorrowDrums](https://github.com/SamMorrowDrums) |         | 协调员      |
+| Cliff Hall   | Futurescale              | [@cliffhall](https://github.com/cliffhall)           |         | 维护者      |
+
+## 运营
+
+| 会议       | 频率    | 时长     | 目的                                                           |
+| ---------- | ------- | -------- | -------------------------------------------------------------- |
+| 讨论       | 待定    | 待定    | 需求对齐、方法评审、实验结果 |
+
+对所有人开放。请加入 [MCP Contributors Discord](/community/communication#discord) 上的 [#primitive-grouping-ig](https://discord.com/channels/1358869848138059966/1425903819186770064) 频道。
+
+## 讨论主题
+
+以下项目构成了该 IG 当前的工作议程。此列表并不详尽，并将随着小组识别出新的关注领域而不断演变。
+
+| 项目                               | 状态        | 负责人           | 备注                                                             |
+| ---------------------------------- | ----------- | ---------------- | ----------------------------------------------------------------- |
+| 需求对齐                           | 进行中      | 所有协调员       | 评审方法，识别共同需求和差距                                     |
+| 实验结果仓库部分                   | 提议中      | 待定              | 用于实现和评估结果的专用仓库部分                                   |
+| MCP 分组约定 v0.1                  | 提议中      | 待定              | 用于对原语进行分组的文档化模式（非规范）                            |
+
+## 生命周期
+
+**当前状态：积极探索中**
+
+### 升级标准（IG → WG）
+
+如果满足以下条件之一，本 IG 可提议升级为工作组：
+
+- 就需要持续进行规范工作的方法达成明确共识
+- 跨领域协调需要正式的授权委派
+- 至少有两位核心维护者支持成立 WG
+
+### 退役标准
+
+- 问题空间已解决（约定已建立，并被其他 WG 吸收）
+- 参与度不足，无法维持推进势头
+- 社区达成共识，认为分组不属于 MCP 协议范围
+
+## 成功标准
+
+- **短期**：就需求和现有方法的评估形成有记录的共识
+- **中期**：给出明确建议（约定、协议扩展或两者兼有）
+- **长期**：在 MCP 服务器和客户端之间实现可互操作的分组约定
+
+## 资源
+
+- [实验性仓库](https://github.com/modelcontextprotocol/experimental-ext-grouping) - 原始组别兴趣组的孵化空间
+
+## 更新日志
+
+| 日期       | 变更           |
+| ---------- | -------------- |
+| 2026-06-18 | 初始章程 |
