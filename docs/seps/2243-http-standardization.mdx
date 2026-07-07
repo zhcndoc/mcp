@@ -56,11 +56,11 @@ description: "用于可流式 HTTP 传输的 HTTP 头标准化"
 
 **服务器行为**：处理请求体的服务器 MUST 拒绝头中指定的值与请求体中的值不匹配的请求。
 
-> **理由**：该要求可防止当网络中的不同组件依赖不同事实来源时可能出现的安全漏洞和错误条件。例如，负载均衡器或网关可能使用头值做路由决策，而 MCP 服务器使用正文值执行操作。此要求适用于任何处理消息正文的网络中介，以及 MCP 服务器本身。
+> **理由**：该要求可防止当网络中的不同组件依赖不同事实来源时可能出现的安全漏洞和错误条件。例如，负载均衡器或网关可能使用头值做路由决策，而 MCP 服务器使用正文值执行操作。该要求适用于任何处理消息正文的网络中介，以及 MCP 服务器本身。
 
-> **Implementation Note**: When validating integer parameter values, servers SHOULD compare the header value and the body value numerically rather than as strings (e.g., `42.0` and `42` are considered equal).
+> **实施说明**：在验证整数参数值时，服务器 SHOULD 按数值而不是按字符串比较头值和正文值（例如，`42.0` 和 `42` 被视为相等）。
 
-**Case Sensitivity**: Header names (called "field names" in [RFC 9110](https://datatracker.ietf.org/doc/html/rfc9110#name-field-names)) are case-insensitive. Clients and servers MUST use case-insensitive comparisons for header names.
+**大小写敏感性**：头名称（在 [RFC 9110](https://datatracker.ietf.org/doc/html/rfc9110#name-field-names) 中称为“字段名”）不区分大小写。客户端和服务器 MUST 对头名称使用不区分大小写的比较。
 
 #### 示例：tools/call 请求
 
@@ -184,7 +184,7 @@ MCP 服务器 MAY 使用工具的 `inputSchema` 中参数 schema 里的 `x-mcp-h
 - MUST only be applied to parameters with primitive types (integer, string, boolean). Parameters with type `number` are not permitted. Integer values MUST be within the safe range for JavaScript (−2^53+1 to 2^53−1)
 - MAY be applied to properties at any nesting depth within the `inputSchema`, not only top-level properties
 
-Clients using the Streamable HTTP transport MUST reject tool definitions where any `x-mcp-header` value violates these constraints. Rejection means the client MUST exclude the invalid tool from the result of `tools/list`. Clients SHOULD log a warning when rejecting a tool definition, including the tool name and the reason for rejection. This behavior ensures that a single malformed tool definition does not prevent other valid tools from being used. Clients using other transports (e.g., stdio) MAY ignore `x-mcp-header` annotations entirely.
+使用 Streamable HTTP 传输的客户端 MUST 拒绝任何 `x-mcp-header` 值违反这些约束的工具定义。拒绝意味着客户端 MUST 将无效工具从 `tools/list` 的结果中排除。客户端 SHOULD 在拒绝工具定义时记录警告，包括工具名称和拒绝原因。此行为可确保单个格式错误的工具定义不会阻止其他有效工具的使用。使用其他传输方式（例如 stdio）的客户端 MAY 完全忽略 `x-mcp-header` 注解。
 
 **工具定义示例**：
 
@@ -455,7 +455,7 @@ Mcp-Param-{Name}: =?base64?{Base64EncodedValue}?=
 1. 按照 [值编码](#value-encoding) 中的规则对这些值进行编码
 1. 将 `Mcp-Param-{Name}: {Value}` 头追加到请求中：
 
-> **Implementation Note**: If the client does not have the tool's `inputSchema` (e.g., `tools/list` has not yet been called) or the cached schema is stale (e.g., its TTL has expired), the client SHOULD send the request without custom `Mcp-Param-*` headers. If the server rejects the request because required custom headers are missing, the client SHOULD call `tools/list` to obtain the current `inputSchema`, then retry the original request with the appropriate headers. Clients MAY pre-load tool definitions via other means (e.g., from a previous session or configuration) to enable header emission without a prior `tools/list` call.
+> **实现说明**：如果客户端没有工具的 `inputSchema`（例如尚未调用 `tools/list`）或者缓存的 schema 已过期（例如 TTL 已到期），客户端 SHOULD 在不带自定义 `Mcp-Param-*` 头的情况下发送请求。如果服务器因为缺少必需的自定义头而拒绝该请求，客户端 SHOULD 调用 `tools/list` 以获取当前的 `inputSchema`，然后使用适当的头重试原始请求。客户端 MAY 通过其他方式预加载工具定义（例如来自先前会话或配置），以便在未先调用 `tools/list` 的情况下也能发送头。
 
 #### Server Behavior
 
@@ -481,7 +481,7 @@ Mcp-Param-{Name}: =?base64?{Base64EncodedValue}?=
   "id": 1,
   "error": {
     "code": -32001,
-    "message": "Header mismatch: Mcp-Name 头值 'foo' 与正文值 'bar' 不匹配"
+    "message": "头不匹配：Mcp-Name 头值 'foo' 与正文值 'bar' 不匹配"
   }
 }
 ```
@@ -495,9 +495,9 @@ Mcp-Param-{Name}: =?base64?{Base64EncodedValue}?=
 
 > **注意**：中介 MUST 在验证失败时返回适当的 HTTP 错误状态（例如 `400 Bad Request`），但不要求返回 JSON-RPC 错误响应。
 
-> **Note**: Intermediaries that enforce policy based on mirrored headers (e.g., routing or rate-limiting by tenant) SHOULD verify that the `MCP-Protocol-Version` header indicates a version that requires header–body validation. If the version is older or the header is absent, the intermediary SHOULD reject the request rather than trusting unvalidated header values.
+> **注意**：基于镜像头执行策略的中介（例如按租户进行路由或限流）SHOULD 验证 `MCP-Protocol-Version` 头是否指示了一个需要头-正文验证的版本。如果版本较旧或该头缺失，中介 SHOULD 拒绝该请求，而不是信任未验证的头值。
 
-**Custom Header Handling**:
+**自定义头处理**：
 
 自定义头（通过 `x-mcp-header` 定义的头）遵循与标准头相同的验证规则：
 
@@ -647,7 +647,7 @@ def mcp_handler():
 
 当包含控制字符（尤其是 `\r\n`）的恶意值被包含在头中时，就会发生头注入攻击，这可能允许攻击者注入额外的头或提前终止头部区域。
 
-客户端 MUST 遵循本规范中定义的 [Value Encoding](#value-encoding) 规则。这些规则确保：
+客户端 MUST 遵循本规范中定义的 [值编码](#value-encoding) 规则。这些规则确保：
 
 - 控制字符绝不会包含在头值中
 - 非 ASCII 值会使用 Base64 安全编码

@@ -36,24 +36,24 @@ Python SDK 变更：https://github.com/modelcontextprotocol/python-sdk/pull/1246
 **客户端实现：** https://github.com/evalstate/fast-agent/pull/324/files
 **工作演示：** https://asciinema.org/a/anBvJdqEmTjw0JkKYOooQa5Ta
 
-## 动机
+## Motivation
 
-现有的枚举模式使用了一种非标准的方法来为枚举值添加标题。它还限制了枚举在询问（Elicitation）（以及未来任何应采用 `EnumSchema` 的模式对象）中的使用，仅限于单选模型。要求用户选择多个条目是一种常见模式。在 UI 中，这相当于使用复选框或单选按钮的区别。
+The existing enum pattern uses a non-standard method to add titles to enum values. It also restricts the use of enums in elicitation (Elicitation) (and any future schema objects that should adopt `EnumSchema`) to single-choice models only. Requiring users to select multiple items is a common pattern. In UI terms, this corresponds to the difference between using checkboxes and radio buttons.
 
-出于这些原因，我们提议对 `EnumSchema` 进行以下非破坏性的次要改进，以改善用户和开发者体验。
+For these reasons, we propose the following non-breaking minor improvements to `EnumSchema` to improve the user and developer experience.
 
-- 将现有的 `EnumSchema` 保留为“遗留”
-  - 它使用一种非标准的方法来为枚举值添加标题
-  - 将其标记为遗留，但目前仍支持它。
-  - 根据 @dsp-ant 的说法，当我们有了适当的弃用策略时，我们将标记它为已弃用
-- 引入无标题枚举和有标题枚举的区别。
-  - 如果枚举值已足够，则无需为每个值指定单独的标题。
-  - 如果枚举值不适合显示，则可以为每个值指定标题。
-- 引入单选和多选枚举的区别。
-  - 如果只能选择一个值，可以使用单选模式
-  - 如果可以选择多个值，可以使用多选模式
-- 在 `ElicitResponse` 中，将数组添加为 `additionalProperty` 类型
-  - 允许将多个枚举值的选择返回给服务器
+- Keep the existing `EnumSchema` as “legacy”
+  - It uses a non-standard method to add titles to enum values
+  - Mark it as legacy, but continue supporting it for now.
+  - According to @dsp-ant, when we have a proper deprecation strategy, we will mark it as deprecated
+- Introduce the distinction between untitled enums and titled enums.
+  - If the enum values are sufficient, there is no need to specify a separate title for each value.
+  - If the enum values are not suitable for display, a title can be specified for each value.
+- Introduce the distinction between single-select and multi-select enums.
+  - If only one value can be selected, single-select mode can be used
+  - If multiple values can be selected, multi-select mode can be used
+- In `ElicitResponse`, add arrays as an `additionalProperty` type
+  - Allows selections of multiple enum values to be returned to the server
 
 ## 规范
 
@@ -176,8 +176,8 @@ export interface ElicitResult extends Result {
 ```json
 {
   "type": "string",
-  "title": "Color Selection",
-  "description": "Choose your favorite color",
+  "title": "颜色选择",
+  "description": "选择你最喜欢的颜色",
   "enum": ["Red", "Green", "Blue"],
   "default": "Green"
 }
@@ -188,10 +188,10 @@ export interface ElicitResult extends Result {
 ```json
 {
   "type": "string",
-  "title": "Color Selection",
-  "description": "Choose your favorite color",
+  "title": "颜色选择",
+  "description": "选择你最喜欢的颜色",
   "enum": ["#FF0000", "#00FF00", "#0000FF"],
-  "enumNames": ["Red", "Green", "Blue"],
+  "enumNames": ["红色", "绿色", "蓝色"],
   "default": "Green"
 }
 ```
@@ -201,12 +201,12 @@ export interface ElicitResult extends Result {
 ```json
 {
   "type": "string",
-  "title": "Color Selection",
-  "description": "Choose your favorite color",
+  "title": "颜色选择",
+  "description": "选择你最喜欢的颜色",
   "oneOf": [
-    { "const": "#FF0000", "title": "Red" },
-    { "const": "#00FF00", "title": "Green" },
-    { "const": "#0000FF", "title": "Blue" }
+    { "const": "#FF0000", "title": "红色" },
+    { "const": "#00FF00", "title": "绿色" },
+    { "const": "#0000FF", "title": "蓝色" }
   ],
   "default": "#00FF00"
 }
@@ -217,8 +217,8 @@ export interface ElicitResult extends Result {
 ```json
 {
   "type": "array",
-  "title": "Color Selection",
-  "description": "Choose your favorite colors",
+  "title": "颜色选择",
+  "description": "选择你最喜欢的颜色",
   "minItems": 1,
   "maxItems": 3,
   "items": {
@@ -234,15 +234,15 @@ export interface ElicitResult extends Result {
 ```json
 {
   "type": "array",
-  "title": "Color Selection",
-  "description": "Choose your favorite colors",
+  "title": "颜色选择",
+  "description": "选择你最喜欢的颜色",
   "minItems": 1,
   "maxItems": 3,
   "items": {
     "anyOf": [
-      { "const": "#FF0000", "title": "Red" },
-      { "const": "#00FF00", "title": "Green" },
-      { "const": "#0000FF", "title": "Blue" }
+      { "const": "#FF0000", "title": "红色" },
+      { "const": "#00FF00", "title": "绿色" },
+      { "const": "#0000FF", "title": "蓝色" }
     ]
   },
   "default": ["Green"]

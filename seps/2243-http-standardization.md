@@ -7,7 +7,7 @@
 - **类型**: Standards Track
 - **创建时间**: 2026-02-04
 - **作者**: MCP Transports Working Group
-- **赞助方**: None
+- **赞助方**: 无
 - **PR**: https://github.com/modelcontextprotocol/specification/pull/2243
 
 ## 摘要
@@ -161,14 +161,14 @@ MCP 服务器 MAY 在工具的 `inputSchema` 中通过参数 schema 内的 `x-mc
 
 **`x-mcp-header` 值的约束**：
 
-- MUST NOT be empty
-- MUST match HTTP field-name token syntax (`1*tchar`, [RFC 9110 Section 5.1](https://datatracker.ietf.org/doc/html/rfc9110#section-5.1))
-- MUST NOT contain control characters, including carriage return (CR, `\r`) or line feed (LF, `\n`)
-- MUST be case-insensitively unique among all `x-mcp-header` values in the `inputSchema`
-- MUST only be applied to parameters with primitive types (integer, string, boolean). Parameters with type `number` are not permitted. Integer values MUST be within the safe range for JavaScript (−2^53+1 to 2^53−1)
-- MAY be applied to properties at any nesting depth within the `inputSchema`, not only top-level properties
+- MUST NOT 为空
+- MUST 符合 HTTP field-name token 语法（`1*tchar`，[RFC 9110 第 5.1 节](https://datatracker.ietf.org/doc/html/rfc9110#section-5.1)）
+- MUST NOT 包含控制字符，包括回车符（CR，`\r`）或换行符（LF，`\n`）
+- 在 `inputSchema` 中，所有 `x-mcp-header` 值 MUST 以大小写不敏感的方式保持唯一
+- 只能应用于原始类型（integer、string、boolean）的参数。`number` 类型不允许。Integer 值 MUST 位于 JavaScript 的安全范围内（−2^53+1 到 2^53−1）
+- MAY 应用于 `inputSchema` 中任意嵌套深度的属性，而不仅限于顶层属性
 
-Clients using the Streamable HTTP transport MUST reject tool definitions where any `x-mcp-header` value violates these constraints. Rejection means the client MUST exclude the invalid tool from the result of `tools/list`. Clients SHOULD log a warning when rejecting a tool definition, including the tool name and the reason for rejection. This behavior ensures that a single malformed tool definition does not prevent other valid tools from being used. Clients using other transports (e.g., stdio) MAY ignore `x-mcp-header` annotations entirely.
+使用 Streamable HTTP 传输的客户端 MUST 拒绝任何 `x-mcp-header` 值违反这些约束的工具定义。拒绝意味着客户端 MUST 将该无效工具从 `tools/list` 的结果中排除。客户端 SHOULD 在拒绝工具定义时记录警告，包括工具名称和拒绝原因。此行为可确保单个格式错误的工具定义不会阻止其他有效工具的使用。使用其他传输方式（例如 stdio）的客户端 MAY 完全忽略 `x-mcp-header` 注解。
 
 **工具定义示例**：
 
@@ -421,13 +421,13 @@ Mcp-Param-{Name}: =?base64?{Base64EncodedValue}?=
 
 **示例**：
 
-| Original Value         | Reason                   | Encoded Header Value                                  |
+| 原始值                 | 原因                     | 编码后的 Header 值                                  |
 | ---------------------- | ------------------------ | ----------------------------------------------------- |
-| `"us-west1"`           | Plain ASCII              | `Mcp-Param-Region: us-west1`                          |
-| `"Hello, 世界"`        | Contains non-ASCII       | `Mcp-Param-Greeting: =?base64?SGVsbG8sIOS4lueVjA==?=` |
-| `" padded "`           | Leading/trailing spaces  | `Mcp-Param-Text: =?base64?IHBhZGRlZCA=?=`             |
-| `"line1\nline2"`       | Contains newline         | `Mcp-Param-Text: =?base64?bGluZTEKbGluZTI=?=`         |
-| `"=?base64?literal?="` | Matches sentinel pattern | `Mcp-Param-Val: =?base64?PT9iYXNlNjQ/bGl0ZXJhbD89?=`  |
+| `"us-west1"`           | 纯 ASCII                 | `Mcp-Param-Region: us-west1`                          |
+| `"Hello, 世界"`        | 包含非 ASCII             | `Mcp-Param-Greeting: =?base64?SGVsbG8sIOS4lueVjA==?=` |
+| `" padded "`           | 前导/尾随空格             | `Mcp-Param-Text: =?base64?IHBhZGRlZCA=?=`             |
+| `"line1\nline2"`       | 包含换行符               | `Mcp-Param-Text: =?base64?bGluZTEKbGluZTI=?=`         |
+| `"=?base64?literal?="` | 匹配 sentinel 模式        | `Mcp-Param-Val: =?base64?PT9iYXNlNjQ/bGl0ZXJhbD89?=`  |
 
 #### 客户端行为
 
@@ -439,7 +439,7 @@ Mcp-Param-{Name}: =?base64?{Base64EncodedValue}?=
 1. 按照 [值编码](#value-encoding) 中的规则对值进行编码
 1. 向请求中添加 `Mcp-Param-{Name}: {Value}` header：
 
-> **实现说明**：如果客户端没有该工具的 `inputSchema`（例如尚未调用 `tools/list`），或者缓存的 schema 已过期（例如其 TTL 已过期），客户端 SHOULD 在不发送自定义 `Mcp-Param-*` header 的情况下发送请求。如果服务器因缺少必需的自定义 header 而拒绝请求，客户端 SHOULD 调用 `tools/list` 以获取当前的 `inputSchema`，然后使用适当的 header 重试原始请求。客户端 MAY 通过其他方式预加载工具定义（例如来自先前会话或配置），以便在未先调用 `tools/list` 的情况下发出 header。
+> **实现说明**：客户端 MUST 使用该工具最近一次获取到的 `inputSchema` 来构造 `Mcp-Param-*` header。若客户端从未获取过该工具的 `inputSchema`，SHOULD 在不包含 `Mcp-Param-*` header 的情况下发送请求。如果服务器因缺少 `Mcp-Param-*` header 或其与正文不匹配而拒绝请求，客户端 SHOULD 调用 `tools/list` 获取当前 `inputSchema`，然后使用相应的 header 重试原始请求。客户端 MAY 通过其他方式预先加载工具定义（例如来自之前的会话或配置），以便在未先调用 `tools/list` 的情况下也能发出 header。
 
 #### Server Behavior
 
@@ -750,11 +750,11 @@ def mcp_handler():
 | 测试用例                 | 头值                     | 预期行为                                                                                 |
 | ------------------------ | ------------------------ | ---------------------------------------------------------------------------------------- |
 | 有效 Base64              | `=?base64?SGVsbG8=?=`    | 服务器解码为 `"Hello"` 并进行验证                                                        |
-| 无效的 Base64 填充       | `=?base64?SGVsbG8?=`     | 服务器 MUST 拒绝，返回 400 和错误码 `-32001`；中介 MAY 拒绝并返回 400 状态码           |
-| 无效的 Base64 字符       | `=?base64?SGVs!!!bG8=?=` | 服务器 MUST 拒绝，返回 400 和错误码 `-32001`；中介 MAY 拒绝并返回 400 状态码           |
-| 缺少前缀               | `SGVsbG8=`               | 服务器将其视为字面值，而不是 Base64                                                    |
-| 缺少后缀               | `=?base64?SGVsbG8=`      | 服务器将其视为字面值，而不是 Base64                                                    |
-| 格式错误的包装器       | `=?BASE64?SGVsbG8=?=`    | 服务器 MUST 接受（前缀不区分大小写）                                                    |
+| 无效 Base64 填充         | `=?base64?SGVsbG8?=`     | 服务器 MUST 拒绝，返回 400 和错误码 `-32001`；中介 MAY 拒绝并返回 400 状态码           |
+| 无效 Base64 字符         | `=?base64?SGVs!!!bG8=?=` | 服务器 MUST 拒绝，返回 400 和错误码 `-32001`；中介 MAY 拒绝并返回 400 状态码           |
+| 缺少前缀                 | `SGVsbG8=`               | 服务器将其视为字面值，而不是 Base64                                                     |
+| 缺少后缀                 | `=?base64?SGVsbG8=`      | 服务器将其视为字面值，而不是 Base64                                                     |
+| 前缀非小写               | `=?BASE64?SGVsbG8=?=`    | 服务器将其视为字面值，而不是 Base64                                                     |
 
 #### 空值与缺失值
 
@@ -771,12 +771,12 @@ def mcp_handler():
 | 省略标准头，但主体中有值              | 无 `Mcp-Name`       | `"params": {"name": "foo"}` | 服务器 MUST 拒绝，返回 400 和错误码 `-32001`；中介 MAY 拒绝并返回 400 状态码           |
 | 省略自定义头，但主体中有值            | 无 `Mcp-Param-Region` | `"region": "us-west1"`      | 服务器 MUST 拒绝，返回 400 和错误码 `-32001`；中介 MAY 拒绝并返回 400 状态码           |
 
-## Reference Implementation
+## 参考实现
 
-_Will be provided before this SEP reaches the Final state._
+_将在此 SEP 进入 Final 状态之前提供。_
 
-Implementation requirements:
+实现要求：
 
-- **Server SDK**: provide a mechanism (property/decorator) to mark parameters as `x-mcp-header`
-- **Client SDK**: implement client behavior to extract and encode request header values
-- **Validation**: both sides must validate request header/request body consistency
+- **服务器 SDK**：提供一种机制（属性/装饰器）将参数标记为 `x-mcp-header`
+- **客户端 SDK**：实现客户端行为，以提取并编码请求头值
+- **验证**：双方都必须验证请求头/请求体的一致性

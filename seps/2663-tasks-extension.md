@@ -38,7 +38,7 @@
 
 ## 规范
 
-MCP Tasks 扩展允许某些请求被 **tasks** 增强。Tasks 是持久化状态
+MCP Tasks 扩展允许某些请求被 **任务** 增强。任务是持久化状态
 
 ## 理由
 
@@ -64,7 +64,206 @@ MCP Tasks 扩展允许某些请求被 **tasks** 增强。Tasks 是持久化状�
 
 与 `tasks/update` 和 `tasks/cancel` 不同，任务创建是强一致的。必须如此，才能避免请求方对 `tasks/get` 发起推测性请求，否则它们将无法知道某个任务是被悄然丢弃了，还是只是尚未创建完成。相反，`tasks/update` 和 `tasks/cancel` 中的最终一致性是可行的，因为客户端行为并不取决于这些操作的结果（无论哪种结果，客户端都可以继续轮询）。虽然在原本并非如此工作的分布式系统中，引入一致性任务创建确实会增加延迟成本，但明确加入这一要求可以简化客户端实现，并消除一种未定义行为的来源。
 
-这也与一般的长时间运行操作 API 相一致，后者通常要求一旦操作被确认，就必须能通过轮询端点找到它。
+以下方法当前支持任务增强执行：
+
+- `tools/call`
+
+本规范未来可能扩展为支持其他请求类型上的任务；实现 **SHOULD** 设计为能够在本规范未来的修订版中适应额外的请求类型。
+
+### 多态结果
+
+符合任务增强条件的请求可能返回两种不同的结果形态之一——该请求的标准结果，或一个 `CreateTaskResult`。判别字段是结果对象上的 `resultType` 字段，该字段由 [SEP-2322](./2322-MRTR.md) 引入：
+
+```typescript
+// "task" 由此扩展引入。
+type ResultType = "complete" | "input_required" | "task" | string;
+```
+
+当返回 `CreateTaskResult` 时，服务器 **MUST** 将 `resultType` 设为 `"task"`，以便客户端能够将其与标准结果区分开。对于除 `CreateTaskResult` 之外的结果类型，服务器 **MUST NOT** 将 `resultType` 设为 `"task"`。
+
+建议客户端实现者注意：现有返回固定形态的代码（例如返回 `CallToolResult` 的 `tools/call` 方法）不必更改其公共契约——它们可以在内部透明地驱动轮询流程，并仅向外暴露最终完成的结果。新的实现接口 **MAY** 直接暴露任务生命周期，以便应用程序加以利用。
+
+### 任务
+
+`Task` 携带有关正在进行工作的运行元数据。
+
+```typescript
+interface Task {
+  /** 此任务的稳定标识符。 */
+  taskId: string;
+
+  /** 当前任务状态。 */
+  status: "working" | "input_required" | "completed" | "cancelled" | "failed";
+
+  /**
+   * 描述当前任务状态的可选消息。
+   * 这可以为任何状态提供上下文，例如（非规范性）：
+   * - "working" 的进度描述
+   * - 被 "input_required" 阻塞的工作
+   * - "cancelled" 状态的原因
+   * - "completed" 状态的摘要
+   * - "failed" 状态的附加信息（例如，错误详情、出错原因）
+   *
+   * 这 MAY 向终端用户或模型公开。
+   */
+  statusMessage?: string;
+
+  /** 任务创建时的 ISO 8601 时间戳。 */
+  createdAt: string;
+
+  /** 任务最后更新时间的 ISO 8601 时间戳。 */
+  lastUpdatedAt: string;
+
+  /**
+   * 从创建时起的生存时间，单位为整数毫秒；若为无限则为 null。
+   * 服务器可能在 TTL 到期后丢弃该任务。该值 MAY 在任务生命周期内变更。
+   */
+  ttlMs: number | null;
+
+  /**
+   * 建议的轮询间隔，单位为整数毫秒。客户端 SHOULD 遵守
+   * 该值以避免压垮服务器。该值 MAY 在任务生命周期内变更。
+   */
+  pollIntervalMs?: number;
+}
+```
+
+#### 任务状态
+
+任务可以处于以下状态之一：
+
+- `working`：请求当前正在处理中。
+- `input_required`：服务器在任务继续之前需要来自客户端的输入。`tasks/get` 响应将在 `inputRequests` 字段中包含未完成的请求。客户端 **MUST** 检查此字段，并且 **SHOULD** 在后续 `tasks/update` 请求中通过 `inputResponses` 字段提供响应。
+- `completed`：请求已成功完成，结果可在 `result` 字段中获取。这包括返回 `isError: true` 的工具调用。
+- `failed`：请求在执行过程中因 JSON-RPC 错误而失败。任务将包含带有 JSON-RPC 错误详情的 `error` 字段。此状态 **MUST NOT** 用于非 JSON-RPC 错误。
+- `cancelled`：请求在完成前被取消。
+
+`Task` 的派生结构体将状态特定的有效负载字段内联，并用于 `tasks/get` 响应和 `notifications/tasks` 通知：
+
+```ts
+/**
+ * 处于正常工作状态的任务。
+ * 用于 tasks/get 和 notifications/tasks。
+ */
+export interface WorkingTask extends Task {
+  status: "working";
+}
+
+/**
+ * 正在等待客户端输入的任务。
+ * 用于 tasks/get 和 notifications/tasks。
+ */
+export interface InputRequiredTask extends Task {
+  status: "input_required";
+  /**
+   * 任务执行期间需要完成的服务器到客户端请求。
+   * 键是用于将请求与响应匹配的任意标识符。
+   */
+  inputRequests: InputRequests;
+}
+
+/**
+ * 已成功完成的任务。
+ * 用于 tasks/get 和 notifications/tasks。
+ */
+export interface CompletedTask extends Task {
+  status: "completed";
+  /**
+   * 任务的最终结果。
+   * 其结构与原始请求的结果类型相匹配。
+   * 例如，CallToolRequest 任务将返回 CallToolResult 结构。
+   */
+  result: JSONObject;
+}
+
+/**
+ * 因 JSON-RPC 错误而失败的任务。
+ * 用于 tasks/get 和 notifications/tasks。
+ */
+export interface FailedTask extends Task {
+  status: "failed";
+  /**
+   * 导致任务失败的 JSON-RPC 错误。
+   */
+  error: JSONObject;
+}
+
+/**
+ * 已被取消的任务。
+ * 用于 tasks/get 和 notifications/tasks。
+ */
+export interface CancelledTask extends Task {
+  status: "cancelled";
+}
+
+/**
+ * 表示一个带有可选内联 result/error/inputRequests 字段的任务的联合类型。
+ * 此类型用于 tasks/get 和 notifications/tasks，以提供完整的任务状态，
+ * 包括终止结果或待处理的输入请求。
+ */
+export type DetailedTask =
+  WorkingTask | InputRequiredTask | CompletedTask | FailedTask | CancelledTask;
+```
+
+### 任务创建
+
+当服务器针对某个请求返回 `CreateTaskResult` 时，表示该请求将以异步方式处理，而不是使用标准结果结构。
+
+```typescript
+// resultType: "task"
+type CreateTaskResult = Result & Task;
+```
+
+**示例请求（CallToolRequest）：**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "get_weather",
+    "arguments": {
+      "city": "New York"
+    }
+  }
+}
+```
+
+**示例响应（CreateTaskResult）：**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "resultType": "task",
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840",
+    "status": "working",
+    "statusMessage": "操作现已开始进行。",
+    "createdAt": "2025-11-25T10:30:00Z",
+    "lastUpdatedAt": "2025-11-25T10:40:00Z",
+    "ttlMs": 60000,
+    "pollIntervalMs": 5000
+  }
+}
+```
+
+嵌入的 `task` 是该任务的初始状态，通常（但不一定）其 `status` 为 `"working"`。客户端会使用 `task.taskId` 来进行后续所有 `tasks/get`、`tasks/update` 和 `tasks/cancel` 调用。
+
+服务器 **不得** 在任务已被持久化创建之前返回 `CreateTaskResult`——也就是说，直到针对返回的 `taskId` 执行 `tasks/get` 能够成功解析时，才可以返回。对于最终一致性环境，服务器 **必须** 在响应之前等待一致性达成。此要求消除了客户端推测性轮询任务创建的需要。
+
+在与任务创建结合使用多轮往返请求（multi round-trip requests，MRTR）的服务器实现中（例如，一个工具在创建任务之前需要通过 `InputRequiredResult` 进行交互确认），**应当** 在返回 `CreateTaskResult` 之前，**同步**完成所有 MRTR 交换。
+
+### 任务轮询
+
+客户端通过发送 `tasks/get` 请求来轮询任务完成情况。
+
+在确定轮询频率时，客户端**应当**遵守响应中提供的 `pollIntervalMs`。`pollIntervalMs` **可能**会在任务生命周期内发生变化。对于轮询频率高于记录的 `pollIntervalMs` 的客户端，服务器**可以**进行限流。
+
+客户端**应当**持续轮询，直到任务达到终止状态，或直到调用 `tasks/cancel`。客户端**应当**将任务 ID 持久化到可靠存储，以便在崩溃或重启后可以恢复轮询。
+
+#### 请求
 
 ### 仅 Ack 的取消
 
@@ -78,11 +277,11 @@ ack 上的最终一致性与 `tasks/update` 的情形相同：服务器可以先
 
 引入如下新要求：
 
-> 与任务创建结合使用多轮往返请求的服务器实现（例如，一个工具在创建任务之前需要通过 `InputRequiredResult` 进行 elicitation）**SHOULD** 在返回 `CreateTaskResult` 之前，_同步_ 解决所有 MRTR 交互。
+> 与任务创建结合使用多轮往返请求的服务器实现（例如，一个工具在创建任务之前需要通过 `InputRequiredResult` 进行询问）**SHOULD** 在返回 `CreateTaskResult` 之前，_同步_ 解决所有 MRTR 交互。
 
 支持 MRTR（[SEP-2322](./2322-MRTR.md)）以及此扩展的 `tools/call` 可以按顺序使用它们：先发送一个或多个 `InputRequiredResult` 交互以同步收集输入，然后再通过 `CreateTaskResult` 交接给异步执行。这种组合是 `resultType` 判别器的直接结果——每个响应都各自有类型，客户端会根据接收到的值切换行为，_而不_ 在两种模式之间维护任何状态。禁止这种做法将需要施加一种人为限制，而协议层并没有机制去强制它，因为客户端并不知道服务器会提前创建任务。
 
-尽管字段名相同，这两个流程仍保持各自独立的状态。MRTR 阶段在服务器返回任何非 `"input_required"` 的 `resultType` 时结束，此时它的 `inputRequests` 键被消费。任务阶段从 `CreateTaskResult` 开始，并独立维护_自己的_ `inputRequests` 键。任务 `inputRequests` 的键唯一性仅限定于任务的生命周期，不会延伸到前一个 MRTR 阶段的键。客户端无需在两个流程之间做去重。
+尽管字段名相同，这两个流程仍保持各自独立的状态。MRTR 阶段在服务器返回任何非 `"input_required"` 的 `resultType` 时结束，此时其 `inputRequests` 键被消费。任务阶段从 `CreateTaskResult` 开始，并独立维护_自己的_ `inputRequests` 键。任务 `inputRequests` 的键唯一性仅限定于任务的生命周期，不会延伸到前一个 MRTR 阶段的键。客户端无需在两个流程之间做去重。
 
 ## 向后兼容性
 

@@ -69,7 +69,7 @@ Tasks 适合表示昂贵的计算和批处理请求，并且与外部作业 API 
 客户端和服务器在各自的能力对象中声明对 tasks 扩展的支持（使用 [SEP-2575: 让 MCP 变为无状态](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2575) 中更新后的形式）：
 
 ```jsonc
-// Client to server, in per-request capabilities
+// 客户端到服务器，在每个请求的能力中
 {
   // 其他请求参数...
   "params": {
@@ -85,7 +85,7 @@ Tasks 适合表示昂贵的计算和批处理请求，并且与外部作业 API 
 ```
 
 ```jsonc
-// Server to client, in response to server/discover
+// 服务器到客户端，在对 server/discover 的响应中
 {
   "result": {
     // 其他响应参数...
@@ -111,7 +111,7 @@ Tasks 适合表示昂贵的计算和批处理请求，并且与外部作业 API 
   "jsonrpc": "2.0",
   "id": 1,
   "error": {
-    // MISSING_REQUIRED_CLIENT_CAPABILITY
+    // 缺少所需客户端能力
     "code": -32003,
     // 此处的消息仅为示例用途。该示例消息内容不具规范性。
     "message": "缺少所需客户端能力",
@@ -139,7 +139,7 @@ Tasks 适合表示昂贵的计算和批处理请求，并且与外部作业 API 
 符合 task 增强条件的请求可以返回两种不同的结果形态之一——该请求的标准结果，或 `CreateTaskResult`。判别器是结果对象上的 `resultType` 字段，由 [SEP-2322](./2322-MRTR.md) 引入：
 
 ```typescript
-// "task" is introduced by this extension.
+// “task” 是由此扩展引入的。
 type ResultType = "complete" | "input_required" | "task" | string;
 ```
 
@@ -147,7 +147,7 @@ type ResultType = "complete" | "input_required" | "task" | string;
 
 建议客户端实现者注意：现有返回固定形态的代码（例如返回 `CallToolResult` 的 `tools/call` 方法）无需更改其对外契约——它们可以在内部透明地驱动轮询流程，并仅向外暴露最终完成结果。新的实现层 **MAY** 直接暴露任务生命周期，以便应用程序利用。
 
-### Tasks
+### 任务
 
 `Task` 携带有关进行中工作的运行时元数据。
 
@@ -402,7 +402,7 @@ type UpdateTaskResult = Result; // 空确认
 
 `UpdateTaskResult` 上的 `resultType` 字段 **MUST** 设为 `"complete"`，因为这是 `tasks/update` 请求的标准结果形态。
 
-### Task 取消
+### 任务取消
 
 客户端发送 `tasks/cancel` 请求以表明其希望取消一个进行中的 task。`notifications/cancelled` 通知 **MUST NOT** 用于 task 取消。
 
@@ -810,13 +810,13 @@ Tasks 使用两种错误报告机制：
 
 对于以下协议错误情况，服务器 **MUST** 返回标准 JSON-RPC 错误：
 
-- Invalid or nonexistent `taskId`: `-32602` (Invalid params)
-  - Servers **MUST** return this error for `tasks/get`.
-  - Servers **SHOULD** return this error for `tasks/update` and `tasks/cancel`.
-- Internal errors: `-32603` (Internal error)
-- Missing required client capabilities: `-32003` (Missing Required Client Capability)
-  - Servers **MUST** return this error for non-declaring clients requesting task notifications on `subscriptions/listen`.
-  - Servers **MUST** return this error for non-declaring clients issuing `tasks/get`, `tasks/update`, and `tasks/cancel` requests.
+- 无效或不存在的 `taskId`：`-32602`（无效参数）
+  - 服务器 **MUST** 对 `tasks/get` 返回此错误。
+  - 服务器 **SHOULD** 对 `tasks/update` 和 `tasks/cancel` 返回此错误。
+- 内部错误：`-32603`（内部错误）
+- 缺少所需的客户端能力：`-32003`（缺少必需的客户端能力）
+  - 对于未声明相关能力却在 `subscriptions/listen` 上请求任务通知的客户端，服务器 **MUST** 返回此错误。
+  - 对于未声明相关能力却发起 `tasks/get`、`tasks/update` 和 `tasks/cancel` 请求的客户端，服务器 **MUST** 返回此错误。
 
 服务器 **SHOULD** 提供信息充分的错误消息来描述错误原因。
 

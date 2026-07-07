@@ -175,7 +175,7 @@ export interface InputResponses {
     "method": "elicitation/create",
     "params": {
       "mode": "form",
-      "message": "Please provide your GitHub username",
+      "message": "请提供你的 GitHub 用户名",
       "requestedSchema": {
         "type": "object",
         "properties": {
@@ -196,7 +196,7 @@ export interface InputResponses {
           "role": "user",
           "content": {
             "type": "text",
-            "text": "What is the capital of France?"
+            "text": "法国的首都是哪里？"
           }
         }
       ],
@@ -209,7 +209,7 @@ export interface InputResponses {
         "intelligencePriority": 0.8,
         "speedPriority": 0.5
       },
-      "systemPrompt": "You are a helpful assistant.",
+      "systemPrompt": "你是一个乐于助人的助手。",
       "maxTokens": 100
     }
   }
@@ -232,7 +232,7 @@ export interface InputResponses {
     "role": "assistant",
     "content": {
       "type": "text",
-      "text": "The capital of France is Paris."
+      "text": "法国的首都是巴黎。"
     },
     "model": "claude-3-sonnet-20240307",
     "stopReason": "endTurn"
@@ -313,7 +313,7 @@ export type ResultType =
 | `PingRequest`                  | 否                            |
 | `InitializeRequest`            | 否                            |
 | `CompleteRequest`              | 否                            |
-| `SetLevelRequest`              | 否                            |
+| `SetLevelRequest`                  | 否                            |
 | `ListPromptsRequest`           | 否                            |
 | `ListResourcesRequest`         | 否                            |
 | `ListResourceTemplatesRequest` | 否                            |
@@ -321,7 +321,7 @@ export type ResultType =
 | `UnsubscribeRequest`           | 否                            |
 | `ListToolsRequest`             | 否                            |
 | `GetTaskRequest`               | 否                            |
-| `ListTasksRequest`             | 否                            |
+| `ListTasksRequest`               | 否                            |
 | `CancelTaskRequest`            | 否                            |
 | `TaskInputResponseRequest`     | 否                            |
 
@@ -998,7 +998,7 @@ sequenceDiagram
       "not_requested_info": {
         "action": "accept",
         "content": {
-          "not_requested_param_name": "Information the server did not request"
+          "not_requested_param_name": "服务器未请求的信息"
         }
       }
     }
@@ -1019,7 +1019,7 @@ sequenceDiagram
         "method": "elicitation/create",
         "params": {
           "mode": "form",
-          "message": "Please provide your GitHub username",
+          "message": "请提供您的 GitHub 用户名",
           "requestedSchema": {
             "type": "object",
             "properties": {
@@ -1051,7 +1051,7 @@ sequenceDiagram
       "echo_input": {
         "action": "accept",
         "content": {
-          "not_requested_parameter": "Information the server did not request."
+          "not_requested_parameter": "服务器未请求的信息。"
         }
       }
     },
@@ -1080,10 +1080,10 @@ sequenceDiagram
 }
 ```
 
-## 原因说明
+## Reason 说明
 
 我们考虑过采用双向流的方式来替代 SSE 流。
-不过，这种方式会使线协议更加复杂（例如，它需要 HTTP/2 或 HTTP/3）。此外，它也不会消除那些无法支持长连接的环境中的问题，也无法解决容错方面的问题。
+不过，这种方式会使线路协议更加复杂（例如，它需要 HTTP/2 或 HTTP/3）。此外，它也不会消除那些无法支持长连接的环境中的问题，也无法解决容错方面的问题。
 
 关于输入请求应该是一个 map 还是仅仅一个单独对象，曾有过讨论，也有人考虑利用请求内部的某个字段（例如 elicitation ID）来区分它们。我们最终决定使用 map，因为它在结构上保证了键的唯一性，这将避免 SDK 和应用程序中为了避免冲突而进行显式检查的需要。
 

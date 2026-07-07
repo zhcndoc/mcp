@@ -174,7 +174,7 @@ sequenceDiagram
 
     Client->>Server: POST subscriptions/listen<br/>(notification filter)
     Server-->>Client: SSE: notifications/subscriptions/acknowledged
-    note over Client,Server: Stream stays open
+    note over Client,Server: 流保持打开
     Server-->>Client: SSE: notifications/tools/list_changed
     Server-->>Client: SSE: notifications/resources/updated
     note over Client,Server: 直到客户端或服务器关闭该流
@@ -185,7 +185,7 @@ sequenceDiagram
 关闭 SSE 响应流 **必须** 被服务器视为该请求的取消。由于
 每个请求都有自己的响应流，因此传输级断开是明确无歧义的。服务器 **应该**
 尽快停止已取消请求的工作，并且 **不得** 为其发送任何后续消息。完整规则请参见
-[Cancellation][cancellation]。
+[取消][cancellation]。
 
 [cancellation]: /specification/draft/basic/patterns/cancellation
 
@@ -233,7 +233,7 @@ Streamable HTTP 传输会将选定的 JSON-RPC 正文字段镜像到 HTTP
 如果 `Mcp-Name` 的来源值无法安全地表示为普通 ASCII
 头值，客户端 **必须** 按照 [值编码](#value-encoding) 中描述的 Base64 哨兵格式对其进行编码。
 
-**`tools/call` request:**
+**`tools/call` 请求：**
 
 ```http
 POST /mcp HTTP/1.1
@@ -295,7 +295,7 @@ Mcp-Name: file:///projects/myapp/config.json
 MCP 服务器 **可以** 使用参数的 schema 中的 `inputSchema` 内的
 `x-mcp-header` 扩展属性，将特定工具参数映射到
 HTTP 头中。详见
-[Tool Definitions][tool-definitions]
+[工具定义][tool-definitions]
 ，了解如何为工具参数添加注解。
 
 虽然服务器使用 `x-mcp-header` 是可选的，但客户端 **必须**
@@ -327,7 +327,7 @@ HTTP 头中。详见
 
 头提取被定义为读取带注解属性的精确属性路径上的实例值（通往它的 `properties` 键链）。如果调用参数中该路径没有值，则省略该头。
 
-使用 Streamable HTTP 传输的客户端 **MUST** 拒绝任何 `x-mcp-header` 值违反这些约束的工具定义。拒绝意味着客户端 **MUST** 将该无效工具从 `tools/list` 的结果中排除。客户端 **SHOULD** 在拒绝工具定义时记录警告，包括工具名称和被拒绝的原因。这样可以确保单个格式错误的工具定义不会阻止其他有效工具的使用。使用其他传输方式（例如 stdio）的客户端 **MAY** 完全忽略 `x-mcp-header` 注解。
+使用 Streamable HTTP 传输的客户端 **必须** 拒绝任何 `x-mcp-header` 值违反这些约束的工具定义。拒绝意味着客户端 **必须** 将该无效工具从 `tools/list` 的结果中排除。客户端 **应该** 在拒绝工具定义时记录警告，包括工具名称和被拒绝的原因。这样可以确保单个格式错误的工具定义不会阻止其他有效工具的使用。使用其他传输方式（例如 stdio）的客户端 **可以** 完全忽略 `x-mcp-header` 注解。
 
 **工具定义示例：**
 
@@ -387,7 +387,7 @@ Mcp-Param-Region: us-west1
 
 #### 值编码
 
-客户端 **MUST** 在将参数值包含到 HTTP
+客户端 **必须** 在将参数值包含到 HTTP
 头之前对其进行编码，以确保安全传输并防止注入攻击。
 
 **类型转换**：将参数值转换为其字符串表示形式：
@@ -401,7 +401,7 @@ HTTP 头字段值必须由可见 ASCII 字符
 （0x21-0x7E）、空格（0x20）以及水平制表符（0x09）组成。当某个值无法
 安全地表示为普通 ASCII 头值时（例如，它包含
 非 ASCII 字符、控制字符，或具有前导/尾随
-空白），客户端 **MUST** 使用其 UTF-8
+空白），客户端 **必须** 使用其 UTF-8
 表示的 Base64 编码，格式如下：
 
 ```text
@@ -409,20 +409,20 @@ Mcp-Param-{Name}: =?base64?{Base64EncodedValue}?=
 ```
 
 相同的编码规则适用于 `Mcp-Name` 头值。工具和
-提示名称仅 **SHOULD** 受限于对头部安全的字符，因此超出安全集合的名称（或资源 URI）将按如下方式传递：
+提示名称仅 **应该** 受限于对头部安全的字符，因此超出安全集合的名称（或资源 URI）将按如下方式传递：
 
 ```text
 Mcp-Name: =?base64?{Base64EncodedValue}?=
 ```
 
 前缀 `=?base64?` 和后缀 `?=` 表示该值已
-使用 Base64 编码。这些标记区分大小写，并且 **MUST** 以
-所示的精确形式出现（小写）。需要检查这些值的服务器和中介组件 **MUST** 进行相应解码。特别是，服务器 **MUST**
+使用 Base64 编码。这些标记区分大小写，并且 **必须** 以
+所示的精确形式出现（小写）。需要检查这些值的服务器和中介组件 **必须** 进行相应解码。特别是，服务器 **必须**
 在将编码后的 `Mcp-Name` 或 `Mcp-Param-{Name}` 值与
 请求正文中的相应值进行比较之前先对其解码，
-参见 [Server Validation](#server-validation)。
+参见 [服务器校验](#server-validation)。
 
-为避免歧义，客户端 **MUST** 还要对任何匹配哨兵模式的纯 ASCII 值进行 Base64 编码（即，以 `=?base64?` 开头并以 `?=` 结尾）。
+为避免歧义，客户端 **必须** 还要对任何匹配哨兵模式的纯 ASCII 值进行 Base64 编码（即，以 `=?base64?` 开头并以 `?=` 结尾）。
 
 **编码示例：**
 
@@ -439,7 +439,7 @@ Mcp-Name: =?base64?{Base64EncodedValue}?=
 #### 客户端行为
 
 当通过 HTTP 传输构造 `tools/call` 请求时，客户端
-**MUST**：
+**必须**：
 
 1. 从请求正文中提取任何标准头的值（例如，
    `method`、`params.name`、`params.uri`）。
@@ -449,28 +449,36 @@ Mcp-Name: =?base64?{Base64EncodedValue}?=
    `x-mcp-header` 的属性，并提取每个已注解属性精确
    属性路径上的值；如果没有值则省略该头（见
    [Schema Extension](#schema-extension)）。
-4. 按照 [Value Encoding](#value-encoding)
+4. 按照 [值编码](#value-encoding)
    规则对这些值进行编码。
 5. 将 `Mcp-Param-{Name}: {Value}` 头附加到请求中。
 
 <Note>
 
-如果客户端没有该工具的 `inputSchema`（例如尚未调用 `tools/list`），或者缓存的 schema 已过期（例如其 TTL 已过期），客户端 **SHOULD** 在不带自定义 `Mcp-Param-*` 头的情况下发送请求。如果服务器因为缺少必需的自定义头而拒绝该请求，客户端 **SHOULD** 调用 `tools/list` 获取当前的 `inputSchema`，然后使用适当的头重试原始请求。客户端 **MAY** 通过其他方式预加载工具定义（例如来自先前会话或配置），以便在未先调用 `tools/list` 的情况下也能发送这些头。
+客户端 **必须** 使用最近一次获取到的
+该工具 `inputSchema` 来构造 `Mcp-Param-*` 头。若客户端从未获取过
+该工具的 `inputSchema`，**应该** 在不带 `Mcp-Param-*`
+头的情况下发送请求。如果服务器因为必需的 `Mcp-Param-*`
+头缺失或与正文不匹配而拒绝请求，客户端 **应该** 调用
+`tools/list` 以获取当前的 `inputSchema`，然后使用合适的头重试原始请求。客户端 **可以** 通过其他方式预先加载工具
+定义（例如来自之前的会话或
+配置），从而在未先调用 `tools/list`
+的情况下也能发送头。
 
 </Note>
 
 #### 服务器对自定义头的行为
 
 不识别 `Mcp-Param-{Name}` 头的中介服务器
-**MUST** 转发它，并在其他方面忽略它，正如
-[HTTP Semantics RFC][http-semantics] 所要求的那样。
+**必须** 转发它，并在其他方面忽略它，正如
+[HTTP 语义 RFC][http-semantics] 所要求的那样。
 
-服务器 **MUST** 拒绝包含无效字符的、被识别的 `Mcp-Param-{Name}` 头
+服务器 **必须** 拒绝包含无效字符的、被识别的 `Mcp-Param-{Name}` 头
 （见 [值编码](#value-encoding)）。
 
-任何处理消息正文的服务器 **MUST** 验证编码后的
+任何处理消息正文的服务器 **必须** 验证编码后的
 头值（如果是 Base64 编码，则在解码后）与正文中的相应
-值匹配。若任何验证失败，服务器 **MUST** 返回
+值匹配。若任何验证失败，服务器 **必须** 返回
 HTTP 状态 `400 Bad Request`，并使用 JSON-RPC 错误码
 `-32020`（`HeaderMismatch`）拒绝该请求。
 
@@ -513,7 +521,7 @@ HTTP 状态 `400 Bad Request`，并使用 JSON-RPC 错误码
 包含一个 JSON-RPC 错误响应：
 
 | Code     | Name                                                                | Description                                                                                                            |
-| ----------- | ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | `-32020` | [`HeaderMismatch`](/specification/draft/schema#headermismatcherror) | HTTP 头与请求正文中的相应值不匹配，或者缺少/格式错误的必需头。 |
 
 该错误码从 MCP 规范为协议定义错误保留的子范围中分配。请参见
