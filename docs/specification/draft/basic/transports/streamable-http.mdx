@@ -453,19 +453,11 @@ Mcp-Name: =?base64?{Base64EncodedValue}?=
    规则对这些值进行编码。
 5. 将 `Mcp-Param-{Name}: {Value}` 头附加到请求中。
 
-<Note>
-
-客户端 **必须** 使用最近一次获取到的
-该工具 `inputSchema` 来构造 `Mcp-Param-*` 头。若客户端从未获取过
-该工具的 `inputSchema`，**应该** 在不带 `Mcp-Param-*`
-头的情况下发送请求。如果服务器因为必需的 `Mcp-Param-*`
-头缺失或与正文不匹配而拒绝请求，客户端 **应该** 调用
-`tools/list` 以获取当前的 `inputSchema`，然后使用合适的头重试原始请求。客户端 **可以** 通过其他方式预先加载工具
-定义（例如来自之前的会话或
-配置），从而在未先调用 `tools/list`
-的情况下也能发送头。
-
-</Note>
+如果服务器因为所需的
+`Mcp-Param-*` 头缺失或与正文不匹配而返回
+[`HeaderMismatch`](#server-validation) 错误，客户端
+**应该** 调用 `tools/list` 以检查工具的
+`inputSchema` 是否有变化，然后使用适当的头重试原始请求。
 
 #### 服务器对自定义头的行为
 

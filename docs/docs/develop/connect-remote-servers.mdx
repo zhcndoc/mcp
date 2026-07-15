@@ -28,14 +28,21 @@ description: 了解如何将 Claude 连接到远程 MCP 服务器，并通过互
 
 <Steps>
 <Step title="导航到连接器设置">
-在浏览器中打开 Claude 并导航到设置页面。您可以通过点击个人资料图标并从下拉菜单中选择“设置”来访问此页面。进入设置后，找到并点击侧边栏中的“连接器”部分。
+打开 Claude Desktop 或浏览器中的 Claude，然后导航到设置页面：
 
-这将显示您当前配置的连接器并提供添加新连接器的选项。
+- **桌面版**：使用键盘快捷键 `Ctrl+Comma`，或点击左上角菜单图标 <img src="/images/claude-desktop-hamburger-menu-icon.png" style={{display: 'inline', margin: 0, height: '1.3em', width: 'auto'}} />，将鼠标悬停在“文件”上，然后选择“设置”
+- **浏览器版**：使用键盘快捷键 `⌘⇧,`（_macOS_），或点击您的个人资料图标，并在菜单中选择“设置”
+
+进入设置页面后，点击侧边栏中的“连接器”。这里会显示您当前配置的连接器，并提供添加新连接器的选项。
 
 </Step>
 
 <Step title="添加自定义连接器">
-在连接器部分，滚动到底部，您将找到“添加自定义连接器”按钮。点击此按钮开始连接过程。
+在“连接器”部分，点击窗口右上角的“添加”按钮，然后从下拉菜单中选择“添加自定义连接器”。这将开始连接过程。为了便于跟随操作，请复制/粘贴下面的 URL：
+
+```text Example Remote Server
+https://example-server.modelcontextprotocol.io/mcp
+```
 
 <Frame>
   <img
@@ -72,7 +79,7 @@ description: 了解如何将 Claude 连接到远程 MCP 服务器，并通过互
 </Step>
 
 <Step title="访问资源和提示">
-成功连接后，远程服务器的资源和提示将在您的 Claude 对话中可用。您可以通过点击消息输入区域中的回形针图标来访问这些内容，这将打开附件菜单。
+连接成功后，远程服务器的资源和提示将可在您的 Claude 对话中使用。您可以通过点击消息输入区域左下角的“添加文件、连接器等 /”指示器 <img src="/images/claude-add-files-connectors-and-more.png" style={{display: 'inline', margin: 0, height: '1.3em', width: 'auto'}} /> 来访问它们。然后将鼠标悬停在“连接器”上，再将光标移动到“添加到 Example Remote Server”上，悬停时会显示附件菜单。
 
 <Frame>
   <img
@@ -81,7 +88,7 @@ description: 了解如何将 Claude 连接到远程 MCP 服务器，并通过互
   />
 </Frame>
 
-菜单显示来自已连接服务器的所有可用资源和提示。选择您要包含在对话中的项目。这些资源为 Claude 提供来自外部工具的上下文和信息。
+菜单会显示来自您已连接服务器的所有可用资源和提示。选择您想要包含在对话中的项目。这些资源为 Claude 提供来自外部工具的上下文和信息。
 
 <Frame>
   <img src="/images/quickstart-remote/5-select-prompts-resources.png" alt="从菜单中选择特定资源和提示" />

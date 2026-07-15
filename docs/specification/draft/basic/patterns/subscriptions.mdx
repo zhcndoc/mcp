@@ -45,7 +45,14 @@ title: 订阅
 
 ## 确认
 
-服务器 **必须** 作为流上的第一条消息发送 `notifications/subscriptions/acknowledged`。确认中的 `notifications` 字段反映了服务器同意支持的子集——服务器不支持的通知类型会被省略。
+服务器 **必须** 将 `notifications/subscriptions/acknowledged` 作为第一条消息发送，
+并在 `_meta` 中通过 `io.modelcontextprotocol/subscriptionId` 携带订阅的 ID，
+且在此之前 **不得** 发送该订阅的任何通知。在 stdio 场景下，所有订阅共享同一通道，
+这种顺序是按订阅 ID 定义的，而不是按通道定义的：属于其他订阅的消息
+**可以** 在此之前交错出现。
+
+确认响应中的 `notifications` 字段反映了服务器同意遵守的子集。
+服务器不支持的通知类型会被省略。
 
 ```json
 {
@@ -65,9 +72,9 @@ title: 订阅
 
 客户端 **应该** 将已确认的过滤器与其请求内容进行比对，并优雅地处理任何不受支持的类型。
 
-## 接收通知
+## Receiving Notifications
 
-流上发送的所有通知都会在 `_meta` 中携带 `io.modelcontextprotocol/subscriptionId`，用于标识打开该流的 `subscriptions/listen` 请求。该值就是 `subscriptions/listen` 请求的 JSON-RPC ID。在上面的示例中，请求使用了 `"id": 1`，因此确认消息以及后续所有通知都会携带订阅 ID `1`。在 stdio 中，所有消息共享单一通道，客户端 **必须** 使用该字段将通知与其来源订阅进行关联。
+All notifications sent on the stream will carry `io.modelcontextprotocol/subscriptionId` in `_meta`, used to identify the `subscriptions/listen` request that opened the stream. This value is the JSON-RPC ID of the `subscriptions/listen` request. In the example above, the request used `"id": 1`, so both the confirmation message and all subsequent notifications will carry subscription ID `1`. In stdio, all messages share a single channel, and the client **must** use this field to associate notifications with their originating subscription.
 
 ```json
 {

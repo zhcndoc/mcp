@@ -92,9 +92,10 @@ MCP 客户端和服务器之间的所有消息 **必须** 遵循
 }
 ```
 
-- 错误响应 **必须** 包含与其对应请求相同的 ID（除非在因请求格式错误而无法读取 ID 的错误情况下）。
-- 错误响应 **必须** 包含带有 `code` 和 `message` 的 `error` 字段。
-- 错误代码 **必须** 是整数。
+- 错误响应 **必须** 包含与其对应请求相同的 ID（除非由于格式错误的请求导致无法读取 ID）。
+- 错误响应 **必须** 包含 `error` 字段，其中带有 `code` 和 `message`。
+- 错误代码 **必须** 为整数。
+- 错误响应 **可以** 包含一个 `data` 成员，用于附加任何类型的信息，例如嵌套错误。
 
 #### 错误代码
 
@@ -280,14 +281,11 @@ JSON Schema 2020-12 允许 `$ref` 指向绝对 URI。实现 **不得**
 
 ### `_meta`
 
-`_meta` 属性/参数由 MCP 保留，允许客户端和服务器
+`_meta` 属性/参数由 MCP 用于允许客户端和服务器
 在其交互中附加额外的元数据。
 
-某些键名由 MCP 保留用于协议级元数据，如下所示；
-实现 **不得** 对这些键处的值做出假设。
-
-此外，[模式](https://github.com/modelcontextprotocol/specification/blob/main/schema/draft/schema.ts) 中的定义
-可能会为特定用途的元数据保留特定名称，如这些定义中所述。
+MCP 为协议级元数据保留了某些键名，如下所述；
+实现 **不得** 假定这些键上的值具有任何特定含义。
 
 **键名格式：** 有效的 `_meta` 键名有两个部分：一个可选的 **前缀** 和一个 **名称**。
 
@@ -305,6 +303,25 @@ JSON Schema 2020-12 允许 `$ref` 指向绝对 URI。实现 **不得**
 - 除非为空，否则 **必须** 以字母数字字符 (`[a-z0-9A-Z]`) 开头和结尾。
 - 中间 **可以** 包含连字符 (`-`)、下划线 (`_`)、点 (`.`) 和字母数字字符。
 
+**保留键：**
+
+以下 `_meta` 键由本规范保留：
+
+| 键                                           | 描述                                                      | 定义于                                                             |
+| -------------------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------ |
+| `progressToken`                              | 将请求纳入进度通知                                        | [进度](/specification/draft/basic/patterns/progress)               |
+| `io.modelcontextprotocol/protocolVersion`    | 请求的协议版本                                            | 每请求协议字段（下文）                                             |
+| `io.modelcontextprotocol/clientInfo`         | 客户端名称和版本                                           | 每请求协议字段（下文）                                             |
+| `io.modelcontextprotocol/clientCapabilities` | 与请求相关的客户端能力                                     | 每请求协议字段（下文）                                             |
+| `io.modelcontextprotocol/logLevel`           | 服务器应为请求发出的最低日志级别                           | [日志](/specification/draft/server/utilities/logging)              |
+| `io.modelcontextprotocol/subscriptionId`     | 将通知与其来源订阅关联起来                                  | [订阅](/specification/draft/basic/patterns/subscriptions)          |
+| `traceparent`, `tracestate`, `baggage`       | OpenTelemetry 追踪上下文传播                                | OpenTelemetry 追踪上下文（下文）                                    |
+
+官方[扩展](/specification/draft/basic/versioning#extension-negotiation)
+会在 `io.modelcontextprotocol/` 前缀下定义额外的 `_meta` 键，
+第三方扩展则使用其自己的供应商前缀。
+在这两种情况下，这些键都在扩展文档中指定。
+
 **每请求协议字段：**
 
 每个客户端请求在 `_meta` 中 **必须** 包含以下 `io.modelcontextprotocol/*` 字段。服务器使用这些字段在不依赖任何先前连接状态的情况下识别客户端和正在使用的协议版本。版本协商规则请参见[版本与兼容性][lifecycle]。
@@ -312,7 +329,7 @@ JSON Schema 2020-12 允许 `$ref` 指向绝对 URI。实现 **不得**
 | 键                                           | 类型                 | 必需 | 描述                                                 |
 | -------------------------------------------- | -------------------- | ---- | ---------------------------------------------------- |
 | `io.modelcontextprotocol/protocolVersion`    | `string`             | 是   | 此请求的协议版本（例如，`"2026-07-28"`）             |
-| `io.modelcontextprotocol/clientInfo`         | `Implementation`     | 是   | 客户端名称和版本                                       |
+| `io.modelcontextprotocol/clientInfo`         | `Implementation`     | 是   | 客户端名称和版本                                     |
 | `io.modelcontextprotocol/clientCapabilities` | `ClientCapabilities` | 是   | 与此请求相关的客户端能力                               |
 | `io.modelcontextprotocol/logLevel`           | `LoggingLevel`       | 否   | 服务器应为此请求发出的最低日志级别                     |
 

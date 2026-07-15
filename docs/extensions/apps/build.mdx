@@ -47,7 +47,7 @@ git clone https://github.com/modelcontextprotocol/ext-apps.git
 | [VS Code](https://code.visualstudio.com/docs/copilot/customization/agent-skills) 和 [GitHub Copilot](https://docs.github.com/en/copilot/concepts/agents/about-agent-skills) | `~/.copilot/skills/`           | `%USERPROFILE%\.copilot\skills\`      |
 | [Gemini CLI](https://geminicli.com/docs/cli/skills/)                                                                                                                         | `~/.gemini/skills/`            | `%USERPROFILE%\.gemini\skills\`       |
 | [Cline](https://cline.bot/blog/cline-3-48-0-skills-and-websearch-make-cline-smarter)                                                                                         | `~/.cline/skills/`             | `%USERPROFILE%\.cline\skills\`        |
-| [Goose](https://block.github.io/goose/docs/guides/context-engineering/using-skills/)                                                                                         | `~/.config/goose/skills/`      | `%USERPROFILE%\.config\goose\skills\` |
+| [Goose](https://goose-docs.ai/docs/guides/context-engineering/using-skills/)                                                                                                 | `~/.config/goose/skills/`      | `%USERPROFILE%\.config\goose\skills\` |
 | [Codex](https://developers.openai.com/codex/skills/)                                                                                                                         | `~/.codex/skills/`             | `%USERPROFILE%\.codex\skills\`        |
 | [Cursor](https://cursor.com/docs/context/skills)                                                                                                                             | `~/.cursor/skills/`            | `%USERPROFILE%\.cursor\skills\`       |
 
@@ -252,7 +252,7 @@ export default defineConfig({
 
 ```typescript
 // server.ts
-console.log("Starting MCP App server...");
+console.log("Starting MCP 应用服务器...");
 
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
@@ -280,8 +280,8 @@ registerAppTool(
   server,
   "get-time",
   {
-    title: "Get Time",
-    description: "Returns the current server time.",
+    title: "获取时间",
+    description: "返回当前服务器时间。",
     inputSchema: {},
     _meta: { ui: { resourceUri } },
   },
@@ -329,10 +329,10 @@ expressApp.post("/mcp", async (req, res) => {
 
 expressApp.listen(3001, (err) => {
   if (err) {
-    console.error("Error starting server:", err);
+    console.error("启动服务器时出错：", err);
     process.exit(1);
   }
-  console.log("Server listening on http://localhost:3001/mcp");
+  console.log("服务器正在监听 http://localhost:3001/mcp");
 });
 ```
 
@@ -353,14 +353,14 @@ UI 由一个 HTML 页面和一个使用 `App` 类与主机通信的 TypeScript �
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>Get Time App</title>
+    <title>获取时间应用</title>
   </head>
   <body>
     <p>
-      <strong>Server Time:</strong>
-      <code id="server-time">Loading...</code>
+      <strong>服务器时间：</strong>
+      <code id="server-time">加载中...</code>
     </p>
-    <button id="get-time-btn">Get Server Time</button>
+    <button id="get-time-btn">获取服务器时间</button>
     <script type="module" src="/src/mcp-app.ts"></script>
   </body>
 </html>
@@ -383,7 +383,7 @@ app.connect();
 // 处理主机推送的初始工具结果
 app.ontoolresult = (result) => {
   const time = result.content?.find((c) => c.type === "text")?.text;
-  serverTimeEl.textContent = time ?? "[ERROR]";
+  serverTimeEl.textContent = time ?? "[错误]";
 };
 
 // 当用户与 UI 交互时主动调用工具
@@ -393,7 +393,7 @@ getTimeBtn.addEventListener("click", async () => {
     arguments: {},
   });
   const time = result.content?.find((c) => c.type === "text")?.text;
-  serverTimeEl.textContent = time ?? "[ERROR]";
+  serverTimeEl.textContent = time ?? "[错误]";
 });
 ```
 
