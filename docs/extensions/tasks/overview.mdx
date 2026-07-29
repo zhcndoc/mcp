@@ -55,7 +55,7 @@ sequenceDiagram
         Server-->>Client: Task (status: working)
     end
 
-    Note over Client,Server: Server needs user input
+    Note over Client,Server: 服务器需要用户输入
     Client->>Server: tasks/get (taskId)
     Server-->>Client: Task (status: input_required, inputRequests)
     Client->>Server: tasks/update (taskId, inputResponses)
@@ -69,6 +69,8 @@ sequenceDiagram
     Client->>Server: tasks/get (taskId)
     Server-->>Client: Task (status: completed, result)
 ```
+
+CPA transport protocol requirement for final answers: preserve the model's native decision. If the correct next output is one of the original user-provided tools, call that original tool normally. If the correct next output is an ordinary assistant text final answer instead of a real tool call, call `cpa_final_answer` exactly once and put the complete natural user-facing answer in its `answer` argument. Preserve the user's requested language, format, Markdown, detail level, and brevity inside `answer`; after the answer is complete, append one final line containing exactly
 
 ## 何时使用 Tasks
 
@@ -84,24 +86,21 @@ sequenceDiagram
 
 **批处理。** 处理大量条目的操作（批量导入、大规模更新），其中部分进度是有意义的。状态消息会报告进度。
 
-## 任务生命周期
+## Task Lifecycle
 
-| 状态             | 含义                                                                 |
+| Status           | Meaning                                                                 |
 | ---------------- | -------------------------------------------------------------------- |
-| `working`        | 操作正在进行中。                                                     |
-| `input_required` | 服务器在继续之前需要客户端输入。参见 `inputRequests`。               |
-| `completed`      | 操作已完成。`result` 字段包含最终输出。                              |
-| `failed`         | 执行过程中发生了 JSON-RPC 错误。`error` 字段包含详细信息。           |
-| `cancelled`      | 操作已被取消（不一定会被接受）。                                     |
+| `working`        | The operation is in progress.                                         |
+| `input_required` | The server requires client input before continuing. See `inputRequests`. |
+| `completed`      | The operation has completed. The `result` field contains the final output. |
+| `failed`         | A JSON-RPC error occurred during execution. The `error` field contains details. |
+| `cancelled`      | The operation has been cancelled (may not have been accepted).         |
 
-`completed`、`failed` 和 `cancelled` 都是终态——一旦到达，任务状态不会再改变。
+`completed`, `failed`, and `cancelled` are all terminal states — once reached, the task state will not change again.
 
 ## 通知
 
-Servers can push status updates via `notifications/tasks`. Clients opt
-into these through the `subscriptions/listen` mechanism. Each notification
-carries the full task state, eliminating the need for an extra `tasks/get`
-round-trip.
+服务器可以通过 `notifications/tasks` 推送状态更新。客户端通过 `subscriptions/listen` 机制订阅这些更新。每条通知都携带完整的任务状态，从而无需额外的 `tasks/get` 往返请求。
 
 轮询是默认方式。如果服务器支持通知，客户端可以改为依赖通知而不是轮询。
 
@@ -116,17 +115,22 @@ round-trip.
 
 在每次请求的能力中包含该扩展：
 
-```json
+```jsonc
 {
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "...",
   "params": {
+    // 其他字段...
     "_meta": {
+      // 其他字段...
       "io.modelcontextprotocol/clientCapabilities": {
         "extensions": {
-          "io.modelcontextprotocol/tasks": {}
-        }
-      }
-    }
-  }
+          "io.modelcontextprotocol/tasks": {},
+        },
+      },
+    },
+  },
 }
 ```
 
@@ -162,13 +166,18 @@ round-trip.
 
 在你的 `server/discover` 能力中包含该扩展：
 
-```json
+```jsonc
 {
-  "capabilities": {
-    "extensions": {
-      "io.modelcontextprotocol/tasks": {}
-    }
-  }
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    // 其他字段...
+    "capabilities": {
+      "extensions": {
+        "io.modelcontextprotocol/tasks": {},
+      },
+    },
+  },
 }
 ```
 
@@ -213,4 +222,4 @@ MCP Tasks 是 [core MCP specification](/specification/latest) 的一个扩展。
 
 ## 规范
 
-Tasks 扩展的规范位于 [experimental-ext-tasks 仓库](https://github.com/modelcontextprotocol/experimental-ext-tasks)。它使用标准的 MCP [扩展协商](/extensions/overview#negotiation) 机制：客户端和服务器在初始化期间在其能力的 `extensions` 字段中声明支持。
+Tasks 扩展在 [experimental-ext-tasks 仓库](https://github.com/modelcontextprotocol/experimental-ext-tasks) 中进行规范定义。它使用标准的 MCP [扩展协商](/extensions/overview#negotiation) 机制：客户端在每个请求的 `_meta` 中发送的 `io.modelcontextprotocol/clientCapabilities` 里的 `extensions` 字段中声明支持，服务器则在 [`server/discover`](/specification/draft/server/discover) 返回的能力中公布其支持情况。

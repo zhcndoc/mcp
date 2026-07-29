@@ -163,12 +163,18 @@ MCP 定义了以下错误代码：
 
 具体而言：
 
-- 服务器 **不得** 依赖同一连接上的先前请求来建立上下文（例如，能力、协议版本、客户端身份）。
-  每个请求都在其 [`_meta`](#meta) 字段中提供这些元数据。
-- 服务器 **应该** 能够处理与多个任务、线程或会话相关的请求。
-- 服务器 **不应** 要求客户端复用相同的连接或进程来执行相关操作。
-- 客户端 **不应** 将单个任务、线程或会话作为 stdio 进程的生命周期边界。
-- 需要跨多个请求存在的状态（例如，长时间运行的任务、应用级句柄）**必须** 通过客户端在每个请求中传递的显式标识符来引用。
+- Servers **MUST NOT** rely on prior requests over the same connection to
+  establish context (e.g., capabilities, protocol version, client identity).
+  Every request supplies this metadata in its [`_meta`](#_meta) field.
+- Servers **SHOULD** be prepared to handle requests associated with multiple
+  tasks, threads, or conversations.
+- Servers **SHOULD NOT** require that a client reuse the same connection or process to
+  perform related operations.
+- Clients **SHOULD NOT** use an individual task, thread, or conversation as the
+  lifetime boundary for the stdio process.
+- State that needs to span multiple requests (e.g., long-running tasks,
+  application-level handles) **MUST** be referenced by an explicit identifier
+  the client passes on each request.
 
 <Note>
   这意味着，像 STDIO 进程这样的打开连接并不是一次对话或会话：客户端可以在同一传输上交错发送无关请求，而服务器不得将连接或进程身份视为对话或会话连续性的替代。
@@ -178,8 +184,8 @@ MCP 定义了以下错误代码：
 [`subscriptions/listen`](/specification/draft/basic/patterns/subscriptions) 这样的长生命周期请求仍然是请求/响应模式；响应只是一个开放的通知流。其状态作用域限定于请求本身，而不是底层连接。
 
 <Info>
-  关于请求级模型如何映射到 SDK 代码的演练，请参阅
-  [架构指南](/docs/learn/architecture#example)。
+  For a walkthrough of how the per-request model maps to SDK code, see the
+  [Architecture guide](/docs/draft/learn/architecture#example).
 </Info>
 
 ## 授权
@@ -324,28 +330,54 @@ MCP 为协议级元数据保留了某些键名，如下所述；
 
 **每请求协议字段：**
 
-每个客户端请求在 `_meta` 中 **必须** 包含以下 `io.modelcontextprotocol/*` 字段。服务器使用这些字段在不依赖任何先前连接状态的情况下识别客户端和正在使用的协议版本。版本协商规则请参见[版本与兼容性][lifecycle]。
+Client requests carry the following `io.modelcontextprotocol/*` fields in `_meta`;
+fields marked as required **MUST** be included on every request. Servers use these
+to identify the protocol version and capabilities in use without relying on any
+prior connection state. See
+[Versioning and Compatibility][lifecycle] for version negotiation rules.
 
-| 键                                           | 类型                 | 必需 | 描述                                                 |
-| -------------------------------------------- | -------------------- | ---- | ---------------------------------------------------- |
-| `io.modelcontextprotocol/protocolVersion`    | `string`             | 是   | 此请求的协议版本（例如，`"2026-07-28"`）             |
-| `io.modelcontextprotocol/clientInfo`         | `Implementation`     | 是   | 客户端名称和版本                                     |
-| `io.modelcontextprotocol/clientCapabilities` | `ClientCapabilities` | 是   | 与此请求相关的客户端能力                               |
-| `io.modelcontextprotocol/logLevel`           | `LoggingLevel`       | 否   | 服务器应为此请求发出的最低日志级别                     |
+| Key                                          | Type                 | Required | Description                                               |
+| -------------------------------------------- | -------------------- | -------- | --------------------------------------------------------- |
+| `io.modelcontextprotocol/protocolVersion`    | `string`             | Yes      | Protocol version for this request (e.g., `"2026-07-28"`)  |
+| `io.modelcontextprotocol/clientInfo`         | `Implementation`     | No       | Client name and version                                   |
+| `io.modelcontextprotocol/clientCapabilities` | `ClientCapabilities` | Yes      | Client capabilities relevant to this request              |
+| `io.modelcontextprotocol/logLevel`           | `LoggingLevel`       | No       | Minimum log level the server should emit for this request |
 
 缺少任何必需字段的请求都属于格式错误；服务器 **必须** 使用
 JSON-RPC 错误码 `-32602`（无效参数）拒绝它。在 HTTP 上，响应状态 **必须** 为
 `400 Bad Request`。
 
-服务器 **不得** 依赖客户端未声明的能力。如果处理请求需要某个客户端未在
-`io.modelcontextprotocol/clientCapabilities` 中包含的能力，服务器 **必须** 返回
+Clients **SHOULD** include `io.modelcontextprotocol/clientInfo` on every request
+unless specifically configured not to do so.
+
+A server **MUST NOT** rely on capabilities the client has not declared. If
+processing a request requires a capability the client did not include in
+`io.modelcontextprotocol/clientCapabilities`, the server **MUST** return a
 [`MissingRequiredClientCapabilityError`](/specification/draft/schema#missingrequiredclientcapabilityerror)
 （`-32021`），其 `data.requiredCapabilities` 列出缺失的能力。在
 HTTP 上，响应状态 **必须** 为 `400 Bad Request`。
 
-对于通过 [`subscriptions/listen`][subscriptions-listen] 流传递的通知，服务器
-**必须** 在 `_meta` 中包含 `io.modelcontextprotocol/subscriptionId`，以便
-客户端可以将通知与源订阅请求关联起来。
+**Per-response protocol fields:**
+
+Servers **SHOULD** include the following `io.modelcontextprotocol/*` field in
+every result's `_meta`, unless specifically configured not to do so, to
+identify themselves without relying on any prior connection state:
+
+| Key                                  | Type             | Required | Description             |
+| ------------------------------------ | ---------------- | -------- | ----------------------- |
+| `io.modelcontextprotocol/serverInfo` | `Implementation` | No       | Server name and version |
+
+<Note>
+  `io.modelcontextprotocol/clientInfo` and `io.modelcontextprotocol/serverInfo`
+  are self-reported by the sender and are not verified by the protocol. They are
+  intended for display, logging, and debugging. Implementations **SHOULD NOT**
+  use them to change the behavior of the client or server, and **SHOULD NOT**
+  rely on them for security decisions.
+</Note>
+
+On notifications delivered via a [`subscriptions/listen`][subscriptions-listen] stream,
+the server **MUST** include `io.modelcontextprotocol/subscriptionId` in `_meta` so the
+client can correlate the notification with the originating subscription request.
 
 [lifecycle]: /specification/draft/basic/versioning
 [subscriptions-listen]: /specification/draft/basic/patterns/subscriptions

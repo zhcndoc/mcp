@@ -13,7 +13,7 @@ export const CHECK = () => (
 
 {/* prettier-ignore-end */}
 
-此矩阵展示了哪些 MCP 客户端支持每个 [官方扩展](/extensions/overview)。扩展始终需要主动启用——只有当客户端和服务器在 [初始化握手](/extensions/overview#negotiation) 期间都声明支持时，客户端才会使用扩展。
+This matrix shows which MCP clients support each [official extension](/extensions/overview). Extensions are always opt-in: a client only uses an extension if both client and server declare support in the `extensions` field of their [capabilities](/extensions/overview#negotiation).
 
 <Note>
 
@@ -55,9 +55,9 @@ Auth 扩展支持（OAuth Client Credentials 和 Enterprise-Managed Authorizatio
 
 如果您正在构建 MCP 客户端并希望实现扩展支持：
 
-1. 查阅扩展规范（例如在 [ext-auth](https://github.com/modelcontextprotocol/ext-auth) 或 [ext-apps](https://github.com/modelcontextprotocol/ext-apps) 仓库中）
-2. 在 `initialize` 能力的 `extensions` 字段中声明支持
-3. 实现扩展的协议要求
-4. 提交拉取请求以更新此矩阵
+1. 查看扩展规范（例如，在 [ext-auth](https://github.com/modelcontextprotocol/ext-auth) 或 [ext-apps](https://github.com/modelcontextprotocol/ext-apps) 仓库中）
+2. 在客户端在每个请求的 `_meta` 中发送的 `io.modelcontextprotocol/clientCapabilities` 的 `extensions` 字段中声明支持，并从服务器的 [`server/discover`](/specification/draft/server/discover) 响应中读取服务器的 `extensions`
+3. 实现该扩展的协议要求
+4. 提交 pull request 以更新此矩阵
 
 请参阅 [扩展概述](/extensions/overview#negotiation) 以了解能力协商机制的详细信息。

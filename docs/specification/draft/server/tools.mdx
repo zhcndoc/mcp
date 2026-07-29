@@ -7,11 +7,12 @@ title: 工具
 模型上下文协议 (MCP) 允许服务器暴露可由语言模型调用的工具。工具使模型能够与外部系统交互，例如查询数据库、调用 API 或执行计算。每个工具都由一个名称唯一标识，并包含描述其模式的元数据。
 
 <Note>
-  为简洁起见，本页中的请求示例省略了必需的 `_meta`
-  请求元数据（`io.modelcontextprotocol/protocolVersion`、
-  `io.modelcontextprotocol/clientInfo` 和
-  `io.modelcontextprotocol/clientCapabilities`）。每个请求 **必须** 包含
-  这些字段；请参见 [`_meta`](/specification/draft/basic/index#meta)。
+  For brevity, the request examples on this page omit the `_meta` request
+  metadata (`io.modelcontextprotocol/protocolVersion`,
+  `io.modelcontextprotocol/clientInfo`, and
+  `io.modelcontextprotocol/clientCapabilities`). Every request **MUST** include
+  the required `_meta` fields; see
+  [`_meta`](/specification/draft/basic/index#meta).
 </Note>
 
 ## 用户交互模型
@@ -444,7 +445,14 @@ sequenceDiagram
 
 为了向后兼容，返回结构化内容的工具 **应当** 还在 TextContent 块中返回序列化的 JSON。
 
-#### 输出模式
+<Note>
+
+`structuredContent` is server-produced result data and is unrelated to LLM
+"structured outputs" (schema-constrained model generation).
+
+</Note>
+
+#### Output Schema
 
 工具还可以提供输出模式以验证结构化结果。
 如果提供了输出模式：

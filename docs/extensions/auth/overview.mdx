@@ -1,6 +1,6 @@
 ---
-title: Authorization Extensions
-sidebarTitle: Overview
+title: 授权扩展
+sidebarTitle: 概览
 description: Model Context Protocol 的补充授权机制
 ---
 
@@ -61,4 +61,4 @@ ext-auth 扩展解决了这些差距。
 
 ## 规范
 
-这两个扩展均在 [ext-auth 仓库](https://github.com/modelcontextprotocol/ext-auth/tree/main/specification/draft) 中指定。它们使用标准的 MCP [扩展协商](/extensions/overview#negotiation) 机制：客户端和服务器在初始化期间在其能力的 `extensions` 字段中声明支持。
+这两个扩展都在 [ext-auth 仓库](https://github.com/modelcontextprotocol/ext-auth/tree/main/specification/draft) 中指定。它们使用标准的 MCP [扩展协商](/extensions/overview#negotiation) 机制：客户端在每个请求的 `_meta` 中发送的 `io.modelcontextprotocol/clientCapabilities` 的 `extensions` 字段里声明支持，而服务器则在 [`server/discover`](/specification/draft/server/discover) 返回的 capabilities 中声明它们的支持。

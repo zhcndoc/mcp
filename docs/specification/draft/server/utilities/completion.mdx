@@ -7,11 +7,12 @@ title: 补全
 Model Context Protocol (MCP) 提供了一种标准化方式，让服务器能够为提示词和资源模板的参数提供自动补全建议。当用户为特定提示词（通过名称识别）或资源模板（通过 URI 识别）填写参数值时，服务器可以提供上下文建议。
 
 <Note>
-  为简洁起见，本页中的请求示例省略了必需的 `_meta`
-  请求元数据（`io.modelcontextprotocol/protocolVersion`、
-  `io.modelcontextprotocol/clientInfo` 和
-  `io.modelcontextprotocol/clientCapabilities`）。每个请求 **必须** 包含
-  这些字段；请参见 [`_meta`](/specification/draft/basic/index#meta)。
+  For brevity, the request examples on this page omit the `_meta` request
+  metadata (`io.modelcontextprotocol/protocolVersion`,
+  `io.modelcontextprotocol/clientInfo`, and
+  `io.modelcontextprotocol/clientCapabilities`). Every request **MUST** include
+  the required `_meta` fields; see
+  [`_meta`](/specification/draft/basic/index#meta).
 </Note>
 
 ## 用户交互模型

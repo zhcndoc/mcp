@@ -103,13 +103,10 @@ WWW-Authenticate: Bearer resource_metadata="https://mcp.example.com/.well-known/
 1. **使用** 初始 `WWW-Authenticate` 头中的 `scope` 参数（如果提供）
 2. **如果 `scope` 不可用**，则使用受保护资源元数据文档中 `scopes_supported` 定义的所有作用域；如果未定义 `scopes_supported`，则省略 `scope` 参数。
 
-这种方法兼顾了 MCP 客户端通用性的特点，因为它们通常缺乏针对单个作用域做出明智决策的领域知识。请求所有可用作用域可以让授权服务器和终端用户在同意过程中决定合适的权限。
-
-这种方法在遵循最小权限原则的同时，尽量减少用户操作阻力。
-`scopes_supported` 字段旨在表示基本功能所需的最小作用域集合
-（参见 [作用域最小化](/docs/tutorials/security/security_best_practices#scope-minimization)），
-而额外的作用域则通过
-[作用域挑战处理](#scope-challenge-handling) 部分所述的逐步提升授权流程步骤逐步请求。
+The `scopes_supported` field is intended to represent the minimal set of scopes necessary
+for basic functionality (see [Scope Minimization](/docs/draft/tutorials/security/security_best_practices#scope-minimization)),
+with additional scopes requested incrementally through the step-up authorization flow steps
+described in the [Scope Challenge Handling](#scope-challenge-handling) section.
 
 ## 授权流程步骤
 
@@ -314,24 +311,21 @@ MCP 服务器 **不得** 接受或转发任何其他令牌。
 `scope` 属性描述了访问请求资源所必需的范围——服务器不必包含
 客户端此前已获授的范围。
 
-服务器在决定包含哪些范围时具有灵活性：
-
-- **最小方案**：仅包含触发该错误的具体操作所需的范围。
-- **推荐方案**：包含当前操作所需的范围，以及通常需要协同工作的相关范围，以减少升级授权轮次的次数。
-- **扩展方案**：包含当前操作所需的范围、相关范围，以及服务器预期客户端在不久的将来可能需要的任何其他范围。
-
-选择取决于服务器对用户体验影响和授权摩擦的评估。
-
-无论采用哪种方案，服务器**应当**将当前操作所需的全部范围一次性包含在单个挑战中。
-逐步挑战（先返回一个缺失范围，再在后续重试中返回另一个）会迫使单个操作经历多次授权往返，降低用户体验。所需范围可以根据具体请求参数和上下文动态确定，但一旦确定，就应当一并发出。
+Whatever scope-inclusion strategy a server adopts, servers **SHOULD** include all
+scopes required for the current operation in a single challenge.
+Challenging incrementally (returning one missing scope, then another
+on the subsequent retry) forces multiple authorization round-trips
+for a single operation and degrades user experience. The required
+scopes may be determined dynamically based on the specific request
+arguments and context, but once determined, they should be emitted
+together.
 
 服务器**应当**在范围包含策略上保持一致，以便为客户端提供可预测的行为。
 
 服务器**应当**在确定响应中要包含哪些范围时考虑用户体验影响，因为配置不当的范围可能会导致用户频繁交互。
 
-<Note>
-  跨操作的范围累积是客户端的责任。客户端在发起重新授权时，**应当**计算先前请求的范围与新挑战范围的并集，如 [升级授权流程](#step-up-authorization-flow) 所述。这样既能让服务器在客户端范围集合方面保持无状态，又能确保客户端不会丢失此前已授予的权限。
-</Note>
+Scope accumulation across operations is a client-side responsibility. See the
+[Step-Up Authorization Flow](#step-up-authorization-flow) for the scope-union requirement.
 
 范围不足响应示例：
 
@@ -367,16 +361,8 @@ WWW-Authenticate: Bearer error="权限不足",
 客户端**应该**实现重试次数限制，并且**应该**跟踪作用域升级尝试，以避免
 同一资源与操作组合反复失败。
 
-<Note>
-  **层级式作用域**：某些授权服务器定义了作用域层级
-  ，其中较宽泛的作用域意味着较窄的作用域（例如，`admin` 作用域
-  包含 `read`）。在累积作用域时，客户端的并集可能
-  包含语义上冗余的条目——例如，先前
-  被授予较宽泛作用域的令牌，可能会被质询要求一个它已经
-  隐含包含的较窄作用域。客户端无需按层级去重；授权服务器
-  通常会在令牌签发期间规范化此类冗余。服务器则在判定令牌是否足以执行某项操作时，必须考虑层级关系，
-  但这不会影响它们在质询中发出的作用域。
-</Note>
+Servers **MUST** account for scope hierarchies, where a broader scope implies narrower ones, when
+deciding whether a token is sufficient for an operation.
 
 ## 安全注意事项
 

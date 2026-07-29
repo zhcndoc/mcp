@@ -444,7 +444,7 @@ sequenceDiagram
 
 信息征集不要求服务器通过 [multi round-trip requests](/specification/draft/basic/patterns/mrtr#multi-round-trip-requests) 机制维护关于用户的状态。
 
-然而，如果存储了状态，实现信息征集的服务器 **必须** 按照 [security best practices](/docs/tutorials/security/security_best_practices) 文档中的指南，将此状态与单个用户安全关联。具体而言：
+However, if state is stored, servers implementing elicitation **MUST** securely associate this state with individual users following the guidelines in the [security best practices](/docs/draft/tutorials/security/security_best_practices) document. Specifically:
 
 - 状态存储 **必须** 防止未经授权的访问
 - 对于远程 MCP 服务器，用户身份 **必须** 尽可能从通过 [MCP 授权](../basic/authorization) 获取的凭证中派生（例如 `sub` 声明）
@@ -491,17 +491,18 @@ URL 模式信息收集启用了一种模式，其中 MCP 服务器充当第三�
 
 关键安全要求是：
 
-1. **第三方凭证不得通过 MCP 客户端传输**：客户端绝不能看到第三方凭证以保护安全边界
-2. **MCP 服务器不得将客户端的凭证用于第三方服务**：那将是 [令牌透传](/docs/tutorials/security/security_best_practices#token-passthrough)，这是禁止的
-3. **用户必须直接授权 MCP 服务器**：交互发生在 MCP 协议之外，不涉及 MCP 客户端
-4. **MCP 服务器负责令牌**：MCP 服务器负责存储和管理通过 URL 模式信息征集获得的第三方令牌（换句话说，MCP 服务器必须是有状态的）。
+1. **The third-party credentials MUST NOT transit through the MCP client**: The client must never see third-party credentials to protect the security boundary
+2. **The MCP server MUST NOT use the client's credentials for the third-party service**: That would be [token passthrough](/docs/draft/tutorials/security/security_best_practices#token-passthrough), which is forbidden
+3. **The user MUST authorize the MCP server directly**: The interaction happens outside the MCP protocol, without involving the MCP client
+4. **The MCP server is responsible for tokens**: The MCP server is responsible for storing and managing the third-party tokens obtained through the URL mode elicitation (in other words, the MCP server must be stateful).
 
 通过 URL 模式信息征集获得的凭证不同于 MCP 客户端使用的 MCP 服务器凭证。MCP 服务器 **不得** 将通过 URL 模式信息征集获得的凭证传输给 MCP 客户端。
 
 <Note>
-  有关更多背景信息，请参阅安全最佳实践文档的 [令牌透传
-  部分](/docs/tutorials/security/security_best_practices#token-passthrough)
-  以了解为什么 MCP 服务器不能充当透传代理。
+  For additional background, refer to the [token passthrough
+  section](/docs/draft/tutorials/security/security_best_practices#token-passthrough)
+  of the Security Best Practices document to understand why MCP servers cannot
+  act as pass-through proxies.
 </Note>
 
 #### 实现模式
@@ -594,8 +595,8 @@ Servers **SHOULD NOT** 假设 elicitation 请求总是会成功，并且 **MUST*
 
 ### 识别用户
 
-服务器 **不得** 依赖未经服务器验证的客户端提供的用户身份识别，因为这可能被伪造。
-相反，服务器 **应当** 遵循 [安全最佳实践](/docs/tutorials/security/security_best_practices)。
+Servers **MUST NOT** rely on client-provided user identification without server verification, as this can be forged.
+Instead, servers **SHOULD** follow [security best practices](/docs/draft/tutorials/security/security_best_practices).
 
 非规范性示例：
 

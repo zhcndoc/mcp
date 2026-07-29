@@ -40,7 +40,7 @@ Streamable HTTP 为 MCP 提供了生产就绪的传输方式，但在大规模�
 
 ### 2. 代理通信
 
-Tasks 原语 ([SEP-1686](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1686)) 为代理提供了可靠的即时调用/稍后获取模式。在生产环境中运行它暴露了生命周期语义方面的差距，**代理工作组** 应弥补这些差距：
+任务扩展（[SEP-2663](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2663)）为代理提供了可靠的即时调用 / 延后获取模式。在生产环境中运行后，暴露出该生命周期语义方面的一些缺口，**Agents WG** 应当予以补齐：
 
 - **重试语义**：当任务暂时失败时会发生什么，以及谁决定是否重试。
 - **过期策略**：完成后结果保留多长时间，以及客户端如何得知结果已过期。

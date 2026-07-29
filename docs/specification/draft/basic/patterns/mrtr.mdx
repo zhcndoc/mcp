@@ -8,7 +8,16 @@ title: 多轮往返请求
   多轮往返请求（MRTR）是在本版本的 MCP 规范中引入的。这取代了之前发送由服务器发起请求的方法。服务器 **MUST** 使用 MRTR 模式发送服务器到客户端的请求（例如 `roots/list`、`sampling/createMessage` 或 `elicitation/create`）。之前的服务器发起请求模式不再受支持。这是一个破坏性变更。
 </Note>
 
-## 多轮往返请求
+<Note>
+  For brevity, the request examples on this page omit the `_meta` request
+  metadata (`io.modelcontextprotocol/protocolVersion`,
+  `io.modelcontextprotocol/clientInfo`, and
+  `io.modelcontextprotocol/clientCapabilities`). Every request **MUST** include
+  the required `_meta` fields; see
+  [`_meta`](/specification/draft/basic/index#meta).
+</Note>
+
+## Multi Round-Trip Requests
 
 模型上下文协议（MCP）定义了服务器在处理客户端请求期间向用户请求额外信息的几种方式（例如 `roots/list`、`sampling/createMessage` 或 `elicitation/create`）。**多轮往返请求**模式提供了一种标准化方式来处理这些服务器请求，而无需在服务器实例之间共享存储层，也无需有状态负载均衡。
 

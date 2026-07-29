@@ -4,7 +4,13 @@ title: 架构
 
 <div id="enable-section-numbers" />
 
-模型上下文协议（MCP）采用客户端-宿主-服务器架构，其中每个宿主可以运行多个客户端实例。MCP 是一种无状态协议：每个请求都是自包含的，并携带其自身的协议版本、客户端身份和能力。该架构使用户能够在各类应用程序中集成 AI 能力，同时保持清晰的安全边界并隔离关注点。MCP 构建于 JSON-RPC 之上，提供了一个专注于上下文交换和采样协调的协议，用于客户端与服务器之间的交互。
+The Model Context Protocol (MCP) follows a client-host-server architecture where each
+host can run multiple client instances. MCP is a stateless protocol: every request is
+self-contained and carries its own protocol version and capabilities.
+This architecture enables users to integrate AI capabilities across applications while
+maintaining clear security boundaries and isolating concerns. Built on JSON-RPC, MCP
+provides a protocol focused on context exchange and sampling coordination between
+clients and servers.
 
 ## 核心组件
 
@@ -125,14 +131,14 @@ sequenceDiagram
         Server-->>Client: 支持的版本 + 能力
     end
 
-    loop 客户端请求
-        Host->>Client: 用户或模型发起的操作
-        Client->>Server: 请求（包含 _meta：版本、clientInfo、clientCapabilities）
-        alt 服务器需要客户端输入
-            Server-->>Client: InputRequiredResult（例如 sampling/createMessage）
-            Client->>Host: 转发给 AI
-            Host-->>Client: AI 响应
-            Client->>Server: 原始请求（附带输入）
+    loop Client Requests
+        Host->>Client: User- or model-initiated action
+        Client->>Server: Request (with _meta: version, clientCapabilities)
+        alt Server requires client input
+            Server-->>Client: InputRequiredResult (e.g. sampling/createMessage)
+            Client->>Host: Forward to AI
+            Host-->>Client: AI response
+            Client->>Server: Original request (with input)
         end
         Server-->>Client: 响应
         Client-->>Host: 更新 UI 或向模型返回结果

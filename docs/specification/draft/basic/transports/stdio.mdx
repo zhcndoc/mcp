@@ -41,7 +41,12 @@ title: 标准输入输出
 
 ## 请求元数据
 
-stdio 传输的所有请求元数据都以内联方式携带在 JSON-RPC 消息体中。协议版本、客户端身份以及每个请求的能力声明都位于 [`_meta.io.modelcontextprotocol/*`][meta-fields]；方法名和参数则位于 JSON-RPC 规定的位置。这里没有头部层。
+All request metadata for the stdio transport is carried inline in the
+JSON-RPC message body. The protocol version, per-request capabilities, and
+optional client identity live in
+[`_meta.io.modelcontextprotocol/*`][meta-fields];
+the method name and arguments live where JSON-RPC puts them. There is no
+header layer.
 
 [meta-fields]: /specification/draft/basic/index#meta
 

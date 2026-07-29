@@ -1,0 +1,59 @@
+---
+title: 版本控制
+type: docs
+weight: 10
+---
+
+Model Context Protocol 使用基于字符串的版本标识符，遵循
+`YYYY-MM-DD` 格式，用于表示最后一次进行了向后不兼容更改的日期。
+
+<Info>
+
+只要更新后的协议保持向后兼容，协议版本就 _不会_ 随着
+协议更新而递增。这使得可以在保持互操作性的同时进行渐进式改进。
+
+</Info>
+
+## 修订
+
+修订可能被标记为：
+
+- **草案**：进行中的规范，尚未准备好供使用。
+- **当前**：当前的协议版本，已准备好使用，并且可能继续
+  接收向后兼容的更改。
+- **最终**：已过去、完整且不会再更改的规范。
+
+**当前**协议版本是 [**2025-11-25**](/specification/2025-11-25/)。
+
+## 特性状态
+
+规范中的单个特性还可以根据
+[特性生命周期和弃用政策](/community/feature-lifecycle)被标记为
+**已弃用**：该特性仍然是规范的一部分，但计划移除。
+已弃用的特性会记录迁移路径（或说明不需要迁移），并且会在规范中至少保留十二个月；或者在该政策的
+[加速移除例外](/community/feature-lifecycle#expedited-removal)
+下至少保留九十天，然后才有资格被移除，之后它们可能会在未来的修订版中被**移除**。
+
+当前已弃用的特性列在
+[已弃用特性注册表](/specification/2026-07-28/deprecated)中。
+
+## 协商
+
+每个请求都会通过其
+[`_meta`](/specification/2026-07-28/basic/index#meta) 字段中的
+`io.modelcontextprotocol/protocolVersion` 键声明其所使用的协议版本，服务器会对每个请求分别接受或
+拒绝。在 Streamable HTTP 中，相同的值也会携带在
+[`MCP-Protocol-Version` 标头](/specification/2026-07-28/basic/transports/streamable-http#protocol-version-header)中。
+客户端和服务器**可以**同时支持多个协议版本。
+
+如果服务器不支持所请求的版本，它会返回一个
+[`UnsupportedProtocolVersionError`](/specification/2026-07-28/basic/versioning#protocol-version-negotiation)，
+其中列出它支持的版本。然后客户端可以用双方都支持的版本重试该请求，或者如果不存在共同支持的版本，则向用户显示错误。
+
+希望预先选择版本的客户端可以调用
+[`server/discover`](/specification/2026-07-28/server/discover)，这是一个必需的 RPC，
+它会在单个请求中返回服务器支持的协议版本、能力和身份。调用它是可选的：客户端完全可以直接发送任意请求，
+并在出现版本错误时进行处理。
+
+如需与实现了基于握手的协议修订版（`2025-11-25` 及更早版本）的服务器和客户端实现互操作，请参见
+[向后兼容性](/specification/2026-07-28/basic/versioning#backward-compatibility-with-initialization-based-versions)。

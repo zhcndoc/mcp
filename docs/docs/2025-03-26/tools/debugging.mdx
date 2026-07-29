@@ -1,0 +1,343 @@
+---
+title: 调试
+description: 模型上下文协议 (MCP) 集成调试综合指南
+---
+
+在开发 MCP 服务器或将其与应用程序集成时，有效的调试至关重要。本指南涵盖了 MCP 生态系统中可用的调试工具和方法。
+
+## 调试工具概述
+
+MCP 提供了多种在不同层级进行调试的工具：
+
+1. **[MCP Inspector](/docs/2025-03-26/tools/inspector)**: 交互式、与传输无关的
+   测试 UI。可连接到 stdio 或 Streamable HTTP 服务器，调用
+   [工具](/specification/2025-03-26/server/tools),
+   [提示](/specification/2025-03-26/server/prompts), 和
+   [资源](/specification/2025-03-26/server/resources)，并查看
+   通知流。这应该是你的首选。
+2. **服务器日志**: 通过 stderr（stdio 传输）输出结构化日志，或通过
+   [`notifications/message`](/specification/2025-03-26/server/utilities/logging#log-message-notifications)
+   （所有传输方式）。
+3. **客户端开发者工具**: 大多数 MCP 客户端都会暴露日志和连接
+   状态。下面的 [Claude Desktop 中的调试](#debugging-in-claude-desktop) 是一个示例，或者查阅你所使用客户端的文档。
+
+## 实现日志记录
+
+### 服务器端日志记录
+
+当构建使用本地
+[stdio 传输](/specification/2025-03-26/basic/transports#stdio) 的服务器时，所有记录到 stderr（标准错误）的消息都会被宿主应用程序自动捕获。
+
+<Warning>
+
+本地 MCP 服务器不应将消息记录到 stdout（标准输出），因为这会干扰协议操作。
+
+</Warning>
+
+对于使用
+[Streamable HTTP 传输](/specification/2025-03-26/basic/transports#streamable-http) 的服务器，客户端不会捕获 stderr。请使用下面的日志消息通知、你自己的服务端日志聚合，或标准 HTTP 工具（curl、浏览器 DevTools 的 Network 面板）来检查请求、
+[`Mcp-Session-Id` 标头](/specification/2025-03-26/basic/transports#session-management)以及 SSE 流。
+
+对于所有[传输方式](/specification/2025-03-26/basic/transports)，你也可以通过发送日志消息通知向客户端提供日志记录：
+
+<CodeGroup>
+
+```python Python
+@server.tool()
+async def my_tool(ctx: Context) -> str:
+    await ctx.session.send_log_message(
+        level="info",
+        data="服务器已成功启动",
+    )
+    return "done"
+```
+
+```typescript TypeScript
+await server.sendLoggingMessage({
+  level: "info",
+  data: "服务器已成功启动",
+});
+```
+
+</CodeGroup>
+
+MCP 定义了八个
+[RFC 5424 严重级别](/specification/2025-03-26/server/utilities/logging#log-levels)
+（从 `debug` 到 `emergency`）。客户端可以通过
+[`logging/setLevel`](/specification/2025-03-26/server/utilities/logging#setting-log-level)
+请求在运行时调整最低级别。
+
+需要记录的重要事件：
+
+- 初始化步骤
+- 资源访问
+- 工具执行
+- 错误条件
+- 性能指标
+
+## 常见问题
+
+下面的示例使用 Claude Desktop 的
+[`claude_desktop_config.json`](/docs/2025-03-26/develop/connect-local-servers)；同样的
+原则适用于任何基于 stdio 的 MCP 客户端。
+
+### 工作目录
+
+当 MCP 客户端启动 stdio 服务器时：
+
+- 通过客户端配置启动的服务器的工作目录可能是未定义的（如 macOS 上的 `/`），因为客户端可以从任何地方启动
+- 始终在配置和 `.env` 文件中使用绝对路径以确保可靠运行
+- 对于通过命令行直接测试服务器，工作目录将是你运行命令的位置
+
+例如在 `claude_desktop_config.json` 中，使用：
+
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/username/data"
+      ]
+    }
+  }
+}
+```
+
+而不是相对路径如 `./data`
+
+### 环境变量
+
+通过 stdio 启动的 MCP 服务器仅自动继承有限的环境变量子集（确切集合取决于平台）。
+
+要覆盖默认变量或提供你自己的变量，你可以在 `claude_desktop_config.json` 中指定 `env` 键：
+
+```json
+{
+  "mcpServers": {
+    "myserver": {
+      "command": "mcp-server-myapp",
+      "env": {
+        "MYAPP_API_KEY": "some_key"
+      }
+    }
+  }
+}
+```
+
+### 服务器初始化
+
+常见的初始化问题：
+
+1. **路径问题**
+   - 服务器可执行文件路径不正确
+   - 缺少必需文件
+   - 权限问题
+   - 尝试对 `command` 使用绝对路径
+
+2. **配置错误**
+   - 无效的 JSON 语法
+   - 缺少必需字段
+   - 类型不匹配
+
+3. **环境问题**
+   - 缺少环境变量
+   - 变量值不正确
+   - 权限限制
+
+### 连接问题
+
+当服务器无法连接时：
+
+1. 检查客户端日志
+2. 验证服务器进程是否正在运行
+3. 使用 [Inspector](/docs/2025-03-26/tools/inspector) 单独测试
+4. 验证
+   [协议兼容性](/specification/2025-03-26/basic/lifecycle#version-negotiation)
+5. 检查
+   [能力协商](/specification/2025-03-26/basic/lifecycle#capability-negotiation)：
+   错误 [`-32602`](/specification/2025-03-26/basic/lifecycle#error-handling) 是
+   标准的 JSON-RPC “无效参数”错误码，并会在许多
+   场景中返回。一个常见原因是服务器向
+   未声明该能力的客户端发送
+   [采样](/specification/2025-03-26/client/sampling) 请求。请检查
+   [`initialize` 交互](/specification/2025-03-26/basic/lifecycle#initialization)
+   以确认双方都声明了你期望的内容
+
+## 在 Claude Desktop 中调试
+
+Claude Desktop 是众多 MCP 客户端之一。它可用于
+macOS 和 Windows。
+
+### 检查服务器状态
+
+点击聊天输入框中的“添加文件、连接器等”加号图标，然后将鼠标悬停在 **Connectors** 菜单上以查看已连接的服务器和可用工具。
+
+<img src="/images/available-mcp-tools.png" alt="可用的 MCP 工具" />
+
+### 查看日志
+
+日志文件写入到：
+
+- macOS: `~/Library/Logs/Claude`
+- Windows: `%APPDATA%\Claude\logs`
+
+<CodeGroup>
+
+```bash macOS
+tail -n 20 -F ~/Library/Logs/Claude/mcp*.log
+```
+
+```powershell Windows
+type "$env:AppData\Claude\logs\mcp*.log"
+```
+
+</CodeGroup>
+
+日志捕获：
+
+- 服务器连接事件
+- 配置问题
+- 运行时错误
+- 消息交换
+
+### 使用 Chrome DevTools
+
+在 Claude Desktop 内部访问 Chrome 开发者工具以调查客户端错误：
+
+1. 创建一个 `developer_settings.json` 文件，将 `allowDevTools` 设置为 true：
+
+<CodeGroup>
+
+```bash macOS
+echo '{"allowDevTools": true}' > ~/Library/Application\ Support/Claude/developer_settings.json
+```
+
+```powershell Windows
+'{"allowDevTools": true}' | Set-Content "$env:AppData\Claude\developer_settings.json"
+```
+
+</CodeGroup>
+
+2. 打开 DevTools：`Command-Option-I` (macOS) 或 `Ctrl+Alt+I` (Windows)
+
+注意：你将看到两个 DevTools 窗口：
+
+- 主内容窗口
+- 应用程序标题栏窗口
+
+使用 Console 面板检查客户端错误。
+
+使用 Network 面板检查：
+
+- 消息负载
+- 连接计时
+
+## 调试工作流
+
+### 开发周期
+
+1. 初始开发
+   - 使用 [Inspector](/docs/2025-03-26/tools/inspector) 进行基础测试
+   - 实现核心功能
+   - 添加日志点
+
+2. 集成测试
+   - 在你的目标 MCP 客户端中测试
+   - 监控日志
+   - 检查错误处理
+
+### 测试更改
+
+为了有效地测试更改：
+
+- **配置更改**：重启 MCP 客户端
+- **服务器代码更改**：重启客户端（对于 Claude Desktop，请完全退出并重新打开；仅关闭窗口是不够的）
+- **快速迭代**：在开发期间使用 [Inspector](/docs/2025-03-26/tools/inspector)
+
+## 最佳实践
+
+### 日志记录策略
+
+1. **结构化日志记录**
+   - 使用一致的格式
+   - 包含上下文
+   - 添加时间戳
+   - 跟踪请求 ID
+
+2. **错误处理**
+   - 记录堆栈跟踪
+   - 包含错误上下文
+   - 跟踪错误模式
+   - 监控恢复情况
+
+3. **性能跟踪**
+   - 记录操作计时
+   - 监控资源使用情况
+   - 跟踪消息大小
+   - 测量延迟
+
+### 安全注意事项
+
+调试时：
+
+1. **敏感数据**
+   - 清理日志
+   - 保护凭据
+   - 掩盖个人信息
+
+2. **访问控制**
+   - 验证权限
+   - 检查身份验证
+   - 监控访问模式
+
+有关 MCP 攻击向量及其缓解措施的完整说明，请参阅
+[安全最佳实践](/docs/2025-03-26/tutorials/security/security_best_practices)。
+
+## 获取帮助
+
+遇到问题时：
+
+1. **第一步**
+   - 检查服务器日志
+   - 使用 [Inspector](/docs/2025-03-26/tools/inspector) 进行测试
+   - 检查配置
+   - 验证环境
+
+2. **支持渠道**
+   - [GitHub 问题](https://github.com/modelcontextprotocol/modelcontextprotocol/issues)
+   - [GitHub 讨论](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions)
+
+3. **提供信息**
+   - 日志摘录
+   - 配置文件
+   - 复现步骤
+   - 环境详情
+
+## 下一步
+
+<CardGroup cols={2}>
+  <Card
+    title="MCP 检查器"
+    icon="magnifying-glass"
+    href="/docs/2025-03-26/tools/inspector"
+  >
+    学习使用 MCP 检查器
+  </Card>
+  <Card
+    title="构建 MCP 服务器"
+    icon="code"
+    href="/docs/2025-03-26/develop/build-server"
+  >
+    逐步了解从头构建服务器
+  </Card>
+  <Card
+    title="连接本地服务器"
+    icon="plug"
+    href="/docs/2025-03-26/develop/connect-local-servers"
+  >
+    完整的 claude_desktop_config.json 参考和故障排除
+  </Card>
+</CardGroup>

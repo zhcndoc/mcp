@@ -96,7 +96,7 @@ export interface RequestMetaObject extends MetaObject {
 如果服务器收到其未实现的协议版本请求（无论该版本对服务器而言是未知版本，还是已知但服务器选择不支持的版本，例如实验版或草案版），它 MUST 返回 JSON-RPC 错误响应。对于 HTTP，响应状态码 MUST 为 `400 Bad Request`。该错误 MUST 符合以下结构：
 
 ```ts
-export const UNSUPPORTED_PROTOCOL_VERSION = -32004;
+export const UNSUPPORTED_PROTOCOL_VERSION = -32022;
 
 export interface UnsupportedProtocolVersionError extends Omit<
   JSONRPCErrorResponse,
@@ -244,7 +244,7 @@ export interface RequestMetaObject extends MetaObject {
 服务器 **MUST NOT** 依赖客户端未声明的能力。如果处理请求需要某项客户端未在 `clientCapabilities` 中声明的能力，服务器 **MUST** 返回一个说明缺失能力的 JSON-RPC 错误。对于 HTTP，响应状态码 MUST 为 `400 Bad Request`。
 
 ```ts
-export const MISSING_REQUIRED_CLIENT_CAPABILITY = -32003;
+export const MISSING_REQUIRED_CLIENT_CAPABILITY = -32021;
 
 export interface MissingRequiredClientCapabilityError extends Omit<
   JSONRPCErrorResponse,

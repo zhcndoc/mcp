@@ -7,7 +7,7 @@ description: 模型上下文协议的可选扩展
 
 MCP 扩展是规范的可选补充，定义了核心协议之外的能力。扩展支持模块化（例如，身份验证等独立功能）、专业化（例如，特定行业的逻辑）或实验性（例如，正在孵化以潜在纳入核心的功能）的功能。
 
-Extensions are identified using a unique _extension identifier_ with the format: `{vendor-prefix}/{extension-name}`, e.g. `io.modelcontextprotocol/oauth-client-credentials`. Identifiers follow the same rules as [`_meta` keys](/specification/draft/basic/index#meta), with a mandatory prefix. Official extensions use the `io.modelcontextprotocol` vendor prefix.
+扩展使用唯一的 _extension identifier_ 进行标识，其格式为：`{vendor-prefix}/{extension-name}`，例如 `io.modelcontextprotocol/oauth-client-credentials`。标识符遵循与 [`_meta` keys](/specification/draft/basic/index#meta) 相同的规则，但必须带有前缀。官方扩展使用 `io.modelcontextprotocol` 供应商前缀。
 
 <Tip>
 
@@ -52,25 +52,25 @@ Extensions are identified using a unique _extension identifier_ with the format:
 
 ### MCP Tasks
 
-| Extension                               | Description                                                                                                   |
-| --------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| 扩展                                  | 描述                                                                                                           |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | [MCP Tasks](/extensions/tasks/overview) | 用于长时间运行操作的异步任务执行，支持轮询、执行中的输入以及持久化句柄。 |
 
-## 实验性扩展
+## Experimental Extensions
 
-实验性扩展为 [工作组和兴趣小组](/community/working-interest-groups) 提供了孵化途径，以便在正式提交 SEP 之前原型化想法并就扩展概念进行协作。
+Experimental extensions provide an incubation path for [working groups and interest groups](/community/working-interest-groups) to prototype ideas and collaborate on extension concepts before formally submitting a SEP.
 
-实验性扩展仓库位于 MCP GitHub 组织内，带有 `experimental-ext-` 前缀（例如，`experimental-ext-interceptors`）。
+Experimental extension repositories live within the MCP GitHub organization and use the `experimental-ext-` prefix (for example, `experimental-ext-interceptors`).
 
-### 基本规则
+### Basic Rules
 
-- 每个实验性扩展都需要与一个工作组或兴趣小组关联
-- 仓库和发布的包需要清楚表明其实验状态（例如，在 README 和包名称中）
-- [核心维护者](/community/contributor-ladder#core-maintainer) 保留对实验性扩展仓库的监督权，包括归档或移除它们的权力
+- Each experimental extension must be associated with a working group or interest group
+- Repositories and published packages must clearly indicate their experimental status (for example, in the README and package name)
+- [Core maintainers](/community/contributor-ladder#core-maintainer) retain oversight of experimental extension repositories, including the authority to archive or remove them
 
-### 晋升为官方状态
+### Promotion to Official Status
 
-要将实验性扩展晋升为官方状态，它需要经过标准的 SEP 流程（扩展轨道）。欢迎引用实验性仓库以及在孵化期间构建的任何参考实现，以证明扩展的实用性。
+To promote an experimental extension to official status, it must go through the standard SEP process (the extension track). It is welcome to reference experimental repositories and any reference implementations built during incubation to demonstrate the extension's usefulness.
 
 ## 创建扩展
 
@@ -112,32 +112,35 @@ SDK 可以选择实现扩展，但这不是协议一致性的必要条件。SDK 
 
 ## 协商
 
-客户端和服务器在 [初始化握手](/specification/latest/basic/lifecycle) 期间，在其各自能力的 `extensions` 字段中宣传他们对扩展的支持。
+客户端和服务器会在各自的能力声明中的 `extensions` 字段里声明其对扩展的支持。
 
 ### 客户端能力
 
-客户端在 `initialize` 请求中宣传扩展支持：
+客户端在每个请求中的 `_meta["io.modelcontextprotocol/clientCapabilities"]` 中声明扩展支持：
 
 ```json
 {
   "jsonrpc": "2.0",
   "id": 1,
-  "method": "initialize",
+  "method": "tools/call",
   "params": {
-    "protocolVersion": "2025-06-18",
-    "capabilities": {
-      "roots": {
-        "listChanged": true
-      },
-      "extensions": {
-        "io.modelcontextprotocol/ui": {
-          "mimeTypes": ["text/html;profile=mcp-app"]
-        }
-      }
+    "name": "get_weather",
+    "arguments": {
+      "location": "New York"
     },
-    "clientInfo": {
-      "name": "ExampleClient",
-      "version": "1.0.0"
+    "_meta": {
+      "io.modelcontextprotocol/protocolVersion": "2026-07-28",
+      "io.modelcontextprotocol/clientCapabilities": {
+        "extensions": {
+          "io.modelcontextprotocol/ui": {
+            "mimeTypes": ["text/html;profile=mcp-app"]
+          }
+        }
+      },
+      "io.modelcontextprotocol/clientInfo": {
+        "name": "ExampleClient",
+        "version": "1.0.0"
+      }
     }
   }
 }
@@ -145,32 +148,37 @@ SDK 可以选择实现扩展，但这不是协议一致性的必要条件。SDK 
 
 ### 服务器能力
 
-服务器在 `initialize` 响应中宣传扩展支持：
+服务器在 `server/discover` 响应中声明扩展支持：
 
 ```json
 {
   "jsonrpc": "2.0",
   "id": 1,
   "result": {
-    "protocolVersion": "2025-06-18",
+    "resultType": "complete",
+    "supportedVersions": ["2026-07-28"],
     "capabilities": {
       "tools": {},
       "extensions": {
         "io.modelcontextprotocol/ui": {}
       }
     },
-    "serverInfo": {
-      "name": "ExampleServer",
-      "version": "1.0.0"
-    }
+    "_meta": {
+      "io.modelcontextprotocol/serverInfo": {
+        "name": "ExampleServer",
+        "version": "1.0.0"
+      }
+    },
+    "ttlMs": 3600000,
+    "cacheScope": "public"
   }
 }
 ```
 
-每个扩展指定其设置对象的模式；空对象表示没有设置。
+每个扩展都会指定其设置对象的模式；空对象表示没有设置。
 
 ### 优雅降级
 
-如果一方支持扩展而另一方不支持，支持方需要要么回退到核心协议行为，要么如果扩展是强制性的，则使用适当的错误拒绝请求。
+如果一方支持某个扩展而另一方不支持，支持方需要么回退到核心协议行为，要么在该扩展是强制性的情况下，使用适当的错误拒绝请求。
 
-在扩展中记录预期的回退行为是一种好的做法。例如，提供 UI 增强工具的服务器仍应为不支持 UI 扩展的客户端返回有意义的文本内容。另一方面，需要特定身份验证扩展的服务器可以拒绝来自不支持该扩展的客户端的连接。
+在扩展中记录预期的回退行为是一种良好做法。例如，提供 UI 增强工具的服务器仍应为不支持 UI 扩展的客户端返回有意义的文本内容。另一方面，需要特定身份验证扩展的服务器可以拒绝来自不支持该扩展的客户端的连接。

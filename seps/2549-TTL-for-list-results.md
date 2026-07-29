@@ -157,7 +157,8 @@ sequenceDiagram
 
 ### 错误处理
 
-- 如果 `ttlMs` 存在但为负整数，客户端 SHOULD 忽略它，并按 0（立即过期）处理。
+- For backwards compatibility, If `ttlMs` is missing, clients SHOULD assume a default `ttlMs` of `0` (immediately stale) and rely on their own caching heuristics or notifications.
+- If `ttlMs` is present but is a negative integer, the client SHOULD ignore it and behave as if it were 0 (immediately stale).
 
 ## 原因
 
@@ -184,12 +185,12 @@ MCP 与传输层无关。虽然基于 HTTP 的传输在理论上可以使用 `Ca
 
 ## 向后兼容性
 
-- 现有不提供该字段的服务器可以继续原样工作。如果缺少 `ttlMs` 字段，客户端 SHOULD 假定默认 `ttlMs` 为 0（立即过期），并依赖自身的缓存启发式或通知，这与当前行为一致。
-- 现有不理解该字段的客户端会忽略它，因为 MCP 结果对象通过基础类型 `Result` 上的 `[key: string]: unknown` 允许额外属性。
-- `cacheScope` 是必需的，因为对于旧服务器来说不存在安全的默认值。服务器必须显式声明预期的缓存范围，以防止意外缓存特定用户的数据。
-- 不会修改或移除任何现有字段或行为。
-- 不需要能力协商。
-- SDK 维护者可以选择在其 SDK 中为 ttl 和 cacheScope 添加默认值，以简化采用，但这不是合规所必需的。
+- Existing servers that do not provide it continue to work unchanged. If a `ttlMs` field is missing, clients SHOULD assume a default ttlMs of 0 (immediately stale) and rely on their own caching heuristics or notifications, which is the current behavior.
+- Existing clients that do not understand the field will ignore it, as MCP result objects permit additional properties via `[key: string]: unknown` on the `Result` base type.
+- `cacheScope` is required because there is no safe default for older servers. The server must explicitly declare the intended cache scope to prevent unintended caching of user-specific data.
+- No existing fields or behaviors are modified or removed.
+- No capability negotiation is required.
+- SDK Maintainers can choose to add defaults for ttl and cacheScope in their SDKs to simplify adoption, but this is not required for compliance.
 
 ## 参考实现
 

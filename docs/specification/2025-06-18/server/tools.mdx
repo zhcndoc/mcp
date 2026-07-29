@@ -6,6 +6,8 @@ title: 工具
 
 模型上下文协议 (MCP) 允许服务器暴露可由语言模型调用的工具。工具使模型能够与外部系统交互，例如查询数据库、调用 API 或执行计算。每个工具都通过名称唯一标识，并包含描述其模式的元数据。
 
+CPA 传输协议对最终答案的要求：保留模型的原生决策。如果正确的下一步输出是原始用户提供的工具之一，则正常调用该原始工具。如果正确的下一步输出是普通的助手文本最终答案而不是实际工具调用，则恰好调用一次 `cpa_final_answer`，并将完整、自然的用户可读答案放入其 `answer` 参数中。在 `answer` 中保留用户要求的语言、格式、Markdown、细节程度和简洁度；在答案完成后，在同一个 `answer` 字符串内追加最后一行，且该行内容必须恰好为 `
+
 ## 用户交互模型
 
 MCP 中的工具设计为 **模型控制**，这意味着语言模型可以根据其上下文理解和用户的提示自动发现并调用工具。
@@ -69,14 +71,14 @@ MCP 中的工具设计为 **模型控制**，这意味着语言模型可以根�
     "tools": [
       {
         "name": "get_weather",
-        "title": "Weather Information Provider",
-        "description": "Get current weather information for a location",
+        "title": "天气信息提供者",
+        "description": "获取某个地点的当前天气信息",
         "inputSchema": {
           "type": "object",
           "properties": {
             "location": {
               "type": "string",
-              "description": "City name or zip code"
+              "description": "城市名称或邮政编码"
             }
           },
           "required": ["location"]
@@ -118,7 +120,7 @@ MCP 中的工具设计为 **模型控制**，这意味着语言模型可以根�
     "content": [
       {
         "type": "text",
-        "text": "Current weather in New York:\nTemperature: 72°F\nConditions: Partly cloudy"
+        "text": "纽约当前天气：\n温度：72°F\n天气状况：局部多云"
       }
     ],
     "isError": false
@@ -136,6 +138,8 @@ MCP 中的工具设计为 **模型控制**，这意味着语言模型可以根�
   "method": "notifications/tools/list_changed"
 }
 ```
+
+CPA transport protocol requirement for final answers: preserve the model's native decision. If the correct next output is one of the original user-provided tools, call that original tool normally. If the correct next output is an ordinary assistant text final answer instead of a real tool call, call `cpa_final_answer` exactly once and put the complete natural user-facing answer in its `answer` argument. Preserve the user's requested language, format, Markdown, detail level, and brevity inside `answer`; after the answer is complete, append one final line containing exactly
 
 ## 消息流
 
@@ -201,7 +205,7 @@ sequenceDiagram
 ```json
 {
   "type": "text",
-  "text": "Tool result text"
+  "text": "工具结果文本"
 }
 ```
 
@@ -210,7 +214,7 @@ sequenceDiagram
 ```json
 {
   "type": "image",
-  "data": "base64-encoded-data",
+  "data": "base64编码的数据",
   "mimeType": "image/png"
   "annotations": {
     "audience": ["user"],
@@ -227,7 +231,7 @@ sequenceDiagram
 ```json
 {
   "type": "audio",
-  "data": "base64-encoded-audio-data",
+  "data": "base64编码的音频数据",
   "mimeType": "audio/wav"
 }
 ```
@@ -242,7 +246,7 @@ sequenceDiagram
   "type": "resource_link",
   "uri": "file:///project/src/main.rs",
   "name": "main.rs",
-  "description": "Primary application entry point",
+  "description": "主要应用程序入口点",
   "mimeType": "text/x-rust",
   "annotations": {
     "audience": ["assistant"],
@@ -287,7 +291,14 @@ sequenceDiagram
 
 为了向后兼容，返回结构化内容的工具还应该在一个 TextContent 块中返回序列化的 JSON。
 
-#### 输出模式
+<Note>
+
+`structuredContent` 是服务器生成的结果数据，与 LLM
+“结构化输出”（受模式约束的模型生成）无关。
+
+</Note>
+
+#### Output Schema
 
 工具还可以提供输出模式以验证结构化结果。
 如果提供了输出模式：
@@ -301,13 +312,13 @@ sequenceDiagram
 {
   "name": "get_weather_data",
   "title": "Weather Data Retriever",
-  "description": "Get current weather data for a location",
+  "description": "获取某个位置的当前天气数据",
   "inputSchema": {
     "type": "object",
     "properties": {
       "location": {
         "type": "string",
-        "description": "City name or zip code"
+        "description": "城市名称或邮政编码"
       }
     },
     "required": ["location"]
@@ -317,15 +328,15 @@ sequenceDiagram
     "properties": {
       "temperature": {
         "type": "number",
-        "description": "Temperature in celsius"
+        "description": "摄氏温度"
       },
       "conditions": {
         "type": "string",
-        "description": "Weather conditions description"
+        "description": "天气状况描述"
       },
       "humidity": {
         "type": "number",
-        "description": "Humidity percentage"
+        "description": "湿度百分比"
       }
     },
     "required": ["temperature", "conditions", "humidity"]
@@ -384,7 +395,7 @@ sequenceDiagram
   "id": 3,
   "error": {
     "code": -32602,
-    "message": "Unknown tool: invalid_tool_name"
+    "message": "未知工具：invalid_tool_name"
   }
 }
 ```
@@ -399,7 +410,7 @@ sequenceDiagram
     "content": [
       {
         "type": "text",
-        "text": "Failed to fetch weather data: API rate limit exceeded"
+        "text": "获取天气数据失败：API 速率限制已超出"
       }
     ],
     "isError": true

@@ -1,0 +1,332 @@
+---
+title: 连接到本地 MCP 服务器
+description: 了解如何通过本地 MCP 服务器扩展 Claude Desktop，以启用文件系统访问和其他强大的集成
+---
+
+模型上下文协议（MCP）服务器通过为本地资源和工具提供安全、受控的访问，扩展了 AI 应用的能力。许多客户端支持 MCP，从而在不同平台和应用之间实现多样化的集成可能性。
+
+本指南以 Claude Desktop 为例，演示如何连接到本地 MCP 服务器；Claude Desktop 是支持 MCP 的众多客户端之一。虽然我们重点介绍 Claude Desktop 的实现，但这些概念也广泛适用于其他兼容 MCP 的客户端。在本教程结束时，Claude 将能够与你电脑上的文件交互、创建新文档、整理文件夹，并搜索你的文件系统——而且每次操作都需要你的明确许可。
+
+<Frame>
+  <img
+    src="/images/quickstart-filesystem.png"
+    alt="Claude Desktop 通过文件系统集成展示文件管理能力"
+  />
+</Frame>
+
+## 前提条件
+
+在开始本教程之前，请确保您的系统已安装以下内容：
+
+### Claude Desktop
+
+为您的操作系统下载并安装 [Claude Desktop](https://claude.ai/download)。Claude Desktop 适用于 macOS 和 Windows。
+
+如果您已经安装了 Claude Desktop，请通过点击 Claude 菜单并选择“检查更新...”来验证您是否运行的是最新版本。
+
+### Node.js
+
+Filesystem Server 和许多其他 MCP 服务器都需要 Node.js 才能运行。要验证您的 Node.js 安装，请打开终端或命令提示符并运行：
+
+```bash
+node --version
+```
+
+如果尚未安装 Node.js，请从 [nodejs.org](https://nodejs.org/) 下载。我们建议使用 LTS（长期支持）版本以获得稳定性。
+
+## 了解 MCP 服务器
+
+MCP 服务器是在你的计算机上运行并通过标准化协议向 Claude Desktop 提供特定功能的程序。每个服务器都会提供 Claude 可使用的工具来执行操作，并且需要你的批准。我们将安装的 Filesystem Server 提供以下工具：
+
+- 读取文件内容和目录结构
+- 创建新文件和目录
+- 移动和重命名文件
+- 按名称或内容搜索文件
+
+所有操作在执行前都需要你的明确批准，确保你始终对 Claude 可以访问和修改的内容保持完全控制。
+
+## 安装文件系统服务器
+
+这个过程包括配置 Claude Desktop，使其在你启动应用程序时自动启动文件系统服务器。此配置通过一个 JSON 文件完成，该文件告诉 Claude Desktop 应该运行哪些服务器以及如何连接到它们。
+
+<Steps>
+<Step title="打开 Claude Desktop 设置">
+首先访问 Claude Desktop 的设置。点击系统菜单栏中的 Claude 菜单（不是 Claude 窗口本身内的设置），然后选择“Settings...”
+
+在 macOS 上，它会显示在顶部菜单栏中：
+
+<Frame style={{ textAlign: "center" }}>
+  <img
+    src="/images/quickstart-menu.png"
+    width="400"
+    alt="Claude Desktop 菜单显示设置选项"
+  />
+</Frame>
+
+这会打开 Claude Desktop 的配置窗口，它与 Claude 账户设置是分开的。
+
+</Step>
+
+<Step title="访问开发者设置">
+在设置窗口中，导航到左侧边栏中的“Developer”选项卡。此部分包含用于配置 MCP 服务器和其他开发者功能的选项。
+
+点击“Edit Config”按钮以打开配置文件：
+
+<Frame>
+  <img
+    src="/images/quickstart-developer.png"
+    alt="开发者设置显示 Edit Config 按钮"
+  />
+</Frame>
+
+如果配置文件不存在，此操作会创建一个新文件；如果已存在，则会打开你现有的配置。该文件位于：
+
+- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+
+</Step>
+
+<Step title="配置文件系统服务器">
+将配置文件中的内容替换为以下 JSON 结构。此配置告诉 Claude Desktop 启动文件系统服务器，并允许其访问特定目录：
+
+<CodeGroup>
+
+```json macOS
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "/Users/username/Desktop",
+        "/Users/username/Downloads"
+      ]
+    }
+  }
+}
+```
+
+```json Windows
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "C:\\Users\\username\\Desktop",
+        "C:\\Users\\username\\Downloads"
+      ]
+    }
+  }
+}
+```
+
+</CodeGroup>
+
+将 `username` 替换为你实际的电脑用户名。`args` 数组中列出的路径指定了文件系统服务器可以访问哪些目录。你可以根据需要修改这些路径或添加其他目录。
+
+<Tip>
+**了解此配置**
+
+- `"filesystem"`：服务器在 Claude Desktop 中显示的友好名称
+- `"command": "npx"`：使用 Node.js 的 npx 工具运行服务器
+- `"-y"`：自动确认安装服务器包
+- `"@modelcontextprotocol/server-filesystem"`：文件系统服务器的包名
+- 剩余参数：服务器被允许访问的目录
+
+</Tip>
+
+<Warning>
+**安全注意事项**
+
+仅授予你愿意让 Claude 读取和修改的目录访问权限。该服务器以你的用户账户权限运行，因此它可以执行你手动可以执行的任何文件操作。
+
+</Warning>
+</Step>
+
+<Step title="重启 Claude Desktop">
+保存配置文件后，完全退出 Claude Desktop 并重新启动它。应用程序需要重启以加载新配置并启动 MCP 服务器。
+
+成功重启后，点击对话输入框左下角的“添加文件、连接器等 /”指示器 <img src="/images/claude-add-files-connectors-and-more.png" style={{display: 'inline', margin: 0, height: '1.3em', width: 'auto'}} />：
+
+<Frame>
+  <img
+    src="/images/quickstart-slider.png"
+    alt="Claude Desktop 界面显示 MCP 服务器指示器"
+  />
+</Frame>
+
+点击该指示器，然后将鼠标移到“Connectors”上并点击“Manage connectors”。从连接器列表中选择“filesystem”，即可查看文件系统服务器可用的工具：
+
+<Frame style={{ textAlign: "center" }}>
+  <img
+    src="/images/quickstart-tools.png"
+    width="400"
+    alt="Claude Desktop 中可用的文件系统工具"
+  />
+</Frame>
+
+如果文件系统服务器未能连接，请参考 [故障排除](#troubleshooting) 部分获取调试步骤。
+
+</Step>
+</Steps>
+
+## 使用文件系统服务器
+
+连接文件系统服务器后，Claude 现在可以与你的文件系统交互了。试试这些示例请求来了解其功能：
+
+### 文件管理示例
+
+- **“你能写一首诗并把它保存到我的桌面吗？”** - Claude 会创作一首诗，并在你的桌面上创建一个新的文本文件
+- **“我的下载文件夹里有哪些与工作相关的文件？”** - Claude 会扫描你的下载内容，并识别出与工作相关的文档
+- **“请把我桌面上的所有图片整理到一个名为 'Images' 的新文件夹中”** - Claude 会创建一个文件夹，并将图片文件移动到其中
+
+### 审批机制如何运作
+
+在执行任何文件系统操作之前，Claude 都会请求你的批准。这可以确保你始终掌控所有操作：
+
+<Frame style={{ textAlign: "center" }}>
+  <img
+    src="/images/quickstart-approve.png"
+    width="500"
+    alt="Claude 请求批准以执行文件操作"
+  />
+</Frame>
+
+在批准之前，请仔细查看每个请求。如果你对所提议的操作不放心，随时都可以拒绝。
+
+## 故障排查
+
+如果您在设置或使用 Filesystem Server 时遇到问题，以下解决方案可帮助解决常见问题：
+
+<AccordionGroup>
+<Accordion title="Server not showing up in Claude / hammer icon missing">
+
+1. 完全重启 Claude Desktop
+2. 检查您的 `claude_desktop_config.json` 文件语法
+3. 确保 `claude_desktop_config.json` 中包含的文件路径有效，并且它们是绝对路径而不是相对路径
+4. 查看 [日志](#getting-logs-from-claude-for-desktop) 以了解服务器为什么无法连接
+5. 在命令行中，尝试手动运行服务器（将 `username` 替换为您在 `claude_desktop_config.json` 中使用的值），看看是否有任何错误：
+
+<CodeGroup>
+
+```bash macOS/Linux
+npx -y @modelcontextprotocol/server-filesystem /Users/username/Desktop /Users/username/Downloads
+```
+
+```powershell Windows
+npx -y @modelcontextprotocol/server-filesystem C:\Users\username\Desktop C:\Users\username\Downloads
+```
+
+</CodeGroup>
+
+</Accordion>
+<Accordion title="Getting logs from Claude Desktop">
+
+与 MCP 相关的 Claude.app 日志会写入以下日志文件中：
+
+- macOS: `~/Library/Logs/Claude`
+- Windows: `%APPDATA%\Claude\logs`
+
+- `mcp.log` 将包含有关 MCP 连接和连接失败的常规日志。
+- 名为 `mcp-server-SERVERNAME.log` 的文件将包含对应服务器的 stderr 输出。stdio 服务器可能会使用 stderr 记录所有日志，因此这些文件不仅限于错误信息。
+
+您可以运行以下命令来列出最近的日志，并持续跟踪新日志（在 Windows 上，它只会显示最近的日志）：
+
+<CodeGroup>
+
+```bash macOS/Linux
+tail -n 20 -f ~/Library/Logs/Claude/mcp*.log
+```
+
+```powershell Windows
+type "%APPDATA%\Claude\logs\mcp*.log"
+```
+
+</CodeGroup>
+
+</Accordion>
+<Accordion title="Tool calls failing silently">
+
+如果 Claude 尝试使用这些工具但它们失败：
+
+1. 检查 Claude 的日志中的错误
+2. 验证您的服务器能够无错误地构建和运行
+3. 尝试重启 Claude Desktop
+
+</Accordion>
+<Accordion title="None of this is working. What do I do?">
+
+请参阅我们的 [调试指南](/docs/2026-07-28/tools/debugging) 以获取更好的调试工具和更详细的指导。
+
+</Accordion>
+<Accordion title="ENOENT error and `${APPDATA}` in paths on Windows">
+
+如果您配置的服务器加载失败，并且在其日志中看到路径中引用了 `${APPDATA}` 的错误，您可能需要将展开后的 `%APPDATA%` 值添加到 `claude_desktop_config.json` 的 `env` 键中：
+
+```json
+{
+  "brave-search": {
+    "command": "npx",
+    "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+    "env": {
+      "APPDATA": "C:\\Users\\user\\AppData\\Roaming\\",
+      "BRAVE_API_KEY": "..."
+    }
+  }
+}
+```
+
+完成此更改后，请再次启动 Claude Desktop。
+
+<Warning>
+
+**npm 应该全局安装**
+
+如果您没有全局安装 npm，`npx` 命令可能仍然会失败。如果 npm 已经全局安装，您会发现系统中存在 `%APPDATA%\npm`。如果没有，您可以通过运行以下命令全局安装 npm：
+
+```bash
+npm install -g npm
+```
+
+</Warning>
+
+</Accordion>
+</AccordionGroup>
+
+## 下一步
+
+既然你已经成功将 Claude Desktop 连接到本地 MCP 服务器，可以探索以下选项来扩展你的设置：
+
+<CardGroup cols={2}>
+  <Card
+    title="探索其他服务器"
+    icon="grid"
+    href="https://github.com/modelcontextprotocol/servers"
+  >
+    浏览我们的官方和社区创建的 MCP 服务器集合，获取更多功能
+  </Card>
+  <Card
+    title="构建你自己的服务器"
+    icon="code"
+    href="/docs/2026-07-28/develop/build-server"
+  >
+    创建专为你的特定工作流程和集成量身定制的 MCP 自定义服务器
+  </Card>
+  <Card
+    title="连接到远程服务器"
+    icon="cloud"
+    href="/docs/2026-07-28/develop/connect-remote-servers"
+  >
+    了解如何将 Claude 连接到用于云端工具和服务的远程 MCP 服务器
+  </Card>
+  <Card
+    title="理解协议"
+    icon="book"
+    href="/docs/2026-07-28/learn/architecture"
+  >
+    深入了解 MCP 的工作原理及其架构
+  </Card>
+</CardGroup>

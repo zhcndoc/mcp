@@ -1,0 +1,32 @@
+---
+title: 已弃用功能
+---
+
+<div id="enable-section-numbers" />
+
+本页是当前处于 **已弃用** 状态的规范特性登记页，依据
+[功能生命周期和弃用策略](/community/feature-lifecycle)
+（[SEP-2596](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2596)）。
+
+已弃用的功能仍然是规范的一部分，但已计划移除：新的实现 **不应** 采用它，现有实现 **应** 在该功能最早移除之前迁移。最早移除时间标志着该功能变为 _可被_ 移除；实际移除是核心维护者在发布准备期间作出的决定，可能会更晚发生。
+
+该登记页是一个派生视图，与各功能的弃用通知和变更日志条目保持一致，而后两者才是规范性记录。
+
+## 已弃用
+
+| 功能                                                                                                                      | 弃用 SEP                                                                            | 弃用于      | 迁移路径                                                                                                                 | 最早移除                                                                                      |
+| ---------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| [Roots](/specification/2026-07-28/client/roots)                                                                              | [SEP-2577](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2577) | `2026-07-28`  | 通过工具参数、资源 URI 或服务器配置传递目录或文件                                          | 自 2027-07-28 之后发布的第一个修订版                                                        |
+| [Sampling](/specification/2026-07-28/client/sampling)                                                                        | [SEP-2577](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2577) | `2026-07-28`  | 直接与 LLM 提供商 API 集成                                                                                      | 自 2027-07-28 之后发布的第一个修订版                                                        |
+| [Logging](/specification/2026-07-28/server/utilities/logging)                                                                | [SEP-2577](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2577) | `2026-07-28`  | 对于 stdio 传输，记录到 `stderr`；使用 [OpenTelemetry](https://opentelemetry.io/) 进行可观测性                         | 自 2027-07-28 之后发布的第一个修订版                                                        |
+| [Dynamic Client Registration](/specification/2026-07-28/basic/authorization/client-registration#dynamic-client-registration) | [PR #2858](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2858) | `2026-07-28`  | [Client ID Metadata Documents](/specification/2026-07-28/basic/authorization/client-registration#client-id-metadata-documents) | 自 2027-07-28 之后发布的第一个修订版                                                        |
+| `includeContext: "thisServer"` / `"allServers"` ([Sampling](/specification/2026-07-28/client/sampling#capabilities))         | [SEP-2596](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2596) | `2025-11-25`  | 省略该字段或使用 `"none"`                                                                                                 | 遵循 Sampling ([SEP-2577](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2577)) |
+| [HTTP+SSE transport](/specification/2024-11-05/basic/transports#http-with-sse)                                               | [SEP-2596](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2596) | `2025-03-26`  | [Streamable HTTP](/specification/2026-07-28/basic/transports/streamable-http)                                                  | SEP-2596 达到 Final 后三个月                                                             |
+
+HTTP+SSE 传输和 `includeContext` 值在生命周期政策存在之前就已经被描述为
+已弃用；SEP-2596 根据其[过渡条款](/community/feature-lifecycle)将它们重新归类为
+已弃用。
+
+## 已移除
+
+目前尚未根据此政策移除任何功能。当某个已弃用的功能被移除时，其对应行将移动到此部分，并附上记录该移除事项的更新日志条目链接。

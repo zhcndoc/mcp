@@ -1,0 +1,459 @@
+---
+title: 架构概览
+sidebarTitle: 架构
+type: docs
+---
+
+本文对模型上下文协议（MCP）的概述讨论了其[范围](#scope)和[MCP 的核心概念](#concepts-of-mcp)，并提供了一个[示例](#example)来演示每个核心概念。
+
+由于 MCP SDK 对许多问题进行了抽象，大多数开发者可能会发现 [数据层协议](#data-layer-protocol) 这一部分最有用。它讨论了 MCP 服务器如何向 AI 应用提供上下文。
+
+有关具体实现细节，请参阅你所使用的[特定语言 SDK](/docs/2025-11-25/sdk)的文档。
+
+## 范围
+
+模型上下文协议包括以下项目：
+
+- [MCP 规范](https://modelcontextprotocol.io/specification/latest)：MCP 的一份规范，概述了客户端和服务器的实现要求。
+- [MCP SDK](/docs/2025-11-25/sdk)：用于不同编程语言、实现 MCP 的 SDK。
+- **MCP 开发工具**：用于开发 MCP 服务器和客户端的工具，包括 [MCP Inspector](https://github.com/modelcontextprotocol/inspector)
+- [MCP 参考服务器实现](https://github.com/modelcontextprotocol/servers)：MCP 服务器的参考实现。
+
+<Note>
+  MCP 仅专注于上下文交换协议——它并不规定
+  AI 应用如何使用 LLM 或管理所提供的上下文。
+</Note>
+
+## MCP 概念
+
+### 参与者
+
+MCP 采用客户端-服务器架构，其中一个 MCP 主机——例如 [Claude Code](https://www.anthropic.com/claude-code) 或 [Claude Desktop](https://www.claude.ai/download) 这样的 AI 应用——会与一个或多个 MCP 服务器建立连接。MCP 主机通过为每个 MCP 服务器创建一个 MCP 客户端来实现这一点。每个 MCP 客户端都与其对应的 MCP 服务器保持专用连接。
+
+使用 STDIO 传输的本地 MCP 服务器通常只服务一个 MCP 客户端，而使用 Streamable HTTP 传输的远程 MCP 服务器通常会服务多个 MCP 客户端。
+
+MCP 架构中的关键参与者包括：
+
+- **MCP 主机**：协调并管理一个或多个 MCP 客户端的 AI 应用
+- **MCP 客户端**：维护与 MCP 服务器连接的组件，并从 MCP 服务器获取上下文供 MCP 主机使用
+- **MCP 服务器**：向 MCP 客户端提供上下文的程序
+
+**例如**：Visual Studio Code 作为 MCP 主机。当 Visual Studio Code 与某个 MCP 服务器建立连接，例如 [Sentry MCP server](https://docs.sentry.io/product/sentry-mcp/)，Visual Studio Code 运行时会实例化一个 MCP 客户端对象，用于维护与 Sentry MCP server 的连接。
+当 Visual Studio Code 随后连接到另一个 MCP 服务器，例如 [本地文件系统服务器](https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem)，Visual Studio Code 运行时会实例化另一个 MCP 客户端对象来维护该连接。
+
+```mermaid
+graph TB
+    subgraph "MCP 主机（AI 应用）"
+        Client1["MCP 客户端 1"]
+        Client2["MCP 客户端 2"]
+        Client3["MCP 客户端 3"]
+        Client4["MCP 客户端 4"]
+    end
+
+    ServerA["MCP 服务器 A - 本地<br/>(例如 文件系统)"]
+    ServerB["MCP 服务器 B - 本地<br/>(例如 数据库)"]
+    ServerC["MCP 服务器 C - 远程<br/>(例如 Sentry)"]
+
+    Client1 ---|"专用<br/>连接"| ServerA
+    Client2 ---|"专用<br/>连接"| ServerB
+    Client3 ---|"专用<br/>连接"| ServerC
+    Client4 ---|"专用<br/>连接"| ServerC
+```
+
+请注意，**MCP 服务器**指的是提供上下文数据的程序，无论其运行在何处。MCP 服务器可以在本地或远程执行。例如，当 Claude Desktop 启动 [filesystem
+server](https://github.com/modelcontextprotocol/servers/tree/main/src/filesystem) 时，由于它使用 STDIO 传输，服务器会在同一台机器上本地运行。这通常被称为“本地”MCP 服务器。官方的 [Sentry MCP server](https://docs.sentry.io/product/sentry-mcp/) 运行在 Sentry 平台上，并使用 Streamable HTTP 传输。这通常被称为“远程”MCP 服务器。
+
+### 层
+
+MCP 由两层组成：
+
+- **数据层**：定义基于 JSON-RPC 的客户端-服务器通信协议，包括生命周期管理以及工具、资源、提示和通知等核心原语。
+- **传输层**：定义支持客户端和服务器之间数据交换的通信机制和通道，包括传输特定的连接建立、消息封装和授权。
+
+从概念上讲，数据层是内层，而传输层是外层。
+
+#### 数据层
+
+数据层实现了一个基于 [JSON-RPC 2.0](https://www.jsonrpc.org/) 的交换协议，用于定义消息结构和语义。
+这一层包括：
+
+- **生命周期管理**：处理客户端与服务器之间的连接初始化、能力协商和连接终止
+- **服务器功能**：使服务器能够提供核心功能，包括用于 AI 操作的工具、用于上下文数据的资源，以及用于交互模板的提示，供客户端使用
+- **客户端功能**：使服务器能够请求客户端从宿主 LLM 中采样、从用户处获取输入，并向客户端记录消息
+- **实用功能**：支持额外能力，例如用于实时更新的通知，以及用于长时间运行操作的进度跟踪
+
+#### 传输层
+
+传输层管理客户端和服务器之间的通信通道以及身份验证。它处理连接建立、消息封装以及 MCP 参与者之间的安全通信。
+
+MCP 支持两种传输机制：
+
+- **Stdio 传输**：使用标准输入/输出流，在同一台机器上的本地进程之间进行直接进程通信，提供无网络开销的最佳性能。
+- **Streamable HTTP 传输**：使用 HTTP POST 发送客户端到服务器的消息，并可选地使用 Server-Sent Events 实现流式传输能力。该传输支持远程服务器通信，并支持标准 HTTP 身份验证方法，包括 bearer token、API key 和自定义头。MCP 建议使用 OAuth 获取身份验证令牌。
+
+传输层将通信细节从协议层抽象出去，使所有传输机制都能使用相同的 JSON-RPC 2.0 消息格式。
+
+### 数据层协议
+
+MCP 的核心部分是定义 MCP 客户端与 MCP 服务器之间的模式和语义。开发者很可能会发现数据层——尤其是 [primitives](#primitives) 集合——是 MCP 最有趣的部分。它定义了开发者如何将上下文从 MCP 服务器共享给 MCP 客户端。
+
+MCP 使用 [JSON-RPC 2.0](https://www.jsonrpc.org/) 作为其底层 RPC 协议。客户端和服务器彼此发送请求并相应响应。当不需要响应时，可以使用通知。
+
+#### 生命周期管理
+
+MCP 是一种 <Tooltip tip="可以通过 Streamable HTTP 传输使 MCP 的一部分无状态化">有状态协议</Tooltip>，需要进行生命周期管理。生命周期管理的目的是协商客户端和服务器都支持的 <Tooltip tip="客户端或服务器支持的功能和操作，例如工具、资源或提示">能力</Tooltip>。详细信息可见 [specification](/specification/2025-11-25/basic/lifecycle)，而 [example](#example) 展示了初始化序列。
+
+#### 原语
+
+MCP 原语是 MCP 中最重要的概念。它们定义了客户端和服务器可以向彼此提供什么。这些原语指定了可以与 AI 应用共享的上下文信息类型，以及可以执行的操作范围。
+
+MCP 定义了三种可由 _服务器_ 暴露的核心原语：
+
+- **工具**：AI 应用可以调用的可执行函数，用于执行操作（例如文件操作、API 调用、数据库查询）
+- **资源**：为 AI 应用提供上下文信息的数据源（例如文件内容、数据库记录、API 响应）
+- **提示**：可复用模板，帮助组织与语言模型的交互（例如系统提示、少样本示例）
+
+每种原语类型都关联有用于发现（`*/list`）、检索（`*/get`），以及在某些情况下执行（`tools/call`）的方法。
+MCP 客户端将使用 `*/list` 方法发现可用原语。例如，客户端可以先列出所有可用工具（`tools/list`），然后再执行它们。这种设计使得列表可以是动态的。
+
+举个具体例子，考虑一个提供数据库上下文的 MCP 服务器。它可以暴露用于查询数据库的工具、包含数据库模式的资源，以及包含与这些工具交互的少样本示例的提示。
+
+有关服务器原语的更多细节，请参见 [server concepts](./server-concepts)。
+
+MCP 也定义了 _客户端_ 可以暴露的原语。这些原语允许 MCP 服务器作者构建更丰富的交互。
+
+- **采样**：允许服务器向客户端的 AI 应用请求语言模型补全。当服务器作者希望访问语言模型，但又希望保持模型无关、且不在其 MCP 服务器中包含语言模型 SDK 时，这非常有用。他们可以使用 `sampling/createMessage` 方法从客户端的 AI 应用请求语言模型补全。
+- **询问**：允许服务器向用户请求更多信息。当服务器作者希望从用户那里获取更多信息，或请求对某个操作进行确认时，这非常有用。他们可以使用 `elicitation/create` 方法向用户请求更多信息。
+- **日志记录**：使服务器能够向客户端发送日志消息，用于调试和监控。
+
+有关客户端原语的更多细节，请参见 [client concepts](./client-concepts)。
+
+除了服务器和客户端原语之外，该协议还提供跨切面的实用原语，用于增强请求的执行方式：
+
+- **任务（实验性）**：持久化执行包装器，使 MCP 请求能够延迟结果检索并进行状态跟踪（例如，昂贵计算、工作流自动化、批处理、多步骤操作）
+
+#### 通知
+
+该协议支持实时通知，以实现服务器和客户端之间的动态更新。例如，当服务器可用工具发生变化时——例如新增功能可用或现有工具被修改——服务器可以发送工具更新通知，告知已连接的客户端这些变化。通知以 JSON-RPC 2.0 通知消息的形式发送（不期望响应），使 MCP 服务器能够向已连接的客户端提供实时更新。
+
+## 示例
+
+### 数据层
+
+本节通过一个 MCP 客户端-服务器交互的逐步演示，重点介绍数据层协议。我们将使用 JSON-RPC 2.0 消息展示生命周期序列、工具操作和通知。
+
+<Steps>
+<Step title="初始化（生命周期管理）">
+
+MCP 通过能力协商握手开始生命周期管理。如 [生命周期管理](#lifecycle-management) 部分所述，客户端发送一个 `initialize` 请求来建立连接并协商支持的特性。
+
+<CodeGroup>
+  ```json Initialize Request
+  {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "method": "initialize",
+    "params": {
+      "protocolVersion": "2025-11-25",
+      "capabilities": {
+        "elicitation": {}
+      },
+      "clientInfo": {
+        "name": "example-client",
+        "version": "1.0.0"
+      }
+    }
+  }
+  ```
+  ```json Initialize Response
+  {
+    "jsonrpc": "2.0",
+    "id": 1,
+    "result": {
+      "protocolVersion": "2025-11-25",
+      "capabilities": {
+        "tools": {
+          "listChanged": true
+        },
+        "resources": {}
+      },
+      "serverInfo": {
+        "name": "example-server",
+        "version": "1.0.0"
+      }
+    }
+  }
+  ```
+</CodeGroup>
+
+#### 理解初始化交互
+
+初始化过程是 MCP 生命周期管理的关键部分，并具有几个重要目的：
+
+1. **协议版本协商**：`protocolVersion` 字段（例如 "2025-11-25"）确保客户端和服务器使用兼容的协议版本。这可防止在不同版本尝试交互时可能发生的通信错误。如果未协商出双方都兼容的版本，应终止连接。
+
+2. **能力发现**：`capabilities` 对象允许各方声明它们支持哪些特性，包括可处理哪些 [原语](#primitives)（工具、资源、提示），以及是否支持 [通知](#notifications) 等特性。这通过避免不受支持的操作来实现高效通信。
+
+3. **身份交换**：`clientInfo` 和 `serverInfo` 对象提供用于调试和兼容性目的的标识和版本信息。
+
+在此示例中，能力协商展示了 MCP 原语是如何被声明的：
+
+**客户端能力**：
+
+- `"elicitation": {}` - 客户端声明它可以处理用户交互请求（可以接收 `elicitation/create` 方法调用）
+
+**服务器能力**：
+
+- `"tools": {"listChanged": true}` - 服务器支持工具原语，并且在其工具列表发生变化时可以发送 `tools/list_changed` 通知
+- `"resources": {}` - 服务器也支持资源原语（可以处理 `resources/list` 和 `resources/read` 方法）
+
+初始化成功后，客户端发送一个通知以表示它已准备就绪：
+
+```json Notification
+{
+  "jsonrpc": "2.0",
+  "method": "notifications/initialized"
+}
+```
+
+#### 这在 AI 应用中如何工作
+
+在初始化过程中，AI 应用的 MCP 客户端管理器会建立到已配置服务器的连接，并保存它们的能力以供后续使用。应用会利用这些信息来确定哪些服务器可以提供特定类型的功能（工具、资源、提示），以及它们是否支持实时更新。
+
+```python Pseudo-code for AI application initialization
+# 伪代码
+async with stdio_client(server_config) as (read, write):
+    async with ClientSession(read, write) as session:
+        init_response = await session.initialize()
+        if init_response.capabilities.tools:
+            app.register_mcp_server(session, supports_tools=True)
+        app.set_server_ready(session)
+```
+
+</Step>
+
+<Step title="工具发现（原语）">
+现在连接已经建立，客户端可以通过发送 `tools/list` 请求来发现可用工具。这个请求是 MCP 工具发现机制的基础——它允许客户端在尝试使用之前了解服务器上有哪些工具可用。
+
+<CodeGroup>
+  ```json Tools List Request
+  {
+    "jsonrpc": "2.0",
+    "id": 2,
+    "method": "tools/list"
+  }
+  ```
+  ```json Tools List Response
+  {
+    "jsonrpc": "2.0",
+    "id": 2,
+    "result": {
+      "tools": [
+        {
+          "name": "calculator_arithmetic",
+          "title": "Calculator",
+          "description": "执行数学计算，包括基本算术、三角函数和代数运算",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "expression": {
+                "type": "string",
+                "description": "要计算的数学表达式（例如：'2 + 3 * 4'、'sin(30)'、'sqrt(16)'）"
+              }
+            },
+            "required": ["expression"]
+          }
+        },
+        {
+          "name": "weather_current",
+          "title": "Weather Information",
+          "description": "获取全球任意地点的当前天气信息",
+          "inputSchema": {
+            "type": "object",
+            "properties": {
+              "location": {
+                "type": "string",
+                "description": "城市名称、地址或坐标（纬度,经度）"
+              },
+              "units": {
+                "type": "string",
+                "enum": ["metric", "imperial", "kelvin"],
+                "description": "响应中使用的温度单位",
+                "default": "metric"
+              }
+            },
+            "required": ["location"]
+          }
+        }
+      ]
+    }
+  }
+  ```
+</CodeGroup>
+
+#### 理解工具发现请求
+
+`tools/list` 请求很简单，不包含任何参数。
+
+#### 理解工具发现响应
+
+响应包含一个 `tools` 数组，提供了每个可用工具的完整元数据。这种基于数组的结构使服务器能够同时暴露多个工具，同时保持不同功能之间的清晰边界。
+
+响应中的每个工具对象都包含几个关键字段：
+
+- **`name`**：服务器命名空间中该工具的唯一标识符。它作为工具执行的主键，应遵循清晰的命名模式（例如，使用 `calculator_arithmetic`，而不是仅仅 `calculate`）
+- **`title`**：工具的人类可读显示名称，客户端可以将其展示给用户
+- **`description`**：对该工具做什么以及何时使用的详细说明
+- **`inputSchema`**：定义预期输入参数的 JSON Schema，支持类型校验，并清楚说明必需和可选参数
+
+#### 这在 AI 应用中如何工作
+
+AI 应用会从所有已连接的 MCP 服务器获取可用工具，并将它们合并为一个统一的工具注册表，供语言模型访问。这使得 LLM 能够理解它可以执行哪些操作，并在对话过程中自动生成适当的工具调用。
+
+```python Pseudo-code for AI application tool discovery
+# 伪代码，使用 MCP Python SDK 模式
+available_tools = []
+for session in app.mcp_server_sessions():
+    tools_response = await session.list_tools()
+    available_tools.extend(tools_response.tools)
+conversation.register_available_tools(available_tools)
+```
+
+</Step>
+
+<Step title="工具执行（原语）">
+现在客户端可以使用 `tools/call` 方法执行一个工具。这展示了 MCP 原语在实践中的用法：在发现可用工具之后，客户端可以使用适当的参数调用它们。
+
+#### 理解工具执行请求
+
+`tools/call` 请求遵循一种结构化格式，以确保客户端和服务器之间的类型安全与清晰通信。注意，我们使用的是发现响应中的正确工具名称（`weather_current`），而不是简化名称：
+
+<CodeGroup>
+  ```json Tool Call Request
+  {
+    "jsonrpc": "2.0",
+    "id": 3,
+    "method": "tools/call",
+    "params": {
+      "name": "weather_current",
+      "arguments": {
+        "location": "San Francisco",
+        "units": "imperial"
+      }
+    }
+  }
+  ```
+  ```json Tool Call Response
+  {
+    "jsonrpc": "2.0",
+    "id": 3,
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "San Francisco 当前天气：68°F，局部多云，西风微风，风速 8 mph。湿度：65%"
+        }
+      ]
+    }
+  }
+  ```
+</CodeGroup>
+
+#### 工具执行的关键元素
+
+请求结构包含几个重要组成部分：
+
+1. **`name`**：必须与发现响应中的工具名称（`weather_current`）完全匹配。这确保服务器能够正确识别要执行哪个工具。
+
+2. **`arguments`**：包含由工具 `inputSchema` 定义的输入参数。在此示例中：
+   - `location`： "San Francisco"（必需参数）
+   - `units`： "imperial"（可选参数，如果未指定则默认为 "metric"）
+
+3. **JSON-RPC 结构**：使用标准 JSON-RPC 2.0 格式，并通过唯一的 `id` 进行请求-响应关联。
+
+#### 理解工具执行响应
+
+响应展示了 MCP 灵活的内容系统：
+
+1. **`content` 数组**：工具响应返回一个内容对象数组，允许丰富的多格式响应（文本、图像、资源等）
+
+2. **内容类型**：每个内容对象都有一个 `type` 字段。在此示例中，`"type": "text"` 表示纯文本内容，但 MCP 支持多种内容类型以适应不同场景。
+
+3. **结构化输出**：响应提供了可操作的信息，AI 应用可以将其作为语言模型交互的上下文。
+
+这种执行模式允许 AI 应用动态调用服务器功能并接收结构化响应，这些响应可以集成到与语言模型的对话中。
+
+#### 这在 AI 应用中如何工作
+
+当语言模型在对话中决定使用某个工具时，AI 应用会拦截该工具调用，将其路由到相应的 MCP 服务器，执行后再将结果作为对话流程的一部分返回给 LLM。这使得 LLM 能够访问实时数据并在外部世界中执行操作。
+
+```python
+# AI 应用工具执行的伪代码
+async def handle_tool_call(conversation, tool_name, arguments):
+    session = app.find_mcp_session_for_tool(tool_name)
+    result = await session.call_tool(tool_name, arguments)
+    conversation.add_tool_result(result.content)
+```
+
+</Step>
+
+<Step title="实时更新（通知）">
+MCP 支持实时通知，使服务器能够在无需显式请求的情况下告知客户端变更。这展示了通知系统这一关键特性，它使 MCP 连接保持同步和响应迅速。
+
+#### 理解工具列表变更通知
+
+当服务器可用工具发生变化时——例如新增功能可用、现有工具被修改或工具暂时不可用——服务器可以主动通知已连接的客户端：
+
+```json Request
+{
+  "jsonrpc": "2.0",
+  "method": "notifications/tools/list_changed"
+}
+```
+
+#### MCP 通知的关键特性
+
+1. **不需要响应**：注意通知中没有 `id` 字段。这符合 JSON-RPC 2.0 的通知语义，即不期望也不发送响应。
+
+2. **基于能力**：只有在初始化时于工具能力中声明了 `"listChanged": true` 的服务器才会发送此通知（如第 1 步所示）。
+
+3. **事件驱动**：服务器根据内部状态变化决定何时发送通知，使 MCP 连接具有动态性和响应性。
+
+#### 客户端对通知的响应
+
+收到此通知后，客户端通常会通过请求更新后的工具列表来作出反应。这形成了一个刷新循环，使客户端对可用工具的理解保持最新：
+
+```json Request
+{
+  "jsonrpc": "2.0",
+  "id": 4,
+  "method": "tools/list"
+}
+```
+
+#### 为什么通知很重要
+
+这个通知系统之所以至关重要，原因如下：
+
+1. **动态环境**：工具可能会根据服务器状态、外部依赖或用户权限而出现或消失
+2. **效率**：客户端无需轮询变化；当更新发生时会被通知
+3. **一致性**：确保客户端始终拥有关于可用服务器能力的准确信息
+4. **实时协作**：使响应迅速的 AI 应用能够适应变化的上下文
+
+这种通知模式不仅适用于工具，也延伸到其他 MCP 原语，从而实现客户端与服务器之间全面的实时同步。
+
+#### 这在 AI 应用中如何工作
+
+当 AI 应用收到关于工具变更的通知时，它会立即刷新工具注册表，并更新 LLM 可用的能力。这确保了正在进行的对话始终可以访问最新的工具集，并且 LLM 可以随着新功能的出现动态适应。
+
+```python
+# AI 应用通知处理的伪代码
+async def handle_tools_changed_notification(session):
+    tools_response = await session.list_tools()
+    app.update_available_tools(session, tools_response.tools)
+    if app.conversation.is_active():
+        app.conversation.notify_llm_of_new_capabilities()
+```
+
+</Step>
+</Steps>

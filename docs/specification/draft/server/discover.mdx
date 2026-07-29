@@ -45,9 +45,11 @@ title: 发现
       "tools": {},
       "resources": {}
     },
-    "serverInfo": {
-      "name": "ExampleServer",
-      "version": "1.0.0"
+    "_meta": {
+      "io.modelcontextprotocol/serverInfo": {
+        "name": "ExampleServer",
+        "version": "1.0.0"
+      }
     },
     "instructions": "该服务器提供天气和资源工具。",
     "ttlMs": 3600000,
@@ -85,10 +87,18 @@ RPC，并在服务器不支持请求的版本时处理
 
 发现结果包括：
 
-- `supportedVersions`：服务器支持的协议版本。客户端应
-  为后续请求选择其中之一。
-- `capabilities`：服务器支持的能力（tools、resources、prompts
-  等）
-- `serverInfo`：服务器软件的名称和版本
-- `instructions`：可选的自然语言指导，供 LLM 了解如何有效使用
-  此服务器
+- `supportedVersions`: Protocol versions the server supports. The client should
+  choose one of these for subsequent requests.
+- `capabilities`: Capabilities the server supports (tools, resources, prompts,
+  etc.)
+- `_meta['io.modelcontextprotocol/serverInfo']`: Name and version of the server
+  software. Servers **SHOULD** include this field.
+- `instructions`: Optional natural-language guidance for LLMs on how to use
+  this server effectively
+
+<Note>
+  `serverInfo` is self-reported by the server and is not verified by the
+  protocol. It is intended for display, logging, and debugging. Clients **SHOULD
+  NOT** use it to change their behavior, and **SHOULD NOT** rely on it for
+  security decisions.
+</Note>

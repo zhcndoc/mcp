@@ -1,0 +1,1141 @@
+---
+title: 理解 MCP 中的授权
+description: 了解如何使用 OAuth 2.1 为 MCP 服务器实现安全授权，以保护敏感资源和操作
+---
+
+模型上下文协议（MCP）中的授权用于保护 MCP 服务器公开的敏感资源和操作。如果你的 MCP 服务器处理用户数据或管理操作，授权可确保只有被允许的用户才能访问其端点。
+
+MCP 使用标准化的授权流程来建立 MCP 客户端与 MCP 服务器之间的信任。其设计并不聚焦于某一种特定的授权或身份系统，而是遵循 [OAuth 2.1](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-13) 中概述的约定。有关详细信息，请参阅 [授权规范](/specification/latest/basic/authorization)。
+
+## 何时应该使用授权？
+
+虽然 MCP 服务器的授权是**可选的**，但在以下情况下强烈建议使用：
+
+- 你的服务器访问用户特定数据（电子邮件、文档、数据库）
+- 你需要审计是谁执行了哪些操作
+- 你的服务器授予对其 API 的访问权限，而这些 API 需要用户同意
+- 你正在为具有严格访问控制的企业环境构建
+- 你希望按用户实现速率限制或使用跟踪
+
+<Tip>
+**本地 MCP 服务器的授权**
+
+对于使用 [STDIO 传输](/specification/latest/basic/transports#stdio) 的 MCP 服务器，你可以改用基于环境的凭据，或直接嵌入在 MCP 服务器中的第三方库提供的凭据。由于基于 STDIO 构建的 MCP 服务器在本地运行，因此在获取用户凭据时，它可以使用一系列灵活的选项，这些选项可能依赖也可能不依赖浏览器中的身份验证和授权流程。
+
+而 OAuth 流程则是为基于 HTTP 的传输而设计的，在这种情况下，MCP 服务器是远程托管的，客户端使用 OAuth 来建立用户已被授权访问该远程服务器。
+</Tip>
+
+## 授权流程：逐步说明
+
+让我们来看看当客户端想要连接到你的受保护 MCP 服务器时会发生什么：
+
+<Steps>
+<Step title="初始握手">
+当你的 MCP 客户端第一次尝试连接时，服务器会响应 `401 Unauthorized`，并告知客户端在哪里可以找到授权信息，这些信息记录在 [受保护资源元数据（Protected Resource Metadata，PRM）文档](https://datatracker.ietf.org/doc/html/rfc9728) 中。该文档由 MCP 服务器托管，遵循可预测的路径模式，并通过 `WWW-Authenticate` 头中的 `resource_metadata` 参数提供给客户端。
+
+```http
+HTTP/1.1 401 Unauthorized
+WWW-Authenticate: Bearer realm="mcp",
+  resource_metadata="https://your-server.com/.well-known/oauth-protected-resource"
+```
+
+这告诉客户端：MCP 服务器需要授权，以及去哪里获取启动授权流程所需的信息。
+
+</Step>
+
+<Step title="受保护资源元数据发现">
+有了指向 PRM 文档的 URI 后，客户端会获取这些元数据，以了解授权服务器、支持的作用域以及其他资源信息。数据通常封装在一个 JSON 数据块中，类似下面这样。
+
+```json
+{
+  "resource": "https://your-server.com/mcp",
+  "authorization_servers": ["https://auth.your-server.com"],
+  "scopes_supported": ["mcp:tools", "mcp:resources"]
+}
+```
+
+你可以在 [RFC 9728 第 3.2 节](https://datatracker.ietf.org/doc/html/rfc9728#name-protected-resource-metadata-r) 中看到一个更完整的示例。
+
+</Step>
+
+<Step title="授权服务器发现">
+接下来，客户端通过获取授权服务器的元数据来了解它能做什么。如果 PRM 文档列出了多个授权服务器，客户端可以决定使用哪一个。
+
+选定授权服务器后，客户端会构造一个标准的元数据 URI，并向 [OpenID Connect (OIDC) Discovery](https://openid.net/specs/openid-connect-discovery-1_0.html) 或 [OAuth 2.0 Auth Server Metadata](https://datatracker.ietf.org/doc/html/rfc8414) 端点发起请求（取决于授权服务器的支持情况），
+并获取另一组元数据属性，从而知道完成授权流程所需的端点。
+
+```json
+{
+  "issuer": "https://auth.your-server.com",
+  "authorization_endpoint": "https://auth.your-server.com/authorize",
+  "token_endpoint": "https://auth.your-server.com/token",
+  "registration_endpoint": "https://auth.your-server.com/register"
+}
+```
+
+</Step>
+
+<Step title="客户端注册">
+在所有元数据都获取完毕后，客户端现在需要确保自己已在授权服务器上完成注册。这可以通过两种方式实现。
+
+首先，客户端可以在给定的授权服务器上**预注册**，这种情况下它会内置客户端注册信息，并用这些信息完成授权流程。
+
+另外，客户端也可以使用**动态客户端注册**（DCR）在授权服务器上动态注册自己。后一种情况要求授权服务器支持 DCR。如果授权服务器支持 DCR，客户端会向 `registration_endpoint` 发送包含其信息的请求：
+
+```json
+{
+  "client_name": "我的 MCP 客户端",
+  "redirect_uris": ["http://localhost:3000/callback"],
+  "grant_types": ["authorization_code", "refresh_token"],
+  "response_types": ["code"]
+}
+```
+
+如果注册成功，授权服务器将返回一个包含客户端注册信息的 JSON 数据块。
+
+<Tip>
+**无 DCR 或无预注册**
+
+如果 MCP 客户端连接到的 MCP 服务器所使用的授权服务器不支持 DCR，而该客户端又没有在该授权服务器上预注册，那么就需要由客户端开发者提供一种方式，让最终用户手动输入客户端信息。
+
+</Tip>
+
+</Step>
+
+<Step title="用户授权">
+接下来，客户端需要在浏览器中打开 `/authorize` 端点，用户可以在此登录并授予所需权限。随后授权服务器会重定向回客户端，并返回一个授权码，客户端再用该授权码交换令牌：
+
+```json
+{
+  "access_token": "eyJhbGciOiJSUzI1NiIs...",
+  "refresh_token": "def502...",
+  "token_type": "Bearer",
+  "expires_in": 3600
+}
+```
+
+访问令牌就是客户端用来向 MCP 服务器验证请求身份的凭证。这一步遵循标准的 [OAuth 2.1 带 PKCE 的授权码流程](https://oauth.net/2/grant-types/authorization-code/) 规范。
+
+</Step>
+
+<Step title="发起已认证请求">
+最后，客户端可以使用嵌入在 `Authorization` 头中的访问令牌向你的 MCP 服务器发起请求：
+
+```http
+GET /mcp HTTP/1.1
+Host: your-server.com
+Authorization: Bearer eyJhbGciOiJSUzI1NiIs...
+```
+
+如果令牌有效且具备所需权限，MCP 服务器就需要验证该令牌并处理请求。
+
+</Step>
+</Steps>
+
+## 实现示例
+
+为了开始一个实际的实现，我们将使用运行在 Docker 容器中的 [Keycloak](https://www.keycloak.org/) 授权服务器。Keycloak 是一个开源授权服务器，可以轻松地在本地部署，用于测试和实验。
+
+请确保你已下载并安装 [Docker Desktop](https://www.docker.com/products/docker-desktop/)。我们将需要它在我们的开发机器上部署 Keycloak。
+
+### Keycloak 设置
+
+从你的终端应用中，运行以下命令来启动 Keycloak 容器：
+
+```bash
+docker run -p 127.0.0.1:8080:8080 -e KC_BOOTSTRAP_ADMIN_USERNAME=admin -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin quay.io/keycloak/keycloak start-dev
+```
+
+该命令会将 Keycloak 容器镜像拉取到本地并完成基础配置初始化。它将运行在 `8080` 端口，并使用 `admin` 用户和 `admin` 密码。
+
+<Warning>
+**不适用于生产环境**
+
+上面的配置可能适合测试和实验；但是，你绝不应在生产环境中使用它。有关如何为需要可靠性、安全性和高可用性的场景部署授权服务器的更多细节，请参阅 [为生产环境配置 Keycloak](https://www.keycloak.org/server/configuration-production) 指南。
+
+</Warning>
+
+你将能够在浏览器中通过 `http://localhost:8080` 访问 Keycloak 授权服务器。
+
+<Frame>
+  <img
+    src="/images/tutorial-authorization/keycloak-browser.png"
+    alt="Keycloak 管理仪表板身份验证对话框。"
+  />
+</Frame>
+
+在默认配置下运行时，Keycloak 已经支持我们为 MCP 服务器所需的许多能力，包括动态客户端注册。你可以通过查看 OIDC 配置来确认这一点，该配置可在以下地址找到：
+
+```http
+http://localhost:8080/realms/master/.well-known/openid-configuration
+```
+
+我们还需要配置 Keycloak，以支持我们的 scopes，并允许我们的主机（本地机器）动态注册客户端，因为默认策略会限制匿名动态客户端注册。
+
+在 Keycloak 仪表板中进入 **Client scopes**，并创建一个新的 `mcp:tools` scope。我们将使用它来访问 MCP 服务器上的所有工具。
+
+<Frame>
+  <img
+    src="/images/tutorial-authorization/keycloak-scopes.png"
+    alt="配置 Keycloak scopes。"
+  />
+</Frame>
+
+创建 scope 后，请确保将其类型设置为 **Default**，并将 **Include in token scope** 开关打开，因为令牌验证需要这一设置。
+
+接下来，我们还要为 Keycloak 签发的令牌设置一个 **audience**。配置 audience 很重要，因为它会将预期目标直接嵌入到签发的访问令牌中。这有助于你的 MCP 服务器验证它收到的令牌是否 באמת是为它本身而不是其他 API 准备的。这是帮助避免 token passthrough 场景的关键。
+
+为此，打开你的 `mcp:tools` client scope，点击 **Mappers**，然后选择 **Configure a new mapper**。选择 **Audience**。
+
+<Frame>
+  <img
+    src="/images/tutorial-authorization/scope-add-audience.gif"
+    alt="在 Keycloak 中为令牌配置 audience。"
+  />
+</Frame>
+
+对于 **Name**，使用 `audience-config`。为 **Included Custom Audience** 添加一个值，设置为 `http://localhost:3000`。这将是我们测试服务器的 URI。
+
+<Warning>
+**不适用于生产环境**
+
+上面的 audience 配置仅用于测试。对于生产场景，还需要额外的设置和配置，以确保签发的令牌中的 audience 得到 उचित 限制。具体来说，audience 需要基于从客户端传入的 resource 参数，而不是固定值。
+
+</Warning>
+
+现在，导航到 **Clients**，然后进入 **Client registration**，再进入 **Trusted Hosts**。禁用 **Client URIs Must Match** 设置，并添加你正在测试所使用的主机。你可以在 Linux 或 macOS 上运行 `ifconfig` 命令，或在 Windows 上运行 `ipconfig` 来获取当前主机 IP。你可以通过查看 keycloak 日志中类似 `Failed to verify remote host : 192.168.215.1` 的一行来看到需要添加的 IP 地址。请确认该 IP 地址属于你的主机。这可能取决于你的 docker 设置而对应一个桥接网络。
+
+<Frame>
+  <img
+    src="/images/tutorial-authorization/keycloak-client.gif"
+    alt="在 Keycloak 中设置客户端注册详细信息。"
+  />
+</Frame>
+
+<Warning>
+**获取主机地址**
+
+如果你是从容器中运行 Keycloak，你也可以在容器日志的终端中看到主机 IP。
+
+</Warning>
+
+最后，我们需要注册一个新的客户端，供 **MCP 服务器本身** 使用，以便与 Keycloak 通信，例如进行 [token introspection](https://oauth.net/2/token-introspection/)。要执行此操作：
+
+1. 转到 **Clients**。
+1. 点击 **Create client**。
+1. 为你的客户端提供一个唯一的 **Client ID**，然后点击 **Next**。
+1. 启用 **Client authentication**，然后点击 **Next**。
+1. 点击 **Save**。
+
+值得注意的是，token introspection 只是可用于验证令牌的众多方法之一。也可以借助各语言和平台各自的独立库来完成。
+
+打开客户端详情后，进入 **Credentials**，记下 **Client Secret**。
+
+<Frame>
+  <img
+    src="/images/tutorial-authorization/keycloak-client-auth.gif"
+    alt="在 Keycloak 中创建新客户端。"
+  />
+</Frame>
+
+<Warning>
+**处理密钥**
+
+切勿将客户端凭证直接嵌入代码中。我们建议使用环境变量或专门的密钥存储方案。
+
+</Warning>
+
+完成 Keycloak 配置后，每次触发授权流程时，你的 MCP 服务器都会收到一个类似下面的令牌：
+
+```text
+eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI1TjcxMGw1WW5MWk13WGZ1VlJKWGtCS3ZZMzZzb3JnRG5scmlyZ2tlTHlzIn0.eyJleHAiOjE3NTU1NDA4MTcsImlhdCI6MTc1NTU0MDc1NywiYXV0aF90aW1lIjoxNzU1NTM4ODg4LCJqdGkiOiJvbnJ0YWM6YjM0MDgwZmYtODQwNC02ODY3LTgxYmUtMTIzMWI1MDU5M2E4IiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL3JlYWxtcy9tYXN0ZXIiLCJhdWQiOiJodHRwOi8vbG9jYWxob3N0OjMwMDAiLCJzdWIiOiIzM2VkNmM2Yi1jNmUwLTQ5MjgtYTE2MS1mMmY2OWM3YTAzYjkiLCJ0eXAiOiJCZWFyZXIiLCJhenAiOiI3OTc1YTViNi04YjU5LTRhODUtOWNiYS04ZmFlYmRhYjg5NzQiLCJzaWQiOiI4ZjdlYzI3Ni0zNThmLTRjY2MtYjMxMy1kYjA4MjkwZjM3NmYiLCJzY29wZSI6Im1jcDp0b29scyJ9.P5xCRtXORly0R0EXjyqRCUx-z3J4uAOWNAvYtLPXroykZuVCCJ-K1haiQSwbURqfsVOMbL7jiV-sD6miuPzI1tmKOkN_Yct0Vp-azvj7U5rEj7U6tvPfMkg2Uj_jrIX0KOskyU2pVvGZ-5BgqaSvwTEdsGu_V3_E0xDuSBq2uj_wmhqiyTFm5lJ1WkM3Hnxxx1_AAnTj7iOKMFZ4VCwMmk8hhSC7clnDauORc0sutxiJuYUZzxNiNPkmNeQtMCGqWdP1igcbWbrfnNXhJ6NswBOuRbh97_QraET3hl-CNmyS6C72Xc0aOwR_uJ7xVSBTD02OaQ1JA6kjCATz30kGYg
+```
+
+解码后，它会像这样：
+
+```json
+{
+  "alg": "RS256",
+  "typ": "JWT",
+  "kid": "5N710l5YnLZMwXfuVRJXkBKvY36sorgDnlrirgkeLys"
+}.{
+  "exp": 1755540817,
+  "iat": 1755540757,
+  "auth_time": 1755538888,
+  "jti": "onrtac:b34080ff-8404-6867-81be-1231b50593a8",
+  "iss": "http://localhost:8080/realms/master",
+  "aud": "http://localhost:3000",
+  "sub": "33ed6c6b-c6e0-4928-a161-f2f69c7a03b9",
+  "typ": "Bearer",
+  "azp": "7975a5b6-8b59-4a85-9cba-8faebdab8974",
+  "sid": "8f7ec276-358f-4ccc-b313-db08290f376f",
+  "scope": "mcp:tools"
+}.[Signature]
+```
+
+<Warning>
+**嵌入式 Audience**
+
+请注意令牌中嵌入的 `aud` claim——它当前被设置为测试 MCP 服务器的 URI，并且是根据我们之前配置的 scope 推断出来的。这一点在我们的实现中对于验证非常重要。
+
+</Warning>
+
+### MCP 服务器设置
+
+我们现在将设置我们的 MCP 服务器，使其使用本地运行的 Keycloak 授权服务器。根据你偏好的编程语言，可以使用支持的任一 [MCP SDK](/docs/draft/sdk)。
+
+为了便于测试，我们将创建一个极其简单的 MCP 服务器，公开两个工具——一个用于加法，另一个用于乘法。访问这些工具需要授权。
+
+<Tabs>
+<Tab title='TypeScript'>
+
+你可以在 [示例仓库](https://github.com/localden/min-ts-mcp-auth) 中查看完整的 TypeScript 项目。
+
+在运行下面的代码之前，请确保你有一个包含以下内容的 `.env` 文件：
+
+```env
+# 服务器主机/端口
+HOST=localhost
+PORT=3000
+
+# 授权服务器位置
+AUTH_HOST=localhost
+AUTH_PORT=8080
+AUTH_REALM=master
+
+# Keycloak OAuth 客户端凭据
+OAUTH_CLIENT_ID=<YOUR_SERVER_CLIENT_ID>
+OAUTH_CLIENT_SECRET=<YOUR_SERVER_CLIENT_SECRET>
+```
+
+`OAUTH_CLIENT_ID` 和 `OAUTH_CLIENT_SECRET` 与我们之前创建的 MCP 服务器客户端相关联。
+
+除了实现 MCP 授权规范之外，下面的服务器还会通过 Keycloak 执行令牌自省，以确保它从客户端接收到的令牌是有效的。它还实现了基本日志记录，方便你轻松诊断任何问题。
+
+```typescript
+import "dotenv/config";
+import express from "express";
+import { randomUUID } from "node:crypto";
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
+import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js";
+import { z } from "zod";
+import cors from "cors";
+import {
+  mcpAuthMetadataRouter,
+  getOAuthProtectedResourceMetadataUrl,
+} from "@modelcontextprotocol/sdk/server/auth/router.js";
+import { requireBearerAuth } from "@modelcontextprotocol/sdk/server/auth/middleware/bearerAuth.js";
+import { OAuthMetadata } from "@modelcontextprotocol/sdk/shared/auth.js";
+import { checkResourceAllowed } from "@modelcontextprotocol/sdk/shared/auth-utils.js";
+const CONFIG = {
+  host: process.env.HOST || "localhost",
+  port: Number(process.env.PORT) || 3000,
+  auth: {
+    host: process.env.AUTH_HOST || process.env.HOST || "localhost",
+    port: Number(process.env.AUTH_PORT) || 8080,
+    realm: process.env.AUTH_REALM || "master",
+    clientId: process.env.OAUTH_CLIENT_ID || "mcp-server",
+    clientSecret: process.env.OAUTH_CLIENT_SECRET || "",
+  },
+};
+
+function createOAuthUrls() {
+  const authBaseUrl = new URL(
+    `http://${CONFIG.auth.host}:${CONFIG.auth.port}/realms/${CONFIG.auth.realm}/`,
+  );
+  return {
+    issuer: authBaseUrl.toString(),
+    introspection_endpoint: new URL(
+      "protocol/openid-connect/token/introspect",
+      authBaseUrl,
+    ).toString(),
+    authorization_endpoint: new URL(
+      "protocol/openid-connect/auth",
+      authBaseUrl,
+    ).toString(),
+    token_endpoint: new URL(
+      "protocol/openid-connect/token",
+      authBaseUrl,
+    ).toString(),
+  };
+}
+
+function createRequestLogger() {
+  return (req: any, res: any, next: any) => {
+    const start = Date.now();
+    res.on("finish", () => {
+      const ms = Date.now() - start;
+      console.log(
+        `${req.method} ${req.originalUrl} -> ${res.statusCode} ${ms}ms`,
+      );
+    });
+    next();
+  };
+}
+
+const app = express();
+
+app.use(
+  express.json({
+    verify: (req: any, _res, buf) => {
+      req.rawBody = buf?.toString() ?? "";
+    },
+  }),
+);
+
+app.use(
+  cors({
+    origin: "*",
+    exposedHeaders: ["Mcp-Session-Id"],
+  }),
+);
+
+app.use(createRequestLogger());
+
+const mcpServerUrl = new URL(`http://${CONFIG.host}:${CONFIG.port}`);
+const oauthUrls = createOAuthUrls();
+
+const oauthMetadata: OAuthMetadata = {
+  ...oauthUrls,
+  response_types_supported: ["code"],
+};
+
+const tokenVerifier = {
+  verifyAccessToken: async (token: string) => {
+    const endpoint = oauthMetadata.introspection_endpoint;
+
+    if (!endpoint) {
+      console.error("[auth] no introspection endpoint in metadata");
+      throw new Error("No token verification endpoint available in metadata");
+    }
+
+    const params = new URLSearchParams({
+      token: token,
+      client_id: CONFIG.auth.clientId,
+    });
+
+    if (CONFIG.auth.clientSecret) {
+      params.set("client_secret", CONFIG.auth.clientSecret);
+    }
+
+    let response: Response;
+    try {
+      response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: params.toString(),
+      });
+    } catch (e) {
+      console.error("[auth] introspection fetch threw", e);
+      throw e;
+    }
+
+    if (!response.ok) {
+      const txt = await response.text();
+      console.error("[auth] introspection non-OK", { status: response.status });
+
+      try {
+        const obj = JSON.parse(txt);
+        console.log(JSON.stringify(obj, null, 2));
+      } catch {
+        console.error(txt);
+      }
+      throw new Error(`Invalid or expired token: ${txt}`);
+    }
+
+    let data: any;
+    try {
+      data = await response.json();
+    } catch (e) {
+      const txt = await response.text();
+      console.error("[auth] failed to parse introspection JSON", {
+        error: String(e),
+        body: txt,
+      });
+      throw e;
+    }
+
+    if (data.active === false) {
+      throw new Error("Inactive token");
+    }
+
+    if (!data.aud) {
+      throw new Error("Resource indicator (aud) missing");
+    }
+
+    const audiences: string[] = Array.isArray(data.aud) ? data.aud : [data.aud];
+    const allowed = audiences.some((a) => {
+      try {
+        return checkResourceAllowed({
+          requestedResource: a,
+          configuredResource: mcpServerUrl,
+        });
+      } catch {
+        // Keycloak 令牌包含非 URL 的受众（例如 "account"、"test-client"）。
+        // 它们永远不是我们的资源，因此将其视为“不匹配”，而不是让程序崩溃。
+        return false;
+      }
+    });
+    if (!allowed) {
+      throw new Error(
+        `None of the provided audiences are allowed. Expected ${mcpServerUrl}, got: ${audiences.join(", ")}`,
+      );
+    }
+
+    return {
+      token,
+      clientId: data.client_id,
+      scopes: data.scope ? data.scope.split(" ") : [],
+      expiresAt: data.exp,
+    };
+  },
+};
+app.use(
+  mcpAuthMetadataRouter({
+    oauthMetadata,
+    resourceServerUrl: mcpServerUrl,
+    scopesSupported: ["mcp:tools"],
+    resourceName: "MCP Demo Server",
+  }),
+);
+
+const authMiddleware = requireBearerAuth({
+  verifier: tokenVerifier,
+  requiredScopes: [],
+  resourceMetadataUrl: getOAuthProtectedResourceMetadataUrl(mcpServerUrl),
+});
+
+const transports: { [sessionId: string]: StreamableHTTPServerTransport } = {};
+
+function createMcpServer() {
+  const server = new McpServer({
+    name: "example-server",
+    version: "1.0.0",
+  });
+
+  server.registerTool(
+    "add",
+    {
+      title: "加法工具",
+      description: "把两个数字相加",
+      inputSchema: {
+        a: z.number().describe("要相加的第一个数字"),
+        b: z.number().describe("要相加的第二个数字"),
+      },
+    },
+    async ({ a, b }) => ({
+      content: [{ type: "text", text: `${a} + ${b} = ${a + b}` }],
+    }),
+  );
+
+  server.registerTool(
+    "multiply",
+    {
+      title: "乘法工具",
+      description: "把两个数字相乘",
+      inputSchema: {
+        x: z.number().describe("要相乘的第一个数字"),
+        y: z.number().describe("要相乘的第二个数字"),
+      },
+    },
+    async ({ x, y }) => ({
+      content: [{ type: "text", text: `${x} × ${y} = ${x * y}` }],
+    }),
+  );
+
+  return server;
+}
+
+const mcpPostHandler = async (req: express.Request, res: express.Response) => {
+  const sessionId = req.headers["mcp-session-id"] as string | undefined;
+  let transport: StreamableHTTPServerTransport;
+
+  if (sessionId && transports[sessionId]) {
+    transport = transports[sessionId];
+  } else if (!sessionId && isInitializeRequest(req.body)) {
+    transport = new StreamableHTTPServerTransport({
+      sessionIdGenerator: () => randomUUID(),
+      onsessioninitialized: (sessionId) => {
+        transports[sessionId] = transport;
+      },
+    });
+
+    transport.onclose = () => {
+      if (transport.sessionId) {
+        delete transports[transport.sessionId];
+      }
+    };
+
+    const server = createMcpServer();
+    await server.connect(transport);
+  } else {
+    res.status(400).json({
+      jsonrpc: "2.0",
+      error: {
+        code: -32000,
+        message: "Bad Request: No valid session ID provided",
+      },
+      id: null,
+    });
+    return;
+  }
+
+  await transport.handleRequest(req, res, req.body);
+};
+
+const handleSessionRequest = async (
+  req: express.Request,
+  res: express.Response,
+) => {
+  const sessionId = req.headers["mcp-session-id"] as string | undefined;
+  if (!sessionId || !transports[sessionId]) {
+    res.status(400).send("无效或缺失的会话 ID");
+    return;
+  }
+
+  const transport = transports[sessionId];
+  await transport.handleRequest(req, res);
+};
+
+app.post("/", authMiddleware, mcpPostHandler);
+app.get("/", authMiddleware, handleSessionRequest);
+app.delete("/", authMiddleware, handleSessionRequest);
+
+app.listen(CONFIG.port, CONFIG.host, () => {
+  console.log(`🚀 MCP 服务器正在 ${mcpServerUrl.origin} 运行`);
+  console.log(`📡 MCP 端点可用地址：${mcpServerUrl.origin}`);
+  console.log(
+    `🔐 OAuth 元数据可用地址：${getOAuthProtectedResourceMetadataUrl(mcpServerUrl)}`,
+  );
+});
+```
+
+运行服务器后，你可以通过提供 MCP 服务器端点，将其添加到你的 MCP 客户端中，例如 Visual Studio Code。
+
+有关在 TypeScript 中实现 MCP 服务器的更多详细信息，请参阅 [TypeScript SDK 文档](https://github.com/modelcontextprotocol/typescript-sdk)。
+
+</Tab>
+
+<Tab title='Python'>
+
+你可以在 [示例仓库](https://github.com/modelcontextprotocol/python-sdk/tree/main/examples/servers/simple-auth) 中查看完整的 Python 项目。
+
+为了简化我们的授权交互，在 Python 场景中，我们依赖 [Python SDK](https://py.sdk.modelcontextprotocol.io/v2/run/authorization/) 中的 `MCPServer` 类。它会发布受保护资源元数据文档，对未认证请求返回一个 `401`，其 `WWW-Authenticate` 头会指回该文档，并将每个 bearer 令牌交给我们提供的验证器。围绕授权的许多约定，例如端点和令牌验证逻辑，在不同语言中是一致的，但有些语言提供了更简单的生产集成方式。
+
+在编写实际服务器之前，我们需要在 `config.py` 中设置配置——其内容完全基于你的本地服务器设置：
+
+```python
+"""MCP 认证服务器的配置设置。"""
+
+import os
+
+
+class Config:
+    """从环境变量加载并提供合理默认值的配置类。"""
+
+    # 服务器设置
+    HOST: str = os.getenv("HOST", "localhost")
+    PORT: int = int(os.getenv("PORT", "3000"))
+
+    # 认证服务器设置
+    AUTH_HOST: str = os.getenv("AUTH_HOST", "localhost")
+    AUTH_PORT: int = int(os.getenv("AUTH_PORT", "8080"))
+    AUTH_REALM: str = os.getenv("AUTH_REALM", "master")
+
+    # OAuth 客户端设置
+    OAUTH_CLIENT_ID: str = os.getenv("OAUTH_CLIENT_ID", "test-client")
+    OAUTH_CLIENT_SECRET: str = os.getenv("OAUTH_CLIENT_SECRET", "")
+
+    # 每个令牌都需要的作用域
+    MCP_SCOPE: str = os.getenv("MCP_SCOPE", "mcp:tools")
+
+    @property
+    def server_url(self) -> str:
+        """构建服务器 URL。"""
+        return f"http://{self.HOST}:{self.PORT}"
+
+    @property
+    def auth_base_url(self) -> str:
+        """构建认证服务器基础 URL。"""
+        return f"http://{self.AUTH_HOST}:{self.AUTH_PORT}/realms/{self.AUTH_REALM}/"
+
+
+# 全局配置实例
+config = Config()
+```
+
+`OAUTH_CLIENT_ID` 和 `OAUTH_CLIENT_SECRET` 与我们之前创建的 MCP 服务器客户端相关联。在启动服务器之前，请将它们设置到你的环境中。
+
+服务器实现如下：
+
+```python
+import datetime
+import logging
+from typing import Any
+from urllib.parse import urljoin
+
+from pydantic import AnyHttpUrl
+
+from mcp.server import MCPServer
+from mcp.server.auth.settings import AuthSettings
+
+from .config import config
+from .token_verifier import IntrospectionTokenVerifier
+
+logger = logging.getLogger(__name__)
+
+
+def create_oauth_urls() -> dict[str, str]:
+    """根据配置创建 OAuth URL（Keycloak 风格）。"""
+    auth_base_url = config.auth_base_url
+
+    return {
+        "issuer": auth_base_url,
+        "introspection_endpoint": urljoin(auth_base_url, "protocol/openid-connect/token/introspect"),
+        "authorization_endpoint": urljoin(auth_base_url, "protocol/openid-connect/auth"),
+        "token_endpoint": urljoin(auth_base_url, "protocol/openid-connect/token"),
+    }
+
+
+def create_server() -> MCPServer:
+    """创建并配置 MCP 服务器。"""
+
+    oauth_urls = create_oauth_urls()
+
+    token_verifier = IntrospectionTokenVerifier(
+        introspection_endpoint=oauth_urls["introspection_endpoint"],
+        server_url=config.server_url,
+        client_id=config.OAUTH_CLIENT_ID,
+        client_secret=config.OAUTH_CLIENT_SECRET,
+    )
+
+    app = MCPServer(
+        name="MCP Resource Server",
+        instructions="通过授权服务器自省验证令牌的资源服务器",
+        debug=True,
+        token_verifier=token_verifier,
+        auth=AuthSettings(
+            issuer_url=AnyHttpUrl(oauth_urls["issuer"]),
+            required_scopes=[config.MCP_SCOPE],
+            resource_server_url=AnyHttpUrl(config.server_url),
+        ),
+    )
+
+    @app.tool()
+    async def add_numbers(a: float, b: float) -> dict[str, Any]:
+        """
+        将两个数字相加。
+        此工具演示了使用 OAuth 认证的基本算术运算。
+
+        Args:
+            a: 要相加的第一个数字
+            b: 要相加的第二个数字
+        """
+        result = a + b
+        return {
+            "operation": "addition",
+            "operand_a": a,
+            "operand_b": b,
+            "result": result,
+            "timestamp": datetime.datetime.now().isoformat(),
+        }
+
+    @app.tool()
+    async def multiply_numbers(x: float, y: float) -> dict[str, Any]:
+        """
+        将两个数字相乘。
+        此工具演示了使用 OAuth 认证的基本算术运算。
+
+        Args:
+            x: 要相乘的第一个数字
+            y: 要相乘的第二个数字
+        """
+        result = x * y
+        return {
+            "operation": "multiplication",
+            "operand_x": x,
+            "operand_y": y,
+            "result": result,
+            "timestamp": datetime.datetime.now().isoformat(),
+        }
+
+    return app
+
+
+def main() -> int:
+    """
+    运行 MCP Resource Server。
+
+    此服务器：
+    - 提供 RFC 9728 受保护资源元数据
+    - 通过授权服务器自省验证令牌
+    - 提供需要认证的 MCP 工具
+
+    配置从 config.py 和环境变量中加载。
+    """
+    logging.basicConfig(level=logging.INFO)
+
+    oauth_urls = create_oauth_urls()
+
+    try:
+        mcp_server = create_server()
+
+        logger.info("正在 %s:%s 上启动 MCP 服务器", config.HOST, config.PORT)
+        logger.info("授权服务器：%s", oauth_urls["issuer"])
+
+        mcp_server.run(
+            transport="streamable-http",
+            host=config.HOST,
+            port=config.PORT,
+            streamable_http_path="/",
+        )
+        return 0
+
+    except Exception:
+        logger.exception("服务器错误")
+        return 1
+
+
+if __name__ == "__main__":
+    exit(main())
+```
+
+最后，令牌验证逻辑完全委托给 `token_verifier.py`，以确保我们可以使用 Keycloak 自省端点来验证任何凭证工件的有效性。
+
+```python
+"""使用 OAuth 2.0 令牌自省（RFC 7662）的令牌验证器实现。"""
+
+import logging
+from typing import Any
+
+import httpx2
+
+from mcp.server.auth.provider import AccessToken, TokenVerifier
+from mcp.shared.auth_utils import check_resource_allowed, resource_url_from_server_url
+
+logger = logging.getLogger(__name__)
+
+
+class IntrospectionTokenVerifier(TokenVerifier):
+    """使用 OAuth 2.0 令牌自省（RFC 7662）的令牌验证器。"""
+
+    def __init__(
+        self,
+        introspection_endpoint: str,
+        server_url: str,
+        client_id: str,
+        client_secret: str,
+    ):
+        self.introspection_endpoint = introspection_endpoint
+        self.server_url = server_url
+        self.client_id = client_id
+        self.client_secret = client_secret
+        self.resource_url = resource_url_from_server_url(server_url)
+
+    async def verify_token(self, token: str) -> AccessToken | None:
+        """通过自省端点验证令牌。"""
+        if not self.introspection_endpoint.startswith(("https://", "http://localhost", "http://127.0.0.1")):
+            return None
+
+        timeout = httpx2.Timeout(10.0, connect=5.0)
+        limits = httpx2.Limits(max_connections=10, max_keepalive_connections=5)
+
+        async with httpx2.AsyncClient(
+            timeout=timeout,
+            limits=limits,
+            verify=True,
+        ) as client:
+            try:
+                form_data = {
+                    "token": token,
+                    "client_id": self.client_id,
+                }
+                # 仅在配置了 client_secret 时发送 client_secret
+                # 公共客户端仅使用 client_id 进行认证。
+                if self.client_secret:
+                    form_data["client_secret"] = self.client_secret
+                headers = {"Content-Type": "application/x-www-form-urlencoded"}
+
+                response = await client.post(
+                    self.introspection_endpoint,
+                    data=form_data,
+                    headers=headers,
+                )
+
+                if response.status_code != 200:
+                    return None
+
+                data = response.json()
+                if not data.get("active", False):
+                    return None
+
+                if not self._validate_resource(data):
+                    return None
+
+                return AccessToken(
+                    token=token,
+                    client_id=data.get("client_id", "unknown"),
+                    scopes=data.get("scope", "").split() if data.get("scope") else [],
+                    expires_at=data.get("exp"),
+                    # AccessToken.resource 是 `str | None`。Keycloak 这里返回的 `aud`
+                    # 是一个 *列表*（例如 ["test-client", "http://localhost:3000",
+                    # "account"]）；如果直接传入该列表，会触发 pydantic
+                    # ValidationError，并被下面的宽泛 `except` 转换成一个
+                    # 静默的 401。我们已经在 `_validate_resource` 中确认了
+                    # 这个服务器的资源是合法受众，因此在这里记录它。
+                    resource=self.resource_url,
+                    subject=data.get("sub"),  # RFC 7662 subject（资源所有者）
+                    claims=data,
+                )
+
+            except Exception:
+                logger.exception("令牌自省失败")
+                return None
+
+    def _validate_resource(self, token_data: dict[str, Any]) -> bool:
+        """验证令牌是否为此资源服务器签发。
+
+        规则：
+        - 如果缺少 'aud'，则拒绝。
+        - 如果任一受众条目匹配派生出的资源 URL，则接受。
+        - 根据 JWT 规范，支持字符串或列表形式。
+        """
+        if not self.server_url or not self.resource_url:
+            return False
+
+        aud: list[str] | str | None = token_data.get("aud")
+        if isinstance(aud, list):
+            return any(self._is_valid_resource(a) for a in aud)
+        if isinstance(aud, str):
+            return self._is_valid_resource(aud)
+        return False
+
+    def _is_valid_resource(self, resource: str) -> bool:
+        """检查给定资源是否与我们的服务器匹配。"""
+        return check_resource_allowed(requested_resource=self.resource_url, configured_resource=resource)
+```
+
+更多详细信息请参见下文或 [Python SDK 文档](https://github.com/modelcontextprotocol/python-sdk)。
+
+**Python MCP 服务器**
+
+在服务器根目录中需要有一个 `pyproject.toml` 文件和一个 `mcp_server` 文件夹。将所有 Python 文件放入 `mcp_server` 文件夹中，并将 `pyproject.toml` 文件填写为：
+
+```toml
+[project]
+name = "mcp-simple-auth"
+version = "0.1.0"
+description = "一个演示 OAuth 认证的简单 MCP 服务器"
+requires-python = ">=3.10"
+authors = [{ name = "Model Context Protocol a Series of LF Projects, LLC." }]
+license = { text = "MIT" }
+dependencies = [
+  "httpx2>=2.5.0",
+  "mcp>=2.0.0rc1",
+  "pydantic>=2.0",
+]
+
+[project.scripts]
+mcp-simple-auth-rs = "mcp_server.server:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["mcp_server"]
+
+[dependency-groups]
+dev = ["pyright>=1.1.391", "pytest>=8.3.4", "ruff>=0.8.5"]
+```
+
+然后运行下面的命令来启动服务器。
+
+```bash
+uv sync
+uv run mcp-simple-auth-rs
+```
+
+</Tab>
+
+<Tab title='C#'>
+
+你可以在 [示例仓库](https://github.com/localden/min-cs-mcp-auth) 中查看完整的 C# 项目。
+
+要使用 MCP C# SDK 在你的 MCP 服务器中设置授权，你可以采用标准的 ASP.NET Core 构建器模式。我们不会使用 Keycloak 提供的自省端点，而是使用 ASP.NET Core 内置能力来进行令牌验证。
+
+```csharp
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using ModelContextProtocol.AspNetCore.Authentication;
+using ProtectedMcpServer.Tools;
+using System.Security.Claims;
+
+var builder = WebApplication.CreateBuilder(args);
+
+var serverUrl = "http://localhost:3000/";
+var authorizationServerUrl = "http://localhost:8080/realms/master/";
+
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultChallengeScheme = McpAuthenticationDefaults.AuthenticationScheme;
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.Authority = authorizationServerUrl;
+    var normalizedServerAudience = serverUrl.TrimEnd('/');
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidIssuer = authorizationServerUrl,
+        ValidAudiences = new[] { normalizedServerAudience, serverUrl },
+        AudienceValidator = (audiences, securityToken, validationParameters) =>
+        {
+            if (audiences == null) return false;
+            foreach (var aud in audiences)
+            {
+                if (string.Equals(aud.TrimEnd('/'), normalizedServerAudience, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+    };
+
+    options.RequireHttpsMetadata = false; // 在生产环境中请设为 true
+
+    options.Events = new JwtBearerEvents
+    {
+        OnTokenValidated = context =>
+        {
+            var name = context.Principal?.Identity?.Name ?? "unknown";
+            var email = context.Principal?.FindFirstValue("preferred_username") ?? "unknown";
+            Console.WriteLine($"令牌已验证：{name} ({email})");
+            return Task.CompletedTask;
+        },
+        OnAuthenticationFailed = context =>
+        {
+            Console.WriteLine($"认证失败：{context.Exception.Message}");
+            return Task.CompletedTask;
+        },
+    };
+})
+.AddMcp(options =>
+{
+    options.ResourceMetadata = new()
+    {
+        Resource = new Uri(serverUrl),
+        ResourceDocumentation = new Uri("https://docs.example.com/api/math"),
+        AuthorizationServers = { new Uri(authorizationServerUrl) },
+        ScopesSupported = ["mcp:tools"]
+    };
+});
+
+builder.Services.AddAuthorization();
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddMcpServer()
+    .WithTools<MathTools>()
+    .WithHttpTransport();
+
+var app = builder.Build();
+
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapMcp().RequireAuthorization();
+
+Console.WriteLine($"正在 {serverUrl} 启动带授权的 MCP 服务器");
+Console.WriteLine($"使用的 Keycloak 服务器：{authorizationServerUrl}");
+Console.WriteLine($"受保护资源元数据 URL：{serverUrl}.well-known/oauth-protected-resource");
+Console.WriteLine("公开的数学工具：Add、Multiply");
+Console.WriteLine("按 Ctrl+C 停止服务器");
+
+app.Run(serverUrl);
+```
+
+更多详细信息请参阅 [C# SDK 文档](https://github.com/modelcontextprotocol/csharp-sdk)。
+
+</Tab>
+</Tabs>
+
+## 测试 MCP 服务器
+
+出于测试目的，我们将使用 [Visual Studio Code](https://code.visualstudio.com)，但任何支持 MCP 和新授权规范的客户端都可以。
+
+按下 <kbd>Cmd</kbd> + <kbd>Shift</kbd> + <kbd>P</kbd>，然后选择 **MCP: Add server...**。选择 **HTTP** 并输入 `http://localhost:3000`。为服务器指定一个唯一名称，以便在 Visual Studio Code 中使用。在 `mcp.json` 中，你现在应该会看到如下条目：
+
+```json
+"my-mcp-server-18676652": {
+  "url": "http://localhost:3000",
+  "type": "http"
+}
+```
+
+连接后，你将被带到浏览器，在那里系统会提示你同意 Visual Studio Code 访问 `mcp:tools` 作用域。
+
+<Frame>
+  <img
+    src="/images/tutorial-authorization/keycloak-vscode.png"
+    alt="Keycloak 同意表单，适用于 VS Code。"
+  />
+</Frame>
+
+同意之后，你会在 `mcp.json` 中服务器条目的上方看到列出的工具。
+
+<Frame>
+  <img
+    src="/images/tutorial-authorization/tools-vs-code.png"
+    alt="VS Code 中列出的工具。"
+  />
+</Frame>
+
+你可以在聊天视图中借助 `#` 符号调用单个工具。
+
+<Frame>
+  <img
+    src="/images/tutorial-authorization/tools-vs-code-invoke.png"
+    alt="在 VS Code 中调用 MCP 工具。"
+  />
+</Frame>
+
+## 常见陷阱及如何避免它们
+
+有关全面的安全指南，包括攻击向量、缓解策略和实现最佳实践，请务必阅读 [安全最佳实践](/specification/draft/basic/security_best_practices)。下面列出了一些关键问题。
+
+- **不要自行实现令牌验证或授权逻辑**。请使用现成的、经过充分测试且安全的库来处理诸如令牌验证或授权决策之类的事情。从头开始做意味着，除非你是安全专家，否则更有可能出错。
+- **使用短生命周期的访问令牌**。根据所使用的授权服务器，此设置可能可以自定义。我们建议不要使用长生命周期令牌——如果恶意行为者窃取了它们，他们将能够维持更长时间的访问权限。
+- **始终验证令牌**。你的服务器收到了一个令牌，并不意味着该令牌有效，或者它就是发给你服务器的。始终验证 MCP 服务器从客户端接收到的内容是否符合所需约束。
+- **将令牌存储在安全、加密的存储中**。在某些场景下，你可能需要在服务端缓存令牌。如果确实如此，请确保存储具有正确的访问控制，并且不会被有权访问你服务器的恶意方轻易窃取。你还应实现健壮的缓存逐出策略，以确保你的 MCP 服务器不会重复使用已过期或其他无效的令牌。
+- **在生产环境中强制使用 HTTPS**。除开发期间的 `localhost` 外，不要通过普通 HTTP 接受令牌或重定向回调。
+- **最小权限范围**。不要使用包罗万象的作用域。尽可能按工具或能力拆分访问权限，并在资源服务器上按路由/工具验证所需作用域。
+- **不要记录凭证**。切勿记录 `Authorization` 头、令牌、代码或密钥。清理查询字符串和请求头。在结构化日志中对敏感字段进行脱敏。
+- **分离应用与资源服务器凭证**。不要在终端用户流程中复用你的 MCP 服务器客户端密钥。将所有密钥存放在合适的密钥管理器中，而不是源代码控制中。
+- **返回正确的挑战信息**。在 401 响应中，包含带有 `Bearer`、`realm` 和 `resource_metadata` 的 `WWW-Authenticate`，以便客户端能够发现如何进行身份验证。
+- **DCR（动态客户端注册）控制**。如果启用，请注意你所在组织特有的约束，例如受信任主机、必需的审查和已审计的注册流程。未经认证的 DCR 意味着任何人都可以向你的授权服务器注册任意客户端。
+- **多租户/realm 混淆**。除非明确需要多租户，否则请固定到单一签发者/租户。即使令牌由同一授权服务器签名，也要拒绝来自其他 realm 的令牌。
+- **受众/资源标识符误用**。不要配置或接受通用受众（如 `api`）或无关资源。要求受众/资源与你配置的服务器匹配。
+- **错误详情泄露**。向客户端返回通用消息，但在内部使用关联 ID 记录详细原因，以便排障，同时不暴露内部信息。
+- **会话标识符加固**。将 `Mcp-Session-Id` 视为不可信输入；切勿将授权绑定到它。发生认证变更时重新生成，并在服务端验证其生命周期。
+
+## 相关标准与文档
+
+MCP 授权建立在这些成熟标准之上：
+
+- **[OAuth 2.1](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-13)**：核心授权框架
+- **[RFC 8414](https://datatracker.ietf.org/doc/html/rfc8414)**：授权服务器元数据发现
+- **[RFC 7591](https://datatracker.ietf.org/doc/html/rfc7591)**：动态客户端注册
+- **[RFC 9728](https://datatracker.ietf.org/doc/html/rfc9728)**：受保护资源元数据
+- **[RFC 8707](https://datatracker.ietf.org/doc/html/rfc8707)**：资源标识符
+
+更多详情，请参阅：
+
+- [授权规范](/specification/draft/basic/authorization)
+- [安全最佳实践](/specification/draft/basic/security_best_practices)
+- [可用的 MCP SDK](/docs/draft/sdk)
+
+理解这些标准将有助于你正确实现授权，并在问题出现时进行排查。

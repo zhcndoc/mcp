@@ -21,7 +21,10 @@ MCP 使用 JSON-RPC 编码消息。JSON-RPC 消息**必须**使用 UTF-8 编码�
 
 ## 请求元数据
 
-所有协议元数据都在消息体中传输：每个请求都在[`_meta.io.modelcontextprotocol/*`](/specification/draft/basic/index#meta)字段中携带其协议版本、客户端标识和客户端能力。
+All protocol metadata travels in the message body: every request carries its
+protocol version and client capabilities in
+[`_meta.io.modelcontextprotocol/*`](/specification/draft/basic/index#meta)
+fields.
 
 绑定**可以**另外将选定的消息体字段镜像到信封元数据中。Streamable HTTP 传输会将它们镜像到[HTTP 标头](/specification/draft/basic/transports/streamable-http#request-metadata)中，以便中间件在不解析消息体的情况下路由和检查请求。消息体仍然是事实来源；镜像元数据的绑定会定义如何拒绝不匹配。
 
