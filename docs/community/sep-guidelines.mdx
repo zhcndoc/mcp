@@ -65,7 +65,7 @@ flowchart TD
     InReview --> Decision
     Decision --> Accepted
     Decision --> Rejected
-    Accepted -->|"Reference implementation +<br/>conformance test complete"| Final
+    Accepted -->|"参考实现 +<br/>一致性测试完成"| Final
 ```
 
 ### 逐步流程
@@ -79,11 +79,11 @@ flowchart TD
 
 </Note>
 
-1. **起草您的 SEP** 为一个名为 `0000-your-feature-title.md` 的 markdown 文件，使用 `0000` 作为占位符。遵循下面的 [SEP 格式](#sep-format)。
+1. **起草您的 SEP** 为一个名为 `0000-your-feature-title.md` 的 Markdown 文件，使用 `0000` 作为占位符。遵循下面的 [SEP 格式](#sep-format)。
 
 2. **创建拉取请求**，将您的 SEP 文件添加到 [规范仓库](https://github.com/modelcontextprotocol/modelcontextprotocol) 的 `seps/` 目录中。
 
-3. **更新 SEP 编号**：一旦创建了您的 PR，使用 PR 编号重命名文件（例如，PR #1850 变为 `1850-your-feature-title.md`）并更新 SEP  header。
+3. **更新 SEP 编号**：一旦创建了您的 PR，使用 PR 编号重命名文件（例如，PR #1850 变为 `1850-your-feature-title.md`）并更新 SEP 头部。
 
 4. **寻找赞助人**：标记 [维护者列表](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/MAINTAINERS.md) 中的核心维护者或维护者。选择与您提案领域相关的人。提示：
    - 标记 1-2 位相关的维护者，而不是所有人
@@ -145,7 +145,7 @@ flowchart TD
 
 ### 7. 参考实现
 
-必须在 SEP 达到 "Final" 状态之前完成，但在接受之前不必完成。
+必须在 SEP 达到“最终”状态之前完成，但在接受之前不必完成。
 
 ### 8. 安全影响
 
@@ -247,11 +247,13 @@ SEP 要被接受，必须满足以下标准：
 1. **解决反馈** - 如果提出了具体顾虑，解决它们并重新提交
 2. **讨论拒绝原因** - 在 Discord 中询问以了解理由
 3. **提交竞争性 SEP** - 有时不同的方法效果更好
-4. **等待合适的时机** - 社区需求会演变；今天被拒绝的内容以后可能会受到欢迎
+4. **等待合适的时机** - 社区需求会演变；今天被拒绝的内容以后可能会受到欢迎。
 
 ## 报告 SEP 错误或更新
 
-对于尚未达到 `final` 状态的 SEP，直接在 SEP 的拉取请求上评论。一旦 SEP 定稿并合并，通过创建修改 SEP 文件的新拉取请求来提交更新。
+对于尚未达到 `final` 状态的 SEP，请直接在该 SEP 的拉取请求中发表评论。
+
+最终版 SEP 作为已接受设计的历史记录予以保留。它们在最终确定后不会更新。如果规范在某个 SEP 达到 Final 状态后发生变化，则以当前规范为准。每个最终版 SEP 页面都会显示相关说明。
 
 ## 转移 SEP 所有权
 
@@ -264,7 +266,7 @@ SEP 要被接受，必须满足以下标准：
 
 不好的理由：
 
-- 你不同意方向（改为提交竞争性 SEP）
+- 你不同意方向（改为提交竞争性 SEP）。
 
 ## 版权
 

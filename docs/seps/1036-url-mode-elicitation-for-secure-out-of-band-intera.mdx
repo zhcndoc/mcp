@@ -89,7 +89,7 @@ URL 征询与 [MCP 授权](https://modelcontextprotocol.io/specification/2025-06
   "method": "elicitation/create",
   "params": {
     "mode": "form", // 新字段
-    "message": "Please provide your GitHub username",
+    "message": "请提供您的 GitHub 用户名",
     "requestedSchema": {
       "type": "object",
       "properties": {
@@ -124,7 +124,7 @@ URL 征询请求**必须**指定 `mode: "url"` 并包含以下参数：
     "mode": "url",
     "elicitationId": "550e8400-e29b-41d4-a716-446655440000",
     "url": "https://github.com/login/oauth/authorize?client_id=abc123&state=xyz789&scope=repo",
-    "message": "Please authorize access to your GitHub repositories to continue."
+    "message": "请授权访问您的 GitHub 仓库以继续。"
   }
 }
 ```
@@ -176,14 +176,14 @@ URL 征询响应使用与表单征询相同的三操作模型：
   "id": 2,
   "error": {
     "code": -32042,
-    "message": "This request requires more information.",
+    "message": "此请求需要更多信息。",
     "data": {
       "elicitations": [
         {
           "mode": "url",
           "elicitationId": "550e8400-e29b-41d4-a716-446655440000",
           "url": "https://oauth.example.com/authorize?client_id=abc123&response_type=code&...",
-          "message": "Authorization is required to access your Example Co files."
+          "message": "需要授权才能访问您的 Example Co 文件。"
         }
       ]
     }
@@ -237,7 +237,7 @@ URL 模式信息收集请求在设计上是异步或“断开连接”的流程�
 - 安全的凭证收集而无需客户端暴露
 - 独立于 MCP 授权的外部授权模式
 - 支付和订阅流程支持
-- 清晰的安全边界和信任模型
+- 清晰的安全边界和信任模型。
 
 ## 向后兼容性
 
@@ -320,4 +320,4 @@ URL 信息收集明确创建了清晰的信任边界：
 
 - 在现有 MCP 授权框架内工作（本提案不影响 MCP 授权）
 - 遵循有关令牌处理的安全最佳实践
-- 保持客户端 - 服务器与服务器 - 第三方授权之间的关注点分离
+- 保持客户端 - 服务器与服务器 - 第三方授权之间的关注点分离。

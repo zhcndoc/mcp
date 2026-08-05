@@ -173,7 +173,7 @@ http://localhost:8080/realms/master/.well-known/openid-configuration
 
 我们还需要设置 Keycloak 以支持我们的作用域，并允许我们的主机（本地机器）动态注册客户端，因为默认策略会限制匿名动态客户端注册。
 
-前往 Keycloak 仪表板中的 **Client scopes**，并创建一个新的 `mcp:tools` 作用域。我们将使用它来访问 MCP 服务器上的所有工具。
+前往 Keycloak 仪表板中的 **客户端作用域**，并创建一个新的 `mcp:tools` 作用域。我们将使用它来访问 MCP 服务器上的所有工具。
 
 <Frame>
   <img
@@ -182,29 +182,29 @@ http://localhost:8080/realms/master/.well-known/openid-configuration
   />
 </Frame>
 
-创建作用域后，请确保将其类型设置为 **Default**，并将 **Include in token scope** 开关打开，因为令牌验证会需要它。
+创建作用域后，请确保将其类型设置为 **默认**，并将 **包含在令牌作用域中** 开关打开，因为令牌验证会需要它。
 
-现在我们还要为 Keycloak 签发的令牌设置一个 **audience**。配置 audience 很重要，因为它会将预期目标直接嵌入到签发的访问令牌中。这有助于你的 MCP 服务器验证它收到的令牌是否确实是为它准备的，而不是为其他 API 准备的。这对于避免令牌透传场景至关重要。
+现在我们还要为 Keycloak 签发的令牌设置一个 **受众**。配置受众很重要，因为它会将预期目标直接嵌入到签发的访问令牌中。这有助于你的 MCP 服务器验证它收到的令牌是否确实是为它准备的，而不是为其他 API 准备的。这对于避免令牌透传场景至关重要。
 
-为此，打开你的 `mcp:tools` 客户端作用域，点击 **Mappers**，然后点击 **Configure a new mapper**。选择 **Audience**。
+为此，打开你的 `mcp:tools` 客户端作用域，点击 **映射器**，然后点击 **配置新映射器**。选择 **受众**。
 
 <Frame>
   <img
     src="/images/tutorial-authorization/scope-add-audience.gif"
-    alt="在 Keycloak 中为令牌配置 audience。"
+    alt="在 Keycloak 中为令牌配置受众。"
   />
 </Frame>
 
-对于 **Name**，使用 `audience-config`。为 **Included Custom Audience** 添加一个值，设置为 `http://localhost:3000`。这将是我们测试服务器的 URI。
+对于 **名称**，使用 `audience-config`。为 **包含的自定义受众** 添加一个值，设置为 `http://localhost:3000`。这将是我们测试服务器的 URI。
 
 <Warning>
 **不用于生产环境**
 
-上面的 audience 配置用于测试。对于生产场景，还需要额外的设置和配置，以确保已签发令牌的 audience 被正确约束。具体来说，audience 需要基于从客户端传入的 resource 参数，而不是固定值。
+上面的受众配置用于测试。对于生产场景，还需要额外的设置和配置，以确保已签发令牌的受众被正确约束。具体来说，受众需要基于从客户端传入的 resource 参数，而不是固定值。
 
 </Warning>
 
-现在，导航到 **Clients**，然后是 **Client registration**，再到 **Trusted Hosts**。禁用 **Client URIs Must Match** 设置，并添加你正在测试的主机。你可以通过在 Linux 或 macOS 上运行 `ifconfig` 命令，或在 Windows 上运行 `ipconfig` 来获取当前主机 IP。你可以通过查看 keycloak 日志中类似 `Failed to verify remote host : 192.168.215.1` 的行来找到你需要添加的 IP 地址。请检查该 IP 地址是否与你的主机关联。这可能取决于你的 docker 设置而对应一个桥接网络。
+现在，导航到 **客户端**，然后是 **客户端注册**，再到 **受信任的主机**。禁用 **客户端 URI 必须匹配** 设置，并添加你正在测试的主机。你可以通过在 Linux 或 macOS 上运行 `ifconfig` 命令，或在 Windows 上运行 `ipconfig` 来获取当前主机 IP。你可以通过查看 Keycloak 日志中类似 `Failed to verify remote host : 192.168.215.1` 的行来找到你需要添加的 IP 地址。请检查该 IP 地址是否与你的主机关联。这可能取决于你的 Docker 设置而对应一个桥接网络。
 
 <Frame>
   <img
@@ -220,17 +220,17 @@ http://localhost:8080/realms/master/.well-known/openid-configuration
 
 </Warning>
 
-最后，我们需要注册一个新的客户端，供 **MCP 服务器本身** 使用，以便与 Keycloak 进行诸如 [token introspection](https://oauth.net/2/token-introspection/) 之类的交互。为此：
+最后，我们需要注册一个新的客户端，供 **MCP 服务器本身** 使用，以便与 Keycloak 进行诸如 [令牌自省](https://oauth.net/2/token-introspection/) 之类的交互。为此：
 
-1. 前往 **Clients**。
-1. 点击 **Create client**。
-1. 为你的客户端提供一个唯一的 **Client ID**，然后点击 **Next**。
-1. 启用 **Client authentication**，然后点击 **Next**。
-1. 点击 **Save**。
+1. 前往 **客户端**。
+1. 点击 **创建客户端**。
+1. 为你的客户端提供一个唯一的 **客户端 ID**，然后点击 **下一步**。
+1. 启用 **客户端身份验证**，然后点击 **下一步**。
+1. 点击 **保存**。
 
-值得注意的是，token introspection 只是验证令牌的可用方法之一。也可以借助针对每种语言和平台的独立库来完成。
+值得注意的是，令牌自省只是验证令牌的可用方法之一。也可以借助针对每种语言和平台的独立库来完成。
 
-打开客户端详情后，前往 **Credentials** 并记下 **Client Secret**。
+打开客户端详情后，前往 **凭据** 并记下 **客户端密钥**。
 
 <Frame>
   <img
@@ -275,7 +275,7 @@ eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICI1TjcxMGw1WW5MWk13WGZ1VlJKWGtC
 ```
 
 <Warning>
-**嵌入式 Audience**
+**嵌入式受众**
 
 注意令牌中嵌入的 `aud` 声明——它当前设置为测试 MCP 服务器的 URI，并且是从我们之前配置的作用域中推导出来的。这在我们的实现中进行验证时将非常重要。
 
@@ -968,6 +968,8 @@ uv run mcp-simple-auth-rs
 
 要使用 MCP C# SDK 在你的 MCP 服务器中设置授权，你可以借助标准的 ASP.NET Core 构建器模式。我们不会使用 Keycloak 提供的内省端点，而是使用内置的 ASP.NET Core 能力来进行令牌验证。
 
+在服务器文件夹的根目录下，创建两个文件 `Program.cs` 和 `ProtectedMcpServer.csproj`，以及一个 `Tools` 文件夹。将以下内容填入 `Program.cs`：
+
 ```csharp
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -1029,9 +1031,9 @@ builder.Services.AddAuthentication(options =>
 {
     options.ResourceMetadata = new()
     {
-        Resource = new Uri(serverUrl),
-        ResourceDocumentation = new Uri("https://docs.example.com/api/math"),
-        AuthorizationServers = { new Uri(authorizationServerUrl) },
+        Resource = serverUrl,
+        ResourceDocumentation = "https://docs.example.com/api/math",
+        AuthorizationServers = { authorizationServerUrl },
         ScopesSupported = ["mcp:tools"]
     };
 });
@@ -1059,7 +1061,64 @@ Console.WriteLine("Press Ctrl+C to stop the server");
 app.Run(serverUrl);
 ```
 
-有关更多详细信息，请参阅 [C# SDK 文档](https://github.com/modelcontextprotocol/csharp-sdk)。
+将以下内容填入 `ProtectedMcpServer.csproj`：
+
+```xml
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- 本地机密存储的标识符，本身不是机密信息。 -->
+    <UserSecretsId>local-authorization-mcp-server</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.18" />
+    <PackageReference Include="ModelContextProtocol" Version="2.0.0" />
+    <PackageReference Include="ModelContextProtocol.AspNetCore" Version="2.0.0" />
+  </ItemGroup>
+
+</Project>
+```
+
+在 `Tools` 文件夹中创建 `MathTools.cs`，并填入以下内容：
+
+```csharp
+using System.ComponentModel;
+using ModelContextProtocol.Server;
+
+namespace ProtectedMcpServer.Tools;
+
+[McpServerToolType]
+public sealed class MathTools
+{
+    [McpServerTool, Description("将两个数字相加。")]
+    public Task<double> Add(
+        [Description("第一个操作数")] double a,
+        [Description("第二个操作数")] double b)
+    {
+        return Task.FromResult(a + b);
+    }
+
+    [McpServerTool, Description("将两个数字相乘。")]
+    public Task<double> Multiply(
+        [Description("第一个操作数")] double a,
+        [Description("第二个操作数")] double b)
+    {
+        return Task.FromResult(a * b);
+    }
+}
+```
+
+然后在服务器根目录下运行：
+
+```bash
+dotnet run
+```
+
+更多详细信息，请参阅 [C# SDK 文档](https://github.com/modelcontextprotocol/csharp-sdk)。
 
 </Tab>
 </Tabs>
@@ -1121,7 +1180,7 @@ app.Run(serverUrl);
 - **多租户/领域混淆**。除非明确支持多租户，否则请固定到单一签发者/租户。即使令牌由同一授权服务器签名，也要拒绝来自其他领域的令牌。
 - **受众/资源标识符误用**。不要配置或接受通用受众（如 `api`）或无关资源。要求受众/资源与你配置的服务器匹配。
 - **错误详情泄露**。向客户端返回通用消息，但在内部使用相关 ID 记录详细原因，以便排障，同时避免暴露内部信息。
-- **会话标识符加固**。将 `Mcp-Session-Id` 视为不可信输入；切勿将授权绑定到它。请在认证变更时重新生成，并在服务器端验证其生命周期。
+- **会话标识符加固**。将 `Mcp-Session-Id` 视为不可信输入；切勿将授权绑定到它。请在认证变更时重新生成，并在服务器端验证其生命周期】【。
 
 ## 相关标准和文档
 

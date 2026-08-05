@@ -112,7 +112,7 @@ description: "任务"
 
 支持任务增强请求的服务器和客户端 **必须** 在初始化期间声明 `tasks` 能力。`tasks` 能力按请求类别构建，具有布尔属性，指示哪些特定请求类型支持任务增强。
 
-详情请参考 https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1732。
+详情请参考 https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1732】【。
 
 ### 3. 协议消息
 
@@ -245,7 +245,7 @@ description: "任务"
 }
 ```
 
-任务 ID 通过 `modelcontextprotocol.io/related-task` 元数据键传达。通知参数 otherwise 为空。
+任务 ID 通过 `modelcontextprotocol.io/related-task` 元数据键传达。通知参数否则为空。
 
 此通知解决了请求方可能在接收方完成创建任务之前尝试轮询任务的竞争条件。通过在任务创建后立即发送此通知，接收方信号表明任务已准备好通过 `tasks/get` 进行查询。
 
@@ -394,7 +394,7 @@ stateDiagram-v2
 
 1. 接收方 **可以** 覆盖请求的 `keepAlive` 持续时间。
 2. 接收方 **必须** 在 `tasks/get` 响应中包含实际的 `keepAlive` 持续时间（或 `null` 表示无限）。
-3. 任务达到终端状态（`completed`、`failed` 或 `cancelled`）且其 `keepAlive` 持续时间 elapsed 后，接收方 **可以** 删除任务及其结果。
+3. 任务达到终端状态（`completed`、`failed` 或 `cancelled`）且其 `keepAlive` 持续时间已过后，接收方 **可以** 删除任务及其结果。
 4. 接收方 **可以** 在 `tasks/get` 响应中包含 `pollFrequency` 值（以毫秒为单位）以建议轮询间隔。请求方 **应当** 在提供时尊重此值。
 
 #### 4.6. 结果检索
@@ -413,7 +413,7 @@ stateDiagram-v2
 1. 当接收方收到任务增强请求的 JSON-RPC 请求 ID 的 `notifications/cancelled` 通知时，接收方 **应当** 立即将任务移动到 `cancelled` 状态并停止与该任务关联的所有处理。
 2. 由于通知的异步性质，接收方 **可能** 无法即时取消任务处理。接收方 **应当** 尽最大努力尽快停止执行。
 3. 如果 `notifications/cancelled` 通知在任务已达到终端状态（`completed`、`failed`、`cancelled` 或 `unknown`）后到达，接收方 **应当** 忽略该通知。
-4. 任务达到 `cancelled` 状态且其 `keepAlive` 持续时间 elapsed 后，接收方 **可以** 删除任务及其元数据。
+4. 任务达到 `cancelled` 状态且其 `keepAlive` 持续时间已过后，接收方 **可以** 删除任务及其元数据。
 5. 请求方 **可以** 在任务执行期间的任何时间发送 `notifications/cancelled`，包括任务处于 `input_required` 状态时。如果任务在 `input_required` 状态时被取消，接收方 **应当** 也忽略关联请求的任何挂起响应。
 6. 因为通知不提供接收确认，请求方 **应当** 在发送取消通知后继续使用 `tasks/get` 轮询以确认任务已转换到 `cancelled` 状态。如果任务未在合理时间范围内转换到 `cancelled`，请求方 **可以** 假设取消未被处理。
 
@@ -725,7 +725,7 @@ https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1686#issueco
    3. 监控可疑模式（例如，许多失败的任务查找，过度轮询）
 2. 请求方 **应当**：
    1. 记录任务生命周期事件以用于调试和审计
-   2. 跟踪任务 ID 及其关联操作
+   2. 跟踪任务 ID 及其关联操作。
 
 ## 设计理由
 
@@ -745,7 +745,7 @@ https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1686#issueco
 
 选择使用 `_meta` 来存储任务信息，而不是专用的请求参数，是为了在请求语义和执行跟踪之间保持清晰的关注点分离。
 
-任务信息从根本上正交于请求语义。任务 ID 和 keepAlive 持续时间不会影响请求做什么——它们只影响结果如何检索和保留。无论 `tools/call` 请求是否包含任务元数据，它执行的操作都是相同的。任务元数据 simply 提供了一种访问结果的替代机制。
+任务信息从根本上正交于请求语义。任务 ID 和 keepAlive 持续时间不会影响请求做什么——它们只影响结果如何检索和保留。无论 `tools/call` 请求是否包含任务元数据，它执行的操作都是相同的。任务元数据只是提供了一种访问结果的替代机制。
 
 通过将任务信息放在 `_meta` 中，我们在“执行什么”（请求参数）和“如何跟踪执行”（任务元数据）之间创建了清晰的架构边界。这个边界使实现者更容易理解协议。请求参数定义正在执行的操作，而元数据提供正交的关注点，如进度跟踪、任务管理和其他与执行相关的信息。
 
@@ -757,7 +757,7 @@ SDK 可以在任务原语之上提供易用的抽象，同时保持关注点分�
 // === MCP SDK（伪代码，大致基于 modelcontextprotocol/typescript-sdk）===
 
 /**
- * NEW: 一个解析为结果的请求，要么直接解析，要么通过轮询任务解析。
+ * 新增：一个解析为结果的请求，要么直接解析，要么通过轮询任务解析。
  */
 class PendingRequest<TResult> {
   constructor(readonly protocol: Protocol, readonly result: Promise<TResult>, readonly taskId?: string) {}
@@ -817,7 +817,7 @@ class Client extends Protocol {
   }
 
   /**
-   * NEW: 启动工具调用并返回 PendingRequest 对象的底层方法，以实现更细粒度的控制。
+   * 新增：启动工具调用并返回 PendingRequest 对象的底层方法，以实现更细粒度的控制。
    */
   async beginCallTool<TResult>(
     params: CallToolRequest['params'],
@@ -936,7 +936,7 @@ const result = await client.callTool(
 
 首先，服务器和客户端需要一种方法来传达关于执行模式的期望。如果没有这个，主机应用程序无法就 UX 模式做出明智的决定——它们应该阻塞、显示加载指示器，还是允许用户继续工作？仅注释可以信号请求可能需要较长时间，但没有提供主动检查状态或稍后检索结果的机制。
 
-其次，传输层解决方案无法提供对仍在进行中的请求执行状态的可见性。如果请求停止发送进度通知，客户端无法区分“服务器正在进行昂贵的工作”和“请求丢失”。传输级重试可以确认连接是活动的，但不能回答“这个特定请求仍在执行吗？”这种可见性对于用户需要确信其工作正在 progress 的操作至关重要。
+其次，传输层解决方案无法提供对仍在进行中的请求执行状态的可见性。如果请求停止发送进度通知，客户端无法区分“服务器正在进行昂贵的工作”和“请求丢失”。传输级重试可以确认连接是活动的，但不能回答“这个特定请求仍在执行吗？”这种可见性对于用户需要确信其工作正在进行的操作至关重要。
 
 第三，不同的传输将需要不同的机制来解决这些问题。sHTTP 提案调整流管理和重试语义以满足这些要求，但 stdio 没有等效的扩展点。这造成了特定于传输的碎片化，实现者必须根据他们选择的传输以不同方式解决相同的问题。数据层操作在所有传输中提供一致的语义。
 
@@ -945,9 +945,9 @@ const result = await client.callTool(
 **基于资源的方法：**
 另一种可能的方法是利用现有的 MCP 资源来跟踪长期运行的操作。例如，工具可以返回一个链接资源来传达操作状态，客户端可以订阅该资源以在操作完成时接收更新。这将允许服务器使用资源原语表示任务状态，可能带有建议轮询频率的注释。
 
-虽然这种方法在技术上是可行的，并且服务器仍然可以自由采用此类约定，但它 suffers 与动机部分中描述的工具拆分模式类似的限制。像 `start_tool` 和 `get_tool` 约定一样，基于资源的跟踪系统将是基于约定而不是标准化的，造成几个挑战：
+虽然这种方法在技术上是可行的，并且服务器仍然可以自由采用此类约定，但它与动机部分中描述的工具拆分模式类似，存在相同的限制。像 `start_tool` 和 `get_tool` 约定一样，基于资源的跟踪系统将是基于约定而不是标准化的，造成几个挑战：
 
-最根本的问题是客户缺乏一致的方法来区分普通资源（旨在暴露给模型）和状态跟踪资源（旨在由应用程序轮询）。状态资源应该呈现给模型吗？客户端应该如何将返回的资源与原始工具调用关联？如果没有标准化，不同的服务器将实现不同的约定，迫使客户端/主机/模型处理每个服务器的特定方法。用类似任务的语义（如轮询频率、keepalive 持续时间和显式状态状态）扩展资源将为资源创建一个新的且 distinct 的目的，这将难以与其作为模型可访问内容的现有目的区分开来。
+最根本的问题是客户缺乏一致的方法来区分普通资源（旨在暴露给模型）和状态跟踪资源（旨在由应用程序轮询）。状态资源应该呈现给模型吗？客户端应该如何将返回的资源与原始工具调用关联？如果没有标准化，不同的服务器将实现不同的约定，迫使客户端/主机/模型处理每个服务器的特定方法。用类似任务的语义（如轮询频率、keepalive 持续时间和显式状态状态）扩展资源将为资源创建一个新的且独特的目的，这将难以与其作为模型可访问内容的现有目的区分开来。
 
 资源订阅模型还有一个额外的问题：由于它是基于推送的，它要求客户端等待资源更改的通知，而不是主动轮询状态。虽然这适用于某些用例，但它没有解决客户端需要主动检查状态的场景——例如，主动且确定地检查工作是否仍在进行，这是本提案的原始意图。
 
@@ -977,7 +977,7 @@ const result = await client.callTool(
 
 - 服务器可以逐步实现任务支持，从高价值请求类型开始
 - 客户端可以在支持的地方机会性地使用任务
-- 客户端和服务器更新之间不需要协调
+- 客户端和服务器更新之间不需要协调。
 
 ## 未来工作
 
@@ -1026,23 +1026,23 @@ const result = await client.callTool(
 
 ```mermaid
 sequenceDiagram
-    participant C as Client
-    participant S as Server
+    participant C as 客户端
+    participant S as 服务器
 
-    Note over C,S: Client Creates Parent Task
+    Note over C,S: 客户端创建父任务
     C->>S: tools/call "deploy_application"<br/>_meta: {taskId: "deploy-123"}
     S--)C: notifications/tasks/created
 
     C->>S: tasks/get (taskId: "deploy-123")
     S->>C: status: working
 
-    Note over S: Server determines subtasks needed
+    Note over S: 服务器确定所需的子任务
 
-    Note over C,S: Server Responds with Subtask Requirements
+    Note over C,S: 服务器响应子任务要求
     C->>S: tasks/get (taskId: "deploy-123")
     S->>C: status: working<br/>childTasks: [{<br/>  taskId: "build-456",<br/>  toolName: "run_build",<br/>  arguments: {...}<br/>}, {<br/>  taskId: "test-789",<br/>  toolName: "run_tests",<br/>  arguments: {...}<br/>}]
 
-    Note over C: Client initiates subtasks
+    Note over C: 客户端发起子任务
 
     C->>S: tools/call "run_build"<br/>_meta: {taskId: "build-456", parentTaskId: "deploy-123"}
     S--)C: notifications/tasks/created
@@ -1050,7 +1050,7 @@ sequenceDiagram
     C->>S: tools/call "run_tests"<br/>_meta: {taskId: "test-789", parentTaskId: "deploy-123"}
     S--)C: notifications/tasks/created
 
-    Note over C: Client polls subtasks
+    Note over C: 客户端轮询子任务
 
     C->>S: tasks/get (taskId: "build-456")
     S->>C: status: completed
@@ -1058,13 +1058,13 @@ sequenceDiagram
     C->>S: tasks/get (taskId: "test-789")
     S->>C: status: completed
 
-    Note over S: All subtasks complete, parent continues
+    Note over S: 所有子任务完成，父任务继续执行
 
     C->>S: tasks/get (taskId: "deploy-123")
     S->>C: status: completed
 
     C->>S: tasks/result (taskId: "deploy-123")
-    S->>C: Deployment complete
+    S->>C: 部署完成
 ```
 
 **潜在数据模型扩展：**

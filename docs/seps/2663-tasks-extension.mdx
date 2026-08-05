@@ -16,12 +16,12 @@ description: "任务扩展"
 | 字段          | 值                                                                                                                                                                 |
 | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **SEP**       | 2663                                                                                                                                                                  |
-| **Title**     | 任务扩展                                                                                                                                                       |
-| **Status**    | 最终版                                                                                                                                                                 |
-| **Type**      | 扩展轨道                                                                                                                                                      |
-| **Created**   | 2026-04-27                                                                                                                                                            |
-| **Author(s)** | Luca Chang ([@LucaButBoring](https://github.com/LucaButBoring)), Caitie McCaffrey ([@CaitieM20](https://github.com/CaitieM20)); 代表 Agents Working Group |
-| **Sponsor**   | Caitie McCaffrey ([@CaitieM20](https://github.com/CaitieM20))                                                                                                         |
+| **标题**      | 任务扩展                                                                                                                                                       |
+| **状态**      | 最终版                                                                                                                                                                 |
+| **类型**      | 扩展轨道                                                                                                                                                      |
+| **创建日期**  | 2026-04-27                                                                                                                                                            |
+| **作者**      | Luca Chang ([@LucaButBoring](https://github.com/LucaButBoring)), Caitie McCaffrey ([@CaitieM20](https://github.com/CaitieM20))；代表代理工作组 |
+| **发起人**    | Caitie McCaffrey ([@CaitieM20](https://github.com/CaitieM20))                                                                                                         |
 | **PR**        | [#2663](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2663)                                                                                       |
 
 ---
@@ -38,7 +38,7 @@ description: "任务扩展"
 - [SEP-2322: 多轮往返请求](./2322-MRTR.md)
 - [SEP-2243: 流式 HTTP 传输的 HTTP Header 标准化](./2243-http-standardization.md)
 - [SEP-2567: 通过显式状态句柄实现无会话 MCP](./2567-sessionless-mcp.md)
-- [SEP-2575: 让 MCP 变为无状态](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2575)
+- [SEP-2575: 让 MCP 变为无状态](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2575)。
 
 ## 动机
 
@@ -153,14 +153,14 @@ type ResultType = "complete" | "input_required" | "task" | string;
 
 ```typescript
 interface Task {
-  /** 该 task 的稳定标识符。 */
+  /** 该任务的稳定标识符。 */
   taskId: string;
 
-  /** 当前 task 状态。 */
+  /** 当前任务状态。 */
   status: "working" | "input_required" | "completed" | "cancelled" | "failed";
 
   /**
-   * 描述当前 task 状态的可选消息。
+   * 描述当前任务状态的可选消息。
    * 这可以为任何状态提供上下文，例如（不具规范性）：
    * - "working" 的进度描述
    * - 在 "input_required" 上被阻塞的工作
@@ -172,42 +172,42 @@ interface Task {
    */
   statusMessage?: string;
 
-  /** task 创建时的 ISO 8601 时间戳。 */
+  /** 任务创建时的 ISO 8601 时间戳。 */
   createdAt: string;
 
-  /** task 上次更新时的 ISO 8601 时间戳。 */
+  /** 任务上次更新时的 ISO 8601 时间戳。 */
   lastUpdatedAt: string;
 
   /**
    * 从创建时刻起的生存时间（毫秒整数）；若为无限则为 null。
-   * 服务器可以在 TTL 到期后丢弃该 task。该值在 task 的生命周期内
+   * 服务器可以在 TTL 到期后丢弃该任务。该值在任务的生命周期内
    * MAY 变化。
    */
   ttlMs: number | null;
 
   /**
    * 建议的轮询间隔（毫秒整数）。客户端 SHOULD 遵守该值，以避免
-   * 压垮服务器。该值在 task 的生命周期内 MAY 变化。
+   * 压垮服务器。该值在任务的生命周期内 MAY 变化。
    */
   pollIntervalMs?: number;
 }
 ```
 
-#### Task 状态
+#### 任务状态
 
-Tasks 可以处于以下状态之一：
+任务可以处于以下状态之一：
 
 - `working`：请求正在处理中。
-- `input_required`：服务器在 task 继续之前需要来自客户端的输入。`tasks/get` 响应将在 `inputRequests` 字段中包含未完成的请求。客户端 **MUST** 检查此字段，并且 **SHOULD** 在后续 `tasks/update` 请求中通过 `inputResponses` 字段提供响应。
+- `input_required`：服务器在任务继续之前需要来自客户端的输入。`tasks/get` 响应将在 `inputRequests` 字段中包含未完成的请求。客户端 **MUST** 检查此字段，并且 **SHOULD** 在后续 `tasks/update` 请求中通过 `inputResponses` 字段提供响应。
 - `completed`：请求已成功完成，结果可在 `result` 字段中获取。这包括返回结果且 `isError: true` 的工具调用。
-- `failed`：请求在执行期间因 JSON-RPC 错误而失败。该 task 会在 `error` 字段中包含 JSON-RPC 错误详情。此状态 **MUST NOT** 用于非 JSON-RPC 错误。
+- `failed`：请求在执行期间因 JSON-RPC 错误而失败。该任务会在 `error` 字段中包含 JSON-RPC 错误详情。此状态 **MUST NOT** 用于非 JSON-RPC 错误。
 - `cancelled`：请求在完成前被取消。
 
 `Task` 的派生结构会内联状态特定的载荷字段，并用于 `tasks/get` 响应和 `notifications/tasks` 通知：
 
 ```ts
 /**
- * 处于正常 working 状态的 task。
+ * 处于正常 working 状态的任务。
  * 用于 tasks/get 和 notifications/tasks。
  */
 export interface WorkingTask extends Task {
@@ -215,46 +215,46 @@ export interface WorkingTask extends Task {
 }
 
 /**
- * 正在等待来自客户端输入的 task。
+ * 正在等待来自客户端输入的任务。
  * 用于 tasks/get 和 notifications/tasks。
  */
 export interface InputRequiredTask extends Task {
   status: "input_required";
   /**
-   * 在 task 执行期间需要完成的 server-to-client 请求。
+   * 在任务执行期间需要完成的服务器到客户端请求。
    * 键是用于将请求与响应匹配的任意标识符。
    */
   inputRequests: InputRequests;
 }
 
 /**
- * 已成功完成的 task。
+ * 已成功完成的任务。
  * 用于 tasks/get 和 notifications/tasks。
  */
 export interface CompletedTask extends Task {
   status: "completed";
   /**
-   * task 的最终结果。
+   * 任务的最终结果。
    * 其结构与原始请求的结果类型一致。
-   * 例如，CallToolRequest task 会返回 CallToolResult 结构。
+   * 例如，CallToolRequest 任务会返回 CallToolResult 结构。
    */
   result: JSONObject;
 }
 
 /**
- * 因 JSON-RPC 错误而失败的 task。
+ * 因 JSON-RPC 错误而失败的任务。
  * 用于 tasks/get 和 notifications/tasks。
  */
 export interface FailedTask extends Task {
   status: "failed";
   /**
-   * 导致 task 失败的 JSON-RPC 错误。
+   * 导致任务失败的 JSON-RPC 错误。
    */
   error: JSONObject;
 }
 
 /**
- * 已被取消的 task。
+ * 已被取消的任务。
  * 用于 tasks/get 和 notifications/tasks。
    */
 export interface CancelledTask extends Task {
@@ -262,8 +262,8 @@ export interface CancelledTask extends Task {
 }
 
 /**
- * 表示带有可选内联 result/error/inputRequests 字段的 task 的联合类型。
- * 此类型用于 tasks/get 和 notifications/tasks，以提供完整的 task 状态，
+ * 表示带有可选内联 result/error/inputRequests 字段的任务的联合类型。
+ * 此类型用于 tasks/get 和 notifications/tasks，以提供完整的任务状态，
  * 包括终态结果或待处理的输入请求。
  */
 export type DetailedTask =
@@ -322,15 +322,15 @@ type CreateTaskResult = Result & Task;
 
 服务器 **MUST NOT** 在 task 可靠创建之前返回 `CreateTaskResult`——也就是说，直到返回的 `taskId` 对应的 `tasks/get` 能够成功解析之前，都不可以返回。在最终一致性环境中，服务器 **MUST** 在响应前等待一致性达成。此要求消除了客户端为 task 创建进行投机式轮询的需要。
 
-将多轮往返请求与 task 创建结合使用的服务器实现（例如，在创建 task 之前需要通过 `InputRequiredResult` 获取 eliciation 的工具）**SHOULD** 在返回 `CreateTaskResult` 之前 _同步_ 完成所有 MRTR 往返。
+将多轮往返请求与 task 创建结合使用的服务器实现（例如，在创建 task 之前需要通过 `InputRequiredResult` 获取 elicitation 的工具）**SHOULD** 在返回 `CreateTaskResult` 之前 _同步_ 完成所有 MRTR 往返。
 
-### Task 轮询
+### 任务轮询
 
-客户端通过发送 `tasks/get` 请求来轮询 task 的完成情况。
+客户端通过发送 `tasks/get` 请求来轮询任务的完成情况。
 
-客户端在决定轮询频率时 **SHOULD** 遵守响应中提供的 `pollIntervalMs`。`pollIntervalMs` 在 task 的生命周期内 **MAY** 变化。服务器 **MAY** 对轮询频率高于记录的 `pollIntervalMs` 的客户端进行限流。
+客户端在决定轮询频率时 **SHOULD** 遵守响应中提供的 `pollIntervalMs`。`pollIntervalMs` 在任务的生命周期内 **MAY** 变化。服务器 **MAY** 对轮询频率高于记录的 `pollIntervalMs` 的客户端进行限流。
 
-客户端 **SHOULD** 持续轮询，直到 task 达到终态，或直到调用 `tasks/cancel`。客户端 **SHOULD** 将 task ID 持久化到持久存储，以便在崩溃或重启后恢复轮询。
+客户端 **SHOULD** 持续轮询，直到任务达到终态，或直到调用 `tasks/cancel`。客户端 **SHOULD** 将任务 ID 持久化到持久存储，以便在崩溃或重启后恢复轮询。
 
 #### 请求
 
@@ -338,7 +338,7 @@ type CreateTaskResult = Result & Task;
 interface GetTaskRequest extends JSONRPCRequest {
   method: "tasks/get";
   params: {
-    /** 要查询的 task 标识符。 */
+    /** 要查询的任务标识符。 */
     taskId: string;
   };
 }
@@ -346,21 +346,21 @@ interface GetTaskRequest extends JSONRPCRequest {
 
 #### 响应
 
-收到 `tasks/get` 请求后，服务器 **MUST** 检查 task 的状态并相应响应：
+收到 `tasks/get` 请求后，服务器 **MUST** 检查任务的状态并相应响应：
 
-1. 如果状态是 `working`，服务器 **MUST** 返回一个状态为 `working` 的 `Task` 对象。
-2. 如果状态是 `input_required`，服务器 **MUST** 返回一个状态为 `input_required` 的 `Task` 对象，并带有 [Multi Round-Trip Requests](./2322-MRTR.md) 中定义的 `inputRequests` 字段。`inputRequests` 字段 **MUST** 包含所有尚未完成、且需要在 task 继续之前由服务器发给客户端并完成的请求。
-3. 如果状态是 `completed`，服务器 **MUST** 返回一个状态为 `completed` 的 `Task` 对象，并在 `result` 字段中包含 task 的最终结果。
-4. 如果状态是 `cancelled`，服务器 **MUST** 返回一个状态为 `cancelled` 的 `Task` 对象。
-5. 如果状态是 `failed`，服务器 **MUST** 返回一个状态为 `failed` 的 `Task` 对象，并包含执行过程中发生的错误。
+1. 如果状态是 `working`，服务器 **MUST** 返回一个状态为 `working` 的任务对象。
+2. 如果状态是 `input_required`，服务器 **MUST** 返回一个状态为 `input_required` 的任务对象，并带有[多轮往返请求](./2322-MRTR.md)中定义的 `inputRequests` 字段。`inputRequests` 字段 **MUST** 包含所有尚未完成、且需要在任务继续之前由服务器发给客户端并完成的请求。
+3. 如果状态是 `completed`，服务器 **MUST** 返回一个状态为 `completed` 的任务对象，并在 `result` 字段中包含任务的最终结果。
+4. 如果状态是 `cancelled`，服务器 **MUST** 返回一个状态为 `cancelled` 的任务对象。
+5. 如果状态是 `failed`，服务器 **MUST** 返回一个状态为 `failed` 的任务对象，并包含执行过程中发生的错误。
 
 ```typescript
 type GetTaskResult = Result & DetailedTask;
 ```
 
-响应携带与 task 当前状态相匹配的相应响应变体（见 [Task 状态](#task-状态)）。由于这是 `tasks/get` 请求的标准结果形态，该对象上的 `resultType` 字段 **MUST** 设为 `"complete"`。
+响应携带与任务当前状态相匹配的相应响应变体（见[任务状态](#task-状态)）。由于这是 `tasks/get` 请求的标准结果形态，该对象上的 `resultType` 字段 **MUST** 设为 `"complete"`。
 
-如果 task 的 `ttlMs` 非空，客户端 **MAY** 将 TTL 视为最后保障：如果在 `createdAt` 加上 `ttlMs` 经过后，task 的可观测状态仍未反映更新，则客户端 **MAY** 认为该 task 不再可用。反过来，服务器 **MAY** 在 TTL 到期后的任意时间点将 task 标记为 `failed`，并随后在任何时候将其删除。`ttlMs` 的值在 task 的生命周期内 **MAY** 变化。
+如果任务的 `ttlMs` 非空，客户端 **MAY** 将 TTL 视为最后保障：如果在 `createdAt` 加上 `ttlMs` 经过后，任务的可观测状态仍未反映更新，则客户端 **MAY** 认为该任务不再可用。反过来，服务器 **MAY** 在 TTL 到期后的任意时间点将任务标记为 `failed`，并随后在任何时候将其删除。`ttlMs` 的值在任务的生命周期内 **MAY** 变化。
 
 ### Task 更新请求
 
@@ -404,7 +404,7 @@ type UpdateTaskResult = Result; // 空确认
 
 ### 任务取消
 
-客户端发送 `tasks/cancel` 请求以表明其希望取消一个进行中的 task。`notifications/cancelled` 通知 **MUST NOT** 用于 task 取消。
+客户端发送 `tasks/cancel` 请求以表明其希望取消一个进行中的任务。`notifications/cancelled` 通知 **MUST NOT** 用于任务取消。
 
 #### 请求
 
@@ -423,15 +423,15 @@ interface CancelTaskRequest extends JSONRPCRequest {
 type CancelTaskResult = Result; // 空确认
 ```
 
-服务器 **MUST** 以空结果确认该请求。若 `taskId` 不对应已知 task，服务器 **SHOULD** 返回 JSON-RPC 错误。取消处理是 _最终一致_ 的——在确认之后，task 的可观测状态 **MAY** 仍保持 `working`（或其他非终态），并且如果工作在取消生效前已完成，最终 **MAY** 到达一个非 `cancelled` 的终态。
+服务器 **MUST** 以空结果确认该请求。若 `taskId` 不对应已知任务，服务器 **SHOULD** 返回 JSON-RPC 错误。取消处理是 _最终一致_ 的——在确认之后，任务的可观测状态 **MAY** 仍保持 `working`（或其他非终态），并且如果工作在取消生效前已完成，最终 **MAY** 到达一个非 `cancelled` 的终态。
 
 取消是 **协作式** 的：请求表达意图，由服务器决定是否以及何时遵从。服务器没有义务真正停止工作；它仅有义务确认该请求。最终变为 `cancelled` 并不保证一定发生。
 
-客户端在发送取消后 **MAY** 立即删除与该 task 相关的全部状态（例如，不再需要保留它已经响应过的 `inputRequests` 键列表）。客户端无需再次轮询 `tasks/get` 来等待 task 进入 `cancelled` 状态。
+客户端在发送取消后 **MAY** 立即删除与该任务相关的全部状态（例如，不再需要保留它已经响应过的 `inputRequests` 键列表）。客户端无需再次轮询 `tasks/get` 来等待任务进入 `cancelled` 状态。
 
 `CancelTaskResult` 上的 `resultType` 字段 **MUST** 设为 `"complete"`，因为这是 `tasks/cancel` 请求的标准结果形态。
 
-### Task 状态通知
+### 任务状态通知
 
 除处理客户端轮询之外，服务器 **MAY** 通过 `notifications/tasks` 通知推送状态更新：
 
@@ -444,7 +444,7 @@ export interface TaskStatusNotification extends JSONRPCNotification {
 }
 ```
 
-要开始监听 task 状态通知，客户端会向服务器发送 `subscriptions/listen` 请求，并包含一份其感兴趣的 task ID 列表（见 [SEP-2575](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2575)）：
+要开始监听任务状态通知，客户端会向服务器发送 `subscriptions/listen` 请求，并包含一份其感兴趣的任务 ID 列表（见 [SEP-2575](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2575)）：
 
 ```typescript
 export interface SubscriptionsListenRequest extends Request {
@@ -459,7 +459,7 @@ export interface SubscriptionsListenRequest extends Request {
 }
 ```
 
-在其确认通知中，服务器会包含其同意发送 task 状态通知的 task ID 列表（如果有）：
+在其确认通知中，服务器会包含其同意发送任务状态通知的任务 ID 列表（如果有）：
 
 ```typescript
 export interface SubscriptionsAcknowledgedNotification extends Notification {
@@ -467,7 +467,7 @@ export interface SubscriptionsAcknowledgedNotification extends Notification {
   params: {
     notifications: {
       /**
-       * 为特定 task ID 订阅 notifications/tasks。
+       * 为特定任务 ID 订阅 notifications/tasks。
        */
       taskIds?: string[];
       // 其他现有字段...
@@ -476,7 +476,7 @@ export interface SubscriptionsAcknowledgedNotification extends Notification {
 }
 ```
 
-如果客户端请求 task 状态通知，但未声明 `io.modelcontextprotocol/tasks` 扩展能力，服务器 **MUST** 返回指定缺失能力的 JSON-RPC 错误：
+如果客户端请求任务状态通知，但未声明 `io.modelcontextprotocol/tasks` 扩展能力，服务器 **MUST** 返回指定缺失能力的 JSON-RPC 错误：
 
 ```jsonl
 {
@@ -526,9 +526,9 @@ export interface SubscriptionsAcknowledgedNotification extends Notification {
 }
 ```
 
-该通知包含完整的 task 对象，使客户端无需轮询 `tasks/get` 方法即可访问完整的 task 状态和最终结果。客户端 **MAY** 在订阅 task 状态通知之外继续轮询 `tasks/get`，但并非必需。
+该通知包含完整的任务对象，使客户端无需轮询 `tasks/get` 方法即可访问完整的任务状态和最终结果。客户端 **MAY** 在订阅任务状态通知之外继续轮询 `tasks/get`，但并非必需。
 
-`notifications/progress` 和 `notifications/message` 通知 **MUST NOT** 在 task 的 `subscriptions/listen` 流上发送，并且本规范一般也不支持在 tasks 上使用它们。
+`notifications/progress` 和 `notifications/message` 通知 **MUST NOT** 在任务的 `subscriptions/listen` 流上发送，并且本规范一般也不支持在任务上使用它们。
 
 ### Streamable HTTP：路由头
 
@@ -790,7 +790,7 @@ export interface SubscriptionsAcknowledgedNotification extends Notification {
       "content": [
         {
           "type": "text",
-          "text": "Hello, Luca!"
+          "text": "你好，Luca！"
         }
       ],
       "isError": false

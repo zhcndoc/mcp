@@ -5,7 +5,7 @@
 - **创建于**：2026-02-16
 - **作者**：MCP 传输工作组
 - **赞助者**：@CaitieM20 - Caitie McCaffrey
-- **PR**: https://github.com/modelcontextprotocol/specification/pull/2260
+- **PR**: https://github.com/modelcontextprotocol/specification/pull/2260。
 
 ## 摘要
 
@@ -98,7 +98,7 @@ MCP 服务器请求的设计意图是在其他 MCP 操作内部**嵌套地**、�
 </Warning>
 ```
 
-**在 `client/roots.mdx` 中（在 `User Interaction Model` 章节中）：**
+**在 `client/roots.mdx` 中（在 `用户交互模型` 章节中）：**
 
 ```markdown
 <Warning>
@@ -112,7 +112,7 @@ MCP 服务器请求的设计意图是在其他 MCP 操作内部**嵌套地**、�
 </Warning>
 ```
 
-**在 `basic/utilities/ping.mdx` 中（在 `Overview` 章节中）：**
+**在 `basic/utilities/ping.mdx` 中（在 `概述` 章节中）：**
 
 ```markdown
 <Warning>
@@ -134,25 +134,22 @@ keepalive 机制来维护空闲连接；`ping` 仍可用于协议级响应性检
 **在 `basic/transports.mdx` 中，POST 触发的 SSE 流（约第 121 行）：**
 
 ```diff
-- The server **MAY** send JSON-RPC _requests_ and _notifications_ before sending the
-- JSON-RPC _response_. These messages **SHOULD** relate to the originating client
-- _request_.
-+ The server **MAY** send JSON-RPC _requests_ and _notifications_ before sending the
-+ JSON-RPC _response_. These messages **MUST** relate to the originating client
-+ _request_.
+- 服务器 **可以** 在发送 JSON-RPC _响应_ 之前发送 JSON-RPC _请求_ 和 _通知_。这些消息
+- **应当** 与发起的客户端 _请求_ 相关联。
++ 服务器 **可以** 在发送 JSON-RPC _响应_ 之前发送 JSON-RPC _请求_ 和 _通知_。这些消息
++ **必须** 与发起的客户端 _请求_ 相关联。
 ```
 
 **在 `basic/transports.mdx` 中，GET 触发的独立 SSE 流（约第 147 行）：**
 
 ```diff
-- The server **MAY** send JSON-RPC _requests_ and _notifications_ on the stream.
-- These messages **SHOULD** be unrelated to any concurrently-running JSON-RPC
-- _request_ from the client.
-+ The server **MAY** send JSON-RPC _notifications_ and _pings_ on the stream.
-+ These messages **SHOULD** be unrelated to any concurrently-running JSON-RPC
-+ _request_ from the client, **except** that `roots/list`,
-+ `sampling/createMessage`, and `elicitation/create` requests **MUST NOT** be
-+ sent on standalone streams.
+- 服务器 **可以** 在流上发送 JSON-RPC _请求_ 和 _通知_。
+- 这些消息 **应当** 与客户端任何并发运行的 JSON-RPC
+- _请求_ 无关。
++ 服务器 **可以** 在流上发送 JSON-RPC _通知_ 和 _ping_。
++ 这些消息 **应当** 与客户端任何并发运行的 JSON-RPC
++ _请求_ 无关，但 `roots/list`、
++ `sampling/createMessage` 和 `elicitation/create` 请求 **不得** 在独立流上发送。
 ```
 
 ## 向后兼容性
@@ -228,7 +225,7 @@ async def analyze_data(data: str, ctx: Context) -> str:
 
 **无需更改** - 客户端应该已经在自身的出站请求上下文中处理采样/诱导请求。如果当前支持带外请求，这里有简化实现的潜力。
 
-收到没有关联出站请求的服务器到客户端请求的客户端 **应当** 返回 `-32602`（无效参数）错误。
+收到没有关联出站请求的服务器到客户端请求的客户端 **应** 以 `-32602`（无效参数）错误进行响应。
 
 ### 对传输实现者
 
@@ -240,7 +237,7 @@ async def analyze_data(data: str, ctx: Context) -> str:
 
 ## 时间线
 
-（本 SEP 旨在作为一项公开通知，告知在未来与此用法不兼容的协议版本之前将进行的更改）
+（本 SEP 旨在作为一项公开通知，告知在未来与此用法不兼容的协议版本之前将进行的更改。）
 
 ## 备选方案考虑
 
@@ -267,4 +264,4 @@ async def analyze_data(data: str, ctx: Context) -> str:
 - 当前采样文档：`/specification/draft/client/sampling.mdx`
 - 当前提示文档：`/specification/draft/client/elicitation.mdx`
 - 传输规范：`/specification/draft/basic/transports.mdx`
-- 客户端概念文档中的用户交互模型讨论
+- 客户端概念文档中的用户交互模型讨论。

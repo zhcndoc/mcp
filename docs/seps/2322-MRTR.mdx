@@ -812,7 +812,7 @@ sequenceDiagram
         "method": "elicitation/create",
         "params": {
           "mode": "form",
-          "message": "Please provide the input string to echo back",
+          "message": "请提供要回显的输入字符串",
           "requestedSchema": {
             "type": "object",
             "properties": {
@@ -1080,7 +1080,7 @@ sequenceDiagram
 }
 ```
 
-## Reason 说明
+## 原因说明
 
 我们考虑过采用双向流的方式来替代 SSE 流。
 不过，这种方式会使线路协议更加复杂（例如，它需要 HTTP/2 或 HTTP/3）。此外，它也不会消除那些无法支持长连接的环境中的问题，也无法解决容错方面的问题。

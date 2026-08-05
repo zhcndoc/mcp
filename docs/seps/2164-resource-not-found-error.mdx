@@ -6,7 +6,7 @@ description: "标准化资源未找到错误码"
 
 <div className="flex items-center gap-2 mb-4">
   <Badge color="green" shape="pill">
-    Final
+    最终
   </Badge>
   <Badge color="gray" shape="pill">
     标准跟踪
@@ -16,12 +16,12 @@ description: "标准化资源未找到错误码"
 | 字段           | 值                                                                              |
 | ------------- | ------------------------------------------------------------------------------- |
 | **SEP**       | 2164                                                                            |
-| **Title**     | 资源未找到错误码标准化                                                         |
-| **Status**    | Final                                                                           |
-| **Type**      | 标准跟踪                                                                        |
-| **Created**   | 2026-01-28                                                                      |
-| **Author(s)** | Peter Alexander ([@pja-ant](https://github.com/pja-ant))                        |
-| **Sponsor**   | None (seeking sponsor)                                                          |
+| **标题**       | 资源未找到错误码标准化                                                         |
+| **状态**       | 最终                                                                            |
+| **类型**       | 标准跟踪                                                                        |
+| **创建日期**   | 2026-01-28                                                                      |
+| **作者**       | Peter Alexander ([@pja-ant](https://github.com/pja-ant))                        |
+| **赞助者**     | 无（寻求赞助者）                                                                |
 | **PR**        | [#2164](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2164) |
 
 ---
@@ -85,7 +85,7 @@ description: "标准化资源未找到错误码"
 
 - 根据 JSON-RPC 规范，`-32000` 到 `-32099` 范围内的自定义代码是“保留给由实现定义的服务器错误”，而不是协议级语义
 - 添加一个协议定义的自定义代码要求所有客户端都更新以识别它
-- `-32602` 已经具有正确含义，并且被 JSON-RPC 库普遍理解
+- `-32602` 已经具有正确含义，并且被 JSON-RPC 库普遍理解。
 
 ## 向后兼容性
 
@@ -95,7 +95,7 @@ description: "标准化资源未找到错误码"
 
 1. SDK 应将其资源未找到错误码更新为 `-32602`
 2. 在过渡期间，客户端应同时将 `-32602` 和 `-32002` 视为资源未找到
-3. 规范应将 `-32602` 记录为标准错误码
+3. 规范应将 `-32602` 记录为标准错误码。
 
 ## 安全影响
 

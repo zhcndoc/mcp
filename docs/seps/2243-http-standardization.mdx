@@ -13,15 +13,15 @@ description: "用于可流式 HTTP 传输的 HTTP 头标准化"
   </Badge>
 </div>
 
-| Field         | Value                                                                           |
-| ------------- | ------------------------------------------------------------------------------- |
-| **SEP**       | 2243                                                                            |
-| **Title**     | 用于可流式 HTTP 传输的 HTTP 头标准化                                               |
-| **Status**    | 最终版                                                                          |
-| **Type**      | 标准轨道                                                                        |
-| **Created**   | 2026-02-04                                                                      |
-| **Author(s)** | MCP Transports 工作组                                                            |
-| **Sponsor**   | 无                                                                              |
+| 字段          | 值                                                                                |
+| ------------- | --------------------------------------------------------------------------------- |
+| **SEP**       | 2243                                                                              |
+| **标题**      | 用于可流式 HTTP 传输的 HTTP 头标准化                                               |
+| **状态**      | 最终版                                                                            |
+| **类型**      | 标准轨道                                                                          |
+| **创建日期**  | 2026-02-04                                                                        |
+| **作者**      | MCP Transports 工作组                                                             |
+| **发起人**    | 无                                                                                |
 | **PR**        | [#2243](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2243) |
 
 ---
@@ -52,7 +52,7 @@ description: "用于可流式 HTTP 传输的 HTTP 头标准化"
 | `Mcp-Method` | `method`                      | 所有请求和通知                                         |
 | `Mcp-Name`   | `params.name` or `params.uri` | `tools/call`、`resources/read`、`prompts/get` 请求      |
 
-这些头在引入它们的 MCP 版本中是**必需**的。
+这些头在引入它们的 MCP 版本中是**必需的**。
 
 **服务器行为**：处理请求体的服务器 MUST 拒绝头中指定的值与请求体中的值不匹配的请求。
 
@@ -408,10 +408,10 @@ HTTP 解析器通常会裁剪头值前后的空白。为了保留参数值中的
 
 客户端 MUST 按以下顺序应用编码规则：
 
-1. **Type conversion**: Convert the parameter value to its string representation:
-   - `string`: Use the value as-is
-   - `integer`: Convert to decimal string representation (e.g., `42`, `-7`)
-   - `boolean`: Convert to lowercase `"true"` or `"false"`
+1. **类型转换**：将参数值转换为其字符串表示：
+   - `string`：按原样使用该值
+   - `integer`：转换为十进制字符串表示（例如，`42`、`-7`）
+   - `boolean`：转换为小写的 `"true"` 或 `"false"`
 
 2. **空白检查**：如果字符串以空白字符（空格或制表符）开头或结尾：
    - 应用 Base64 编码（见下文）
@@ -437,13 +437,13 @@ Mcp-Param-{Name}: =?base64?{Base64EncodedValue}?=
 
 **示例**：
 
-| Original Value         | Reason                   | Encoded Header Value                                  |
-| ---------------------- | ------------------------ | ----------------------------------------------------- |
-| `"us-west1"`           | Plain ASCII              | `Mcp-Param-Region: us-west1`                          |
-| `"Hello, 世界"`        | Contains non-ASCII       | `Mcp-Param-Greeting: =?base64?SGVsbG8sIOS4lueVjA==?=` |
-| `" padded "`           | Leading/trailing spaces  | `Mcp-Param-Text: =?base64?IHBhZGRlZCA=?=`             |
-| `"line1\nline2"`       | Contains newline         | `Mcp-Param-Text: =?base64?bGluZTEKbGluZTI=?=`         |
-| `"=?base64?literal?="` | Matches sentinel pattern | `Mcp-Param-Val: =?base64?PT9iYXNlNjQ/bGl0ZXJhbD89?=`  |
+| 原始值                 | 原因                   | 编码后的头值                                          |
+| ---------------------- | ---------------------- | ----------------------------------------------------- |
+| `"us-west1"`           | 纯 ASCII               | `Mcp-Param-Region: us-west1`                          |
+| `"Hello, 世界"`        | 包含非 ASCII 字符      | `Mcp-Param-Greeting: =?base64?SGVsbG8sIOS4lueVjA==?=` |
+| `" padded "`           | 前导/尾随空格          | `Mcp-Param-Text: =?base64?IHBhZGRlZCA=?=`             |
+| `"line1\nline2"`       | 包含换行符             | `Mcp-Param-Text: =?base64?bGluZTEKbGluZTI=?=`         |
+| `"=?base64?literal?="` | 匹配哨兵模式           | `Mcp-Param-Val: =?base64?PT9iYXNlNjQ/bGl0ZXJhbD89?=`  |
 
 #### 客户端行为
 
@@ -457,7 +457,7 @@ Mcp-Param-{Name}: =?base64?{Base64EncodedValue}?=
 
 > **实现说明**：如果客户端没有工具的 `inputSchema`（例如尚未调用 `tools/list`）或者缓存的 schema 已过期（例如 TTL 已到期），客户端 SHOULD 在不带自定义 `Mcp-Param-*` 头的情况下发送请求。如果服务器因为缺少必需的自定义头而拒绝该请求，客户端 SHOULD 调用 `tools/list` 以获取当前的 `inputSchema`，然后使用适当的头重试原始请求。客户端 MAY 通过其他方式预加载工具定义（例如来自先前会话或配置），以便在未先调用 `tools/list` 的情况下也能发送头。
 
-#### Server Behavior
+#### 服务器行为
 
 在接收请求时，服务器 MUST 拒绝包含无效字符的 `Mcp-Param-{Name}` 头（见 [值编码](#value-encoding) 部分中的“字符限制”）。
 
@@ -467,7 +467,7 @@ Mcp-Param-{Name}: =?base64?{Base64EncodedValue}?=
 
 当由于头验证失败而拒绝请求时，服务器 MUST 返回具有以下错误代码的 JSON-RPC 错误响应：
 
-| Code     | Name             | Description                                                                                                            |
+| 代码     | 名称             | 描述                                                                                                                   |
 | -------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | `-32001` | `HeaderMismatch` | HTTP 头与请求体中的对应值不匹配，或所需头缺失/格式错误。                                                               |
 
@@ -501,48 +501,48 @@ Mcp-Param-{Name}: =?base64?{Base64EncodedValue}?=
 
 自定义头（通过 `x-mcp-header` 定义的头）遵循与标准头相同的验证规则：
 
-| Scenario                                 | Client Behavior                | Server Behavior                          |
-| ---------------------------------------- | ------------------------------ | ---------------------------------------- |
-| 提供了参数值                             | 客户端 MUST 包含该头           | 服务器 MUST 验证头与正文匹配             |
-| 参数值为 `null`                         | 客户端 MUST 省略该头           | 服务器 MUST NOT 期待该头                 |
-| 参数不在 arguments 中                    | 客户端 MUST 省略该头           | 服务器 MUST NOT 期待该头                 |
-| 客户端省略了头但正文中存在值             | 不符合规范的客户端             | 服务器 MUST 拒绝该请求                   |
+| 场景                             | 客户端行为                     | 服务器行为                           |
+| -------------------------------- | ------------------------------ | ------------------------------------ |
+| 提供了参数值                     | 客户端 MUST 包含该头           | 服务器 MUST 验证头与正文匹配          |
+| 参数值为 `null`                  | 客户端 MUST 省略该头           | 服务器 MUST NOT 期待该头              |
+| 参数不在 arguments 中             | 客户端 MUST 省略该头           | 服务器 MUST NOT 期待该头              |
+| 客户端省略了头但正文中存在值      | 不符合规范的客户端              | 服务器 MUST 拒绝该请求                |
 
 当由于缺少或无效的自定义头而拒绝请求时，服务器 MUST 返回 HTTP 状态 `400 Bad Request`，并带有 JSON-RPC 错误代码 `-32001`（`HeaderMismatch`）。
 
 ## 理由
 
-### Header 与 Path
+### 请求头与路径
 
-本提案将请求数据镜像到 header 中，而不是将其编码到 URL path 中。
+本提案将请求数据镜像到请求头中，而不是将其编码到 URL 路径中。
 
-**Header 的优势**：
+**请求头的优势**：
 
-1. **简单性**：所有广泛使用的网络负载均衡器都支持基于 HTTP header 的路由
+1. **简单性**：所有广泛使用的网络负载均衡器都支持基于 HTTP 请求头的路由
 2. **多版本支持**：在客户端和服务器中更容易支持多个 MCP 版本
-3. **兼容性**：Header 可与现有的 Streamable HTTP 传输设计配合使用，而无需更改 endpoint 结构
-4. **值无限制**：Header 值可以包含在 URL 中需要编码的字符（例如 `/`、`?`、`#`）
+3. **兼容性**：请求头可与现有的 Streamable HTTP 传输设计配合使用，而无需更改端点结构
+4. **值无限制**：请求头值可以包含在 URL 中需要编码的字符（例如 `/`、`?`、`#`）
 5. **无 URL 长度限制**：很长的值也可以传输，而不会触及 URL 长度限制
 
-**基于 Path 路由的优势**：
+**基于路径路由的优势**：
 
-1. **框架简单性**：许多 Web 框架（Flask、Express、Django、Rails）都内置支持基于 path 的路由，配置极少
-2. **日志记录**：URL path 通常默认会被记录，便于调试
+1. **框架简单性**：许多 Web 框架（Flask、Express、Django、Rails）都内置支持基于路径的路由，配置极少
+2. **日志记录**：URL 路径通常默认会被记录，便于调试
 
 **权衡与框架考量**：
 
-| 框架             | 基于 Header 的路由                                               | 基于 Path 的路由                              |
+| 框架             | 基于请求头的路由                                               | 基于路径的路由                              |
 | ----------------- | ------------------------------------------------------------------- | ------------------------------------------------ |
-| Flask（Python）   | 需要中间件或装饰器在路由前提取 header | 原生支持 `@app.route('/mcp/<method>')` |
+| Flask（Python）   | 需要中间件或装饰器在路由前提取请求头 | 原生支持 `@app.route('/mcp/<method>')` |
 | Express（Node.js） | 可通过 `req.headers` 轻松实现，但需要自定义路由逻辑            | 原生支持 `app.post('/mcp/:method')`    |
 | Django（Python）  | 需要自定义中间件                                          | 原生 URL 模式                              |
-| Go（net/http）    | 可通过 `r.Header.Get()` 轻松实现                                           | 可通过 path 模式原生支持                         |
+| Go（net/http）    | 可通过 `r.Header.Get()` 轻松实现                                           | 可通过路径模式原生支持                         |
 | ASP.NET Core      | 可通过 `[FromHeader]` 属性轻松实现                                   | 可通过路由模板原生支持                       |
 
-对于像 Flask 这样强烈偏好基于 path 路由的框架，实现基于 header 的路由需要额外代码：
+对于像 Flask 这样强烈偏好基于路径路由的框架，实现基于请求头的路由需要额外代码：
 
 ```python
-# Flask 示例：基于 Header 的路由需要手动分发
+# Flask 示例：基于请求头的路由需要手动分发
 @app.route('/mcp', methods=['POST'])
 def mcp_handler():
     method = request.headers.get('Mcp-Method')
@@ -553,35 +553,35 @@ def mcp_handler():
     # ... 等等
 ```
 
-尽管某些框架中会增加额外复杂性，但最终仍选择基于 header 的路由，原因如下：
+尽管某些框架中会增加额外复杂性，但最终仍选择基于请求头的路由，原因如下：
 
-1. **向后兼容**：引入基于 path 的路由将要求所有现有 MCP Server 进行重大更新，并且可能需要同时支持两套 endpoint 来支持多个版本。即使 SDK 可以在一定程度上掩盖这些问题，测试、指标等额外运维关注点仍然需要处理。基于 header 的路由只需极少的客户端改动。未选择 opt in 的客户端也仍可正常工作。
+1. **向后兼容**：引入基于路径的路由将要求所有现有 MCP 服务器进行重大更新，并且可能需要同时支持两套端点来支持多个版本。即使 SDK 可以在一定程度上掩盖这些问题，测试、指标等额外运维关注点仍然需要处理。基于请求头的路由只需极少的客户端改动。未选择加入的客户端也仍可正常工作。
 
-2. **基础设施收益大于框架复杂度**：主要目标是让网络基础设施（负载均衡器、代理、WAF）无需解析 body 就能路由和处理请求。这一收益与服务器所使用的框架无关。
+2. **基础设施收益大于框架复杂度**：主要目标是让网络基础设施（负载均衡器、代理、WAF）无需解析正文就能路由和处理请求。这一收益与服务器所使用的框架无关。
 
 ### 基础设施支持
 
-基于 HTTP header 的路由和处理已被以下组件支持：
+基于 HTTP 请求头的路由和处理已被以下组件支持：
 
 - **负载均衡器**：所有主流负载均衡器（HAProxy、NGINX、Cloudflare、F5、Envoy/Istio）
 - **限流**：11 个流行限流方案中的 9 个
 - **授权**：Kong、Tyk、AWS API Gateway、Google Cloud Apigee、Azure API Gateway、NGINX、Apache APISIX、Istio/Envoy
 - **Web 应用防火墙**：Cloudflare WAF、AWS WAF、Azure WAF、F5 Advanced WAF、FortiWeb、Imperva WAF、Barracuda WAF、ModSecurity、Akamai、Wallarm
-- **可观测性**：大多数可观测性方案都可以从 HTTP header 中提取数据
+- **可观测性**：大多数可观测性方案都可以从 HTTP 请求头中提取数据
 
-### x-mcp-header 中显式 Header 名称
+### x-mcp-header 中显式的请求头名称
 
-该设计在 `x-mcp-header` 中使用显式名称值，而不是从参数名推导 header 名称，原因如下：
+该设计在 `x-mcp-header` 中使用显式名称值，而不是从参数名推导请求头名称，原因如下：
 
-1. **大小写敏感性不匹配**：Header 名称不区分大小写，但 JSON Schema 属性名区分大小写
-2. **字符集限制**：Header 名称仅限 ASCII 字符，而工具参数名可能包含任意 Unicode
-3. **简单性**：无需用复杂方案从嵌套属性构造 header 名称
+1. **大小写敏感性不匹配**：请求头名称不区分大小写，但 JSON Schema 属性名区分大小写
+2. **字符集限制**：请求头名称仅限 ASCII 字符，而工具参数名可能包含任意 Unicode
+3. **简单性**：无需用复杂方案从嵌套属性构造请求头名称
 
 ### 在 JSON Schema 中的位置
 
 `x-mcp-header` 扩展直接放置在要镜像的属性的 JSON Schema 内部，而不是放在 schema 外部的单独元数据字段中。该设计选择有几个优点：
 
-1. **共置性**：header 映射与其影响的属性定义在一起，使其立即清楚哪个参数会被镜像。开发者无需在 schema 与单独的元数据结构之间来回查找。
+1. **共置性**：请求头映射与其影响的属性定义在一起，使其立即清楚哪个参数会被镜像。开发者无需在 schema 与单独的元数据结构之间来回查找。
 
 2. **成熟模式**：JSON Schema 明确支持扩展关键字（以 `x-` 开头的属性），这一模式在 OpenAPI 等生态中被广泛使用。工具作者和 SDK 开发者对此方式已经很熟悉。
 
@@ -589,32 +589,32 @@ def mcp_handler():
 
 4. **工具兼容性**：现有 JSON Schema 校验器默认会忽略未知关键字，因此添加 `x-mcp-header` 不会破坏现有 schema 校验。不理解此扩展的工具会直接跳过它。
 
-5. **降低复杂度**：单独的元数据结构需要定义一种映射机制（例如 JSON Pointer 或属性路径）来将 headers 与属性关联起来，这会增加实现复杂度并带来出错风险。
+5. **降低复杂度**：单独的元数据结构需要定义一种映射机制（例如 JSON Pointer 或属性路径）来将请求头与属性关联起来，这会增加实现复杂度并带来出错风险。
 
-### 范围：仅适用于 Tools
+### 范围：仅适用于工具
 
-`x-mcp-header` 机制目前仅适用于 `tools/call` 请求，因为 tools 是唯一带有 `inputSchema` 且支持 JSON Schema 扩展关键字的 MCP 原语。Resources 和 prompts 没有等价的 schema 结构：`resources/read` 只接收一个 `uri`（已通过 `Mcp-Name` 暴露），而 `prompts/get` 将参数定义为一个简单的 `{name, description, required}` 数组，不具备 JSON Schema 可扩展性。若要将自定义 header 映射泛化到这些原语，需要为 resources 和 prompts 增加类似 `inputSchema` 的定义，这属于更大的规范变更。这被记录为未来可能的扩展。
+`x-mcp-header` 机制目前仅适用于 `tools/call` 请求，因为工具是唯一带有 `inputSchema` 且支持 JSON Schema 扩展关键字的 MCP 原语。资源和提示没有等价的 schema 结构：`resources/read` 只接收一个 `uri`（已通过 `Mcp-Name` 暴露），而 `prompts/get` 将参数定义为一个简单的 `{name, description, required}` 数组，不具备 JSON Schema 可扩展性。若要将自定义请求头映射泛化到这些原语，需要为资源和提示增加类似 `inputSchema` 的定义，这属于更大的规范变更。这被记录为未来可能的扩展。
 
-### 不定义规范层面的 Header 大小限制
+### 不定义规范层面的请求头大小限制
 
-本规范有意不定义单个 header 值长度、MCP header 总大小或自定义 header 数量的限制。Header 纯粹是 HTTP 概念，而 HTTP 本身（[RFC 9110](https://datatracker.ietf.org/doc/html/rfc9110)）并未规定 header 大小限制。常见 HTTP 基础设施会施加自己的限制——从某些服务器的 4–8 KB（例如 Apache 约 8190 字节）到其他系统的 128 KB（例如 Cloudflare）不等——但合适的限制取决于部署环境，而只有服务运营者才能确定这一点。
+本规范有意不定义单个请求头值长度、MCP 请求头总大小或自定义请求头数量的限制。请求头纯粹是 HTTP 概念，而 HTTP 本身（[RFC 9110](https://datatracker.ietf.org/doc/html/rfc9110)）并未规定请求头大小限制。常见 HTTP 基础设施会施加自己的限制——从某些服务器的 4–8 KB（例如 Apache 约 8190 字节）到其他系统的 128 KB（例如 Cloudflare）不等——但合适的限制取决于部署环境，而只有服务运营者才能确定这一点。
 
-定义规范层面的限制（例如“省略超过 8192 字节的 header”）会带来问题：
+定义规范层面的限制（例如“省略超过 8192 字节的请求头”）会带来问题：
 
 1. **任意阈值**：无论选择什么数值，对某些部署来说都太低，对另一些则无关紧要。合适的“正确”限制因基础设施而异。
-2. **适得其反的省略**：如果客户端因为某个 header 超过规范定义的限制而省略它，那么依赖该 header 进行路由的服务器和中间件就必须解析 body 或拒绝请求——这会削弱将值暴露在 header 中的核心目的。
+2. **适得其反的省略**：如果客户端因为某个请求头超过规范定义的限制而省略它，那么依赖该请求头进行路由的服务器和中间件就必须解析正文或拒绝请求——这会削弱将值暴露在请求头中的核心目的。
 3. **不必要的 SDK 负担**：SDK 维护者需要为一个在实践中很少适用的约束实现并测试限制检查逻辑。
-4. **与 HTTP 重复**：服务器和中间件已经会使用标准 HTTP 状态码拒绝过大的 header（`413 Request Entity Too Large`、`431 Request Header Fields Too Large`），客户端无论如何都必须处理这些响应。
+4. **与 HTTP 重复**：服务器和中间件已经会使用标准 HTTP 状态码拒绝过大的请求头（`413 Request Entity Too Large`、`431 Request Header Fields Too Large`），客户端无论如何都必须处理这些响应。
 
-> **给实现者的注记**：服务器、中间件和客户端可以根据各自的部署环境独立对单个 header 大小、MCP header 总大小或自定义 header 数量施加限制。服务器应记录其施加的任何限制。客户端应优雅地处理 `413 Request Entity Too Large` 或 `431 Request Header Fields Too Large` 响应。工具作者应将 `x-mcp-header` 注释限制在那些能带来明确基础设施收益的参数上。
+> **给实现者的注记**：服务器、中间件和客户端可以根据各自的部署环境独立对单个请求头大小、MCP 请求头总大小或自定义请求头数量施加限制。服务器应记录其施加的任何限制。客户端应优雅地处理 `413 Request Entity Too Large` 或 `431 Request Header Fields Too Large` 响应。工具作者应将 `x-mcp-header` 注释限制在那些能带来明确基础设施收益的参数上。
 
 ### 不安全值的编码方式
 
-对于无法安全表示为普通 ASCII header 值的参数值（非 ASCII 字符、前导/尾随空白字符、控制字符），我们考虑了四种编码方式：
+对于无法安全表示为普通 ASCII 请求头值的参数值（非 ASCII 字符、前导/尾随空白字符、控制字符），我们考虑了四种编码方式：
 
-1. **Sentinel 包裹（所选方案）**：在同一个 `Mcp-Param-{Name}` header 内使用 `=?base64?{value}?=` 前缀/后缀来标识 Base64 编码值。
+1. **Sentinel 包裹（所选方案）**：在同一个 `Mcp-Param-{Name}` 请求头内使用 `=?base64?{value}?=` 前缀/后缀来标识 Base64 编码值。
 
-2. **单独的 header 名称**：为编码值使用不同的 header 名称，例如 `Mcp-ParamEncoded-{Name}`，通过 header 名称而不是值格式来表示编码。
+2. **单独的请求头名称**：为编码值使用不同的请求头名称，例如 `Mcp-ParamEncoded-{Name}`，通过请求头名称而不是值格式来表示编码。
 
 3. **隐式编码**：让解析器根据工具 schema 推断编码，例如在工具定义中使用 `"x-mcp-header-encoding": "base64"` 注释。
 
@@ -622,12 +622,12 @@ def mcp_handler():
 
 | 方案                 | 优点                                                                                                                                     | 缺点                                                                                                                                                                                          |
 | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Sentinel 包裹    | 每个参数只需一个 header 名称；常见情况（纯 ASCII）可读性强；中间件无需解码即可基于普通值进行路由 | 带内信号在理论上可能与字面值冲突；每个读取方都必须检查该前缀                                                                                       |
-| 单独的 header 名称 | 不存在带内歧义；编码方式可从 header 名称自解释                                                                  | header 命名空间翻倍；每个中间件都必须为每个参数检查两个 header 名称；如果两者都存在，还需要冲突规则                                                         |
-| 隐式编码    | 最简单的线格式；无需 sentinel 或额外 header                                                                                      | 中间件需要访问工具 schema 才知道是否解码——这违背了在 header 中暴露值的目的；按参数静态决定无法很好处理混合情况 |
+| Sentinel 包裹    | 每个参数只需一个请求头名称；常见情况（纯 ASCII）可读性强；中间件无需解码即可基于普通值进行路由 | 带内信号在理论上可能与字面值冲突；每个读取方都必须检查该前缀                                                                                       |
+| 单独的请求头名称 | 不存在带内歧义；编码方式可从请求头名称自解释                                                                  | 请求头命名空间翻倍；每个中间件都必须为每个参数检查两个请求头名称；如果两者都存在，还需要冲突规则                                                         |
+| 隐式编码    | 最简单的线格式；无需 sentinel 或额外请求头                                                                                      | 中间件需要访问工具 schema 才知道是否解码——这违背了在请求头中暴露值的目的；按参数静态决定无法很好处理混合情况 |
 | 始终编码        | 规则最简单；无需条件逻辑或歧义                                                                                        | 纯 ASCII 值会变得不可读；中间件必须解码 Base64 才能检查任何值，这会显著削弱本 SEP 的核心动机                                       |
 
-**结论**：Sentinel 包裹方案提供了最佳权衡。自定义 header 的主要用途是让中间件能够对地区名称、租户 ID 之类简单、可读的值进行路由和过滤——这些值几乎总是纯 ASCII，且永远不会触发 Base64 编码。方案 4 使所有值对中间件都变得不可见。方案 3 在没有工具 schema 访问权限的情况下，使中间件无法区分编码值与字面值。方案 2 消除了带内歧义，但会使 header 命名空间翻倍，要求中间件为每个参数检查两种可能的 header 名称，并在两者同时存在时增加冲突规则。方案 1 中 sentinel 的理论碰撞风险可以忽略不计，因为 `=?base64?...?=` 在实践中成为字面参数值的可能性极低。
+**结论**：Sentinel 包裹方案提供了最佳权衡。自定义请求头的主要用途是让中间件能够对地区名称、租户 ID 之类简单、可读的值进行路由和过滤——这些值几乎总是纯 ASCII，且永远不会触发 Base64 编码。方案 4 使所有值对中间件都变得不可见。方案 3 在没有工具 schema 访问权限的情况下，使中间件无法区分编码值与字面值。方案 2 消除了带内歧义，但会使请求头命名空间翻倍，要求中间件为每个参数检查两种可能的请求头名称，并在两者同时存在时增加冲突规则。方案 1 中 sentinel 的理论碰撞风险可以忽略不计，因为 `=?base64?...?=` 在实践中成为字面参数值的可能性极低。
 
 ## 向后兼容性
 
@@ -689,18 +689,18 @@ def mcp_handler():
 
 | 测试用例                  | 输入                    | 预期行为                                      |
 | -------------------------- | ------------------------ | ------------------------------------------------------ |
-| Header 名称大小写变化 | `mcp-method: tools/call` | 服务器 MUST 接受（header 名称不区分大小写） |
-| Header 名称混合大小写     | `MCP-METHOD: tools/call` | 服务器 MUST 接受                                     |
+| 标头名称大小写变化 | `mcp-method: tools/call` | 服务器 MUST 接受（标头名称不区分大小写） |
+| 标头名称混合大小写     | `MCP-METHOD: tools/call` | 服务器 MUST 接受                                     |
 | 方法值大小写          | `Mcp-Method: TOOLS/CALL` | 服务器 MUST 拒绝（方法值区分大小写）  |
 
 #### 头/正文不匹配
 
-| 测试用例                  | Header 值             | 正文值                  | 预期行为                                   |
+| 测试用例                  | 标头值             | 正文值                  | 预期行为                                   |
 | -------------------------- | ------------------------ | --------------------------- | --------------------------------------------------- |
 | 方法不匹配            | `Mcp-Method: tools/call` | `"method": "prompts/get"`   | 服务器 MUST 拒绝，返回 400 和错误码 `-32001` |
 | 工具名称不匹配         | `Mcp-Name: foo`          | `"params": {"name": "bar"}` | 服务器 MUST 拒绝，返回 400 和错误码 `-32001` |
 | 缺少必需头    | （无 `Mcp-Method`）        | 有效正文                  | 服务器 MUST 拒绝，返回 400 和错误码 `-32001` |
-| Header 中多余空白 | `Mcp-Name:  foo `        | `"params": {"name": "foo"}` | 服务器 MUST 接受（按 HTTP 规范去除空白）  |
+| 标头中的多余空白 | `Mcp-Name:  foo `        | `"params": {"name": "foo"}` | 服务器 MUST 接受（按 HTTP 规范去除空白）  |
 
 #### 值中的特殊字符
 
@@ -715,12 +715,12 @@ def mcp_handler():
 
 #### x-mcp-header 名称冲突
 
-| 测试用例                               | Schema                                                    | 预期行为                                                |
+| 测试用例                               | 模式                                                    | 预期行为                                                |
 | --------------------------------------- | --------------------------------------------------------- | ---------------------------------------------------------------- |
-| 重复的 header 名称（相同大小写）      | 两个属性都使用 `"x-mcp-header": "Region"`            | 客户端 MUST 拒绝工具定义                               |
-| 重复的 header 名称（不同大小写） | `"x-mcp-header": "Region"` 和 `"x-mcp-header": "REGION"` | 客户端 MUST 拒绝工具定义（不区分大小写唯一性） |
-| Header 名称与标准头同名     | `"x-mcp-header": "Method"`                                | 允许（生成的是 `Mcp-Param-Method`，不是 `Mcp-Method`）          |
-| 空 Header 名称                       | `"x-mcp-header": ""`                                      | 客户端 MUST 拒绝工具定义                               |
+| 重复的标头名称（相同大小写）      | 两个属性都使用 `"x-mcp-header": "Region"`            | 客户端 MUST 拒绝工具定义                               |
+| 重复的标头名称（不同大小写） | `"x-mcp-header": "Region"` 和 `"x-mcp-header": "REGION"` | 客户端 MUST 拒绝工具定义（不区分大小写唯一性） |
+| 标头名称与标准头同名     | `"x-mcp-header": "Method"`                                | 允许（生成的是 `Mcp-Param-Method`，不是 `Mcp-Method`）          |
+| 空标头名称                       | `"x-mcp-header": ""`                                      | 客户端 MUST 拒绝工具定义                               |
 
 #### 无效的 x-mcp-header 值
 
@@ -733,7 +733,7 @@ def mcp_handler():
 
 #### 值编码边界情况
 
-| 测试用例                           | 参数值    | 预期 Header 值                           |
+| 测试用例                           | 参数值    | 预期标头值                           |
 | ----------------------------------- | ------------------ | ----------------------------------------------- |
 | 纯 ASCII 字符串                  | `"us-west1"`       | `Mcp-Param-Region: us-west1`                    |
 | 以空格开头的字符串           | `" us-west1"`      | `Mcp-Param-Region: =?base64?IHVzLXdlc3Qx?=`     |
@@ -747,7 +747,7 @@ def mcp_handler():
 | 非 ASCII 字符                | `"日本語"`         | `Mcp-Param-Text: =?base64?5pel5pys6Kqe?=`       |
 | 包含换行符的字符串                 | `"line1\nline2"`   | `Mcp-Param-Text: =?base64?bGluZTEKbGluZTI=?=`   |
 | 包含回车符的字符串         | `"line1\r\nline2"` | `Mcp-Param-Text: =?base64?bGluZTENCmxpbmUy?=`   |
-| 以 tab 开头的字符串             | `"\tindented"`     | `Mcp-Param-Text: =?base64?CWluZGVudGVk?=`       |
+| 以制表符开头的字符串             | `"\tindented"`     | `Mcp-Param-Text: =?base64?CWluZGVudGVk?=`       |
 | 空字符串                        | `""`               | `Mcp-Param-Name: `（空值）                |
 
 #### 类型限制违规
@@ -763,7 +763,7 @@ def mcp_handler():
 
 #### Base64 解码
 
-| 测试用例                 | Header 值             | 预期行为                                                                                 |
+| 测试用例                 | 标头值             | 预期行为                                                                                 |
 | ------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------- |
 | 有效的 Base64              | `=?base64?SGVsbG8=?=`    | 服务器解码为 `"Hello"` 并进行验证                                                         |
 | Base64 补位无效    | `=?base64?SGVsbG8?=`     | 服务器 MUST 拒绝，返回 400 和错误码 `-32001`；中间设备 MAY 返回 400 状态码 |
@@ -776,13 +776,13 @@ def mcp_handler():
 
 | 测试用例                              | 场景                    | 预期行为          |
 | -------------------------------------- | --------------------------- | -------------------------- |
-| 带 x-mcp-header 的参数为 null    | `"region": null`            | 客户端 MUST 省略 header    |
-| 带 x-mcp-header 的参数缺失 | 参数不在 arguments 中  | 客户端 MUST 省略 header    |
-| 可选参数已提供             | 已提供可选参数 | 客户端 MUST 包含 header |
+| 带 x-mcp-header 的参数为 null    | `"region": null`            | 客户端 MUST 省略头    |
+| 带 x-mcp-header 的参数缺失 | 参数不在 arguments 中  | 客户端 MUST 省略头    |
+| 可选参数已提供             | 已提供可选参数 | 客户端 MUST 包含头 |
 
 #### 当正文中存在值但缺少自定义头时
 
-| 测试用例                              | 是否存在 Header        | 正文值                  | 预期行为                                                                                 |
+| 测试用例                              | 是否存在头        | 正文值                  | 预期行为                                                                                 |
 | -------------------------------------- | --------------------- | --------------------------- | ------------------------------------------------------------------------------------------------- |
 | 标准头被省略，但正文中有值 | 没有 `Mcp-Name`         | `"params": {"name": "foo"}` | 服务器 MUST 拒绝，返回 400 和错误码 `-32001`；中间设备 MAY 返回 400 状态码 |
 | 自定义头被省略，但正文中有值   | 没有 `Mcp-Param-Region` | `"region": "us-west1"`      | 服务器 MUST 拒绝，返回 400 和错误码 `-32001`；中间设备 MAY 返回 400 状态码 |
@@ -795,4 +795,4 @@ _将在此 SEP 达到最终状态之前提供。_
 
 - **服务器 SDK**：提供一种机制（属性/装饰器）来标记带有 `x-mcp-header` 的参数
 - **客户端 SDK**：实现提取和编码头部值的客户端行为
-- **验证**：双方都必须验证头部/正文一致性
+- **验证**：双方都必须验证头部/正文一致性。

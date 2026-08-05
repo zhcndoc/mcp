@@ -20,17 +20,17 @@
 
 **更新**：
 
-- _10 月 1 日_: 将 `tool_choice` 重命名为 `toolChoice`（并新增 `"none"` 值）；移除了异类的 `stopReason`：`"refusal"` 和 `"other"`；允许 `{CreateMessageResult,SamplingMessage}.content` 为单个内容或内容数组；
-- _10 月 6 日_: 将 `ToolResultContent` 与 `CallToolResult` 对齐（支持图像 / 音频）；新增“可能的后续跟进”部分。
-- _10 月 10 日_: 更新参考实现示例，使用简单的工具注册表（统一 mcp tools 与 tool loop tools，见下方[评论](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1577#issuecomment-3389273471)）以及一个使用 sampling 配合工具和 elicitation 的“自选冒险”游戏。
-- _10 月 27 日_: 将 `ToolResultContent.content` 与 `CallToolResult.content` 对齐（使用 [ContentBlock](https://modelcontextprotocol.io/specification/2025-06-18/schema#contentblock)）；新增 `ToolResultContent._meta`
+- _10 月 1 日_：将 `tool_choice` 重命名为 `toolChoice`（新增 `"none"` 值）；移除特殊的 `stopReason` 值 `"refusal"` 和 `"other"`；允许 `{CreateMessageResult,SamplingMessage}.content` 为单个内容或内容数组；
+- _10 月 6 日_：使 `ToolResultContent` 与 `CallToolResult` 保持一致（支持图像/音频）；新增“可能的后续操作”章节。
+- _10 月 10 日_：更新参考实现示例，加入简单的工具注册表（将 MCP 工具与工具循环工具统一，参见[下方评论](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1577#issuecomment-3389273471)），以及一个使用工具采样和信息征询的“选择你自己的冒险”游戏。
+- _10 月 27 日_：使 `ToolResultContent.content` 与 `CallToolResult.content` 保持一致（使用 [ContentBlock](https://modelcontextprotocol.io/specification/2025-06-18/schema#contentblock)）；新增 `ToolResultContent._meta`
 - _11 月 5 日_：
-  - 保持 `stopReason` 为开放字符串，但为便于查看，保留冗余的显式枚举
-  - 取消在 `includeContext` 与声明的 `ClientCapabilities.sampling.context` 不匹配时必须抛出异常的要求
-  - 通过说明在较早的规范版本中，`CreateMessageResult.content` 作为内容数组或单个内容会带来向后兼容问题，因此 sampling _不得_ 返回数组来缓解这一问题（+ 承认使用 sampling 的 SDK 更新时需要少量代码修改）
-- _11 月 7 日_: 将类型 `ToolCallContent` 重命名为 `ToolUseContent`（以匹配其 `tool_use` 类型和 `toolUse` `stopReason`）。SEP 已获批准！
-- _11 月 10 日_: 移除 `disable_parallel_tool_use` / 保留到后续更新，因为 Gemini API 目前无法实现这一点。
-- _11 月 11 日_: 增加关于 Gemini API 的 function calling 模式与角色的补充说明；要求带有工具结果内容的 SamplingMessage 不得与其他内容类型混合
+  - 保留 `stopReason` 作为开放字符串，但额外提供显式枚举以便查看
+  - 移除在 `includeContext` 与声明的 `ClientCapabilities.sampling.context` 不匹配时必须抛出异常的要求
+  - 缓解 `CreateMessageResult.content` 可以是内容数组或单个内容这一向后兼容性问题：规定在早期规范版本中，采样 _不得_ 返回数组（同时承认，更新包含采样功能的 SDK 代码时需要进行少量代码修改）
+- _11 月 7 日_：将类型 `ToolCallContent` 重命名为 `ToolUseContent`（以匹配其 `tool_use` 类型和 `toolUse` `stopReason`）。SEP 已获批准！
+- _11 月 10 日_：移除 `disable_parallel_tool_use`，将其留待后续更新，因为 Gemini API 目前无法实现此功能。
+- _11 月 11 日_：补充关于 Gemini API 函数调用模式和角色的说明；要求包含工具结果内容的 SamplingMessage 不得与其他内容类型混合使用
 
 ## 摘要
 
@@ -213,7 +213,7 @@
                 "type": "text",
                 "text": "what is the temperature in london?"
               }
-            },
+            ],
           {
             "role": "assistant",
             "content": [
@@ -286,11 +286,11 @@
 
 ## 可能的后续事项
 
-这些内容超出了本 SEP 的范围，但我们会注意不要预先排除它们，因此在适当的地方，我们会举例说明如何在本 SEP 之上或之后实现它们。
+这些内容不在本 SEP 的范围内，但我们注意避免排除它们，因此在适当的地方给出了一些如何在本 SEP 之上或之后实现它们的示例。
 
 ### 流式支持
 
-参见：[Streaming tool use results #117](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/117)
+参见：[流式工具使用结果 #117](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/117)
 
 这对于某些较长时间运行的用例，或者当延迟很重要时，可能会很关键，但如果 MCP 工具也支持流式处理，会更适配。
 

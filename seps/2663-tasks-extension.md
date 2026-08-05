@@ -20,7 +20,7 @@
 - [SEP-2322: 多轮往返请求](./2322-MRTR.md)
 - [SEP-2243: 流式 HTTP 传输的 HTTP 头标准化](./2243-http-standardization.md)
 - [SEP-2567: 通过显式状态句柄实现无会话 MCP](./2567-sessionless-mcp.md)
-- [SEP-2575: 使 MCP 无状态](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2575)
+- [SEP-2575: 使 MCP 无状态](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2575)。
 
 ## 动机
 
@@ -38,7 +38,7 @@
 
 ## 规范
 
-MCP Tasks 扩展允许某些请求被 **任务** 增强。任务是持久化状态
+MCP Tasks 扩展允许某些请求被 **任务** 增强。任务是持久化状态。
 
 ## 理由
 
@@ -60,9 +60,27 @@ MCP Tasks 扩展允许某些请求被 **任务** 增强。任务是持久化状�
 
 引入如下新要求：
 
-> 服务器 **MUST NOT** 在任务持久创建完成之前返回 `CreateTaskResult`——也就是说，直到对返回的 `taskId` 发起一次 `tasks/get` 能够成功解析为止。在最终一致的环境中，服务器 **MUST** 等待一致性达成后再响应。此要求消除了客户端对任务创建进行推测性轮询的需要。
+如果服务器无法为未声明此扩展能力的客户端处理请求，且不返回 `CreateTaskResult`，则服务器 **MUST** 返回错误代码为 `-32021`（缺少所需客户端能力）的错误，并在错误响应中指出所需的扩展：
 
-与 `tasks/update` 和 `tasks/cancel` 不同，任务创建是强一致的。必须如此，才能避免请求方对 `tasks/get` 发起推测性请求，否则它们将无法知道某个任务是被悄然丢弃了，还是只是尚未创建完成。相反，`tasks/update` 和 `tasks/cancel` 中的最终一致性是可行的，因为客户端行为并不取决于这些操作的结果（无论哪种结果，客户端都可以继续轮询）。虽然在原本并非如此工作的分布式系统中，引入一致性任务创建确实会增加延迟成本，但明确加入这一要求可以简化客户端实现，并消除一种未定义行为的来源。
+```jsonl
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "error": {
+    // 缺少所需客户端能力
+    "code": -32021,
+    // 此消息仅用于示例。示例消息的内容不具有规范性。
+    "message": "Missing required client capability",
+    "data": {
+      "requiredCapabilities": {
+        "extensions": {
+          "io.modelcontextprotocol/tasks": {}
+        }
+      }
+    }
+  }
+}
+```
 
 以下方法当前支持任务增强执行：
 
@@ -303,4 +321,591 @@ ack 上的最终一致性与 `tasks/update` 的情形相同：服务器可以先
 
 ## 参考实现
 
-已在 [mcpkit](https://github.com/panyam/mcpkit/blob/02cfbe0d2cada8167b9043b9130804c8638b0aa5/core/task_v2.go) 中实现（参见[使用示例](https://github.com/panyam/mcpkit/tree/02cfbe0d2cada8167b9043b9130804c8638b0aa5/examples/tasks-v2)）。
+```typescript
+type UpdateTaskResult = Result; // 空确认
+```
+
+成功时，服务器**必须**使用空结果确认该请求。该确认是_最终一致的_：服务器**可以**接受这些响应，并在任务的可观察状态（通过 `tasks/get` 或 `notifications/tasks`）反映这些响应之前返回确认。若 `taskId` 不对应已知任务，服务器**应**返回 JSON-RPC 错误。客户端**应**跟踪 `inputRequests` 的键，以避免对请求进行多次响应。
+
+服务器**应**忽略映射到当前任务中不存在的待处理键的任何 `inputResponses` 响应——包括从未发出过的键、已经得到回答的键，以及其对应请求已被取代的键。服务器**可以**接受部分响应集合（当前待处理键的严格子集）；
+
+`resultType` 字段在 `UpdateTaskResult` 上**必须**设置为 `"complete"`，因为这是 `tasks/update` 请求的标准结果结构。
+
+### 任务取消
+
+客户端发送 `tasks/cancel` 请求，以表示其取消正在进行的任务的意图。**不得**使用 `notifications/cancelled` 通知来取消任务。
+
+#### 请求
+
+```typescript
+interface CancelTaskRequest extends JSONRPCRequest {
+  method: "tasks/cancel";
+  params: {
+    taskId: string;
+  };
+}
+```
+
+#### 响应
+
+```typescript
+type CancelTaskResult = Result; // 空确认
+```
+
+服务器**必须**使用空结果确认该请求。如果 `taskId` 不对应已知任务，服务器**应该**返回 JSON-RPC 错误。取消处理是_最终一致的_——确认后，任务的可观察状态**可能**仍为 `working`（或其他非终止状态）；如果任务在取消生效前已经完成，其最终状态**可能**是除 `cancelled` 之外的其他终止状态。
+
+取消是**协作式的**：该请求表示取消意图，服务器决定是否以及何时执行取消。服务器没有义务实际停止工作；它只需确认该请求即可。最终转变为 `cancelled` 状态并无保证。
+
+客户端**可以**在发送取消请求后立即删除与任务关联的所有状态（例如，不再需要保留其已经响应过的 `inputRequests` 键列表）。客户端无需再次轮询 `tasks/get` 来等待任务进入 `cancelled` 状态。
+
+`CancelTaskResult` 上的 `resultType` 字段**必须**设置为 `"complete"`，因为这是 `tasks/cancel` 请求的标准结果形状。
+
+### 任务状态通知
+
+服务器除了响应客户端轮询之外，**可以**通过 `notifications/tasks` 通知推送状态更新：
+
+```typescript
+export type TaskStatusNotificationParams = NotificationParams & Task;
+
+export interface TaskStatusNotification extends JSONRPCNotification {
+  method: "notifications/tasks";
+  params: TaskStatusNotificationParams;
+}
+```
+
+要开始监听任务状态通知，客户端向服务器发送 `subscriptions/listen` 请求，其中包含客户端感兴趣的任务 ID 列表（参见 [SEP-2575](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2575)）：
+
+```typescript
+export interface SubscriptionsListenRequest extends Request {
+  method: "subscriptions/listen";
+  params: {
+    // 其他现有字段...
+    notifications: {
+      taskIds?: string[];
+      // 其他现有字段...
+    };
+  };
+}
+```
+
+在其确认通知中，服务器会包含其同意发送任务状态通知的任务 ID 列表（如果有）：
+
+```typescript
+export interface SubscriptionsAcknowledgedNotification extends Notification {
+  method: "notifications/subscriptions/acknowledged";
+  params: {
+    notifications: {
+      /**
+       * 订阅特定任务 ID 的 notifications/tasks 通知。
+       */
+      taskIds?: string[];
+      // 其他现有字段...
+    };
+  };
+}
+```
+
+如果客户端请求任务状态通知，但未声明 `io.modelcontextprotocol/tasks` 扩展能力，服务器**必须**返回一个 JSON-RPC 错误，指出缺失的能力：
+
+```jsonl
+{
+  "jsonrpc": "2.0",
+  "id": 12,
+  "error": {
+    // 缺少必需的客户端能力
+    "code": -32021,
+    // 此消息仅用于示例。示例消息的内容不具有规范性。
+    "message": "Missing required client capability",
+    "data": {
+      "requiredCapabilities": {
+        "extensions": {
+          "io.modelcontextprotocol/tasks": {}
+        }
+      }
+    }
+  }
+}
+```
+
+每个通知都携带当前状态的完整 `DetailedTask`，与此时调用 `tasks/get` 所返回的内容相同。
+
+**通知：**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "method": "notifications/tasks",
+  "params": {
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840",
+    "status": "completed",
+    "createdAt": "2025-11-25T10:30:00Z",
+    "lastUpdatedAt": "2025-11-25T10:50:00Z",
+    "ttlMs": 60000,
+    "pollIntervalMs": 5000,
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Operation completed successfully."
+        }
+      ],
+      "isError": false
+    }
+  }
+}
+```
+
+该通知包含完整的任务对象，使客户端无需轮询 `tasks/get` 方法即可访问完整的任务状态和最终结果。客户端**可以**在订阅任务状态通知的同时继续轮询 `tasks/get`，但不必这样做。
+
+`notifications/progress` 和 `notifications/message` 通知**不得**在任务的 `subscriptions/listen` 流上发送，并且根据本规范，任务通常也不支持这些通知。
+
+### Streamable HTTP：路由标头
+
+当通过 Streamable HTTP 传输发送 `tasks/get`、`tasks/update` 或 `tasks/cancel` 时，客户端**必须**将 `Mcp-Name` 标头（由 [SEP-2243](./2243-http-standardization.md) 定义）设置为 `params.taskId` 的值。这样，传输中间件和负载均衡器便可将同一任务的后续请求路由到保存其状态的服务器实例，这通常是确保正确性所必需的。根据 [SEP-2243](./2243-http-standardization.md)，`Mcp-Method` 标头设置为 JSON-RPC 方法名称。
+
+### 示例消息流程
+
+考虑一个简单的工具调用 `hello_world`，该调用需要通过 elicitation 请求用户提供姓名。工具本身不接受任何参数。
+
+要调用此工具，客户端按如下方式发送 `CallToolRequest`：
+
+```jsonc
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "method": "tools/call",
+  "params": {
+    "name": "hello_world",
+    "arguments": {},
+    "_meta": {
+      // 其他元数据...
+      "io.modelcontextprotocol/clientCapabilities": {
+        "extensions": {
+          "io.modelcontextprotocol/tasks": {},
+        },
+      },
+    },
+  },
+}
+```
+
+服务器通过定制逻辑判断需要创建一个任务来表示此工作，并立即返回 `CreateTaskResult`：
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 2,
+  "result": {
+    "resultType": "task",
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840",
+    "status": "working",
+    "createdAt": "2025-11-25T10:30:00Z",
+    "lastUpdatedAt": "2025-11-25T10:50:00Z",
+    "ttlMs": 3600000,
+    "pollIntervalMs": 5000
+  }
+}
+```
+
+客户端收到 `CreateTaskResult` 后，开始轮询 `tasks/get`：
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "method": "tasks/get",
+  "params": {
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840"
+  }
+}
+```
+
+当任务处于 `"working"` 状态时，服务器会针对每次请求返回常规任务响应：
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 3,
+  "result": {
+    "resultType": "complete",
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840",
+    "status": "working",
+    "createdAt": "2025-11-25T10:30:00Z",
+    "lastUpdatedAt": "2025-11-25T10:50:00Z",
+    "ttlMs": 3600000,
+    "pollIntervalMs": 5000
+  }
+}
+```
+
+最终，服务器执行到需要向用户发送 elicitation 的阶段。它将任务状态设置为 `"input_required"`，以发出此信号。在客户端下一次发送 `tasks/get` 请求时，服务器通过 `inputRequests` 字段发送 elicitation 负载。请注意，虽然任务的 `inputRequests` 在结构上与 [SEP-2322](./2322-MRTR.md) 多轮往返请求相似，但它们是不同的机制：任务的 `inputRequests` 通过 `tasks/get` 展示，并通过 `tasks/update` 完成，而不是通过重试原始方法完成。服务器如果需要在返回 `CreateTaskResult` **之前**获取客户端输入（例如决定是否继续），应在原始请求上使用多轮往返请求流程；服务器如果需要在任务执行**期间**获取客户端输入，则应使用此处描述的 `inputRequests`/`inputResponses` 机制。
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 4,
+  "method": "tasks/get",
+  "params": {
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840"
+  }
+}
+```
+
+```json
+{
+  "id": 4,
+  "jsonrpc": "2.0",
+  "result": {
+    "resultType": "complete",
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840",
+    "status": "input_required",
+    "createdAt": "2025-11-25T10:30:00Z",
+    "lastUpdatedAt": "2025-11-25T10:50:00Z",
+    "ttlMs": 3600000,
+    "pollIntervalMs": 5000,
+    "inputRequests": {
+      "name": {
+        "method": "elicitation/create",
+        "params": {
+          "mode": "form",
+          "message": "请输入您的姓名。",
+          "requestedSchema": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" }
+            },
+            "required": ["name"]
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+为完整起见，我们来考虑这样一种情况：客户端恰好在用户完成 elicitation 请求**之前**再次轮询 `tasks/get`。由于 `inputRequests` 实际上是与该任务关联的所有待处理服务器到客户端请求在某个时间点的快照，因此即使客户端已经看过这些信息，服务器仍会再次包含相同的请求（建议客户端为改善用户体验，对具有相同键的 `inputRequests` 进行去重）：
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 5,
+  "method": "tasks/get",
+  "params": {
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840"
+  }
+}
+```
+
+```json
+{
+  "id": 5,
+  "jsonrpc": "2.0",
+  "result": {
+    "resultType": "complete",
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840",
+    "status": "input_required",
+    "createdAt": "2025-11-25T10:30:00Z",
+    "lastUpdatedAt": "2025-11-25T10:50:00Z",
+    "ttlMs": 3600000,
+    "pollIntervalMs": 5000,
+    "inputRequests": {
+      "name": {
+        "method": "elicitation/create",
+        "params": {
+          "mode": "form",
+          "message": "请输入您的姓名。",
+          "requestedSchema": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" }
+            },
+            "required": ["name"]
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+用户输入姓名后，客户端发送包含已满足信息的 `tasks/update` 请求：
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 6,
+  "method": "tasks/update",
+  "params": {
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840",
+    "inputResponses": {
+      "name": {
+        "action": "accept",
+        "content": {
+          "input": "Luca"
+        }
+      }
+    }
+  }
+}
+```
+
+服务器确认该请求：
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 6,
+  "result": {
+    "resultType": "complete"
+  }
+}
+```
+
+服务器异步处理该请求，并将任务重新置于 `working` 状态：
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 7,
+  "method": "tasks/get",
+  "params": {
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840"
+  }
+}
+```
+
+```json
+{
+  "id": 7,
+  "jsonrpc": "2.0",
+  "result": {
+    "resultType": "complete",
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840",
+    "status": "working",
+    "createdAt": "2025-11-25T10:30:00Z",
+    "lastUpdatedAt": "2025-11-25T10:50:00Z",
+    "ttlMs": 3600000,
+    "pollIntervalMs": 5000
+  }
+}
+```
+
+最终，服务器完成该请求，因此它存储最终的 `CallToolResult`，并将任务置于 `"completed"` 状态。在下一次 `tasks/get` 请求中，服务器将最终工具结果内联到任务对象中：
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 8,
+  "method": "tasks/get",
+  "params": {
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840"
+  }
+}
+```
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 8,
+  "result": {
+    "resultType": "complete",
+    "taskId": "786512e2-9e0d-44bd-8f29-789f320fe840",
+    "status": "completed",
+    "createdAt": "2025-11-25T10:30:00Z",
+    "lastUpdatedAt": "2025-11-25T10:50:00Z",
+    "ttlMs": 3600000,
+    "pollIntervalMs": 5000,
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "你好，Luca！"
+        }
+      ],
+      "isError": false
+    }
+  }
+}
+```
+
+### 错误处理
+
+任务使用两种错误报告机制：
+
+1. **协议错误**：针对协议级问题的标准 JSON-RPC 错误
+2. **任务执行错误**：底层请求执行中的错误，通过任务状态报告
+
+#### 协议错误
+
+对于以下协议错误情况，服务器 **必须** 返回标准 JSON-RPC 错误：
+
+- 无效或不存在的 `taskId`：`-32602`（无效参数）
+  - 对于 `tasks/get`，服务器 **必须** 返回此错误。
+  - 对于 `tasks/update` 和 `tasks/cancel`，服务器 **应该** 返回此错误。
+- 内部错误：`-32603`（内部错误）
+- 缺少必需的客户端能力：`-32021`（缺少必需的客户端能力）
+  - 对于未声明能力的客户端在 `subscriptions/listen` 上请求任务通知，服务器 **必须** 返回此错误。
+  - 对于未声明能力的客户端发出 `tasks/get`、`tasks/update` 和 `tasks/cancel` 请求，服务器 **必须** 返回此错误。
+
+服务器 **应该** 提供信息丰富的错误消息来描述错误原因。
+
+**示例：未找到任务**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 70,
+  "error": {
+    "code": -32602,
+    "message": "Failed to retrieve task: Task not found"
+  }
+}
+```
+
+**示例：任务已过期**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 71,
+  "error": {
+    "code": -32602,
+    "message": "Failed to retrieve task: Task has expired"
+  }
+}
+```
+
+服务器不要求永久保留任务。如果服务器已清除过期任务，则返回说明找不到该任务的错误属于符合规范的行为。
+
+#### 任务执行错误
+
+当底层请求在执行期间遇到 JSON-RPC 协议错误时，任务将转为 `failed` 状态。`tasks/get` 响应 **应该** 包含带有故障诊断信息的 `statusMessage` 字段，并且 **必须** 包含带有 JSON-RPC 错误的 `error` 字段。
+
+`failed` 状态 **不得** 用于表示非 JSON-RPC 错误，例如结果以 `isError: true` 完成的工具调用。协议方法结果上下文中的错误 **必须** 使用 `completed` 状态，并将错误详情放在 `result` 字段中。这样可以明确区分协议级故障（使用 `failed` 状态）和其他故障。
+
+**示例：带有 JSON-RPC 执行错误的任务**
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 4,
+  "result": {
+    "resultType": "task",
+    "taskId": "786512e2-9e0d-44bd-8f29-789f820fe840",
+    "status": "failed",
+    "createdAt": "2025-11-25T10:30:00Z",
+    "lastUpdatedAt": "2025-11-25T10:40:00Z",
+    "ttlMs": 3600000,
+    "statusMessage": "Tool execution failed: API rate limit exceeded",
+    "error": {
+      "code": -32603,
+      "message": "API rate limit exceeded"
+    }
+  }
+}
+```
+
+**示例：工具调用完成但出现工具错误（isError: true）**
+
+对于在协议层面成功完成但返回工具级错误的工具调用（由工具结果中的 `isError: true` 指示），任务将达到 `completed` 状态，并在 `result` 字段中包含工具结果：
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 5,
+  "result": {
+    "resultType": "task",
+    "taskId": "786512e2-9e0d-44bd-8f29-789f820fe840",
+    "status": "completed",
+    "createdAt": "2025-11-25T10:30:00Z",
+    "lastUpdatedAt": "2025-11-25T10:40:00Z",
+    "ttlMs": 3600000,
+    "result": {
+      "content": [
+        {
+          "type": "text",
+          "text": "Failed to process request: invalid input"
+        }
+      ],
+      "isError": true
+    }
+  }
+}
+```
+
+`tasks/get` 端点返回的内容与底层请求本应返回的内容完全一致：
+
+- 如果底层请求产生了 JSON-RPC 错误，任务将使用 `failed` 状态，并且 `error` 字段 **必须** 包含该 JSON-RPC 错误。
+- 如果请求返回了结果（即使工具结果中的 `isError: true`），任务将使用 `completed` 状态，并且 `result` 字段 **必须** 包含该结果。
+
+### 保留项
+
+- `tasks/` 方法前缀和 `notifications/tasks/` 通知前缀为此扩展保留。
+- `resultType` 的结果判别值 `"task"` 为此扩展保留。
+- 标签 `io.modelcontextprotocol/tasks` 为此扩展保留。
+
+## 设计 rationale
+
+### 非请求任务与即时结果
+
+一个[替代提案](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1905)会单独处理即时结果的情况，并采用略有不同的前提条件：_如果_支持任务，_并且_客户端支持即时任务结果，_那么_服务器可以针对附加了任务的请求返回常规结果。这个版本的即时结果在当时看起来是更好的选择，因为它意味着无需在初始任务规范之上引入破坏性变更。
+
+然而，随着我们寻求[逐步摆脱](https://blog.modelcontextprotocol.io/posts/2025-12-19-mcp-transport-future/)有状态的协议交互，并鉴于任务整体上仍处于当前的实验性阶段，现在似乎值得提出一项更为激进的变更，以降低整体规范的复杂性，并使任务在此时更加“原生”地融入 MCP。具体而言，允许非请求任务（_以及_即时结果）意味着将任务提升为一等概念，使其面向所有持久化操作，而不是作为一种并行且有些专门化的概念存在。
+
+这恰好与提议中的 [SEP-2322](./2322-MRTR.md) 保持一致，但两者并不相互耦合。
+
+### 分离读取（`tasks/get`）与写入（`tasks/update`）
+
+这一重设计的早期草案允许 `tasks/get` 携带 `inputResponses`，从而通过一次往返同时提交响应并观察由此产生的状态。这种混合会带来一些代价：它使读取路径变得非幂等（重试 `tasks/get` 可能会重新提交响应），迫使读取路径采用与写入相同的最终一致性模型，并使希望缓存或去重读取操作的中间层变得更加复杂。分离这些方法后，`tasks/get` 成为纯粹的幂等读取，任何层都可以安全地缓存或重放；而包括最终一致性窗口在内的写入语义则被限制在 `tasks/update` 中。
+
+`tasks/update` 仅返回确认的响应形式同样源于这种分离：服务器无需返回任何客户端无法通过后续 `tasks/get` 获取的读取数据，而强行在响应中嵌入 `Task` 会重新引入我们试图避免的非幂等性。代价是每轮输入增加一次往返——且仅当任务确实需要客户端请求时才会产生这一开销。
+
+### 任务创建的一致性
+
+引入了以下新要求：
+
+> 服务器**不得**在任务持久创建之前返回 `CreateTaskResult`——也就是说，在返回的 `taskId` 对应的 `tasks/get` 能够成功解析之前不得返回。在最终一致性的环境中，服务器**必须**在响应前等待一致性达成。此要求消除了客户端为任务创建而进行推测性轮询的必要。
+
+与 `tasks/update` 和 `tasks/cancel` 不同，任务创建具有强一致性。必须如此，才能避免请求方发出推测性的 `tasks/get` 请求，因为请求方无法判断任务是被静默丢弃了，还是仅仅尚未创建。相反，`tasks/update` 和 `tasks/cancel` 中的最终一致性之所以可行，是因为客户端行为并不取决于这些操作的结果（无论哪种情况，客户端都可以继续轮询）。虽然在原本并不具备这种行为的分布式系统中，一致的任务创建确实会增加延迟成本，但明确引入这一要求可以简化客户端实现，并消除一个未定义行为来源。
+
+这也与一般的长时间运行操作 API 保持一致：这类 API 通常要求，一旦某个操作得到确认，就必须能够通过轮询端点找到它。
+
+### 仅确认式取消
+
+在 `2025-11-25` 的任务设计中，`tasks/cancel` 会返回一个描述取消尝试后任务状态的任务对象。这种返回形式意味着同步读取——服务器必须查询任务状态以填充该对象——但在许多应用中，取消本质上是异步的（由独立的工作线程决定是否以及何时执行取消），因此返回的任务对象在许多情况下只会简单重复下一次 `tasks/get` 所显示的内容。将 `tasks/cancel` 简化为确认响应，更符合该操作的实际语义：请求是一种信号，而不是状态查询。希望了解取消后状态的客户端，可以通过 `tasks/get` 获取，使用的代码路径与其他所有状态观察操作相同。
+
+确认响应所具有的最终一致性，与 `tasks/update` 中的分离原则相同：服务器可以记录取消请求并在工作线程实际转换任务状态之前作出响应，但不允许客户端将该确认解读为强一致性的结果。
+
+虽然 `tasks/update` 和 `tasks/cancel` 基于上述原因采用仅确认式响应形式，但服务器**仍应**针对明显无效的请求返回错误——例如未知的 `taskId`。仅确认式设计旨在避免在成功路径中同步读取任务状态，而不是抑制服务器能够在请求时检测到的错误。针对无效输入返回错误，可以更快地向客户端发出问题信号，而不必迫使客户端通过后续的 `tasks/get` 轮询间接发现问题。
+
+### 与多次往返请求的组合
+
+引入了以下新要求：
+
+> 将多次往返请求与任务创建结合使用的服务器实现（例如，在创建任务之前需要通过 `InputRequiredResult` 进行询问的工具）**应该**在返回 `CreateTaskResult` 之前，同步完成所有 MRTR 交互。
+
+同时支持 MRTR（[SEP-2322](./2322-MRTR.md)）和此扩展的 `tools/call` 可以按顺序使用它们：先发送一个或多个 `InputRequiredResult` 交互以同步收集输入，然后通过 `CreateTaskResult` 将执行交接给异步流程。这种组合是 `resultType` 判别字段的结果——每个响应都具有独立的类型，客户端根据接收到的值切换行为，_而不会_在两种模式之间维护任何状态。禁止这种组合将需要施加一项人为约束，但协议层面没有机制可以强制执行该约束，因为客户端并不知道服务器会预先创建任务。
+
+尽管共享字段名，这两个流程仍维护着彼此独立的状态。当服务器返回任何非 `"input_required"` 的 `resultType` 时，MRTR 阶段结束，此时其 `inputRequests` 的键即被消耗。任务阶段从 `CreateTaskResult` 开始，并独立维护_自身的_ `inputRequests` 键。任务 `inputRequests` 的键唯一性仅限于任务的生命周期，不延伸至前一个 MRTR 阶段中的键。客户端无需在两个流程之间进行去重。
+
+## 向后兼容性
+
+`2025-11-25` 版本中的实验性任务功能与本扩展**不具备线路兼容性**。需要同时与这两种接口互操作的实现，可以在 SDK 层进行适配：并行实现实验性流程和扩展流程，并根据协商的协议版本以及对端声明的客户端能力进行分派。下表总结了每种组合下的预期行为：
+
+| 协议版本 | `tasks.*`（旧版）                                                                                                                                                                                                                                                                                                                                                                                               | `io.modelcontextprotocol/tasks`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `2025-11-25`     | 遵循 `2025-11-25` 规范的旧版实验性任务。客户端通过 `CallToolRequest` 上的 `task` 参数，按请求选择启用任务增强；服务器根据该规范使用 `tasks/result`、`tasks/get`、`tasks/cancel`，以及（在支持的情况下）`tasks/list`。本扩展不适用。                                                                                           | 此扩展未定义于 `2025-11-25` 协议版本下。服务器**不得**将此能力视为在该协议版本下启用任务；请求应按照客户端未声明任何任务能力的情况进行处理。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `2026-06-30`     | 旧版能力不属于本扩展。对于仅声明旧版能力的客户端，服务器**必须**将其视为未就本扩展声明能力。若服务器在支持本扩展的同时还支持 `2025-11-25` Tasks 规范，**应**继续允许此类客户端发送 `tasks/get` 和 `tasks/cancel` 请求，以操作通过该流程创建的任务。 | 规范中的标准情况。完整的任务生命周期如本文档所述，但与 `2025-11-25` 实验性功能存在以下线路层面的差异：<ul><li>`tasks/result` 已移除；客户端调用该方法时**必须**收到 `-32601`（方法未找到）。</li><li>`CallToolRequest` 上的 `task` 参数已移除；服务器**必须**忽略该参数（将其视为未知字段），而不能将其用作选择启用的依据。</li><li>`tasks.requests.*`、`tasks.cancel` 和 `tasks.list` 能力声明不属于本扩展。此前曾声明这些能力的服务器**必须**改为声明 `io.modelcontextprotocol/tasks`，并且在包含本扩展的任何协议版本下**不得**继续声明旧版能力。</li></ul> |
+
+返回标准 `CallToolResult` 形状的服务器——即从不选择创建任务——在本扩展下仍完全符合规范。已协商使用本扩展的客户端，对于任何增强请求，**必须**同时处理这两种结果形状。
+
+## 安全影响
+
+- **任务 ID 的不可猜测性。** 服务器**可以**使用任务 ID 作为服务器存储状态的持有者令牌。服务器**必须**以足够的熵生成任务 ID，使第三方无法枚举或猜测这些 ID。
+- **身份验证绑定。** 服务器**必须**对每个与任务相关的请求执行身份验证和授权检查，以确保客户端有权访问某个任务。
+- **跨调用方关联。** 由于不存在 `tasks/list`，服务器不会意外地将一个调用方的任务存在性泄露给另一个调用方。与 `2025-11-25` 任务规范相比，这是一个改进；在后者中，范围定义不当的列表可能会暴露无关的任务 ID。
+- **输入请求信任模型。** `inputRequests` 携带从服务器经由客户端传递给用户或模型的引导和采样负载。主机**必须**对这些负载应用与标准引导/采样请求相同的信任模型。任务并不是更高信任级别的通道。
+
+## 参考实现
+
+已在 [mcpkit](https://github.com/panyam/mcpkit/blob/02cfbe0d2cada8167b9043b9130804c8638b0aa5/core/task_v2.go) 中实现（参见[用法示例](https://github.com/panyam/mcpkit/tree/02cfbe0d2cada8167b9043b9130804c8638b0aa5/examples/tasks-v2)）。

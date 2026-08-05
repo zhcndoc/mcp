@@ -20,13 +20,13 @@
 
 ## 动机
 
-Model Context Protocol（MCP）规范目前要求进行有状态的初始化握手。这一设计选择给可扩展性、可靠性和实现简洁性带来了重大挑战。本 SEP 的动机是解决这些不足。
+模型上下文协议（MCP）规范目前要求进行有状态的初始化握手。这一设计选择给可扩展性、可靠性和实现简洁性带来了重大挑战。本 SEP 的动机是解决这些不足。
 
 ### 有状态性的问题
 
 核心问题在于：服务器必须保留前面请求的会话状态，才能理解后续请求。这与现代云原生系统的设计理念直接相悖，后者更倾向于无状态服务，因为它们更具韧性和可扩展性。
 
-1. **可扩展性的阻碍：** 最关键的问题是难以对有状态 MCP 做负载均衡。简单的无状态负载均衡器（例如 L4/L7 轮询）无法使用，因为它会将客户端请求路由到不同的后端服务器，而这些服务器都不会拥有正确的会话状态。运维人员不得不实现复杂且脆弱的方案，例如黏性会话，将客户端绑定到特定服务器。这会使基础设施复杂化，可能导致负载分配不均，并使服务的水平扩展变得非平凡。
+1. **可扩展性的阻碍：** 最关键的问题是难以对有状态 MCP 做负载均衡。简单的无状态负载均衡器（例如 L4/L7 轮询）无法使用，因为它会将客户端请求路由到不同的后端服务器，而这些服务器都不会拥有正确的会话状态。运维人员不得不实现复杂且脆弱的方案，例如黏性会话，将客户端绑定到特定服务器。这会使基础设施复杂化，可能导致负载分配不均，并使服务的水平扩展变得困难。
 2. **韧性和容错性差：** 在有状态模型中，如果处理某个客户端会话的特定服务器实例发生故障，该会话状态就会丢失。客户端必须检测连接失败，重新建立连接（通常会通过负载均衡器连接到新的服务器实例），并再次执行整个初始化握手。这个过程具有破坏性且效率低下，还增加了围绕“可恢复性”的复杂性。
 3. **实现复杂度增加：** 当前模型给开发者带来了显著负担。
    - **服务器端：** 开发者必须实现逻辑来创建、管理并最终回收每个客户端的会话状态。这是常见的漏洞和内存泄漏来源。
@@ -264,7 +264,7 @@ export interface MissingRequiredClientCapabilityError extends Omit<
 
 ### `subscriptions/listen` RPC
 
-本 SEP 引入一个新的 `subscriptions/listen` RPC，用于替代先前的 HTTP GET 端点，并确保 HTTP 与 STDIO 之间行为一致。客户端使用它来打开一个长生命周期通道，以接收特定请求上下文之外的通知。
+本 SEP 引入一个新的 `subscriptions/listen` RPC，用于替代先前的 HTTP GET 端点，并确保 HTTP 与 STDIO 之间的行为一致。客户端使用它来打开一个长生命周期通道，以接收特定请求上下文之外的通知。
 
 用于 Streamable HTTP 的服务器到客户端消息的 HTTP GET 端点在本版本协议中**移除**。所有通信都使用 POST。
 
@@ -497,6 +497,23 @@ MCP 所使用的传输层应该只是一种实现细节。如果协议的某个�
 ### `clientInfo` 应该成为 `ClientCapabilities` 的一部分吗？
 
 目前，`clientInfo`（`Implementation` 类型）和 `clientCapabilities`（`ClientCapabilities` 类型）是分开的字段。在按请求模型中，将所有客户端元数据放入一个字段可以降低开销。然而，`clientInfo` 的用途（身份/UI）与能力（特性协商）不同。`clientInfo` 是否应并入 `ClientCapabilities`、保留为单独的按请求 `_meta` 字段，还是完全通过其他机制处理（例如仅通过 `subscriptions/listen` 发送）？
+
+## SEP 成为 Final 后的变更
+
+本 SEP 作为已接受内容的历史记录予以保留。以下列表追踪本 SEP
+达到 Final 状态后对规范所做的变更。请参阅当前的
+[规范](https://modelcontextprotocol.io/specification)，以获取权威且最新的要求。
+
+- **客户端身份信息成为可选的请求元数据。**
+  [#3002](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/3002)
+  将 `io.modelcontextprotocol/clientInfo` 设为可选。除非经过明确配置而不这样做，否则客户端**应当**在每个请求中包含该信息。
+- **服务器身份信息移至可选的结果元数据。**
+  [#3002](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/3002)
+  在结果 `_meta` 中引入了 `io.modelcontextprotocol/serverInfo`，并移除了顶层的
+  `DiscoverResult.serverInfo` 字段，以避免重复表示。除非经过明确配置而不这样做，否则服务器**应当**在每个结果中包含此元数据。
+- **订阅新增了优雅完成结果。**
+  [#2953](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2953)
+  定义了一个用于服务器发起的优雅关闭的 `subscriptions/listen` 结果，取代了 SEP 中关于订阅没有自然完成结果的表述。服务器在关闭流之前**应当**发送此结果。
 
 [SEP-2127]: https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2127
 [SEP-2243]: https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2243

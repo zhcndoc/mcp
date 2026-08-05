@@ -36,30 +36,30 @@ Python SDK 变更：https://github.com/modelcontextprotocol/python-sdk/pull/1246
 **客户端实现：** https://github.com/evalstate/fast-agent/pull/324/files
 **工作演示：** https://asciinema.org/a/anBvJdqEmTjw0JkKYOooQa5Ta
 
-## Motivation
+## 动机
 
-The existing enum pattern uses a non-standard method to add titles to enum values. It also restricts the use of enums in elicitation (Elicitation) (and any future schema objects that should adopt `EnumSchema`) to single-choice models only. Requiring users to select multiple items is a common pattern. In UI terms, this corresponds to the difference between using checkboxes and radio buttons.
+现有的枚举模式使用一种非标准的方法为枚举值添加标题。此外，它还将枚举在引导（Elicitation）中的使用（以及未来任何应采用 `EnumSchema` 的模式对象）限制为仅支持单选模型。要求用户选择多个项目是一种常见模式。在 UI 术语中，这对应于复选框和单选按钮之间的区别。
 
-For these reasons, we propose the following non-breaking minor improvements to `EnumSchema` to improve the user and developer experience.
+基于这些原因，我们提议对 `EnumSchema` 进行以下不破坏兼容性的轻微改进，以提升用户和开发者体验。
 
-- Keep the existing `EnumSchema` as “legacy”
-  - It uses a non-standard method to add titles to enum values
-  - Mark it as legacy, but continue supporting it for now.
-  - According to @dsp-ant, when we have a proper deprecation strategy, we will mark it as deprecated
-- Introduce the distinction between untitled enums and titled enums.
-  - If the enum values are sufficient, there is no need to specify a separate title for each value.
-  - If the enum values are not suitable for display, a title can be specified for each value.
-- Introduce the distinction between single-select and multi-select enums.
-  - If only one value can be selected, single-select mode can be used
-  - If multiple values can be selected, multi-select mode can be used
-- In `ElicitResponse`, add arrays as an `additionalProperty` type
-  - Allows selections of multiple enum values to be returned to the server
+- 保留现有的 `EnumSchema`，并将其视为“旧版”
+  - 它使用一种非标准的方法为枚举值添加标题
+  - 将其标记为旧版，但目前继续支持
+  - 根据 @dsp-ant 的说法，待我们制定适当的弃用策略后，会将其标记为已弃用
+- 引入无标题枚举和有标题枚举之间的区别
+  - 如果枚举值本身足够清晰，则无需为每个值指定单独的标题
+  - 如果枚举值不适合直接展示，则可以为每个值指定标题
+- 引入单选枚举和多选枚举之间的区别
+  - 如果只能选择一个值，则可以使用单选模式
+  - 如果可以选择多个值，则可以使用多选模式
+- 在 `ElicitResponse` 中，将数组添加为 `additionalProperty` 类型
+  - 允许将多个枚举值的选择返回给服务器
 
 ## 规范
 
 ### 1. 将带有非标准 `enumNames` 属性的当前 `EnumSchema` 标记为“遗留”
 
-当前的 MCP 规范使用非标准的 `enumNames` 属性来提供枚举值的显示名称。我们提议将 `enumNames` 属性标记为遗留，建议使用 `TitledSingleSelectEnum`，这是我们下面定义的一种符合标准的枚举类型。
+当前的 MCP 规范使用非标准的 `enumNames` 属性来提供枚举值的显示名称。我们提议将 `enumNames` 属性标记为遗留，建议使用 `TitledSingleSelectEnum`，这是我们在下面定义的一种符合标准的枚举类型。
 
 ```typescript
 // 继续支持当前的 EnumSchema 作为遗留版本
@@ -77,9 +77,9 @@ export interface LegacyEnumSchema {
 }
 ```
 
-### 2. 定义单选枚举（带有有标题和无标题变体）
+### 2. 定义单选枚举（带标题和不带标题的变体）
 
-枚举可能需要也可能不需要标题。枚举值可能是人类可读的并且适合显示。在这种情况下，使用 JSON 模式关键字 `enum` 的无标题实现更简单。添加标题需要使用 `const` 和 `title` 将 `enum` 数组替换为对象数组。
+枚举可能需要标题，也可能不需要标题。枚举值可能具有可读性，适合直接显示。在这种情况下，使用 JSON 模式关键字 `enum` 的不带标题实现更为简单。添加标题时，需要使用 `const` 和 `title` 将 `enum` 数组替换为对象数组。
 
 ```typescript
 // 不带标题的单选枚举
@@ -107,9 +107,9 @@ export type SingleSelectEnumSchema =
   | TitledSingleSelectEnumSchema;
 ```
 
-### 3. 引入多选枚举（带有有标题和无标题变体）
+### 3. 引入多选枚举（带标题和不带标题的变体）
 
-虽然询问不支持任意 JSON 类型（如数组和对象），以便客户端可以轻松显示选择项，但可以轻松实现多选枚举。
+虽然询问不支持数组和对象等任意 JSON 类型，以便客户端能够轻松显示选择项，但实现多选枚举仍然很简单。
 
 ```typescript
 // 不带标题的多选枚举
@@ -117,8 +117,8 @@ export type UntitledMultiSelectEnumSchema = {
   type: "array";
   title?: string;
   description?: string;
-  minItems?: number; // 要选择的最小项目数
-  maxItems?: number; // 要选择的最大项目数
+  minItems?: number; // 要选择的最少项目数
+  maxItems?: number; // 要选择的最多项目数
   items: {
     type: "string";
     enum: string[]; // 不带标题的普通枚举
@@ -130,8 +130,8 @@ export type TitledMultiSelectEnumSchema = {
   type: "array";
   title?: string;
   description?: string;
-  minItems?: number; // 要选择的最小项目数
-  maxItems?: number; // 要选择的最大项目数
+  minItems?: number; // 要选择的最少项目数
+  maxItems?: number; // 要选择的最多项目数
   items: {
     oneOf: Array<{
       const: string; // 枚举值
@@ -160,7 +160,7 @@ export type EnumSchema =
 
 ### 5. 扩展 ElicitResult
 
-当前的询问结果模式仅允许返回原始类型。我们扩展此内容以包含用于 MultiSelectEnums 的字符串数组：
+当前的询问结果模式仅允许返回原始类型。我们扩展此内容，以包含用于 MultiSelectEnums 的字符串数组：
 
 ```typescript
 export interface ElicitResult extends Result {
@@ -253,7 +253,7 @@ export interface ElicitResult extends Result {
 
 1. **标准合规性**：与官方 JSON 模式规范保持一致。标准模式可与现有的 JSON 模式验证器一起工作
 2. **灵活性**：支持普通枚举和带有显示名称的枚举，适用于单选和多选枚举。
-3. **客户端实现：** 表明实现一组复选框与单个复选框的额外开销是最小的：https://github.com/evalstate/fast-agent/pull/324/files
+3. **客户端实现：** 表明实现一组复选框与单个复选框的额外开销是最小的：https://github.com/evalstate/fast-agent/pull/324/files。
 
 ## 向后兼容性
 

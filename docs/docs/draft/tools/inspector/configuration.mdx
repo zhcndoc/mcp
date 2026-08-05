@@ -1,0 +1,192 @@
+---
+title: 配置和标志
+description: 目录与配置文件、各客户端拥有的标志，以及所有环境变量
+---
+
+`mcp-inspector` 二进制文件是一个启动器：它读取自身的两个标志，并将所有其他参数转发给三个客户端之一（Web、CLI 或 TUI）。每个客户端定义自己的标志，因此某个标志在一个客户端中有效，在另一个客户端中可能是未知标志（例如，`--method` 仅适用于 CLI）。本页面按所属客户端对标志和环境变量进行分类。
+
+## 启动器恰好拥有两项功能
+
+| 标志                        | 行为                                                                                                                                                                                                                                                                                         |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `--web` / `--cli` / `--tui` | 选择客户端，默认为 `--web`。传入多个标志会失败，并显示 `Specify at most one of --web, --cli, or --tui.`。启动器标志必须位于开头：解析会在遇到第一个不属于启动器的参数时停止，并将从该参数开始的所有内容原样转发给客户端。 |
+| `-h` / `--help`             | 未指定模式标志时，打印启动器自身的帮助信息并退出。指定模式标志时，该参数会被转发，因此 `mcp-inspector --cli --help` 会打印 CLI 的帮助信息。                                                                                                                                            |
+
+以下内容均属于客户端。
+
+## 选择服务器
+
+### `--catalog` 与 `--config`
+
+这三个客户端都通过同一套共享代码解析 `--catalog` 和 `--config`，因此每个标志在 Web 应用、CLI 和 TUI 中的行为都相同。两者之间的差异如下表所示。
+
+|                             | `--catalog <path>`                                                           | `--config <path>`                                       |
+| --------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------- |
+| **可写入？**               | 是，Inspector 自己的服务器列表。                                        | 否。按原样提供，永不写入、初始化或迁移。   |
+| **文件不存在？**           | 创建并初始化（见下文）。                                              | **报错。**                                             |
+| **默认值**                 | `~/.mcp-inspector/mcp.json`，或 `MCP_CATALOG_PATH` 环境变量。 | 无；必须传入。                                 |
+| **可在 Web UI 中编辑？** | 是。                                                                         | 否。                                                     |
+| **用于**              | 您自己的工作服务器集合。                                             | 针对他人配置文件的只读会话。 |
+
+两者**互斥**，且都不能与临时目标组合使用。三个客户端对同时传入两者的处理方式完全一致，都会拒绝。
+
+<Note>
+**新初始化的目录内容取决于客户端。** Web 后端会初始化两个示例服务器，因此首次启动时就可以立即连接：
+
+```json
+{
+  "mcpServers": {
+    "filesystem-server-default": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/tmp"]
+    },
+    "everything-server-default": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-everything"]
+    }
+  }
+}
+```
+
+CLI 和 TUI 则会初始化为空的 `{ "mcpServers": {} }`：它们是非交互式或由列表驱动的，因此示例条目只会造成干扰，而不是提供一个起点。
+
+无论哪种情况，只有在文件尚不存在时才会进行初始化，而只读的 `--config` 完全不会被初始化。
+
+</Note>
+
+<Note>
+  当您要让 Inspector 指向一个并非由您编写的配置文件时，应使用 `--config`：例如同事的配置文件、客户端应用程序的配置文件，或提交到代码仓库中的配置文件。它可以确保 Inspector 不会触碰该文件。
+</Note>
+
+### 临时目标
+
+您可以不使用文件，而是直接指定一个服务器，可以指定为位置命令（stdio）或 URL：
+
+```bash
+mcp-inspector node build/index.js                              # stdio，位置参数
+mcp-inspector --server-url https://api.example.com/mcp --transport http
+```
+
+### 共享的服务器选择标志
+
+这些标志由 Web、CLI 和 TUI 分别定义，因此三者均可使用，差异如下：
+
+| 标志                     | 含义                                               | 差异                                                                                      |
+| ------------------------ | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `--catalog <path>`       | 可写的目录文件。                                | 无                                                                                            |
+| `--config <path>`        | 只读会话文件。                               | 无                                                                                            |
+| `--server <name>`        | 从文件中选择一个指定名称的服务器。                | **仅 Web 和 CLI 支持。** TUI 会加载文件中的所有服务器，并允许您进行交互式选择。 |
+| `--transport <type>`     | `stdio`、`sse` 或 `http`。                            | 仅适用于临时目标。                                                                            |
+| `--server-url <url>`     | SSE/HTTP 服务器的 URL。                              | 仅适用于临时目标。                                                                            |
+| `--cwd <path>`           | stdio 服务器进程的工作目录。         | 无                                                                                            |
+| `-e <KEY=VALUE>`         | stdio 服务器的环境变量。可重复指定。 | 无                                                                                            |
+| `--header "Name: Value"` | HTTP/SSE 服务器的 HTTP 标头。可重复指定。      | Web 客户端要求使用临时 HTTP/SSE 服务器。                                           |
+| `[target...]`            | 一个临时服务器的位置命令/URL。         | 无                                                                                            |
+
+### `--` 分隔符
+
+**Web 和 CLI** 客户端会在单独出现的 `--` 处分割参数，并将其后的所有内容作为目标命令自身的参数传递。这就是传递 Inspector 原本会截获的标志的方式：
+
+```bash
+mcp-inspector node build/index.js -- --config /etc/myserver.conf --verbose
+```
+
+如果没有该分隔符，`--config` 就会被读取为 Inspector 自己的只读会话标志。
+
+## 仅限 Web 的标志
+
+| 标志    | 含义                                                                                               |
+| ------- | ----------------------------------------------------------------------------------------------------- |
+| `--dev` | 运行 Vite 开发服务器，而不是预构建的 bundle。在开发 Inspector 本身时很有用。 |
+
+## CLI 和 TUI：OAuth 客户端标志
+
+这五项仅由 **CLI 和 TUI** 定义。Web 客户端通过其客户端设置对话框获取相同的设置。
+
+| 标志                          | 环境变量                  | 含义                                                                                                                                                                                                                                                                                                          |
+| ----------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--client-config <path>`      | `MCP_CLIENT_CONFIG_PATH`  | 安装级客户端配置。默认值为 `~/.mcp-inspector/storage/client.json`。                                                                                                                                                                                                                                     |
+| `--client-id <id>`            | 无                        | 静态客户端的 OAuth 客户端 ID。覆盖 `client.json`。                                                                                                                                                                                                                                                    |
+| `--client-secret <secret>`    | 无                        | 机密客户端的 OAuth 客户端密钥。覆盖 `client.json`。                                                                                                                                                                                                                                           |
+| `--client-metadata-url <url>` | 无                        | CIMD 元数据 URL。覆盖 `client.json`。                                                                                                                                                                                                                                                                      |
+| `--callback-url <url>`        | `MCP_OAUTH_CALLBACK_URL`   | 发送给授权服务器的重定向 URI。默认值为 `http://127.0.0.1:6276/oauth/callback`。必须是环回主机（`127.0.0.1` 或 `localhost`）：本地回调监听器通过明文 `http` 接收授权码，因此会拒绝任何其他主机，并且没有可用于覆盖此限制的标志。 |
+
+## 仅限 CLI 的标志
+
+整个脚本操作界面都属于 CLI。有关使用方法，请参阅 [CLI 客户端](/docs/draft/tools/inspector/cli)。
+
+| 分组               | 标志                                                                                                                                                   |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **调用内容**       | `--method`、`--tool-name`、`--tool-arg`、`--tool-args-json`、`--uri`、`--prompt-name`、`--prompt-args`、`--log-level`、`--metadata`、`--tool-metadata` |
+| **运行方式**       | `--connect-timeout`、`--format`、`--app-info`                                                                                                          |
+| **身份验证**       | `--use-stored-auth`、`--stored-auth-only`、`--relogin`、`--wait-for-auth`、`--list-stored-auth`、`--print-handoff`                                     |
+
+## 环境变量
+
+环境变量的分类方式与标志相同：其中两个由启动器本身读取，其余变量属于 CLI 和 TUI，或属于 Web 后端。
+
+### 由启动器读取
+
+| 变量        | 作用                                                                                                                                                           |
+| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MCP_DEBUG` | 将错误堆栈附加到顶层失败信息中。仅在设置为有意义的值时生效：`0`、`false` 和空值均表示关闭。                                            |
+| `DEBUG`     | 规则相同：只有设置为有意义的值时才生效，因此意外设置的 `DEBUG=0` 不会启用堆栈跟踪，同时 `DEBUG` 仍可作为 npm `debug` 包的命名空间过滤器使用。 |
+
+### CLI 和 TUI
+
+| 变量                            | 作用                                                                                                                                                                                              |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MCP_CATALOG_PATH`              | `--catalog` 的备用值。仅在未提供临时目标时生效，因此导出该变量的 Shell 仍可运行一次性的临时调用。                                                         |
+| `MCP_CLIENT_CONFIG_PATH`        | `--client-config` 的备用值。                                                                                                                                                                     |
+| `MCP_OAUTH_CALLBACK_URL`        | `--callback-url` 的备用值。                                                                                                                                                                      |
+| `MCP_STORAGE_DIR`               | OAuth 状态文件（`<dir>/oauth.json`）所在的目录。                                                                                                                                            |
+| `MCP_INSPECTOR_OAUTH_STATE_PATH` | 按文件覆盖 OAuth 状态路径。优先级高于 `MCP_STORAGE_DIR`。                                                                                                                 |
+| `MCP_AUTO_OPEN_ENABLED`         | 控制浏览器自动打开，以及交互式 OAuth 是否可以在没有 TTY 的情况下运行。`true` 强制自动打开并允许在没有 TTY 时显示 OAuth 提示，`false` 表示绝不打开，未设置时仅在 TTY 上打开。 |
+
+### Web 后端环境变量
+
+| 变量                                      | 作用                                                                                                                    |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `MCP_INSPECTOR_API_TOKEN`                 | 固定[会话令牌](/docs/draft/tools/inspector/web#the-session-token)，而不是每次启动时生成随机令牌。 |
+| `DANGEROUSLY_OMIT_AUTH`                   | 完全禁用 `/api/*` 令牌检查。                                                                                |
+| `HOST`                                    | 绑定主机。默认为 `localhost`。                                                                                       |
+| `CLIENT_PORT`                             | Web UI 端口。默认为 `6274`。                                                                                          |
+| `DANGEROUSLY_BIND_ALL_INTERFACES`         | 绑定通配主机（`0.0.0.0`、`::` 或任何等效写法）所必需的显式启用项。                                    |
+| `ALLOWED_ORIGINS`                         | 以逗号分隔的来源允许列表。**替换**默认列表，而不是与其合并。                                     |
+| `MCP_SANDBOX_PORT`                        | 固定 MCP Apps 沙盒端口，该端口默认是动态的。                                                               |
+| `HTTPS_PROXY` / `HTTP_PROXY` / `NO_PROXY` | 用于出站 MCP 连接的标准代理路由。                                                                      |
+
+<Warning>
+  切勿同时使用 `DANGEROUSLY_OMIT_AUTH` 和 `DANGEROUSLY_BIND_ALL_INTERFACES`。
+  Web 后端会生成进程并持有 OAuth 令牌，因此任何能够访问它的人都可以操控它。
+</Warning>
+
+## Catalog 文件格式
+
+Catalog 或配置文件采用熟悉的 MCP 客户端配置结构（包含 `mcpServers` 对象），并在其中为每个服务器配置 Inspector 设置：
+
+```json
+{
+  "mcpServers": {
+    "my-stdio-server": {
+      "command": "node",
+      "args": ["build/index.js"],
+      "env": { "API_KEY": "..." }
+    },
+    "my-modern-server": {
+      "type": "http",
+      "url": "https://api.example.com/mcp",
+      "protocolEra": "modern",
+      "modernLogLevel": "info",
+      "headers": { "X-Tenant": "acme" },
+      "roots": [{ "uri": "file:///Users/me/project", "name": "project" }]
+    }
+  }
+}
+```
+
+Inspector 将文件写回时会省略值等于默认值的字段，从而尽量减少差异。`protocolEra`（参见[协议时代](/docs/draft/tools/inspector/protocol-eras)）默认为 `legacy`，`modernLogLevel` 默认为 `debug`。
+
+你不必手动编写这些内容；Web 客户端可以从 Claude Desktop、Cursor、Cline 或 VS Code [导入现有客户端配置](/docs/draft/tools/inspector/recipes#importing-an-existing-client-config)，也可以导入注册表中的 `server.json`。

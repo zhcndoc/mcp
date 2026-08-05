@@ -28,7 +28,7 @@ description: "支持询问模式中所有原始类型的默认值"
 
 ## 摘要
 
-本 SEP 建议在 MCP 询问模式（StringSchema, NumberSchema 和 EnumSchema）的所有原始类型中添加对默认值的支持，扩展现有的仅覆盖 BooleanSchema 的支持。
+本 SEP 建议在 MCP 询问模式（StringSchema、NumberSchema 和 EnumSchema）的所有原始类型中添加对默认值的支持，扩展现有的仅覆盖 BooleanSchema 的支持。
 
 ## 动机
 
@@ -91,7 +91,7 @@ const response = await client.request("elicitation/create", {
 一个可行的实现表明客户端只需极少更改即可显示默认值（约 10 行代码）：
 
 - 实现 PR: https://github.com/chughtapan/fast-agent/pull/2
-- 上述电子邮件回复工作流程的演示：https://asciinema.org/a/X7aQZjT2B5jVwn9dJ9sqQVkOM
+- 上述电子邮件回复工作流程的演示：https://asciinema.org/a/X7aQZjT2B5jVwn9dJ9sqQVkOM。
 
 ## 规范
 
@@ -148,7 +148,7 @@ export interface EnumSchema {
 
 1. **服务器端模板**：服务器可以单独维护模板，但这增加了复杂性
 2. **新请求类型**：用于带默认值表单的单独请求类型会碎片化 API
-3. **必需默认值**：将默认值设为必需会破坏现有实现
+3. **必需默认值**：将默认值设为必需会破坏现有实现。
 
 ## 向后兼容性
 
@@ -160,4 +160,4 @@ export interface EnumSchema {
 
 1. **无敏感数据**：现有关于请求敏感信息的指南仍然适用
 2. **客户端控制**：客户端保留对发送到服务器数据的完全控制
-3. **用户可见性**：默认值对用户可见，用户可以在提交前修改它们
+3. **用户可见性**：默认值对用户可见，用户可以在提交前修改它们。

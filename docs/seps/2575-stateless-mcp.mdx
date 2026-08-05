@@ -6,7 +6,7 @@ description: "使 MCP 无状态"
 
 <div className="flex items-center gap-2 mb-4">
   <Badge color="green" shape="pill">
-    Final
+    最终版
   </Badge>
   <Badge color="gray" shape="pill">
     标准跟踪
@@ -16,12 +16,12 @@ description: "使 MCP 无状态"
 | 字段          | 值                                                                                                                            |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | **SEP**       | 2575                                                                                                                            |
-| **Title**     | 使 MCP 无状态                                                                                                              |
-| **Status**    | Final                                                                                                                           |
-| **Type**      | 标准跟踪                                                                                                                 |
-| **Created**   | 2025-06-18                                                                                                                      |
-| **Author(s)** | Jonathan Hefner ([@jonathanhefner](https://github.com/jonathanhefner)), Mark Roth ([@markdroth](https://github.com/markdroth)), |
-| **Sponsor**   | Kurtis Van Gent ([@kurtisvg](https://github.com/kurtisvg))                                                                      |
+| **标题**     | 使 MCP 无状态                                                                                                              |
+| **状态**    | 最终版                                                                                                                           |
+| **类型**      | 标准跟踪                                                                                                                 |
+| **创建时间**   | 2025-06-18                                                                                                                      |
+| **作者** | Jonathan Hefner ([@jonathanhefner](https://github.com/jonathanhefner)), Mark Roth ([@markdroth](https://github.com/markdroth)), |
+| **赞助者**   | Kurtis Van Gent ([@kurtisvg](https://github.com/kurtisvg))                                                                      |
 | **PR**        | [#2575](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2575)                                                 |
 
 ---
@@ -40,7 +40,7 @@ description: "使 MCP 无状态"
 
 Model Context Protocol（MCP）规范目前强制要求一个有状态的初始化握手。这一设计选择给可扩展性、可靠性和实现简洁性带来了显著挑战。本 SEP 的动机是解决这些不足。
 
-### 有状态性的問題
+### 有状态性的问题
 
 核心问题在于，服务器必须保留先前请求的会话状态，才能理解后续请求。这与现代云原生系统的设计方向直接相悖；后者更偏好无状态服务，以获得更好的弹性和可扩展性。
 
@@ -407,7 +407,7 @@ export interface SubscriptionsAcknowledgedNotification extends Notification {
 
 ### 默认采用无状态优先
 
-本 SEP 的主要设计决策是移除强制性的初始化握手，使无状态交互成为该协议的默认模型。这个选择基于“按需付费”（pay as you go）原则，以及希望让 MCP 与现代云原生架构保持一致的愿望。通过将最简单的交互模型设为默认，我们降低了入门门槛，并减少了最常见用例的实现复杂度。这会立即支持直接的水平扩展，并提高系统的弹性，因为任何请求都可以由任何服务器实例处理。
+本 SEP 的主要设计决策是移除强制性的初始化握手，使无状态交互成为该协议的默认模型。这个选择基于“按需付费”原则，以及希望让 MCP 与现代云原生架构保持一致的愿望。通过将最简单的交互模型设为默认，我们降低了入门门槛，并减少了最常见用例的实现复杂度。这会立即支持直接的水平扩展，并提高系统的弹性，因为任何请求都可以由任何服务器实例处理。
 
 #### 考虑过的替代方案：可选握手
 

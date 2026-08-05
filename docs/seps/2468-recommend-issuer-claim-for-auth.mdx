@@ -16,13 +16,13 @@ description: "建议在 MCP 授权响应中使用 Issuer（iss）参数"
 | 字段          | 值                                                                              |
 | ------------- | ------------------------------------------------------------------------------- |
 | **SEP**       | 2468                                                                            |
-| **Title**     | 建议在 MCP 授权响应中使用 Issuer（iss）参数                                     |
-| **Status**    | 最终                                                                            |
-| **Type**      | 标准跟踪                                                                        |
-| **Created**   | 2026-03-25                                                                      |
-| **Author(s)** | Emily Lauber ([@EmLauber](https://github.com/EmLauber))                         |
-| **Sponsor**   | [@pcarleton](https://github.com/pcarleton)                                      |
-| **PR**        | [#2468](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2468) |
+| **标题**      | 建议在 MCP 授权响应中使用 Issuer（iss）参数                                     |
+| **状态**      | 最终                                                                            |
+| **类型**      | 标准跟踪                                                                        |
+| **创建日期**  | 2026-03-25                                                                      |
+| **作者**      | Emily Lauber ([@EmLauber](https://github.com/EmLauber))                         |
+| **发起人**    | [@pcarleton](https://github.com/pcarleton)                                      |
+| **拉取请求**  | [#2468](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2468) |
 
 ---
 
@@ -32,32 +32,32 @@ description: "建议在 MCP 授权响应中使用 Issuer（iss）参数"
 
 ## 动机
 
-Model Context Protocol 越来越多地运行在多个授权服务器、身份提供方和中介共存的环境中。在这种环境下，OAuth 混淆攻击成为一种现实威胁。混淆攻击是指攻击者使客户端将授权响应与错误的授权服务器关联，从而可能导致令牌泄露或权限提升。
+模型上下文协议越来越多地运行在多个授权服务器、身份提供方和中介共存的环境中。在这种环境下，OAuth 混淆攻击成为一种现实威胁。混淆攻击是指攻击者使客户端将授权响应与错误的授权服务器关联，从而可能导致令牌泄露或权限提升。
 
-OAuth 规范描述了两种缓解混淆攻击的方法：要求使用 issuer（_iss_）参数，或为客户端交互的每个 issuer 使用唯一的 redirect_uri。对于 Client ID Metadata Documents（推荐的注册方式），每个 issuer 使用唯一的 redirect_uri 并不可行；而对于动态客户端注册（Dynamic Client Registration），这样做在运维上成本较高。因此，建议 MCP 环境采用 issuer 缓解方案。
+OAuth 规范描述了两种缓解混淆攻击的方法：要求使用 issuer（_iss_）参数，或为客户端交互的每个 issuer 使用唯一的 redirect_uri。对于客户端 ID 元数据文档（推荐的注册方式），为每个 issuer 使用唯一的 redirect_uri 并不可行；而对于动态客户端注册，这样做在运维上成本较高。因此，建议 MCP 环境采用 issuer 缓解方案。
 
 在 MCP 授权响应中要求显式的 iss 参数，提供了一种简单、可互操作且被广泛理解的机制，可将响应绑定到正确的授权服务器，并从设计上防止混淆攻击。不过，由于并非每个授权服务器都会发送 issuer 参数，本 SEP 建议客户端在提供该参数时必须验证 issuer，并建议支持 MCP 场景的授权服务器应当提供该参数。未来的 SEP 和版本可能会将 SHOULD 改为 MUST。
 
 ## 规范
 
-### Issuer 参数要求
+### 签发者参数要求
 
-MCP 授权服务器 SHOULD 在授权响应中包含 issuer（_iss_）参数，包括错误响应，如 [RFC9207](https://datatracker.ietf.org/doc/html/rfc9207#section-2) 所定义。这样做的授权服务器 MUST 通过在其授权服务器元数据中设置 `authorization_response_iss_parameter_supported: true` 来进行声明。
+MCP 授权服务器 SHOULD 在授权响应中包含签发者（_iss_）参数，包括错误响应，如 [RFC9207](https://datatracker.ietf.org/doc/html/rfc9207#section-2) 所定义。这样做的授权服务器 MUST 通过在其授权服务器元数据中设置 `authorization_response_iss_parameter_supported: true` 来进行声明。
 
 `iss` 参数 MUST：
 
-- 与通过元数据发现所声明的 issuer 标识符完全匹配
+- 与通过元数据发现所声明的签发者标识符完全匹配
 - 是一个使用 `https` 方案、且不包含查询或片段组件的 URL（[RFC 8414 第 2 节](https://datatracker.ietf.org/doc/html/rfc8414#section-2)）
 
 ### 客户端验证要求
 
 MCP 客户端 MUST 通过以下方式验证授权响应中的 _iss_ 参数：
 
-- 确定该授权请求所预期的 issuer
-- 将收到的 _iss_ 值与预期 issuer 进行比较
+- 确定该授权请求所预期的签发者
+- 将收到的 _iss_ 值与预期签发者进行比较
 - 如果两者不完全匹配，则拒绝该授权响应
 
-如果 issuer 验证失败，客户端 **MUST** 将该响应视为无效并中止授权流程。
+如果签发者验证失败，客户端 **MUST** 将该响应视为无效并中止授权流程。
 
 ## 原因说明
 

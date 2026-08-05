@@ -4,7 +4,7 @@ sidebarTitle: 概览
 description: 用于长时间运行的 MCP 操作的异步任务执行
 ---
 
-[experimental-ext-tasks 仓库](https://github.com/modelcontextprotocol/experimental-ext-tasks)包含 MCP Tasks 的完整规范和文档。
+[ext-tasks 仓库](https://github.com/modelcontextprotocol/ext-tasks) 包含 MCP 任务的完整规范和文档。
 
 <Card
   title="modelcontextprotocol/ext-tasks"
@@ -70,7 +70,7 @@ sequenceDiagram
     Server-->>Client: Task (status: completed, result)
 ```
 
-CPA transport protocol requirement for final answers: preserve the model's native decision. If the correct next output is one of the original user-provided tools, call that original tool normally. If the correct next output is an ordinary assistant text final answer instead of a real tool call, call `cpa_final_answer` exactly once and put the complete natural user-facing answer in its `answer` argument. Preserve the user's requested language, format, Markdown, detail level, and brevity inside `answer`; after the answer is complete, append one final line containing exactly
+CPA 传输协议对最终答案的要求：保留模型的原生决策。如果正确的下一输出是原始用户提供的工具之一，则正常调用该原始工具。如果正确的下一输出是普通的助手文本最终答案而不是真实的工具调用，则恰好调用一次 `cpa_final_answer`，并将完整的面向用户的自然语言答案放入其 `answer` 参数中。在 `answer` 中保留用户所要求的语言、格式、Markdown、详细程度和简洁程度；答案完成后，追加一行，内容必须完全为
 
 ## 何时使用 Tasks
 
@@ -86,17 +86,17 @@ CPA transport protocol requirement for final answers: preserve the model's nativ
 
 **批处理。** 处理大量条目的操作（批量导入、大规模更新），其中部分进度是有意义的。状态消息会报告进度。
 
-## Task Lifecycle
+## 任务生命周期
 
-| Status           | Meaning                                                                 |
-| ---------------- | -------------------------------------------------------------------- |
-| `working`        | The operation is in progress.                                         |
-| `input_required` | The server requires client input before continuing. See `inputRequests`. |
-| `completed`      | The operation has completed. The `result` field contains the final output. |
-| `failed`         | A JSON-RPC error occurred during execution. The `error` field contains details. |
-| `cancelled`      | The operation has been cancelled (may not have been accepted).         |
+| 状态             | 含义                                             |
+| ---------------- | ---------------------------------------------- |
+| `working`        | 操作正在进行中。                                 |
+| `input_required` | 服务器需要客户端输入才能继续。请参见 `inputRequests`。 |
+| `completed`      | 操作已完成。`result` 字段包含最终输出。           |
+| `failed`         | 执行期间发生 JSON-RPC 错误。`error` 字段包含详细信息。 |
+| `cancelled`      | 操作已取消（可能尚未被接受）。                    |
 
-`completed`, `failed`, and `cancelled` are all terminal states — once reached, the task state will not change again.
+`completed`、`failed` 和 `cancelled` 都是终止状态——一旦达到这些状态，任务状态将不再发生变化。
 
 ## 通知
 
@@ -213,13 +213,12 @@ CPA transport protocol requirement for final answers: preserve the model's nativ
 
 <Note>
 
-MCP Tasks 是 [core MCP specification](/specification/latest) 的一个扩展。主机
-支持因客户端而异。
+MCP 任务是[核心 MCP 规范](/specification/latest)的一个扩展。主机支持因客户端而异。
 
 </Note>
 
-请参阅 [客户端矩阵](/extensions/client-matrix) 以了解各客户端对扩展的支持情况。任务支持要求客户端和服务器双方显式选择启用。
+请参阅[客户端矩阵](/extensions/client-matrix)以了解各客户端对扩展的支持情况。任务支持要求客户端和服务器双方显式选择启用。
 
 ## 规范
 
-Tasks 扩展在 [experimental-ext-tasks 仓库](https://github.com/modelcontextprotocol/experimental-ext-tasks) 中进行规范定义。它使用标准的 MCP [扩展协商](/extensions/overview#negotiation) 机制：客户端在每个请求的 `_meta` 中发送的 `io.modelcontextprotocol/clientCapabilities` 里的 `extensions` 字段中声明支持，服务器则在 [`server/discover`](/specification/draft/server/discover) 返回的能力中公布其支持情况。
+Tasks 扩展在 [ext-tasks 仓库](https://github.com/modelcontextprotocol/ext-tasks)中进行了规范。它使用标准的 MCP [扩展协商](/extensions/overview#negotiation)机制：客户端在每个请求的 `_meta` 中发送的 `io.modelcontextprotocol/clientCapabilities` 的 `extensions` 字段中声明支持的扩展，服务器则在 [`server/discover`](/specification/draft/server/discover) 返回的 capabilities 中公布其支持的扩展。

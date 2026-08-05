@@ -13,15 +13,15 @@ description: "工具 `inputSchema` 与 `outputSchema` 符合 JSON Schema 2020-12
   </Badge>
 </div>
 
-| Field         | Value                                                                                                                                                                         |
+| 字段          | 值                                                                                                                                                                          |
 | ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **SEP**       | 2106                                                                                                                                                                          |
-| **Title**     | 工具 `inputSchema` 与 `outputSchema` 符合 JSON Schema 2020-12                                                                                                               |
-| **Status**    | 最终                                                                                                                                                                          |
-| **Type**      | 标准轨道                                                                                                                                                                      |
-| **Created**   | 2026-01-06                                                                                                                                                                    |
-| **Author(s)** | John McBride ([@jpmcb](https://github.com/jpmcb)) — 原始提案；Ola Hungerford ([@olaservo](https://github.com/olaservo)) — 当前维护人，SEP-1850 转换后 |
-| **Sponsor**   | Ola Hungerford ([@olaservo](https://github.com/olaservo))                                                                                                                     |
+| **标题**      | 工具 `inputSchema` 与 `outputSchema` 符合 JSON Schema 2020-12                                                                                                               |
+| **状态**      | 最终                                                                                                                                                                          |
+| **类型**      | 标准轨道                                                                                                                                                                      |
+| **创建日期**  | 2026-01-06                                                                                                                                                                    |
+| **作者**      | John McBride ([@jpmcb](https://github.com/jpmcb)) — 原始提案；Ola Hungerford ([@olaservo](https://github.com/olaservo)) — 当前维护人，SEP-1850 转换后 |
+| **发起人**    | Ola Hungerford ([@olaservo](https://github.com/olaservo))                                                                                                                     |
 | **PR**        | [#2106](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2106)                                                                                               |
 
 ---
@@ -397,7 +397,7 @@ JSON Schema 2020-12 允许 `$ref` 指向绝对 URI，而不仅仅是同一文档
 - **npm**: `@olaservo/mcp-server-everything-sep834@1.1.0-sep834.1`
 - **工具**：
   - `get-weather-forecast`：直接在 `structuredContent` 中返回每小时预报的**原始数组**
-    - 与 SEP-2106 的 Motivation 部分中的精确示例一致
+    - 与 SEP-2106 的动机部分中的精确示例一致
     - `outputSchema`: `z.array(HourlyForecastSchema)` - 根层级为数组类型
     - `structuredContent`: `[{hour, temp, conditions}, ...]` - 直接数组
   - `find-by-id-or-name`：演示灵活的输入模式（接受 `id` 或 `name`）
@@ -420,7 +420,7 @@ SDK 实现需要：
 1. 更新 `inputSchema` 类型，保留 `type: "object"`，但允许任何额外的 JSON Schema 属性
 2. 更新 `outputSchema` 类型，允许任何有效的 JSON Schema（移除 `type: "object"` 约束）
 3. 更新 `structuredContent` 类型，使其接受任何有效的 JSON 值
-4. 相应更新 JSON Schema 定义
+4. 相应更新 JSON Schema 定义。
 
 ## 致谢
 

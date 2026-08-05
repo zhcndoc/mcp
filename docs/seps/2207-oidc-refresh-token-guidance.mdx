@@ -16,12 +16,12 @@ description: "OIDC 风格刷新令牌指南"
 | 字段          | 值                                                                            |
 | ------------- | ------------------------------------------------------------------------------- |
 | **SEP**       | 2207                                                                            |
-| **Title**     | OIDC 风格刷新令牌指南                                                           |
-| **Status**    | 最终版                                                                          |
-| **Type**      | 标准轨道                                                                        |
-| **Created**   | 2026-02-04                                                                      |
-| **Author(s)** | Wils Dawson ([@wdawson](https://github.com/wdawson))                            |
-| **Sponsor**   | Paul Carleton ([@pcarleton](https://github.com/pcarleton))                      |
+| **标题**      | OIDC 风格刷新令牌指南                                                           |
+| **状态**      | 最终版                                                                          |
+| **类型**      | 标准轨道                                                                        |
+| **创建时间**  | 2026-02-04                                                                      |
+| **作者**      | Wils Dawson ([@wdawson](https://github.com/wdawson))                            |
+| **赞助者**    | Paul Carleton ([@pcarleton](https://github.com/pcarleton))                      |
 | **PR**        | [#2207](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2207) |
 
 ---
@@ -71,7 +71,7 @@ MCP 服务器（作为 OAuth 2.0 受保护资源）：
 
 ### 为什么不在 401 响应中要求 `offline_access`？
 
-`offline_access` scope 与特定于资源的 scope  fundamentally 不同。它代表客户端对长期访问的愿望，而不是资源的要求。根据 [OAuth 2.1 第 5.3.1 节](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-13#section-5.3.1)，`WWW-Authenticate` 中的 `scope` 属性表示“访问请求资源所需的访问令牌 scope"。由于资源不需要 `offline_access`，包含它在语义上是不正确的。
+`offline_access` scope 与特定于资源的 scope 根本不同。它代表客户端对长期访问的愿望，而不是资源的要求。根据 [OAuth 2.1 第 5.3.1 节](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-13#section-5.3.1)，`WWW-Authenticate` 中的 `scope` 属性表示“访问请求资源所需的访问令牌 scope”。由于资源不需要 `offline_access`，包含它在语义上是不正确的。
 
 ### 为什么要检查客户端元数据中的授予类型？为什么不总是颁发刷新令牌？
 
