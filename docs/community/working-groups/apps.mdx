@@ -1,0 +1,123 @@
+---
+title: MCP Apps 工作组章程
+description: MCP Apps 工作组章程
+---
+
+## 组类型
+
+**工作组**
+
+## 使命宣言
+
+MCP Apps 工作组定义、发展和维护用于通过 MCP 提供交互式用户界面的官方扩展。工作组负责监督扩展规范、SDK、参考实现、安全模型、兼容性工作和指导，以便应用能够在独立的 MCP 主机之间安全且一致地运行。
+
+## 范围
+
+### 范围内
+
+- **规范工作**：[MCP Apps 扩展规范](https://github.com/modelcontextprotocol/ext-apps/tree/main/specification)及相关 SEP，涵盖以下 `io.modelcontextprotocol/ui` 命名空间下的领域。
+- **应用生命周期**：应用如何声明、初始化、持久化和拆除，包括 UI 资源声明和工具元数据。
+- **应用交互模型**：用户、应用和主机之间的交互协议，例如双向消息传递、应用工具等。
+- **内容类型和渲染目标**：支持不同的内容类型和方法，例如生成式 UI，并与 [A2UI](https://a2ui.org/) 和 [AG-UI](https://ag-ui.com/) 等外部协议实现互操作性。
+- **安全模型**：UI 发起操作的威胁模型、沙箱、安全策略、权限和可审计性。
+- **SDK 和参考实现**：[`@modelcontextprotocol/ext-apps`](https://github.com/modelcontextprotocol/ext-apps) SDK、参考主机、示例服务器和主机集成示例。
+- **兼容性**：兼容性测试、应用验证，以及应用和主机兼容性要求的定义。
+- **跨领域协调**：应用发现和元数据（与 Registry WG 协作）、智能体流程中的 UI（与 Agents WG 协作），以及各语言 SDK 支持（与 SDK WG 协作）。
+- **文档**：API 参考、创作指南、主机集成指南、入门资源和示例。
+
+### 范围外
+
+- **核心协议所有权**：对基础 MCP 语义、传输或生命周期的更改应通过 [SEP 流程](/community/sep-guidelines)提出，并由相关小组或 Core Maintainers 负责。
+- **特定主机的产品和设计决策**：主机负责控制其用户体验和视觉设计。工作组负责标准化互操作性和安全契约。
+- **单个应用实现**：基于该扩展构建的应用仍由其作者负责。
+- **通用智能体编排**：智能体循环、任务管理和子智能体协调属于 Agents WG。本工作组仅涵盖交互式 UI 表面及其集成点。
+
+### 相关小组
+
+- **Agents WG**：智能体流程和任务生命周期中的交互式 UI。
+- **[Registry WG](/community/working-groups/registry)**：应用发现、分发和元数据。
+- **[Security IG](/community/interest-groups/security)**：沙箱、权限以及对 UI 发起操作的审查。
+- **[SDK WG](/community/working-groups/sdk)**：SDK 一致性，以及 TypeScript 参考实现之外的支持。
+
+## 领导层
+
+| 角色 | 姓名           | 组织       | GitHub                                 | 任期   |
+| ---- | -------------- | ---------- | -------------------------------------- | ------ |
+| 负责人 | Ido Salomon    | MCP-UI     | [@idosal](https://github.com/idosal)   | 初始   |
+| 负责人 | Liad Yosef     | MCP-UI / Ora | [@liady](https://github.com/liady)     | 初始   |
+| 负责人 | Olivier Chafik | Anthropic  | [@ochafik](https://github.com/ochafik) | 初始   |
+
+## 权限与决策权
+
+| 决策类型                         | 权限级别                                      |
+| -------------------------------- | --------------------------------------------- |
+| 会议事务与日程安排               | 工作组负责人（自主决定）                      |
+| 工作组内部提案排序               | 工作组负责人（自主决定）                      |
+| SEP 分类与结案（范围内）         | 工作组负责人（自主决定，并记录理由）          |
+| 范围内的技术设计                 | 工作组共识                                    |
+| 规范更改（增量）                 | 工作组共识 → Core Maintainer 批准             |
+| 规范更改（破坏性／根本性）       | 工作组共识 → Core Maintainer 批准 + 更广泛审查 |
+| 范围扩展                         | 必须获得 Core Maintainer 批准                 |
+| 工作组成员批准                   | 工作组成员发起人                              |
+
+## 成员
+
+| 姓名           | 组织       | GitHub                                           | Discord | 级别     |
+| -------------- | ---------- | ------------------------------------------------ | ------- | -------- |
+| Ido Salomon    | MCP-UI     | [@idosal](https://github.com/idosal)             |         | 负责人   |
+| Liad Yosef     | MCP-UI / Ora | [@liady](https://github.com/liady)               |         | 负责人   |
+| Olivier Chafik | Anthropic  | [@ochafik](https://github.com/ochafik)           |         | 负责人   |
+| Anton Pidkuiko | Anthropic  | [@antonpk1](https://github.com/antonpk1)         |         | 工作组成员 |
+| Max Stoiber    | OpenAI     | [@mstoiber-oai](https://github.com/mstoiber-oai) |         | 工作组成员 |
+
+## 运作
+
+| 会议     | 频率                             | 时长       | 目的                                                         |
+| -------- | -------------------------------- | ---------- | ------------------------------------------------------------ |
+| 工作会议 | 每三周一次（星期三，08:00 Pacific） | 60 分钟 | 规范审查、路线图讨论，以及应用／主机反馈 |
+
+会议发布在 [MCP 社区日历](https://meet.modelcontextprotocol.io/tag/mcp-apps-wg)中的 `#mcp-apps-wg` 标签下。议程和笔记维护在公开的 [MCP Apps 工作组议程](https://docs.google.com/document/d/103S6IjN9D80ntbPIcK3mP_ZWdeFom2Mq8qpkpIsXRVI/edit)中，并从日历条目链接到该议程。
+
+Discord：`#mcp-apps-wg`
+
+## 资源
+
+- 规范和 SDK：[modelcontextprotocol/ext-apps](https://github.com/modelcontextprotocol/ext-apps)（`@modelcontextprotocol/ext-apps`）
+- 基础提案：[SEP-1865](/seps/1865-mcp-apps-interactive-user-interfaces-for-mcp)
+- 指南：[MCP Apps 概览](/extensions/apps/overview)和[构建 MCP App](/extensions/apps/build)
+- API 文档：[apps.extensions.modelcontextprotocol.io](https://apps.extensions.modelcontextprotocol.io/)
+- 工作跟踪：[ext-apps issues](https://github.com/modelcontextprotocol/ext-apps/issues)和[pull requests](https://github.com/modelcontextprotocol/ext-apps/pulls)
+
+## 交付成果与成功指标
+
+### 进行中的工作项
+
+正在进行的工作记录在 ext-apps 的[问题跟踪器](https://github.com/modelcontextprotocol/ext-apps/issues)和[拉取请求](https://github.com/modelcontextprotocol/ext-apps/pulls)中。主要工作流包括：
+
+| 项目                                                                                                                                             | 状态       | 目标日期 | 负责人                                                                                                                   |
+| ------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- | -------- | ------------------------------------------------------------------------------------------------------------------------ |
+| 规范和 SDK 演进：协议对齐、能力协商、版本控制，以及 `@modelcontextprotocol/ext-apps` 的维护     | 进行中     |          | [@idosal](https://github.com/idosal)、[@liady](https://github.com/liady)、[@ochafik](https://github.com/ochafik)           |
+| 解决工具和服务器之间的视图泛滥问题（可复用且独立的视图）                                                                    | 进行中     |          | [@mstoiber-oai](https://github.com/mstoiber-oai)、[@idosal](https://github.com/idosal)、[@liady](https://github.com/liady) |
+| 正式确定安全模型并扩展沙箱和权限                                                                                   | 进行中     |          | [@idosal](https://github.com/idosal)                                                                                       |
+| 试验应用工具交互模型（WebMCP 方法）                                                                                | 进行中     |          | [@ochafik](https://github.com/ochafik)                                                                                     |
+| 解决动态资源内容和非 HTML 主机问题                                                                                              | 草案       |          | [@liady](https://github.com/liady)、[@idosal](https://github.com/idosal)                                                   |
+| 兼容性和跨主机互操作性：官方验证器、公共平台测试和兼容性报告                              | 进行中     |          | [@idosal](https://github.com/idosal)                                                                                       |
+| 开发者体验和生态系统采用：参考主机、创作工具、示例、文档、可访问性和发现协调 | 维护中     |          | [@idosal](https://github.com/idosal)                                                                                       |
+
+### 成功标准
+
+- 扩展规范、SDK、参考主机和示例得到积极维护，并能及时分类处理规范和 SDK 问题。
+- MCP Apps 可以在多个主要主机之间无需修改即可运行。
+- 兼容主机实现文档中规定的沙箱、权限、内容安全策略和可审计性要求，并通过兼容性测试套件进行验证。
+- 破坏性更改很少发生，有文档记录，并且在更改前提供适当的弃用和迁移路径。
+- MCP Apps 是智能体 Web 的标准 UI 层。
+
+## 变更日志
+
+| 日期       | 更改                                                                 |
+| ---------- | -------------------------------------------------------------------- |
+| 2025-11-21 | SEP-1865 提出，统一 MCP-UI 和 OpenAI Apps SDK 方法 |
+| 2025-12-17 | 首次 MCP Apps 工作组会议                                  |
+| 2026-01-26 | 初始稳定版 MCP Apps 扩展规范发布             |
+| 2026-01-28 | SEP-1865 标记为 Final                                                 |
+| 2026-05-21 | 初始章程                                                       |

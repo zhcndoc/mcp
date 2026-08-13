@@ -885,6 +885,7 @@
           {
             "group": "工作组章程",
             "pages": [
+              "community/working-groups/agents",
               "community/working-groups/file-uploads",
               "community/working-groups/inspector-v2",
               "community/working-groups/interceptors",
@@ -943,6 +944,10 @@
     {
       "source": "/community/tool-annotations/charter",
       "destination": "/community/interest-groups/tool-annotations"
+    },
+    {
+      "source": "/community/agents/charter",
+      "destination": "/community/working-groups/agents"
     },
     {
       "source": "/community/file-uploads/charter",

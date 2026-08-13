@@ -2,7 +2,7 @@
 
 本文档列出了 Model Context Protocol 项目当前的维护者。
 
-**最后更新：** 2026 年 5 月 1 日
+**最后更新：** 2026 年 8 月 5 日
 
 ## 主要维护者
 
@@ -14,16 +14,16 @@
 - [Caitie McCaffrey](https://github.com/CaitieM20)
 - [Clare Liguori](https://github.com/clareliguori)
 - [Kurtis Van Gent](https://github.com/kurtisvg)
-- [Nick Aldridge](https://github.com/000-000-000-000-000)
 - [Nick Cooper](https://github.com/nickcoai)
 - [Paul Carleton](https://github.com/pcarleton)
 - [Peter Alexander](https://github.com/pja-ant)
 
 ## 名誉维护者
 
-- [Justin Spahr-Summers](https://github.com/jspahrsummers)（联合创始人，首席维护者荣休）
-- [Basil Hosmer](https://github.com/bhosmer-ant)（核心维护者荣休）
-- [Che Liu](https://github.com/pwwpche)（核心维护者荣休）
+- [Justin Spahr-Summers](https://github.com/jspahrsummers)（共同发明者、名誉首席维护者）
+- [Basil Hosmer](https://github.com/bhosmer-ant)（名誉核心维护者）
+- [Che Liu](https://github.com/pwwpche)（名誉核心维护者）
+- [Nick Aldridge](https://github.com/000-000-000-000-000)（名誉核心维护者）
 
 ## SDK 维护者
 
@@ -122,15 +122,15 @@
 ### Registry
 
 - [Tadas Antanavicius](https://github.com/tadasant)
-- [Radoslav (Rado) Dimitrov](https://github.com/rdimitrov)
+- [Radoslav（Rado）Dimitrov](https://github.com/rdimitrov)
 - [Bob Dickinson](https://github.com/BobDickinson)
 
-#### Registry Emeritus
+#### Registry 名誉维护者
 
 - [Adam Jones](https://github.com/domdomegg)
 - [Toby Padilla](https://github.com/toby)
 
-### MCPB (Model Context Protocol Bundle)
+### MCPB（Model Context Protocol Bundle）
 
 - [Alexander Sklar](https://github.com/asklar)
 - [Adam Jones](https://github.com/domdomegg)

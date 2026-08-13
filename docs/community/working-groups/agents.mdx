@@ -1,0 +1,109 @@
+---
+title: Agents 章程
+description: MCP Agents 工作组章程
+---
+
+## 工作组类型
+
+**工作组**
+
+## 使命宣言
+
+Agents 工作组旨在使与由 agent 支持的系统之间的交互能够通过 MCP 实现互操作。如今，这些系统通常作为普通工具或通过特定框架的集成来提供，将持久执行、能力发现、委托和多轮交互留给临时约定。该工作组负责维护 Tasks，使其成为 MCP 持久异步执行的基础，并评估哪些剩余差距需要协议支持。基于生产环境用例和原型，工作组将演进 Tasks、引入与其互补的 Agents Extension，或记录应如何一致地使用现有 MCP 原语。
+
+## 范围
+
+### 范围内
+
+- **Tasks**：稳定化
+  [`io.modelcontextprotocol/tasks`](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2663)
+  扩展并将其提升为 MCP 核心协议的一部分，包括收集实现反馈、解决歧义，以及评估针对其生命周期提出的变更。
+- **Agents Extension 评估**：评估由 agent 支持的 MCP 用例，包括 agent-as-tool、remote-agent 和 supervisor/子 agent 模式，以确定是否需要 Agents Extension 来补充 Tasks。
+- **原型和提案**：在有助于确定是否引入 Agents Extension、演进 Tasks 或依赖现有 MCP 原语的情况下，开发范围严格限定的概念验证。
+- **实现协调**：与 SDK 和一致性维护者协调，针对工作组负责的规范收集实现反馈、示例和覆盖情况。
+- **跨领域关注事项**：当 Tasks 或经评估的 agent 用例引发传输、事件、技能、授权、元数据或外部互操作性问题时，与相关工作组进行协调。
+- **文档**：维护 Tasks 规范，并记录由 agent 支持的 MCP 用例、发现结果以及工作组采纳的任何提案。
+
+### 范围外
+
+- 构建或标准化通用 agent 框架和运行时，包括关于规划、记忆、模型选择和编排的内部决策。该工作组标准化 MCP 互操作性边界处的行为，而不是主机或服务器实现内部机制。
+- 传输线路格式和会话机制，这些由 Transports WG 负责。
+- 通用事件传递和回调机制，这些由 Triggers and Events WG 负责。
+
+本章程不会预先决定推理或 agent 循环运行的位置，也不会预先决定特定能力应属于 Tasks、Agents Extension 还是现有 MCP 原语。工作组将通过设计工作评估这些问题。
+
+### 相关工作组
+
+- **[Transports WG](https://github.com/modelcontextprotocol/transports-wg)** — 任务轮询、多轮往返请求、无状态操作和请求关联依赖于传输和消息流语义。
+- **[Triggers and Events WG](/community/working-groups/triggers-events)** — 主动的任务状态和完成通知属于事件传递范畴，由该工作组负责。
+
+## 领导层
+
+| 角色 | 姓名             | 组织                 | GitHub                                             | 任期   |
+| ---- | ---------------- | -------------------- | -------------------------------------------------- | ------ |
+| 负责人 | Luca Chang       | Amazon Web Services | [@LucaButBoring](https://github.com/LucaButBoring) | 初始   |
+| 负责人 | Caitie McCaffrey | Microsoft            | [@CaitieM20](https://github.com/CaitieM20)         | 初始   |
+
+## 权限与决策权
+
+| 决策类型                         | 权限级别                                              |
+| -------------------------------- | ----------------------------------------------------- |
+| 会议事务与安排                   | 工作组负责人（自主决定）                              |
+| 工作组内提案优先级排序           | 工作组负责人（自主决定）                              |
+| SEP 分类与结案（范围内）         | 工作组负责人（自主决定，需记录理由）                  |
+| 范围内的技术设计                 | 工作组共识                                            |
+| 规范变更（增量）                 | 工作组共识 → 核心维护者批准                           |
+| 规范变更（破坏性／根本性）       | 工作组共识 → 核心维护者批准 + 更广泛审查              |
+| 范围扩展                         | 需要核心维护者批准                                    |
+| 工作组成员批准                   | 工作组成员发起人                                      |
+
+## 成员资格
+
+| 姓名             | 组织                 | GitHub                                             | Discord | 级别 |
+| ---------------- | -------------------- | -------------------------------------------------- | ------- | ---- |
+| Luca Chang       | Amazon Web Services | [@LucaButBoring](https://github.com/LucaButBoring) |         | 负责人 |
+| Caitie McCaffrey | Microsoft            | [@CaitieM20](https://github.com/CaitieM20)         |         | 负责人 |
+
+## 运作方式
+
+| 会议         | 频率   | 时长       | 目的                                             |
+| ------------ | ------ | ---------- | ------------------------------------------------ |
+| 工作会议     | 每周   | 30 分钟    | 技术讨论、研究和提案审查                         |
+
+会议发布于
+[meet.modelcontextprotocol.io](https://meet.modelcontextprotocol.io)。
+
+Discord：`#agents-wg`
+
+## 资源
+
+- 工作组代码库：
+  [modelcontextprotocol/agents-wg](https://github.com/modelcontextprotocol/agents-wg)
+- Tasks 扩展代码库：
+  [modelcontextprotocol/ext-tasks](https://github.com/modelcontextprotocol/ext-tasks)
+- Tasks 规范：
+  [SEP-2663：Tasks Extension](/seps/2663-tasks-extension)
+
+## 交付成果与成功指标
+
+### 当前工作项目
+
+| 项目                                             | 状态        | 目标日期 | 负责人                                                                                         |
+| ------------------------------------------------ | ----------- | -------- | ---------------------------------------------------------------------------------------------- |
+| Tasks 稳定化及核心协议提升                       | 进行中      |          | [@LucaButBoring](https://github.com/LucaButBoring)                                             |
+| Agents Extension 评估与建议                      | 进行中      |          | TBD                                                                                            |
+| 两级 agent 定义概念验证                          | 进行中      |          | [@LucaButBoring](https://github.com/LucaButBoring)、[@madhaviai](https://github.com/madhaviai) |
+
+### 成功标准
+
+- Tasks 根据实现反馈得到全面稳定，并从扩展提升为 MCP 核心协议的一部分。
+- 阻碍 Tasks 稳定化的生命周期歧义和一致性差距得到解决，或被明确确定处理方式。
+- 工作组发布关于是否需要 Agents Extension 来补充 Tasks 的评估，并以记录在案的用例和相关原型证据作为支持。
+- 基于该评估，工作组将演进 Tasks、提出 Agents Extension，或记录现有 MCP 原语已足够。
+- 在推进之前，通过原型和实现反馈对提出的 agent 协议表面进行评估。
+
+## 更新日志
+
+| 日期       | 变更           |
+| ---------- | -------------- |
+| 2026-08-04 | 初始章程       |
