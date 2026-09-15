@@ -1,87 +1,114 @@
 ---
-title: Authorization Charter
+title: 授权章程
 description: MCP 授权兴趣组的章程。
 ---
 
-## Group Type
+## 组类型
 
 **兴趣组**
 
-## Mission Statement
+## 使命声明
 
-授权兴趣组为 MCP 实现者、身份提供商厂商以及安全从业者提供一个场所，用于呈现部署 MCP 客户端和服务器时遇到的真实世界授权挑战。该小组收集用例，记录当前基于 OAuth 2.1 的授权规范中的缺口，并持续孵化已验证的问题，直到其范围足够明确，可以通过标准的 [group-creation process](/community/working-interest-groups#creating-a-working-group) 提议成立一个聚焦的工作组，以推动相应的 [SEPs](/community/sep-guidelines)。
+授权兴趣组是 MCP 授权工作的唯一正式场所。它汇集 MCP 实施者、身份提供商厂商和安全从业者，提出真实世界中的授权问题，决定这些问题是否值得解决以及是否属于 MCP 范畴，并为作者提供一个可靠的平台，用于展示 [SEP](/community/sep-guidelines)、[ext-auth](https://github.com/modelcontextprotocol/ext-auth) 草案、原型和部署结果，以获得跨主题反馈。本章程定义工作范围；讨论和粗略共识在一个频道和一个定期会议中进行，产出物是草案和演示，而不是新的常设小组。
 
-## Scope
+## 范围
 
-### In Scope
+### 范围内
 
-- **部署经验报告**：实现者如何将当前授权规范（OAuth 2.1、[RFC 9728](https://www.rfc-editor.org/rfc/rfc9728) Protected Resource Metadata、[RFC 7591](https://www.rfc-editor.org/rfc/rfc7591) Dynamic Client Registration、Client ID Metadata Documents）与真实授权服务器集成，以及它有哪些不足
-- **企业身份集成**：连接 MCP 服务器与企业 IdP（Okta、Entra ID、Ping、Keycloak 等）时的需求和摩擦点，包括 SSO、租户隔离和管理员同意流程
-- **委托与代理式访问**：当 MCP 客户端通过代理链或工具链行事时，代用户代办令牌交换、下游资源访问、受众限制和同意的用例
-- **范围与权限粒度**：MCP 服务器是否以及如何应当公开细粒度范围（按工具、按资源），以及客户端应如何请求和展示这些范围
-- **非 HTTP 传输的凭据**：适用于 stdio、WebSocket 以及未来那些 HTTP 授权规范无法直接应用的传输方式的模式
-- **客户端身份与注册**：关于动态客户端注册、Client ID Metadata Documents、软件声明和预注册客户端的运营体验
-- **威胁建模输入**：整理与授权相关的攻击面（令牌混淆、混淆代理、受众不匹配、重定向处理），为安全最佳实践文档提供依据
-- **提议工作组**：当某个问题被验证并且范围明确后，IG 会通过标准的 `#wg-ig-group-creation` 流程提交工作组创建提案；批准权仍归社区版主和核心维护者所有
-- **问题陈述与需求**：发布到 GitHub Discussions 的用例目录和建议，供 SEP 作者和工作组使用
+- **部署经验报告**：实施者如何将当前授权规范（OAuth 2.1、[RFC 9728](https://www.rfc-editor.org/rfc/rfc9728) 受保护资源元数据、[RFC 7591](https://www.rfc-editor.org/rfc/rfc7591) 动态客户端注册、客户端 ID 元数据文档）与真实授权服务器集成，以及该规范在哪些方面存在不足
+- **扩展互操作性报告**：对 [ext-auth](https://github.com/modelcontextprotocol/ext-auth) 扩展进行独立实现端到端配对的结果（例如，通过[企业管理授权](/extensions/auth/enterprise-managed-authorization) ID-JAG 交换连接 IdP、客户端和授权服务器），包括 IdP 能力缺口、变通方案和一致性场景输入
+- **企业身份集成**：将 MCP 服务器连接到企业 IdP（Okta、Entra ID、Ping、Keycloak 等）时的需求和摩擦点，包括 SSO、租户隔离和管理员同意流程
+- **委派式和代理式访问**：当 MCP 客户端通过代理或工具链进行操作时，关于代表他人进行令牌交换、下游资源访问、受众限制和同意的使用场景
+- **范围和权限粒度**：MCP 服务器是否以及如何应公布细粒度范围（按工具、按资源），客户端应如何请求和呈现这些范围，以及超出范围字符串的授权粒度（丰富授权请求、结构化拒绝、修复提示）
+- **非 HTTP 传输的凭据**：适用于 stdio、WebSocket 以及 HTTP 授权规范不直接适用的未来传输方式的模式
+- **客户端身份和注册**：运营者在使用动态客户端注册、客户端 ID 元数据文档、软件声明和预注册客户端时的体验
+- **威胁建模输入**：整理与授权相关的攻击面（令牌混淆、混淆代理、受众不匹配、重定向处理），为安全最佳实践文档提供信息
+- **SEP 和草案反馈**：在 [SEP 流程](/community/sep-guidelines)之前和期间，与授权相关的 SEP、ext-auth 草案、参考实现和演示会在会议以及 `#auth-ig` 线程中进行展示并征求反馈；兴趣组的粗略共识会记录在会议纪要中，供赞助者和核心维护者参考
+- **问题陈述和需求**：在 `#auth-ig` 线程和 SEP 拉取请求中分享用例目录和建议，供 SEP 作者使用
 
-### Out of Scope
+### 范围外
 
-- **MCP 客户端对终端用户的认证**：宿主应用如何认证其自身用户属于宿主问题，不属于协议问题
-- **传输安全（TLS、mTLS、证书处理）**：属于 Transports WG
-- **服务器身份、来源和信任信号**：属于 Server Card / Registry 工作
-- **终端用户产品配置操作指南**：IG 讨论的是模式，而不是针对单个 IdP 产品的逐步配置。厂商报告的授权服务器可实现或不可实现的约束 _属于_ 部署经验的范围
-- **具有竞争敏感性或非公开的商业信息**，根据 [MCP Antitrust Policy](/community/antitrust)
+- **接受 SEP 或扩展**：兴趣组提供反馈并表达支持；赞助和接受遵循 [SEP 指南](/community/sep-guidelines)，并由维护者和核心维护者负责
+- **最终用户向 MCP 客户端进行身份验证**：主机应用如何验证自身用户的身份属于主机关注事项，而非协议关注事项
+- **传输安全（TLS、mTLS、证书处理）**：属于传输工作组
+- **服务器身份、来源和信任信号**：属于服务器卡片／注册表相关工作
+- **最终用户产品配置演练**：兴趣组讨论模式，而不是针对单个 IdP 产品的逐步设置。厂商报告的授权服务器或 IdP 能够或不能够实现的限制属于部署经验范围
+- **具有竞争敏感性或非公开的商业信息**：遵循 [MCP 反垄断政策](/community/antitrust)
 
-### Related Groups
+### 相关组
 
-- **[Enterprise-Managed Authorization IG](/community/interest-groups/enterprise-managed-authorization)**: 协调由 Profiles WG 制定的 EMA 扩展的 IdP、客户端和服务器互操作性测试；在此提出的规范变更请求会被转回本组
-- **Transports WG**：授权目前是在 HTTP 传输层级规范的；对传输的更改会影响凭据的携带位置
-- **Agents WG**：多智能体链中的委托/代表行事访问和同意，与代理式用例高度重叠
-- **[Server Card WG](/community/working-groups/server-card) / [Registry](/community/working-groups/registry)**：客户端和服务器身份、发现元数据以及信任建立，与授权服务器和资源服务器如何被定位和验证相交叉
-- **SDK Maintainers**：SDK 会发布 auth 客户端实现；IG 的发现应为跨 SDK 的 auth 易用性提供参考
+- **[安全兴趣组](/community/interest-groups/security)**：令牌受众混淆、签发者验证和账户关联风险处于两个组的交界处
+- **[传输工作组](/community/working-groups/transports)**：授权目前在 HTTP 传输层面进行规范定义；传输方式的变化会影响凭据的承载位置
+- **代理工作组**：委派式／代表他人访问以及多代理链中的同意与代理式用例高度重叠
+- **[服务器卡片工作组](/community/working-groups/server-card)／[注册表](/community/working-groups/registry)**：客户端和服务器身份、发现元数据以及信任建立，与授权服务器和资源服务器的定位及验证方式相互关联
+- **SDK 维护者**：SDK 提供身份验证客户端实现；兴趣组的发现应为跨 SDK 的身份验证易用性和默认设置提供参考
 
-## Leadership
+## 领导层
 
-| Role        | Name          | Organization | GitHub                                     | Term    |
-| ----------- | ------------- | ------------ | ------------------------------------------ | ------- |
-| Facilitator | Aaron Parecki | Okta         | [@aaronpk](https://github.com/aaronpk)     | Initial |
-| Facilitator | Darin McAdams | Amazon       | [@D-McAdams](https://github.com/D-McAdams) | Initial |
-| Facilitator | Paul Carleton | Anthropic    | [@pcarleton](https://github.com/pcarleton) | Initial |
+| 角色       | 姓名          | 组织       | GitHub                                     | 任期   |
+| ---------- | ------------- | ---------- | ------------------------------------------ | ------ |
+| 协调人     | Aaron Parecki | Okta       | [@aaronpk](https://github.com/aaronpk)     | 初始   |
+| 协调人     | Darin McAdams | Amazon     | [@D-McAdams](https://github.com/D-McAdams) | 初始   |
+| 协调人     | Paul Carleton | Anthropic  | [@pcarleton](https://github.com/pcarleton) | 初始   |
 
-## Membership
+## 成员资格
 
-任何人都可加入；加入频道、参加会议或贡献都不需要正式成员资格或审批步骤。
+任何人都可以参加；加入频道、参加会议或作出贡献均不需要正式成员资格或审批步骤。本组尤其欢迎身份提供商厂商、正在发布授权支持的 MCP 客户端和服务器实施者，以及将 MCP 与企业 IdP 集成的运营者。
 
-加入 [MCP Contributors Discord](/community/communication#discord) 上的 `#auth-ig` 频道，或在 [GitHub Discussions](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions) 的 Authorization 分类下开启一个讨论串。如果你的主题明显匹配下表中的某个工作组，你可以直接在该 WG 的频道中发帖。会议是开放的，出席可选 —— 通过 Discord 和 GitHub 进行异步参与同样受到重视。
+加入 [MCP Contributors Discord](/community/communication#discord) 中的 `#auth-ig` 频道，并为你的主题发起或加入线程。会议对所有人开放，参加会议不是强制要求——在 Discord 线程中进行异步参与同样受到重视。
 
-## Operations
+## 运作方式
 
-| Meeting         | Frequency     | Duration | Purpose                                                                      |
-| --------------- | ------------- | -------- | ---------------------------------------------------------------------------- |
-| Discussion Call | Every 2 weeks | 45 min   | Use-case sharing, problem triage, WG proposal decisions, implementer reports |
+| 会议       | 频率       | 时长   | 目的                                                                           |
+| ---------- | ---------- | ------ | ------------------------------------------------------------------------------ |
+| Auth IG Call | 每 2 周一次 | 45 分钟 | 由议程驱动：问题提案、SEP 和草案进展、演示、部署报告 |
 
-Discord: [#auth-ig](https://discord.com/channels/1358869848138059966/1360835991749001368)
+Discord：[＃auth-ig](https://discord.com/channels/1358869848138059966/1360835991749001368)
 
-### Working Group Incubation
+### 一个频道，每个主题一个线程
 
-当某个主题在 GitHub Discussions 中有书面问题陈述，并且在双周电话会议上形成粗略共识（记录在已发布的会议纪要中）时，它就会晋升为一个工作组提案。随后由一位协调人按照标准 WG 创建模板在 `#wg-ig-group-creation` 中提交，并引用该讨论。IG 的职责在提案阶段结束；批准权仍归社区版主和核心维护者所有。
+所有授权讨论都在 `#auth-ig` 中进行，每个主题对应一个 Discord 线程（例如某个 SEP 编号、草案名称或部署配对）。不存在按主题划分的频道。会议议程和纪要位于频道中每次会议对应的议程线程内，并根据[组治理规则](/community/working-interest-groups)的要求，将链接交叉发布到 [GitHub Discussions](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions)。
 
-## Deliverables & Success Metrics
+### 由议程驱动的会议
 
-IG 会持续孵化问题，直到它们的范围足够明确，然后提议成立聚焦的工作组来推动具体的 SEP。每个新成立的 WG 都维护自己的章程；此列表只是目录，而非替代。IG 负责管理 [modelcontextprotocol/ext-auth](https://github.com/modelcontextprotocol/ext-auth)，各个 WG 通过 PR 在其中提交授权扩展规范。
+会议固定每两周举行一次，但每次会议都根据议程安排：
 
-| Working Group              | Discord                        | Focus                                                                                                                                                                               | Status    | Charter |
-| -------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------- |
-| Client Registration        | `#auth-wg-client-registration` | Dynamic Client Registration、Client ID Metadata Documents、software statements 和预注册客户端工作流                                                                                 | Completed | —       |
-| Mix-up Protection          | `#auth-wg-mixup-protection`    | 缓解 OAuth 授权服务器混淆和令牌受众混淆攻击                                                                                                                                        | Completed | —       |
-| Profiles                   | `#auth-wg-profiles`            | 用于额外授权类型和令牌绑定机制的扩展规范（Client Credentials、Enterprise-Managed Authorization、DPoP、Workload Identity Federation）                                              | Completed | —       |
-| Tool Scopes                | `#auth-wg-tool-scopes`         | 按工具的 OAuth scope 公告、逐步提升授权 / scope challenge，以及客户端侧 scope 累积 —— OAuth scope 字符串模型内的机制                                                           | Active    | Pending |
-| Fine-Grained Authorization | `#auth-wg-fine-grained-authz`  | 超出 scope 字符串之外的授权粒度 —— Rich Authorization Requests ([RFC 9396](https://www.rfc-editor.org/rfc/rfc9396))、修复提示以及多凭据处理                                                | Active    | Pending |
-| Improve DevX               | `#auth-wg-improve-devx`        | 面向构建安全 MCP 客户端和服务器的最佳实践指南与教程，超出规范性标准的范围                                                                                                        | Completed | —       |
+1. 协调人在每次会议前于 `#auth-ig` 中发起议程线程。任何人都可以回复并申请一个议程时段，说明主题、诉求（反馈、决策或知悉）以及所需时间。
+2. 协调人同意议程，并在会议前分配各个时段。
+3. 如果议程内容不足，则在该线程中取消会议，并保留该时段供下次使用。
 
-## Changelog
+典型时段包括问题提案、SEP 或 ext-auth 草案的进展更新、原型或参考实现的演示，或者已发布扩展的实施者提交的部署或互操作性报告。
 
-| Date       | Change          |
-| ---------- | --------------- |
-| 2026-06-02 | 初始章程 |
+### 从问题到 SEP
+
+在任何人投入编写 SEP 之前，每个问题提案都必须回答以下两个固定问题：
+
+- **这是一个值得解决的问题吗？** 是否存在真实的部署需求，且缺口出在协议中，而不是某个产品中？
+- **它属于这里吗？** 合适的归属是核心规范、ext-auth 中的官方扩展、非官方扩展，还是上游标准组织？
+
+当两个问题的答案都是肯定时，提案者会按照常规的 [SEP 流程](/community/sep-guidelines)起草 SEP 或 ext-auth 拉取请求，寻找赞助者，并在草案逐渐成熟的过程中回到会议中展示进展和演示。兴趣组不会针对每个主题设立子组、频道或系列会议。已经针对某个主题单独开展会议的贡献者可以继续这样做，并将结果作为议程时段带回会议。如果某项交付物确实需要独立的决策权，仍然可以按照标准流程提议成立单独的[工作组](/community/working-interest-groups)，但这属于例外，而不是默认路径。
+
+## 交付物和成功指标
+
+兴趣组的产出是经过其推动的草案和演示：记录有兴趣组反馈的授权 SEP 和 ext-auth 规范、参考实现和一致性场景、互操作性和部署报告，以及发布的会议纪要。兴趣组负责维护 [modelcontextprotocol/ext-auth](https://github.com/modelcontextprotocol/ext-auth)，授权扩展规范通过拉取请求在其中落地。成功的表现是：授权提案在进入核心维护者审查时，已经纳入跨主题反馈；已发布的扩展则不断积累独立的互操作实现。
+
+### 合并频道
+
+以下 Discord 频道此前承载授权子组。自本次重新制定章程起，这些频道已归档（只读），其主题将继续以 `#auth-ig` 线程和议程时段的形式进行。[企业管理授权兴趣组](/community/interest-groups/enterprise-managed-authorization)也以同样的方式并入本组：EMA 实施者将互操作性和部署进展作为演示时段带到会议中，而不是提交给一个长期独立存在的组。
+
+| 原频道                       | 主题                                                                                                                   | 合并时状态 | 后续形式                                                   |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ---------- | ---------------------------------------------------------- |
+| `#auth-wg-client-registration` | 动态客户端注册、客户端 ID 元数据文档、软件声明、预注册                                                               | 已完成     | 按需在 `#auth-ig` 线程中进行                              |
+| `#auth-wg-mixup-protection`    | 授权服务器混淆和令牌受众混淆的缓解措施                                                                                 | 已完成     | 按需在 `#auth-ig` 线程中进行                              |
+| `#auth-wg-profiles`            | Client Credentials、企业管理授权、DPoP、工作负载身份联合扩展                                                          | 已完成     | `#auth-ig` 中的 DPoP 和工作负载身份联合线程                 |
+| `#auth-wg-tool-scopes`         | 按工具公布范围、升级授权、客户端范围累积                                                                                | 活跃       | `#auth-ig` 线程                                           |
+| `#auth-wg-fine-grained-authz`  | 丰富授权请求（[RFC 9396](https://www.rfc-editor.org/rfc/rfc9396)）、结构化拒绝、修复提示                               | 活跃       | `#auth-ig` SEP-2643／细粒度授权线程                         |
+| `#auth-wg-improve-devx`        | 规范性规范之外的最佳实践指南和教程                                                                                     | 休眠       | 按需在 `#auth-ig` 线程中进行                              |
+| `#enterprise-managed-auth-ig`  | EMA 扩展互操作性（IdP、客户端、授权服务器）                                                                             | 活跃       | `#auth-ig` EMA 互操作线程和部署报告时段                    |
+
+## 变更日志
+
+| 日期       | 变更                                                                                                                                                                               |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-17 | 重新制定章程：授权工作的单一场所和频道；由议程驱动的会议；将 SEP 反馈纳入范围；合并 `#auth-wg-*` 频道和企业管理授权兴趣组 |
+| 2026-06-02 | 初始章程                                                                                                                                                                          |

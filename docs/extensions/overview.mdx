@@ -56,21 +56,37 @@ MCP 扩展是规范的可选补充，定义了核心协议之外的能力。扩�
 | ------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | [MCP Tasks](/extensions/tasks/overview) | 用于长时间运行操作的异步任务执行，支持轮询、执行中的输入以及持久化句柄。 |
 
-## Experimental Extensions
+### Skills over MCP
 
-Experimental extensions provide an incubation path for [working groups and interest groups](/community/working-interest-groups) to prototype ideas and collaborate on extension concepts before formally submitting a SEP.
+<Card
+  title="modelcontextprotocol/ext-skills"
+  icon="github"
+  href="https://github.com/modelcontextprotocol/ext-skills"
+>
+  从 MCP 服务器发现并读取 Agent Skills。
+</Card>
 
-Experimental extension repositories live within the MCP GitHub organization and use the `experimental-ext-` prefix (for example, `experimental-ext-interceptors`).
+| 扩展                                      | 描述                                                                     |
+| ---------------------------------------------- | ------------------------------------------------------------------------------- |
+| [Skills over MCP](/extensions/skills/overview) | 通过 MCP 资源发现工作流说明并读取支持文件。 |
 
-### Basic Rules
+请参阅 [Skills 概述](/extensions/skills/overview) 以开始使用，并参阅[客户端矩阵](/extensions/client-matrix)了解实现支持情况。
 
-- Each experimental extension must be associated with a working group or interest group
-- Repositories and published packages must clearly indicate their experimental status (for example, in the README and package name)
-- [Core maintainers](/community/contributor-ladder#core-maintainer) retain oversight of experimental extension repositories, including the authority to archive or remove them
+## 实验性扩展
 
-### Promotion to Official Status
+实验性扩展为[工作组和兴趣组](/community/working-interest-groups)提供了一条孵化路径，使其能够在正式提交 SEP 之前对想法进行原型设计，并围绕扩展概念展开协作。
 
-To promote an experimental extension to official status, it must go through the standard SEP process (the extension track). It is welcome to reference experimental repositories and any reference implementations built during incubation to demonstrate the extension's usefulness.
+实验性扩展仓库位于 MCP GitHub 组织内，并使用 `experimental-ext-` 前缀（例如，`experimental-ext-interceptors`）。
+
+### 基本规则
+
+- 每个实验性扩展都必须与一个工作组或兴趣组相关联
+- 仓库和已发布的软件包必须明确表明其实验性状态（例如，在 README 和软件包名称中）
+- [核心维护者](/community/contributor-ladder#core-maintainer)保留对实验性扩展仓库的监督权，包括将其归档或移除的权力
+
+### 晋升为官方状态
+
+要将实验性扩展晋升为官方扩展，必须经过标准 SEP 流程（扩展轨道）。欢迎引用实验性仓库以及在孵化期间构建的任何参考实现，以证明扩展的实用性。
 
 ## 创建扩展
 

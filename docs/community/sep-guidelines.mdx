@@ -31,7 +31,7 @@ SEP 流程保留给那些需要广泛社区讨论、正式设计文档和历史�
 - 为现有功能添加示例
 - 不改变行为的次要模式修复
 
-不确定？在开始重要工作之前，请在 [Discord](/community/communication#discord) 中询问。
+不确定？在 [Discord](/community/communication#discord) 中询问。
 
 ## SEP 类型
 
@@ -98,7 +98,7 @@ flowchart TD
 
 8. **决议**：SEP 可能被 `accepted`、`rejected` 或返回修订。赞助人更新状态。
 
-9. **定稿**：一旦接受，参考实现必须完成。对于具有可观察协议行为的标准轨道 SEP，还必须合并 [一致性测试](#conformance-test-requirement)。完成并纳入规范后，赞助人将状态更新为 `final`。
+9. **最终确定**：一旦接受，参考实现必须完成。对于具有可观察协议行为的标准轨道 SEP，还必须合并一个[一致性测试](#conformance-test-requirement)。作者将规范更改（模式更改、规范文本和变更日志条目）添加到 SEP 的拉取请求中。SEP 无需 SDK 实现即可变为 `final`。完成这些工作后，赞助人将状态更新为 `final`，SEP 的 PR 即可合并。
 
 ### SEP 状态
 
@@ -213,7 +213,7 @@ SEP 要被接受，必须满足以下标准：
 - 对 MCP 生态系统有明确的好处
 - 社区支持和共识
 
-一旦 SEP 被接受，必须完成参考实现。完成后并入主仓库，状态变为 "Final"。
+SEP 被接受后，作者将规范更改（模式更改、规范文本和变更日志条目）添加到 SEP 的拉取请求中。参考实现必须完成，同时还要完成任何所需的[一致性测试](#conformance-test-requirement)。不要求 SDK 实现。完成这些工作后，状态变为“Final”，PR 即可合并。
 
 ## 一致性测试要求
 

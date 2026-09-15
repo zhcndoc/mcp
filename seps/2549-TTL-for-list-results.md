@@ -157,8 +157,8 @@ sequenceDiagram
 
 ### 错误处理
 
-- For backwards compatibility, If `ttlMs` is missing, clients SHOULD assume a default `ttlMs` of `0` (immediately stale) and rely on their own caching heuristics or notifications.
-- If `ttlMs` is present but is a negative integer, the client SHOULD ignore it and behave as if it were 0 (immediately stale).
+- 为了向后兼容，如果缺少 `ttlMs`，客户端 SHOULD 假定默认 `ttlMs` 为 `0`（立即过期），并依赖自身的缓存策略或通知。
+- 如果存在 `ttlMs` 但它是负整数，客户端 SHOULD 忽略它，并按照其为 0（立即过期）的情况处理。
 
 ## 原因
 
@@ -185,12 +185,12 @@ MCP 与传输层无关。虽然基于 HTTP 的传输在理论上可以使用 `Ca
 
 ## 向后兼容性
 
-- Existing servers that do not provide it continue to work unchanged. If a `ttlMs` field is missing, clients SHOULD assume a default ttlMs of 0 (immediately stale) and rely on their own caching heuristics or notifications, which is the current behavior.
-- Existing clients that do not understand the field will ignore it, as MCP result objects permit additional properties via `[key: string]: unknown` on the `Result` base type.
-- `cacheScope` is required because there is no safe default for older servers. The server must explicitly declare the intended cache scope to prevent unintended caching of user-specific data.
-- No existing fields or behaviors are modified or removed.
-- No capability negotiation is required.
-- SDK Maintainers can choose to add defaults for ttl and cacheScope in their SDKs to simplify adoption, but this is not required for compliance.
+- 不提供该字段的现有服务器仍可继续正常工作。如果缺少 `ttlMs` 字段，客户端 SHOULD 假定默认 `ttlMs` 为 `0`（立即过期），并依赖自身的缓存策略或通知，这与当前行为一致。
+- 不理解该字段的现有客户端会忽略它，因为 MCP 结果对象允许通过 `Result` 基础类型上的 `[key: string]: unknown` 添加额外属性。
+- `cacheScope` 是必需的，因为对于旧服务器不存在安全的默认值。服务器必须明确声明预期的缓存范围，以防止意外缓存用户特定数据。
+- 不会修改或删除任何现有字段或行为。
+- 不需要能力协商。
+- SDK Maintainers 可以选择在其 SDK 中为 ttl 和 cacheScope 添加默认值，以简化采用过程，但这不是合规要求。
 
 ## 参考实现
 
@@ -200,4 +200,4 @@ _暂无参考实现。_
 
 ## 安全影响
 
-配置错误或恶意的服务器可能会设置过长的 TTL，导致客户端将陈旧数据缓存的时间比预期更长。不过，由于 TTL 只是一个提示，客户端可以选择忽略它，或者在怀疑有变化时重新获取，因此安全风险很小。客户端应设计为能够优雅地处理意外的 TTL 值。
+配置错误或恶意服务器可能会设置过长的 TTL，导致客户端缓存过期数据的时间超出预期。不过，由于 TTL 只是提示，客户端可以选择忽略它，或在怀疑数据发生变化时重新获取，因此安全风险很小。客户端应设计为能够妥善处理意外的 TTL 值。

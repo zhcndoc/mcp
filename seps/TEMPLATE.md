@@ -72,15 +72,9 @@
 
 ## 参考实现
 
-链接到或描述一个参考实现。在任何 SEP 能被赋予“Final”状态之前，都需要有参考实现。
+提供一个展示该提案的可运行原型链接，例如 SDK 分支或 fork、独立的概念验证，或参考服务器或客户端。SEP 被接受前必须提供原型，且原型无需达到可用于生产环境的程度。有关符合要求的内容，请参阅[原型要求](https://modelcontextprotocol.io/community/sep-guidelines#prototype-requirements)。
 
-“粗略共识和可运行代码”的原则在解决协议细节讨论时很有帮助。
-
-请包括：
-
-- 原型代码或拉取请求链接
-- 示例用法指引
-- 测试结果或验证
+SEP 达到“Final”状态前，参考实现必须完成，并且任何所需的[一致性测试](https://modelcontextprotocol.io/community/sep-guidelines#conformance-test-requirement)都必须合并。在实现和测试结果可用后，请附上相关链接。
 
 ---
 

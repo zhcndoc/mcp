@@ -1,97 +1,99 @@
 ---
 title: 路线图
-description: 我们演进模型上下文协议的计划
+description: Model Context Protocol 路线图，涵盖核心维护者和工作组为下一次规范发布所推动的重点领域，以及这些领域如何影响 SEP 审核
 ---
 
-<Info>最后更新：**2026-03-05**</Info>
+<Info>最后更新：**2026-08-22**</Info>
 
-本页描述了我们的战略优先级，以及我们期望 **工作组** 和 **兴趣小组** 据此交付的内容。
+此页面概述了核心维护者对未来六到十二个月内协议发展的愿景，重点介绍下一次规范更新及后续版本的目标。页面描述了我们的主要战略目标，以及[工作组和兴趣组](/community/working-interest-groups)预计交付的成果。
 
 <Note>
 
-此处提出的想法并非承诺。我们解决这些挑战的方式可能与描述不同。某些项目可能根本不会实现。这也不是一个 _详尽_ 的列表。我们可能会纳入此处未提及的工作。
+此路线图反映的是当前思路，而不是坚定承诺。优先级可能会发生变化，某些项目的交付方式可能与描述不同或被推迟，未在此列出的工作也可能仍会被纳入发布版本。
 
 </Note>
 
 ## SEP 优先级
 
-**属于以下优先领域的 SEP 将获得加速审查，并且接受的可能性最高。** 这些领域之外的 SEP 不会被自动拒绝，但贡献者应预期更长的审查时间和更高的理由说明标准。维护者的精力是有限的。我们会优先将其投入到这些优先级上。
+**属于以下优先领域的[规范增强提案](/community/sep-guidelines)（SEPs）将获得加速审核，并最有可能被接受。**不属于这些领域的 SEPs 不会被自动拒绝，但预计会面临更长的排队时间和更高的论证门槛。维护者的审核时间十分有限。我们会优先投入在这些领域。
 
-如果您正在考虑提出 SEP，请检查它是否与以下某个领域一致，在相关的 [工作组或兴趣小组](/community/working-interest-groups) 中讨论，并获得该小组的支持。获得工作组支持且与路线图有明确联系的 SEP 进展最快。请参阅 [SEP 指南](/community/sep-guidelines) 了解完整流程。
+如果你正在考虑编写 SEP，请先确定它属于哪个优先领域，并与相关工作组沟通，然后在提案中获得该工作组的支持。有工作组支持且与本路线图有明确联系的 SEPs 推进最快。完整流程请参阅[SEP 指南](/community/sep-guidelines)。
+
+每个优先领域都会列出负责该领域的核心维护者，任何有兴趣参与贡献的人都可以通过[Discord](/community/communication#discord)联系他们。每个领域下列出的项目是本路线图周期内的优先交付成果。每个领域的其余部分属于开放范围，工作组应在其中进一步定义并贡献工作。
 
 ## 优先领域
 
-### 1. 传输演进与可扩展性
+### 1. 智能体消息传递原语
 
-Streamable HTTP 为 MCP 提供了生产就绪的传输方式，但在大规模运行时揭示了围绕水平扩展、无状态操作和中间件模式方面的差距。
+核心维护者：[**Caitie McCaffrey**](https://github.com/CaitieM20)、[**Clare Liguori**](https://github.com/clareliguori)、[**Peter Alexander**](https://github.com/pja-ant)
 
-**我们想要实现的目标：**
+智能体工作负载需要超越请求和响应的[消息传递模式](/specification/2026-07-28/basic/patterns)：运行数分钟的工作、主动推送的服务器、流式传输的结果，以及在工作进行期间对其进行引导的方式。MCP 已经围绕这些需求形成了一组概念，包括[Tasks](/extensions/tasks/overview)、[`subscriptions/listen`](/specification/2026-07-28/basic/patterns/subscriptions)和[进度通知](/specification/2026-07-28/basic/patterns/progress)，它们分散在多个工作组中。风险在于，当“服务器还没完成”时出现三种彼此不同的处理方式，而它们没有共享生命周期、取消模型或错误呈现方式。我们希望让它们能够组合使用。
 
-- **下一代传输**：演进 Streamable HTTP 以在多个服务器实例上无状态运行，并在负载均衡器和代理后面正确行为。
-- **可扩展会话处理**：定义会话如何创建、恢复和迁移，以便服务器重启和扩展事件对连接的客户端透明。
-- **MCP 服务器卡片**：一种通过 `.well-known` URL 暴露结构化服务器元数据的标准，以便浏览器、爬虫和注册表无需连接服务器即可发现其能力。
+**本路线图周期内：**
 
-**工作组所有权：**
+- **服务器发起的事件**：[Triggers & Events WG](/community/working-groups/triggers-events)。用于推送交付的通道和订阅，包括 Webhook。随着我们通过 Tasks 和其他事件处理异步工作负载，我们需要一些扩展，让服务器能够在工作完成时通知客户端，而不是完全依赖成本高昂的客户端轮询。
+- **组合审查**：[Agents](/community/working-groups/agents)、Transports 和 [Triggers & Events](/community/working-groups/triggers-events) 工作组。正在形成的原语（例如 Tasks 和 Triggers）需要彼此干净地组合，并适用于具体用例。
 
-- **传输工作组** 拥有传输和会话工作：一系列涵盖线路格式、会话模型和恢复协议的 SEP，以及针对 SDK 作者的一致性指南。
-- **服务器卡片工作组** 拥有服务器卡片格式及其分发，并与更广泛的行业 AI 目录工作协调。
+除此之外，我们预计会继续推进 Tasks（[SEP-2663](/seps/2663-tasks-extension)），最终将该扩展纳入核心协议。
 
-本周期我们**不会**引入额外的官方传输方式。保持集合较小可保护生态系统兼容性；社区应通过自定义传输进行实验。
+### 2. HTTP 原生传输统一与强化
 
-### 2. 代理通信
+核心维护者：[**Kurtis Van Gent**](https://github.com/kurtisvg)、[**Nick Cooper**](https://github.com/nickcoai)
 
-任务扩展（[SEP-2663](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2663)）为代理提供了可靠的即时调用 / 延后获取模式。在生产环境中运行后，暴露出该生命周期语义方面的一些缺口，**Agents WG** 应当予以补齐：
+[2026-07-28 版本](/specification/2026-07-28/changelog)使远程 MCP 服务器成为常规 HTTP 工作负载，而我们越来越依赖标头和状态码等 HTTP 具体机制来传递传输层信息。每个 HTTP 原生功能都需要单独设计一个 stdio 专用版本，否则就无法在本地运行。SDK 需要维护两套传输管线，而协议元数据现在又重复存在于 HTTP 标头和消息字段中，服务器必须对二者进行交叉验证。我们希望采用一种统一的传输模型，并在其上使用标准 HTTP 实践。
 
-- **重试语义**：当任务暂时失败时会发生什么，以及谁决定是否重试。
-- **过期策略**：完成后结果保留多长时间，以及客户端如何得知结果已过期。
+**本路线图周期内：**
 
-这些是我们今天能指出的差距。代理工作组还应收集和分类生产部署中的操作问题——随着生态系统中更多部分大规模运行 Tasks，此列表将会增长。
+- **stdio 上的 HTTP**：Transports WG。将 Streamable HTTP 作为单一绑定，通过 stdin/stdout 与本地服务器通信。我们认为可以在 stdio 上使用 HTTP/2，从而获得多路复用的 HTTP 传输，同时保留子进程的安全性和生命周期保证。
+- **缓存**：Transports WG。最近的协议修订在缓存方面取得了进展，为列表结果和资源读取增加了 `ttlMs` 和 `cacheScope`（[SEP-2549](/seps/2549-TTL-for-list-results)）。作为这项工作的一部分，我们希望将缓存方案扩展为支持 ETag，从而可以对原语的结果进行版本控制，尤其是工具调用的结果。
 
-### 3. 治理成熟度
+除此之外，我们希望研究所有表面中的标准化错误处理、[SEP-2575](/seps/2575-stateless-mcp)之后工具列表的能力范围，以及以安全方式向服务器提供配置选项。
 
-MCP 已发展成为 Linux 基金会下的多公司开放标准。[SEP-1302](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1302) 正式化了工作组和兴趣小组，[SEP-2085](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/2085) 建立了继任和修订程序。下一步是为社区提供一条清晰的领导路径，以便项目不依赖于少数个人。
+### 3. 智能体身份与企业级安全
 
-**治理工作组** 应交付：
+核心维护者：[**Paul Carleton**](https://github.com/pcarleton)、[**Den Delimarsky**](https://github.com/localden)
 
-- **贡献者阶梯 SEP** 定义从社区参与者 → 工作组贡献者 → 工作组协调人 → 主要维护者 → 核心维护者的进展，每一步都有明确的提名和审查标准。
-- **委托模型** 允许有良好记录的工作组在其领域内接受 SEP 并发布扩展更新，无需完整的核心维护者审查周期。
-- **章程模板** 每个工作组和兴趣小组公开维护：范围、活跃交付物、成功标准和退休条件，每季度审查。
+MCP 授权假设在用户同意时，有一个人正在使用浏览器。越来越多时候，调用方是一个智能体：拥有自身身份、代表不在场用户执行操作的云工作负载，或生成权限应窄于父智能体的子智能体。现有 MCP 服务器往往依赖手动粘贴的 API 密钥和长期有效的刷新令牌。我们需要一种标准化方式，让 MCP 服务器能够处理智能体身份，并将继续通过采用现有标准来改进安全性。
 
-### 4. 企业就绪
+**本路线图周期内：**
 
-企业正在大规模部署 MCP，并遇到了协议尚未解决的差距。
+- **DPoP**：Agent Identity WG（在本路线图周期内组建）。完成 Demonstrating Proof of Possession（DPoP）规范，并重点推动广泛采用。
+- **智能体身份与委派**：Agent Identity WG。我们希望以一种明确的方式，让智能体通过自身身份或用户委派的身份访问 MCP 服务器。这项工作将重点关注 Workload Identity Federation（[SEP-1933](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1933)）、[Enterprise-Managed Authorization](/extensions/auth/enterprise-managed-authorization)所使用的 Identity Assertion JWT Authorization Grant（ID-JAG），以及[RFC 8693](https://www.rfc-editor.org/rfc/rfc8693)令牌交换，并与 IETF OAuth 和 [WIMSE](https://datatracker.ietf.org/wg/wimse/about/) 工作组协调。
 
-我们需要明确问题陈述和方向性提案的领域：
+除此之外，还有其他几个主题正在讨论中，随着工作组组建，这些主题可能会纳入范围，包括用于区分交互式客户端和无头智能体的人类在场证明，以及其他智能体身份相关问题。
 
-- **审计跟踪和可观察性**：端到端可见性，了解客户端请求了什么以及服务器做了什么，形式为企业可将其输入现有日志和合规管道。
-- **企业管理的身份验证**：铺平从静态客户端密钥走向 SSO 集成流程 ([跨应用访问](https://xaa.dev)) 的道路，以便 IT 部门可以像管理其他内容一样管理 MCP 访问。
-- **网关和代理模式**：当客户端不直接连接到服务器而是通过中介路由时的明确定义行为。这可能包括授权传播、会话语义以及网关允许看到的内容。
-- **配置可移植性**：一种配置服务器一次并使该配置在不同 MCP 客户端上工作的方法。
+### 4. 改进原语
 
-我们期望成立一个 **企业工作组** 来负责此事。大部分输出可能会作为扩展而非核心规范变更落地。
+核心维护者：[**Kurtis Van Gent**](https://github.com/kurtisvg)、[**Peter Alexander**](https://github.com/pja-ant)、[**Den Delimarsky**](https://github.com/localden)
 
-## 未来展望
+MCP 的工具调用接口一直运行良好。然而，`tools/call`允许同时返回`content`和`structuredContent`，这让服务器和客户端作者都感到困惑，并导致实现出现分歧。我们希望在本路线图周期内改进`tools/call`接口的形式，以实现更一致的语义。社区也反复反馈，服务器需要更多选项来引导客户端处理大量工具、资源和其他原语，因此我们将围绕**渐进式发现**开展专门工作，以定义实验性的服务器端发现机制应当是什么样的。
 
-这些领域具有社区兴趣和核心维护者的兴趣，但不是最高优先级。我们将支持其中任何一个社区形成的工作组，并在时间允许的情况下审查关于这些主题的 SEP。
+**本路线图周期内：**
 
-- **触发器和事件驱动更新** — 客户端目前通过轮询或保持 SSE 连接打开来了解服务器端状态变化。标准化的回调机制（webhooks 或类似机制）将使服务器在新数据可用时主动通知客户端，并在所有传输方式上定义排序保证。
-- **结果类型改进** — 工具调用、资源读取和任务结果都是完整且内联到达的。流式结果将使客户端能够在交互场景（生成的文本、音频、视频帧）中增量接收输出；基于引用的结果将使客户端决定何时将大型负载拉入上下文，而不是默认污染它。这是跨领域的：流式传输涉及传输，引用涉及模式。
-- **安全与授权** — 更细粒度的最小权限范围，关于避免 OAuth 混淆攻击的更清晰指南，客户端和服务器上的安全凭据管理，以及通过 Linux 基金会路由的社区驱动漏洞披露计划。赞助工作已经在进行中：[SEP-1932 (DPoP)](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1932) 和 [SEP-1933 (工作负载身份联合)](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/1933)。
-- **扩展生态系统** — `ext-auth` 和 `ext-apps` 轨道是扩展机制有效的早期证明。成熟化它们，调查用于组合能力的 Skills 原语，以及向注册表添加一流扩展支持，都将加强从实验到标准的路径。
+- **工具结果形式**：Core Primitives WG（在本路线图周期内组建）。重新设计`tools/call`接口，以解决不同返回类型之间的保真度差异，并简化结构化和非结构化输出的处理。
+- **渐进式发现**：Core Primitives WG。客户端根据需要了解服务器的工具和资源，而不是预先获取完整目录；同时定义它与[HTTP 原生传输统一与强化](#2-http-native-transport-unification-and-hardening)下缓存工作的交互方式。
+- **原语注解**：Core Primitives WG。规范中的[内容注解](/specification/2026-07-28/server/resources#annotations)声明了一段内容的目标受众和优先级。将其应用于工具结果和资源，可能有助于解决[SEP-2200](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2200)中描述的可见性混淆问题，但大多数实现者尚未采用这些注解，也可能不了解其用途。如果它们没有用处，我们应考虑弃用它们。
 
-## 验证
+此外，[File Uploads WG](/community/working-groups/file-uploads)将继续推进有范围限制的文件操作和类似文件系统的资源语义（范围读取、分层列表）。
 
-协议规范的好坏取决于遵循它的实现。除了上述领域外，我们继续投资于：
+### 5. 改进 SDK 开发者体验
 
-- **一致性测试套件**：自动验证客户端、服务器和 SDK 是否正确实现了规范，覆盖率随每个新功能领域扩展。
-- **SDK 层级**：[SEP-1730](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1730) 中引入的层级系统为开发人员提供了清晰的信号，表明哪些 SDK 最紧密地跟踪规范。
-- **参考实现**：新功能的规范实现，以锚定社区开发并为早期采用者扫清障碍。
+核心维护者：[**Den Delimarsky**](https://github.com/localden)、[**David Soria Parra**](https://github.com/dsp-ant)
+
+我们的 SDK、参考服务器和快速入门内容都是手工维护的。虽然这种方式可行，但我们认为，规范和经过人工审查的一致性测试套件可以作为事实来源，并据此生成更多这些产物，从而让 SDK 和示例在每次发布时都能重新生成并重新验证，而不是在发布后修复。
+
+**本路线图周期内：**
+
+- **扩展契约**：[SDK WG](/community/working-groups/sdk)与核心维护者共同推进。扩展绑定的角色是什么（主机、客户端、服务器、智能体），以及在声明该能力时每个角色要做什么；SDK 必须原生支持哪些内容；扩展如何打包；以版本化变更的方式向扩展添加能力；将认证作为独立领域处理。
+- **生成产物实验**：[SDK WG](/community/working-groups/sdk)。根据规范生成一个候选的[Tier 1 SDK](/community/sdk-tiers)及其配套快速入门示例，使用[一致性测试套件](/community/sdk-tiers#conformance-testing)对二者进行验证，并发布包含下一周期建议的研究结果，包括哪些层应采用确定性代码生成，哪些层应采用模型辅助。
+
+除此之外，我们希望重新审视参考服务器和快速入门仓库的所有权及更新时效预期，并将生成失败暴露出的规范清晰度问题视为文档缺陷。
 
 ## 参与其中
 
-MCP 的路线图由其社区构建：
+上述每个优先领域背后都有一个工作组，或正在围绕其组建工作组，而所有工作组都有空间吸纳更多贡献者。参与方式有以下几种：
 
-- **加入工作组或兴趣小组**：查看 [工作组和兴趣小组](/community/working-interest-groups) 页面和 [社区沟通渠道](/community/communication) 以联系上述每个领域活跃的小组。
-- **提出或评论 SEP**：审查 [SEP 指南](/community/sep-guidelines) 并开启或权衡提案。
-- **启动实验性扩展**：[SEP-2133](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/2133) 允许任何工作组或兴趣小组在需要正式 SEP 之前在 `experimental-ext-` 仓库中进行实验。
-- **为项目做贡献**：阅读 [贡献指南](/community/contributing) 了解如何参与规范、SDK 和工具的开发。
+- **加入工作组或兴趣组**：请参阅[工作组和兴趣组](/community/working-interest-groups)页面以及[社区频道](/community/communication)。
+- **提出或评论 SEP**：阅读[SEP 指南](/community/sep-guidelines)，然后发起提案或参与讨论。
+- **开始一个实验性扩展**：[SEP-2133](/seps/2133-extensions)允许任何 WG 或 IG 在正式 SEP 之前，于`experimental-ext-`仓库中进行实验。
+- **直接贡献**：[贡献指南](/community/contributing)涵盖规范、SDK 和工具链。

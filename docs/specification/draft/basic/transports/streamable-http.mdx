@@ -311,19 +311,25 @@ HTTP 头中。详见
 
 **`x-mcp-header` 值的约束**：
 
-- **不得** 为空
-- **必须** 符合 HTTP field-name token 语法（`1*tchar`，[RFC 9110 第 5.1 节](https://datatracker.ietf.org/doc/html/rfc9110#section-5.1)）
-- **不得** 包含控制字符，包括回车符（CR，`\r`）
-  或换行符（LF，`\n`）
-- **必须** 在 `inputSchema` 中所有 `x-mcp-header` 值之间大小写不敏感地唯一
-- **必须** 仅应用于原始类型（integer、string、boolean）的参数。不允许类型为 `number` 的参数。
-  整数值 **必须** 位于 JavaScript 的安全范围内
-  （−2<sup>53</sup>+1 到 2<sup>53</sup>−1）
-- **必须** 仅应用于从 schema 根 _静态可达_ 的属性：即仅通过由
-  `properties` 键组成的链可达。该链 **不得** 穿过 `items`（或任何
-  其他数组关键字）、组合关键字（`oneOf`、`anyOf`、`allOf`、`not`）、
-  条件关键字（`if`/`then`/`else`），或 `$ref`。只要链中的每一步都是
-  `properties` 键，就允许嵌套对象属性。任何其他位置的 `x-mcp-header` 注解都会使该注解——从而使工具定义——无效。
+- **MUST NOT** be empty
+- **MUST** match HTTP field-name token syntax (`1*tchar`, [RFC 9110 Section 5.1](https://datatracker.ietf.org/doc/html/rfc9110#section-5.1))
+- **MUST NOT** contain control characters, including carriage return (CR, `\r`)
+  or line feed (LF, `\n`)
+- **MUST** be case-insensitively unique among all `x-mcp-header` values in
+  the `inputSchema`
+- **MUST** only be applied to parameters with primitive types (integer,
+  string, boolean). Parameters with type `number` are not permitted.
+  Integer values **MUST** be within the safe range for integers
+  represented using IEEE754 double-precision floating point numbers
+  (−2<sup>53</sup>+1 to 2<sup>53</sup>−1)
+- **MUST** only be applied to properties that are _statically reachable_
+  from the schema root: reachable via a chain consisting solely of
+  `properties` keys. The chain **MUST NOT** pass through `items` (or any
+  other array keyword), composition keywords (`oneOf`, `anyOf`, `allOf`,
+  `not`), conditional keywords (`if`/`then`/`else`), or `$ref`. Nested
+  object properties are permitted as long as every step in the chain is a
+  `properties` key. An `x-mcp-header` annotation anywhere else makes the
+  annotation — and thus the tool definition — invalid.
 
 头提取被定义为读取带注解属性的精确属性路径上的实例值（通往它的 `properties` 键链）。如果调用参数中该路径没有值，则省略该头。
 

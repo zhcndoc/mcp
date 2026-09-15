@@ -97,28 +97,19 @@ title: 订阅
 
 ## 多个并发订阅
 
-客户端 **MAY** 同时拥有多个活动订阅——例如，一个监听 tools-list 变更，另一个监听资源更新。每个订阅都通过其 `subscriptions/listen` 请求的 JSON-RPC 请求 ID 来标识，流中的每条通知都会在 `io.modelcontextprotocol/subscriptionId` 中携带该 ID，以便客户端进行分流。
+客户端 **MAY** 同时拥有多个活动订阅——例如，一个监听工具列表变更，另一个监听资源更新。每个订阅都通过其 `subscriptions/listen` 请求的 JSON-RPC 请求 ID 来标识，流中的每条通知都会在 `io.modelcontextprotocol/subscriptionId` 中携带该 ID，以便客户端进行分流。
 
 ## 取消
 
 当以下情况发生时，订阅结束：
 
-- **客户端**取消订阅——关闭 SSE 流（HTTP）或发送
-  `notifications/cancelled`，引用 `subscriptions/listen` 请求 ID（stdio）。
-- **服务器**终止订阅（例如，在关闭期间）——它 **SHOULD** 发送
-  空的 `subscriptions/listen` 响应以表示优雅结束（参见
-  [优雅关闭](#graceful-closure)），然后关闭流。
-- 底层传输关闭（HTTP 超时、TCP 断开、stdio 进程
-  退出）。
+- **客户端**取消订阅——关闭 SSE 流（HTTP），或发送引用 `subscriptions/listen` 请求 ID 的 `notifications/cancelled`（stdio）。
+- **服务器**将其拆除（例如，在关闭期间）——它**应当**发送成功的 `subscriptions/listen` 响应，以表示正常结束（请参见[优雅关闭](#graceful-closure)），然后关闭流。
+- 底层传输关闭（HTTP 超时、TCP 断开、stdio 进程退出）。
 
 ### 优雅关闭
 
-当服务器主动结束一个订阅时（例如，在
-关闭期间），它 **SHOULD** 在关闭流之前向原始的
-`subscriptions/listen` 请求返回一个空结果。这里指的是对
-这个长生命周期请求的 JSON-RPC 响应，由其 `id` 关联，并表示订阅
-已优雅结束——而不是一次突然的传输中断，后者不会带来任何
-响应。
+当服务器主动结束订阅时（例如，在关闭期间），它**应当**在关闭流之前对原始的 `subscriptions/listen` 请求返回一个完成结果。除标准结果字段和订阅元数据之外，该结果不携带任何特定于方法的数据。这是对长期存活请求的 JSON-RPC 响应，通过其 `id` 进行关联，并表示订阅已正常结束——与突然的传输断开不同，后者不会携带响应。
 
 ```json
 {

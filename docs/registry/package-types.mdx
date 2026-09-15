@@ -125,6 +125,57 @@ This MCP server manages Azure DevOps work items and pipelines.
 <!-- mcp-name: io.github.username/azure-devops-mcp -->
 ```
 
+## Cargo（Rust）包
+
+对于 Cargo 包，MCP 注册表目前仅支持官方 crates.io 注册表（`https://crates.io`）。
+
+Cargo 包在 `server.json` 中使用 `"registryType": "cargo"`。例如：
+
+```json server.json highlight={9}
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.username/widget-mcp",
+  "title": "Widget",
+  "description": "Rust-native MCP server",
+  "version": "0.3.0",
+  "packages": [
+    {
+      "registryType": "cargo",
+      "identifier": "widget-mcp",
+      "version": "0.3.0",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}
+```
+
+### 运行时模型
+
+Cargo 的运行时模型不同于 npm、PyPI 和 NuGet。`cargo install <crate>` 会将编译后的二进制文件放置在 PATH 中的 `~/.cargo/bin`，之后 MCP 客户端会直接按名称调用它。不存在与 `npx`（npm）、`uvx`（PyPI）或 `dnx`（NuGet、.NET 10 SDK Preview 6+）等效的、针对每次调用的运行器——安装只需执行一次，运行时按二进制文件名称执行。出于这一原因，上面的 Cargo 示例特意省略了 `runtimeHint`。
+
+Rust MCP 作者有两种一等分发路径：
+
+- **Cargo（`registryType: cargo`）**——通过 crates.io 以源代码形式分发。最终用户需要 Rust 工具链（`rustup`）才能运行 `cargo install`。这符合 Rust 生态系统的惯例，也与 Rust CLI 通常的发布方式一致。
+- **MCPB（`registryType: mcpb`）**——通过 GitHub 或 GitLab Releases 分发预构建的二进制文件。最终用户无需工具链。如果优先考虑“无需 Rust 工具链”，这是正确的选择。
+
+两种路径都受支持；选择权在作者手中。提供 Cargo 原生支持，是为了让偏好源代码分发的 Rust 作者不必被迫采用 MCPB 二进制打包变通方案。
+
+### 所有权验证
+
+MCP 注册表通过检查包 README 中是否存在 `mcp-name: $SERVER_NAME` 字符串来验证 Cargo 包的所有权（该 README 会被渲染为 HTML，并由 crates.io 的静态 CDN 提供）。`$SERVER_NAME` 部分**必须**与 `server.json` 中的服务器名称匹配。例如：
+
+```markdown README.md highlight={5}
+# Widget MCP Server
+
+A Rust-native MCP server for widget operations.
+
+- MCP Registry name: `mcp-name: io.github.username/widget-mcp`
+```
+
+**Cargo 特有的注意事项：**不同于 PyPI 和 NuGet（它们在 README 渲染时会保留 HTML 注释），**crates.io 会在 markdown→HTML 转换过程中移除 HTML 注释**。适用于 PyPI/NuGet 的 `<!-- mcp-name: ... -->` 隐藏注释形式**不适用于 cargo**——该令牌不会出现在验证器检查的渲染后 HTML 中。Cargo 作者必须将 `mcp-name:` 令牌作为可见的 markdown 文本包含在内。在 Links 部分添加一个简单的项目符号是推荐的方式。
+
 ## Docker/OCI 镜像
 
 对于 Docker/OCI 镜像，MCP 注册表目前支持：

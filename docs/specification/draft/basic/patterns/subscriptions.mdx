@@ -72,9 +72,9 @@ title: 订阅
 
 客户端 **应该** 将已确认的过滤器与其请求内容进行比对，并优雅地处理任何不受支持的类型。
 
-## Receiving Notifications
+## 接收通知
 
-All notifications sent on the stream will carry `io.modelcontextprotocol/subscriptionId` in `_meta`, used to identify the `subscriptions/listen` request that opened the stream. This value is the JSON-RPC ID of the `subscriptions/listen` request. In the example above, the request used `"id": 1`, so both the confirmation message and all subsequent notifications will carry subscription ID `1`. In stdio, all messages share a single channel, and the client **must** use this field to associate notifications with their originating subscription.
+在流上发送的所有通知都会在 `_meta` 中携带 `io.modelcontextprotocol/subscriptionId`，用于标识打开该流的 `subscriptions/listen` 请求。此值是 `subscriptions/listen` 请求的 JSON-RPC ID。在上面的示例中，请求使用了 `"id": 1`，因此确认消息和所有后续通知都会携带订阅 ID `1`。在 stdio 中，所有消息共享同一通道，客户端 **必须** 使用此字段将通知与其来源订阅相关联。
 
 ```json
 {
@@ -97,21 +97,16 @@ All notifications sent on the stream will carry `io.modelcontextprotocol/subscri
 
 订阅在以下情况下结束：
 
-- **客户端** 取消它——关闭 SSE 流（HTTP）或发送
-  `notifications/cancelled`，引用 `subscriptions/listen` 请求 ID（stdio）。
-- **服务器** 主动终止它（例如，在关闭期间）——它 **应该** 发送
-  空的 `subscriptions/listen` 响应以表示正常结束（参见
-  [优雅关闭](#graceful-closure)），然后关闭流。
-- 底层传输关闭（HTTP 超时、TCP 断开、stdio 进程
-  退出）。
+- **客户端**取消订阅——关闭 SSE 流（HTTP），或发送引用 `subscriptions/listen` 请求 ID 的 `notifications/cancelled`（stdio）。
+- **服务器**将其拆除（例如，在关闭期间）——它 **应该** 发送成功的 `subscriptions/listen` 响应，以表示正常结束（请参见[优雅关闭](#graceful-closure)），然后关闭流。
+- 底层传输关闭（HTTP 超时、TCP 断开、stdio 进程退出）。
 
 ### 优雅关闭
 
-当服务器主动结束订阅时（例如，在
-关闭期间），它 **应该** 在关闭流之前，先对原始的 `subscriptions/listen` 请求
-返回一个空结果。 这是对这个长生命周期请求的 JSON-RPC 响应，通过其 `id` 关联，并表明订阅
-已优雅结束——而不是突发的传输中断，后者不会携带任何
-响应。
+当服务器主动结束订阅时（例如，在关闭期间），它 **应该** 在关闭流之前，
+使用完成结果响应原始的 `subscriptions/listen` 请求。除了标准结果字段和订阅元数据之外，
+该结果不携带任何特定于方法的数据。这是对长期请求的 JSON-RPC 响应，通过其 `id` 进行关联，
+并表示订阅已正常结束——不同于突然的传输断开，后者不携带任何响应。
 
 ```json
 {

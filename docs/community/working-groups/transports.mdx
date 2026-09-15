@@ -1,0 +1,97 @@
+---
+title: 传输工作组章程
+description: MCP 传输工作组章程。
+---
+
+## 工作组类型
+
+**工作组**
+
+## 使命声明
+
+传输工作组持续演进 MCP 传输绑定及传输相关的协议架构，使实现能够在本地和远程部署中保持互操作性、可扩展性、可靠性并易于运维。该工作组产出传输提案、SEP、实现证据和指导文档。该工作组的[工作组仓库](https://github.com/modelcontextprotocol/transports-wg)及其[上游章程](https://github.com/modelcontextprotocol/transports-wg/blob/main/CHARTER.md)在这些边界内维护工作组当前的技术重点、提案策略和支持性细节。
+
+## 范围
+
+### 范围内
+
+- **传输绑定**：成帧、交付、请求和信封元数据、取消和终止、连接生命周期、向后兼容性，以及现有和未来 MCP 传输的行为。当前规范的[传输概述](/specification/draft/basic/transports)定义了传输绑定与核心协议语义之间的边界
+- **可扩展性和可靠性**：传输层连接管理、资源效率、多路复用、负载分配、错误处理、重新连接、恢复，以及绑定所提供的交付和排序保证
+- **传输相关的协议架构**：可扩展、可互操作绑定所需的协议范围消息流关注点，包括请求关联、每请求元数据、无状态操作，以及从传统初始化和传输会话模型迁移
+- **传输安全**：绑定和信封安全要求，例如 Origin 验证、TLS、mTLS 和证书处理，与 Security IG 协调。凭据传递与 Auth IG 协调
+- **验证和指导**：评估提案并帮助实现者采用约定的传输行为所需的参考实现、实验、实现证据和文档。支持材料维护在上游的[文档](https://github.com/modelcontextprotocol/transports-wg/tree/main/docs)中。工作组向 Conformance Testing 项目贡献传输场景和要求，该项目的维护者负责一致性测试套件
+- **跨领域协调**：其他 MCP 工作组负责的工作所涉及的传输影响，但不负责其应用层功能
+
+上游的[范围声明](https://github.com/modelcontextprotocol/transports-wg/blob/main/CHARTER.md#scope)提供了支持性背景，但不能扩展本章程中的边界。
+
+### 范围外
+
+- MCP 原语的应用层行为，例如 tools、resources、prompts、tasks、agents 或 events，包括应用状态、应用会话含义、任务生命周期以及事件或订阅语义。工作组会在这些功能依赖绑定或消息流行为时进行协调
+- 特定领域的扩展以及特定实现的产品或业务关注点
+- 与传输无关的 SDK API 和实现细节
+- 授权协议机制、凭据和令牌语义、应用身份以及授权策略。工作组与相关工作组协调绑定如何承载约定的授权数据
+- MCP 一致性测试套件的所有权。工作组与其维护者协调，贡献传输要求和场景
+
+### 相关工作组
+
+- **[SDK WG](/community/working-groups/sdk)**：官方 SDK 实现传输变更；两个工作组就可行性、参考实现和推广顺序进行协调
+- **[Agents WG](/community/working-groups/agents)**：Agents WG 负责 Tasks 和持久化执行；两个工作组就这些内容依赖多轮往返请求、请求关联、无状态操作或绑定行为的部分进行协调
+- **[Triggers and Events WG](/community/working-groups/triggers-events)**：事件回调、订阅和应用层交付语义由该工作组负责；Transports 负责特定于绑定的承载和保证
+- **[Auth IG](/community/interest-groups/auth)** 和 **[Security IG](/community/interest-groups/security)**：两个工作组就凭据传递和传输线安全进行协调，而授权机制和更广泛的安全要求仍由相应的 IG 负责
+
+## 领导层
+
+当前工作组负责人是[Kurtis Van Gent](https://github.com/kurtisvg)。
+
+## 权限与决策权
+
+| 决策类型                         | 权限级别                                         |
+| -------------------------------- | ------------------------------------------------ |
+| 会议事务和日程安排               | 工作组负责人（自主决定）                         |
+| 工作组内提案优先级排序           | 工作组负责人（自主决定）                         |
+| SEP 分流和结案（范围内）         | 工作组负责人（自主决定，并记录理由）             |
+| 范围内的技术设计                 | 工作组共识                                       |
+| 规范变更（增量）                 | 工作组共识 → Core Maintainer 批准                |
+| 规范变更（破坏性／根本性）       | 工作组共识 → Core Maintainer 批准 + 更广泛审查   |
+| 范围扩展                         | 需要 Core Maintainer 批准                         |
+| 工作组成员批准                   | 工作组成员发起人                                 |
+
+## 成员资格
+
+当前工作组成员列于上游的[工作组成员名册](https://github.com/modelcontextprotocol/transports-wg/blob/main/GOVERNANCE.md#members)中。
+
+## 运作方式
+
+工作组每周定期举行会议，当前时间和加入详情列于[meet.modelcontextprotocol.io](https://meet.modelcontextprotocol.io)。议题在[MCP Discord](https://discord.gg/6CSzBmMkjX)的 `#transports-wg` 频道中异步讨论。
+
+工作遵循问题优先的工作流程：
+
+1. 在[工作组仓库](https://github.com/modelcontextprotocol/transports-wg)中创建核心问题陈述，使工作组就问题及其要求达成一致
+2. 与其他感兴趣的参与者合作定义解决方案
+3. 审查并迭代解决方案，以回应工作组反馈
+4. 工作组根据其决策流程达成共识后，通过[SEP 流程](/community/sep-guidelines)向 Core Maintainers 提交该解决方案作为 SEP
+
+## 资源
+
+- [modelcontextprotocol/transports-wg](https://github.com/modelcontextprotocol/transports-wg)
+  - [提案](https://github.com/modelcontextprotocol/transports-wg/tree/main/proposals)
+  - [支持性文档和决策记录](https://github.com/modelcontextprotocol/transports-wg/tree/main/docs)
+  - [会议记录](https://github.com/modelcontextprotocol/transports-wg/tree/main/meetings)
+
+## 交付成果与成功指标
+
+### 当前工作项
+
+请参阅[开放的拉取请求](https://github.com/modelcontextprotocol/transports-wg/pulls)和[`roadmaps/` 目录](https://github.com/modelcontextprotocol/transports-wg/tree/main/roadmaps)。
+
+### 成功标准
+
+- 已采用的与传输无关的协议行为在不同传输之间保持一致，同时绑定特定的差异得到明确说明，并通过实现证据和适用的一致性场景进行验证
+- 影响官方 SDK 的传输变更与 SDK WG 协调，并具有清晰的实现指导
+- 决策、提案状态和支持性理由持续在工作组仓库中公开可查，或提供从工作组仓库访问这些信息的链接
+
+## 变更日志
+
+| 日期       | 变更            |
+| ---------- | --------------- |
+| 2026-08-23 | 初始章程        |

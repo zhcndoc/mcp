@@ -141,7 +141,7 @@ description: Model Context Protocol 社区内两种协作形式的治理规则�
 
 本节主要适用于工作组，工作组做出具有约束力的决策（关于技术设计、规范变更等的共识）。兴趣组通常在讨论中通过大致共识运作，不做具有约束力的决策——他们的产出是建议、问题陈述和用例。采用工作组成员层级的兴趣组可以使用此流程进行内部决策。
 
-**工作组共识** 通过以下 progression 达成。在进入下一步之前尝试每一步。
+**工作组共识** 通过以下流程达成。在进入下一步之前尝试每一步。
 
 <Steps>
   <Step title="懒惰共识（默认）">
@@ -207,7 +207,7 @@ description: Model Context Protocol 社区内两种协作形式的治理规则�
 | Discord `#{name}-wg` 或 `#{name}-ig` | 快速问题、协调  | 尽力而为          |
 | GitHub 讨论                   | 长篇技术讨论 | 每周处理        |
 
-除了 Discord，组还可以在 [GitHub 讨论](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions/) 中建立讨论类别。负责人将获得适当的角色来管理和 moderating 讨论。
+除了 Discord，组还可以在 [GitHub 讨论](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions/) 中建立讨论类别。负责人将获得适当的角色来管理和主持讨论。
 
 ### 报告
 
@@ -227,16 +227,15 @@ description: Model Context Protocol 社区内两种协作形式的治理规则�
 
 **工作组成立：**
 
-- There must be a widely acknowledged concern requiring coordination
-- PR for creation of WG into `docs/community/working-groups/<name>/overview.mdx`, gated by CODEOWNERS requiring approval by Maintainers
-- PR for charter into `docs/community/working-groups/<name>.mdx`, gated by CODEOWNERS requiring approval from Core Maintainers
-- Initial member list approved by WG Lead
+- 必须存在一个广泛认可且需要协调的问题
+- 提交 PR，将工作组章程添加为 `docs/community/working-groups/<name>.mdx`，根据 [小组章程模板](/community/charter-template) 编写，并在 `docs/docs.json` 中包含相应的导航条目；由 CODEOWNERS 负责把关，要求核心维护者批准
+- 初始成员列表由工作组负责人批准
 
 **兴趣组成立：**
 
 - 在 [Discord](https://discord.gg/6CSzBmMkjX) 的 `#wg-ig-group-creation` 频道中填写创建模板
 - 核心维护者审查提案；兴趣组及其协调人必须由至少两名核心维护者或一名首席维护者担保
-- 一旦担保，协调人组织兴趣组并创建章程
+- 获得担保后，协调人组织兴趣组，并通过 PR 添加 `docs/community/interest-groups/<name>.mdx` 来创建章程；该文件根据同一模板编写，并在 `docs/docs.json` 中包含相应的导航条目；由 CODEOWNERS 负责把关，要求核心维护者批准
 
 **退休：**
 
