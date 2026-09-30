@@ -70,35 +70,34 @@ flowchart TD
 
 ### 逐步流程
 
+**Prior discussion is required.** SEP authors must discuss the idea with the relevant [working or interest group](/community/working-interest-groups) in [Discord](/community/communication#discord) before opening the SEP pull request, and the PR description must link to that discussion (a Discord thread, WG/IG meeting notes, or a GitHub Discussion). A SEP without a linked prior discussion is not accepted. If no relevant group exists, start a conversation in [GitHub Discussions](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions) or the `#general` channel in [Discord](/community/communication#discord) instead. If there is enough interest, it may be worth [creating a new IG or WG](/community/working-interest-groups#creating-an-interest-group). The effort involved in finding sponsors and facilitators is a good signal of whether the idea has sufficient traction.
+
 <Note>
-  为了提高 SEP 被接受的机会：
-
-- **首先在 [Discord](/community/communication#discord) 中与相关的 [工作组或兴趣组](/community/working-interest-groups) 讨论您的想法。** 这是完善提案并建立早期支持的最佳方式。
-- **如果不存在相关组，请在 [GitHub Discussions](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions) 或 [Discord](/community/communication#discord) 的 `#general` 频道中发起对话。** 如果有足够的兴趣，可能值得 [创建新的 IG 或 WG](/community/working-interest-groups#creating-an-interest-group) —— 寻找赞助人和协调人所涉及的努力是想法是否有足够吸引力的良好信号，并且仍然优于冷提交。
-- **检查与 [核心维护者](/community/governance#roles) 优先级和 [设计原则](/community/design-principles) 的一致性。** 优先级通常反映在 [项目路线图](/development/roadmap) 中。当前优先级之外或与设计原则冲突的提案更可能在审查过程中面临延误或额外的摩擦。
-
+  为了提高 SEP 被接受的机会，请检查其与 [核心维护者](/community/governance#roles) 优先级和 [设计原则](/community/design-principles) 的一致性。优先级通常反映在 [项目路线图](/development/roadmap) 中。当前优先级之外或与设计原则冲突的提案更可能在审查过程中面临延误或额外的摩擦。
 </Note>
 
-1. **起草您的 SEP** 为一个名为 `0000-your-feature-title.md` 的 Markdown 文件，使用 `0000` 作为占位符。遵循下面的 [SEP 格式](#sep-format)。
+1. **与相关小组讨论**：将你的想法带到匹配的[工作组或兴趣组](/community/working-interest-groups)中，并在那里完善。保留讨论链接（Discord 线程、会议记录或 GitHub Discussion），以便将其添加到 PR 描述中。
 
-2. **创建拉取请求**，将您的 SEP 文件添加到 [规范仓库](https://github.com/modelcontextprotocol/modelcontextprotocol) 的 `seps/` 目录中。
+2. **起草你的 SEP**：将其写成名为 `0000-your-feature-title.md` 的 Markdown 文件，使用 `0000` 作为占位符。遵循下面的 [SEP 格式](#sep-format)。
 
-3. **更新 SEP 编号**：一旦创建了您的 PR，使用 PR 编号重命名文件（例如，PR #1850 变为 `1850-your-feature-title.md`）并更新 SEP 头部。
+3. **创建拉取请求**：将你的 SEP 文件添加到[规范仓库](https://github.com/modelcontextprotocol/modelcontextprotocol)的 `seps/` 目录中。该仓库仅接受协作者提交的拉取请求。
 
-4. **寻找赞助人**：标记 [维护者列表](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/MAINTAINERS.md) 中的核心维护者或维护者。选择与您提案领域相关的人。提示：
-   - 标记 1-2 位相关的维护者，而不是所有人
-   - 在相关的 Discord 频道中分享您的 PR
+4. **更新 SEP 编号**：创建 PR 后，使用 PR 编号重命名文件（例如，PR #1850 变为 `1850-your-feature-title.md`）并更新 SEP 头部。
+
+5. **寻找赞助人**：从[维护者列表](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/MAINTAINERS.md)中标记一位核心维护者或维护者。选择负责领域与你的提案相关的人。提示：
+   - 标记 1-2 位相关维护者，而不是所有人
+   - 在相关 Discord 频道中分享你的 PR
    - 如果 2 周后没有回应，请在 `#general` 中询问
 
-5. **赞助人指派自己**：当赞助人同意后，他们将自己指派给 PR 并将 SEP 状态更新为 `draft`。
+6. **赞助人指派自己**：赞助人同意后，会将自己指派给 PR，并将 SEP 状态更新为 `draft`。
 
-6. **非正式审查**：赞助人审查提案并可能请求更改。讨论发生在 PR 评论中。
+7. **非正式审查**：赞助人审查提案并可能请求更改。讨论发生在 PR 评论中。
 
-7. **正式审查**：准备就绪后，赞助人将状态更新为 `in-review`。SEP 进入核心维护者的正式审查（每两周举行会议）。
+8. **正式审查**：准备就绪后，赞助人将状态更新为 `in-review`。在此之前，赞助人会确认小组讨论已经完成，并且其链接已包含在 PR 描述中。SEP 进入核心维护者的正式审查（每两周举行会议）。
 
-8. **决议**：SEP 可能被 `accepted`、`rejected` 或返回修订。赞助人更新状态。
+9. **决议**：SEP 可能被标记为 `accepted`、`rejected` 或退回修改。赞助人更新状态。
 
-9. **最终确定**：一旦接受，参考实现必须完成。对于具有可观察协议行为的标准轨道 SEP，还必须合并一个[一致性测试](#conformance-test-requirement)。作者将规范更改（模式更改、规范文本和变更日志条目）添加到 SEP 的拉取请求中。SEP 无需 SDK 实现即可变为 `final`。完成这些工作后，赞助人将状态更新为 `final`，SEP 的 PR 即可合并。
+10. **最终确定**：接受后，必须完成参考实现。对于具有可观察协议行为的标准轨道 SEP，还必须合并一个[一致性测试](#conformance-test-requirement)。作者将规范更改（模式更改、规范文本和变更日志条目）添加到 SEP 的拉取请求中。SEP 无需 SDK 实现即可变为 `final`。完成这些工作后，赞助人将状态更新为 `final`，SEP 的 PR 即可合并。已合并的 SEP 会发布在 [SEP 索引](/seps/index)中，并可通过编号在 `modelcontextprotocol.io/seps/<number>` 访问（例如 [/seps/1850](/seps/1850)）。
 
 ### SEP 状态
 

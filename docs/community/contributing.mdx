@@ -7,6 +7,10 @@ description: 如何为模型上下文协议项目做贡献
 
 ## 开始之前
 
+### 加入社区
+
+你无需准备好变更即可参与。加入 [MCP 贡献者 Discord](https://discord.gg/6CSzBmMkjX)，与贡献者和维护者交流、提问并了解需要帮助的地方。请参阅 [贡献者沟通](/community/communication) 指南，了解所有频道（包括 [实时会议](https://meet.modelcontextprotocol.io/) 和 GitHub Discussions）及其使用时机，或跳转到下方的 [获取帮助](#getting-help)。
+
 ### 先决条件
 
 在贡献之前，确保你已安装并准备好以下内容：
@@ -333,12 +337,41 @@ npm run check:docs
     展示你的想法的实际应用。
   </Step>
   <Step title="寻找赞助人">
-    来自 [维护者列表](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/MAINTAINERS.md) 的维护者，他将支持你的提案。
+    一位来自 [维护者列表](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/MAINTAINERS.md)、将为你的提案提供支持的维护者。请参阅下方的[为 SEP 寻找赞助人](#finding-a-sponsor-for-seps)。
   </Step>
   <Step title="编写 SEP">
     遵循 [SEP 指南](/community/sep-guidelines)。
   </Step>
 </Steps>
+
+<a id="finding-a-sponsor-for-seps" />
+
+### 为 SEP 寻找赞助人
+
+**赞助人** 是核心维护者或维护者，他们在审查过程中支持你的 SEP。他们提供反馈，帮助完善你的提案，并在核心维护者会议上展示它。
+
+<Warning>
+  每个 SEP 都需要一个赞助人才能继续推进。6 个月内未找到赞助人的 SEP 将被标记为 **休眠**。休眠的 SEP 不会被直接拒绝——如果找到赞助人或重新评估认为需要该提案，它们可以在以后恢复。
+</Warning>
+
+寻找赞助人：
+
+<Steps>
+  <Step title="寻找相关的维护者">
+    查看 [维护者列表](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/MAINTAINERS.md)，查找在你领域工作的维护者。
+  </Step>
+  <Step title="在你的 PR 中标记维护者">
+    标记 1-2 位相关维护者（不要骚扰所有人）。
+  </Step>
+  <Step title="在 Discord 中分享">
+    在相关 Discord 频道发布你的 PR 以增加可见性。
+  </Step>
+  <Step title="必要时跟进">
+    如果 2 周后无响应，请在 `#general` 中询问或联系核心维护者。
+  </Step>
+</Steps>
+
+维护者定期审查开放的提案，但响应时间因复杂性和可用性而异。
 
 ## 使用 SDK 仓库
 
@@ -439,32 +472,7 @@ MCP 维护多种语言的官方 SDK。欢迎贡献——无论是修复错误、
 
 对于协议讨论，加入 [工作组](/community/working-interest-groups) 频道，如 `#auth-wg` 或 `#server-identity-wg`。对于 SDK 帮助，找到你语言的频道（例如 `#typescript-sdk-dev`）。
 
-### 寻找 SEP 赞助人
-
-**赞助人** 是核心维护者或维护者，他们在审查过程中支持你的 SEP。他们提供反馈，帮助完善你的提案，并在核心维护者会议上展示它。
-
-<Warning>
-  每个 SEP 都需要一个赞助人才能继续推进。6 个月内未找到赞助人的 SEP 将被标记为 **休眠**。休眠的 SEP 不会被直接拒绝——如果找到赞助人或重新评估认为需要该提案，它们可以在以后恢复。
-</Warning>
-
-寻找赞助人：
-
-<Steps>
-  <Step title="寻找相关的维护者">
-    查看 [维护者列表](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/MAINTAINERS.md) 以查找在你领域工作的维护者。
-  </Step>
-  <Step title="在你的 PR 中标记维护者">
-    标记 1-2 位相关维护者（不要骚扰所有人）。
-  </Step>
-  <Step title="在 Discord 中分享">
-    在相关 Discord 频道发布你的 PR 以增加可见性。
-  </Step>
-  <Step title="必要时跟进">
-    如果 2 周后无响应，请在 `#general` 中询问或联系核心维护者。
-  </Step>
-</Steps>
-
-维护者定期审查开放的提案，但响应时间因复杂性和可用性而异。
+有关完整流程，请参阅[为 SEP 寻找赞助人](#finding-a-sponsor-for-seps)。
 
 ## 故障排除
 
@@ -491,6 +499,8 @@ MCP 维护多种语言的官方 SDK。欢迎贡献——无论是修复错误、
 1. 确保你的想法已在 Discord 或兴趣小组中讨论过
 2. 有社区兴趣展示的提案更有可能找到赞助人
 3. 考虑你的变更是否太大——能否拆分为更小的 SEP？
+
+有关完整流程，请参阅[为 SEP 寻找赞助人](#finding-a-sponsor-for-seps)。
 
 ### 我的 SEP 被拒绝了
 

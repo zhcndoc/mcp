@@ -167,8 +167,8 @@ export interface ElicitResult extends Result {
   "title": "颜色选择",
   "description": "选择你喜欢的颜色",
   "enum": ["#FF0000", "#00FF00", "#0000FF"],
-  “enumNames”: ["Red", "Green", "Blue"],
-  "default": "Green"
+  "enumNames": ["Red", "Green", "Blue"],
+  "default": "#00FF00"
 }
 ```
 

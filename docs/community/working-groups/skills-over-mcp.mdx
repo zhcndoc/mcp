@@ -9,15 +9,17 @@ description: MCP Skills Over MCP 工作组章程。
 
 ## 使命宣言
 
-Skills Over MCP 工作组定义了“agent skills”——用于 agent 工作流的丰富、结构化指令——如何通过 MCP 被发现、分发和消费。主机应用中对原生 skills 支持的实现表明需求强烈，而该工作组源自对 [SEP-2076 — Agent Skills as a First-Class MCP Primitive](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2076) 的讨论，该讨论提出了一个尚未解决的问题：现有的 MCP 原语是否足够，还是需要标准化哪些约定。该 WG 会产出规范扩展、参考实现和协调性产物，因为这些解决方案会同时涉及协议规范、注册表 schema、SDK 实现以及客户端行为。WG 当前的方向记录在 [SEP-2640 — Skills Extension](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2640) 中（基于 Resources 的 Extensions Track）。
+Skills Over MCP 工作组定义了“agent skills”——用于 agent 工作流的丰富、结构化指令——如何通过 MCP 被发现、分发和消费。主机应用中对原生 skills 的支持表明需求强烈，而该工作组源自对 [SEP-2076 — Agent Skills as a First-Class MCP Primitive](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2076) 的讨论，该讨论提出了一个尚未解决的问题：现有的 MCP 原语是否足够，还是需要标准化哪些约定。该 WG 会产出规范扩展、参考实现和协调性产物，因为这些解决方案会同时涉及协议规范、注册表 schema、SDK 实现以及客户端行为。
+
+[SEP-2640 — Skills Extension](/seps/2640-skills-extension) 已定稿。WG 在 [modelcontextprotocol/ext-skills](https://github.com/modelcontextprotocol/ext-skills) 中维护官方 [Skills 扩展](/extensions/skills/overview)（`io.modelcontextprotocol/skills`）。当前工作重点是实现支持、互操作性以及已发布扩展的演进。
 
 ## 范围
 
 ### 范围内
 
-- **规范工作**：定义技能如何在 MCP 中被表示、发现和消费的 SEPs——包括 Skills Extension（Extensions Track）及相关协议变更
-- **参考实现**：展示技能发现与消费模式的 SDK 组件和参考服务器
-- **跨领域关注点**：与 Registry WG 的协调（技能发现／分发、注册表 schema 变更）、Agents WG（技能激活、服务器元数据消费）、Primitive Grouping WG（渐进式披露模式），以及外部项目的协调，包括 [Agent Skills](https://agentskills.io/) 规范（内容格式和 well-known URI 发现）、FastMCP 和 PydanticAI
+- **规范工作**：维护和演进 Skills 扩展，变更记录在[决策日志](https://github.com/modelcontextprotocol/ext-skills/blob/main/docs/decisions.md)中；相关核心协议变更通过 SEP 流程提出
+- **参考实现**：展示技能发现和消费模式的 SDK 组件与参考服务器
+- **跨领域关注点**：与 Registry WG（技能发现／分发、注册表 schema 变更）、Agents WG（技能激活、服务器元数据消费）和 Primitive Grouping IG（渐进式披露模式）协调，并与外部项目协作，包括 [Agent Skills](https://agentskills.io/) 规范（内容格式和 well-known URI 发现）、FastMCP 和 PydanticAI
 - **文档**：涵盖技能编写、发现和消费的规范章节与指南
 
 ### 范围外
@@ -30,7 +32,7 @@ Skills Over MCP 工作组定义了“agent skills”——用于 agent 工作流
 
 - **Agents WG** — agent 如何消费服务器元数据、技能激活
 - **Registry WG** — 技能发现／分发、注册表 schema 变更
-- **Primitive Grouping WG** — 渐进式披露模式
+- **Primitive Grouping IG** — 渐进式披露模式
 
 ## 领导层
 
@@ -74,6 +76,7 @@ Skills Over MCP 工作组定义了“agent skills”——用于 agent 工作流
 | Kaxil Naik               | Astronomer / Apache Airflow PMC | [@kaxil](https://github.com/kaxil)                     |         | 参与者 |
 | Cliff Hall               | Futurescale                     | [@cliffhall](https://github.com/cliffhall)             |         | 参与者 |
 | Haoyu Wang               | Google                          | [@helloeve](https://github.com/helloeve)               |         | 参与者 |
+| Nate Barbettini          | Arcade.dev                      | [@nbarbettini](https://github.com/nbarbettini)         |         | 参与者 |
 
 ## 运作
 
@@ -89,33 +92,36 @@ Discord：[#skills-over-mcp-wg](https://discord.com/channels/1358869848138059966
 
 ## 资源
 
-- 实验性发现和参考实现：[modelcontextprotocol/experimental-ext-skills](https://github.com/modelcontextprotocol/experimental-ext-skills)
-- 项目看板：[Skills Over MCP WG](https://github.com/orgs/modelcontextprotocol/projects/38/views/1)
+- [Skills 扩展概述](/extensions/skills/overview)和[最终版 SEP-2640](/seps/2640-skills-extension)
+- 规范和 WG 文档：[modelcontextprotocol/ext-skills](https://github.com/modelcontextprotocol/ext-skills)
+- [实现](https://github.com/modelcontextprotocol/ext-skills/blob/main/docs/implementations.md)和[客户端支持](/extensions/client-matrix)
+- [决策日志](https://github.com/modelcontextprotocol/ext-skills/blob/main/docs/decisions.md)和[已归档的设计工作](https://github.com/modelcontextprotocol/ext-skills/tree/main/docs/archive)
 
 ## 交付物与成功指标
 
-### 当前工作项
+### 已完成的里程碑
 
-完整的实时跟踪见 [Skills Over MCP WG 项目看板](https://github.com/orgs/modelcontextprotocol/projects/38/views/1)。重点工作流如下：
+- [SEP-2640](/seps/2640-skills-extension) 已定稿，于 2026 年 9 月 13 日合并。
+- 官方规范已发布在 [ext-skills](https://github.com/modelcontextprotocol/ext-skills/blob/main/specification/stable/skills.mdx) 中，并提供[网站概述](/extensions/skills/overview)。
+- [Skills 一致性场景](https://github.com/modelcontextprotocol/conformance/pull/330) 已于 2026 年 9 月 11 日合并。
 
-| 项目                                                                                                              | 状态      | 目标日期 | 负责人                                                                                     |
-| ----------------------------------------------------------------------------------------------------------------- | ----------- | ----------- | -------------------------------------------------------------------------------------------- |
-| [Skills Extension SEP](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2640)（Extensions Track） | 审核中   |             | [@pja-ant](https://github.com/pja-ant)                                                       |
-| Skills Extension 参考实现                                                                         | 审核中   |             | [@olaservo](https://github.com/olaservo)                                                     |
-| Agent Skills 规范协调                                                                                    | 进行中 |             | [@jonathanhefner](https://github.com/jonathanhefner)，[@pja-ant](https://github.com/pja-ant) |
-| 注册表 skills.json 提案                                                                                     | 进行中 |             | [@JAORMX](https://github.com/JAORMX)                                                         |
+### 当前工作
+
+在 [ext-skills issues](https://github.com/modelcontextprotocol/ext-skills/issues) 中跟踪提案、实现工作和协调，并链接到实现所在的 SDK 或客户端 issue。
+所有者、进度和优先级在该处维护，而不是本章程中。
 
 ### 成功标准
 
-- **短期**：针对需求形成有记录的共识，并评估现有方法
-- **中期**：给出清晰建议（约定 vs．协议扩展 vs．两者并用）——草案 Skills Extension SEP 代表了 WG 当前方向：使用现有 Resources 原语的正式扩展
-- **长期**：在 MCP 服务器与客户端之间实现可互操作的技能分发
+- **规范**：已发布基于 Resources 的 Skills 扩展——通过最终版 SEP-2640 实现。
+- **实现**：SDK 和主机实现通过适用的一致性场景。
+- **互操作性**：独立 MCP 服务器和客户端能够一致地发现和加载技能。
 
 ## 变更日志
 
 | 日期       | 变更                                                                                                                                                                                                                                                                                                           |
 | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 2026-04-25 | 在 Active Work Items 中链接 SEP-2640；新增 @helloeve（Google）为 Participant                                                                                                                                                                                                                                    |
-| 2026-04-16 | 从 Interest Group 转换为 Working Group                                                                                                                                                                                                                                                                   |
+| 2026-09-15 | 新增 @nbarbettini（Arcade.dev）为参与者 |
+| 2026-04-25 | 在 Active Work Items 中链接 SEP-2640；新增 @helloeve（Google）为参与者 |
+| 2026-04-16 | 从 Interest Group 转换为 Working Group |
 | 2026-04-14 | 初始章程（由 [experimental-ext-skills](https://github.com/modelcontextprotocol/experimental-ext-skills) 仓库的 README 正式化而来；在通过 [SEP-2149](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2149) 建立章程流程之前，该 README 一直作为事实上的章程） |
-| 2026-02-01 | 组建 IG；创建实验性仓库                                                                                                                                                                                                                                                                             |
+| 2026-02-01 | 组建 IG；创建实验性仓库 |

@@ -59,7 +59,7 @@ MCP 客户端和授权服务器 **SHOULD** 支持 OAuth 客户端 ID 元数据�
   "logo_uri": "https://app.example.com/logo.png",
   "redirect_uris": [
     "http://127.0.0.1:3000/callback",
-    "http://localhost:3000/callback"
+    "http://[::1]:3000/callback"
   ],
   "grant_types": ["authorization_code"],
   "response_types": ["code"],
@@ -82,7 +82,7 @@ sequenceDiagram
     Note over Client,Metadata: Client 将元数据托管在<br/>https://app.example.com/oauth/metadata.json
 
     User->>Client: 发起到 MCP Server 的连接
-    Client->>Server: Authorization Request<br/>client_id=https://app.example.com/oauth/metadata.json<br/>redirect_uri=http://localhost:3000/callback
+    Client->>Server: Authorization Request<br/>client_id=https://app.example.com/oauth/metadata.json<br/>redirect_uri=http://127.0.0.1:3000/callback
 
     Server->>User: Authentication prompt
     User->>Server: 提供凭据
