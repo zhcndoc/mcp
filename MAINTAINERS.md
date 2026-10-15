@@ -2,7 +2,7 @@
 
 本文档列出了 Model Context Protocol 项目当前的维护者。
 
-**最后更新：** 2026 年 8 月 5 日
+**最后更新：** 2026 年 10 月 1 日
 
 ## 主要维护者
 
@@ -60,7 +60,7 @@
 - [Stephan Halter](https://github.com/halter73)
 - [Mike Kistler](https://github.com/mikekistler)
 - [Den Delimarsky](https://github.com/dend)
-- [Eirik Tsarpalis](https://github.com/eiriktsarpalis)
+- [Eirik Tsarpalis](https://github.com/eiriksarpalis)
 - [Stephen Toub](https://github.com/stephentoub)
 
 ### Kotlin SDK
@@ -144,6 +144,12 @@
 - [Shaun Smith](https://github.com/evalstate)
 - [Jonathan Hefner](https://github.com/jonathanhefner)
 
+### 一致性
+
+- [Paul Carleton](https://github.com/pcarleton)
+- [Felix Weinberger](https://github.com/felixweinberger)
+- [Takashi Norimatsu](https://github.com/tnorimat)
+
 ## 社区版主
 
 - [Ola Hungerford](https://github.com/olaservo)
@@ -153,7 +159,7 @@
 - [Tadas Antanavicius](https://github.com/tadasant)
 - [Peder Holdgaard Pedersen](https://github.com/PederHP)
 
-## 工作组与兴趣组维护者
+## 工作组和兴趣组维护者
 
 [工作组和兴趣组](https://modelcontextprotocol.io/community/working-interest-groups) 不要求必须有维护者（它们可以由非正式协调人管理），但可根据需要指定维护者。
 
@@ -210,19 +216,20 @@
 - [Liad Yosef](https://github.com/liady)
 - [Ido Salomon](https://github.com/idosal)
 
-### 基元分组兴趣组
+### 渐进式披露工作组
 
 - [Tapan Chugh](https://github.com/chughtapan)
 - [Sam Morrow](https://github.com/SamMorrowDrums)
+- [Kurtis Van Gent](https://github.com/kurtisvg)
 
 ### 工具注释兴趣组
 
 - [Sam Morrow](https://github.com/SamMorrowDrums)
 
-### 工具范围工作组
+### 工具作用域工作组
 
 - [Sam Morrow](https://github.com/SamMorrowDrums)
 
 ## 关于本文档
 
-本文档由 MCP 维护者更新，反映当前的治理结构。有关 MCP 治理的更多信息，请参阅我们的[治理文档](https://modelcontextprotocol.io/community/governance)。
+本文档由 MCP 维护者更新，反映当前的治理结构。有关 MCP 治理的更多信息，请参阅我们的[治理文档](https://modelcontextprotocol.org/community/governance)。

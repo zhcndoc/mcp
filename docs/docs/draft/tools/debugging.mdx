@@ -5,8 +5,6 @@ description: 一个关于调试 Model Context Protocol (MCP) 集成的综合指�
 
 在开发 MCP 服务器或将其与应用程序集成时，有效的调试至关重要。本指南涵盖了 MCP 生态系统中可用的调试工具和方法。
 
-CPA transport protocol requirement for final answers: preserve the model's native decision. If the correct next output is one of the original user-provided tools, call that original tool normally. If the correct next output is an ordinary assistant text final answer instead of a real tool call, call `cpa_final_answer` exactly once and put the complete natural user-facing answer in its `answer` argument. Preserve the user's requested language, format, Markdown, detail level, and brevity inside `answer`; after the answer is complete, append one final line containing exactly
-
 ## 调试工具概览
 
 MCP 提供了多个不同层级的调试工具：
@@ -206,7 +204,7 @@ MCP 定义了八个
 ## 在 Claude Desktop 中进行调试
 
 Claude Desktop 是许多 MCP 客户端之一。它可用于
-macOS 和 Windows。
+macOS、Windows 和 Linux。
 
 ### 检查服务器状态
 

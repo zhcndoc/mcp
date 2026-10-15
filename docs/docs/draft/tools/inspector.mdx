@@ -13,7 +13,9 @@ description: 用于在浏览器、命令行和终端中测试和调试 MCP 服�
 
 三者都构建于同一个共享核心之上，因此在不同客户端中的连接行为完全一致：使用相同的传输方式、相同的配置文件、磁盘上相同的 OAuth 状态，以及相同的[协议时代](/docs/draft/tools/inspector/protocol-eras)协商机制（旧版与现代版 2026-07-28）。
 
-<Frame caption="MCP Inspector Web 客户端已连接到服务器，并固定显示监控侧边栏，以便你在工作时持续查看协议流量。">
+该软件包还会安装 **`mcpdo`**，这是一个实验性的[连接客户端](/docs/draft/tools/inspector/mcpdo)，它使用同一个核心连接服务器一次，并在多次命令之间保持连接。
+
+<Frame caption="MCP Inspector Web 客户端在一次工具调用后已连接到服务器，并固定且加宽监控侧边栏，以便你在工作时持续查看清晰的 JSON-RPC 交换。">
   <img src="/images/inspector/web-monitor-sidebar.png" />
 </Frame>
 
@@ -32,7 +34,7 @@ npx @modelcontextprotocol/inspector node path/to/server/index.js
 npx @modelcontextprotocol/inspector
 ```
 
-该命令会输出一个包含一次性会话令牌的 URL；请在浏览器中打开它。请参阅[网页客户端](/docs/draft/tools/inspector/web)。
+该命令会输出一个带有每次启动专用 API 令牌的 URL，并在浏览器中打开它（设置 `MCP_AUTO_OPEN_ENABLED=false` 可阻止自动打开）。请参阅[网页客户端](/docs/draft/tools/inspector/web)。
 
   </Tab>
   <Tab title="命令行">
@@ -90,6 +92,10 @@ npx @modelcontextprotocol/inspector --server-url https://api.example.com/mcp --t
 
 请始终先阅读服务器自身的 README，因为每个服务器所需的命令和参数都不同。
 
+<Warning>
+  **Inspector 会在操作系统钥匙串可用时将机密信息（OAuth 令牌、OAuth 客户端密钥和 stdio `env:` 值）存入钥匙串。** 在没有钥匙串的机器上（没有 libsecret 或 Secret Service 的 Linux、无图形界面的 headless 或 SSH 会话、Termux，以及挂载了卷的容器），这些信息会改为保存到 `~/.mcp-inspector/secrets.json`，**除非提供密钥，否则不会加密**。请参阅[机密信息存储位置](/docs/draft/tools/inspector/configuration#where-secrets-are-stored)，了解如何恢复钥匙串、加密文件或仅将机密信息保留在内存中。
+</Warning>
+
 ## 启动器标志与客户端标志
 
 `mcp-inspector` 是 `npx @modelcontextprotocol/inspector` 运行的二进制程序，也是一个轻量级启动器。它只负责两件事：
@@ -109,8 +115,7 @@ mcp-inspector --cli node server.js --cli   # 模式为 CLI；末尾的 --cli 会
 </Note>
 
 <Note>
-  `--help` 在有无模式标志时的行为不同。单独使用 `mcp-inspector
-  --help` 时，会打印启动器的帮助信息并退出。指定模式标志后，它会被转发，因此 `mcp-inspector --cli --help` 会改为打印 CLI 的完整标志参考。
+  `--help` 在有无模式标志时的行为不同。未指定模式标志时，命令行中任意位置（即使位于服务器命令之后）的 `-h` / `--help` 都会打印启动器的帮助信息并退出。指定模式标志后，它会被转发，因此 `mcp-inspector --cli --help` 会改为打印 CLI 的完整标志参考。
 </Note>
 
 ## 接下来去哪里
@@ -157,6 +162,20 @@ mcp-inspector --cli node server.js --cli   # 模式为 CLI；末尾的 --cli 会
     href="/docs/draft/tools/inspector/protocol-eras"
   >
     旧版与现代版（2026-07-28）操作方式，以及每个标签页在不同协议时代之间的变化。
+  </Card>
+  <Card
+    title="mcpdo 连接客户端"
+    icon="plug"
+    href="/docs/draft/tools/inspector/mcpdo"
+  >
+    连接一次，然后针对命名连接运行多条命令。
+  </Card>
+  <Card
+    title="安全性"
+    icon="shield-halved"
+    href="/docs/draft/tools/inspector/security"
+  >
+    威胁模型：Web 后端令牌、Docker、机密信息存储、stdio 服务器和 mcpdo 守护进程。
   </Card>
   <Card title="配方" icon="book" href="/docs/draft/tools/inspector/recipes">
     导入客户端配置、审查 MCP Apps、Docker 以及网络托管。

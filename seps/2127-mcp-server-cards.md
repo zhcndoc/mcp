@@ -1,0 +1,159 @@
+# SEP-2127：MCP 服务器卡片 - HTTP 服务器发现
+
+- **状态**：Final
+- **类型**：扩展轨道
+- **创建时间**：2026-01-21
+- **作者**：David Soria Parra（@dsp-ant）、Sam Morrow（@SamMorrowDrums）、Tadas Antanavicius（@tadasant）；代表服务器卡片工作组
+- **发起人**：David Soria Parra（@dsp-ant）
+- **扩展标识符**：`io.modelcontextprotocol/server-card`
+- **PR**：https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2127
+
+<Note>
+完整扩展规范维护在 [experimental-ext-server-card 仓库](https://github.com/modelcontextprotocol/experimental-ext-server-card)中（接受后将升级为 `ext-server-card` 仓库）。该仓库包含 TypeScript 事实来源（`schema.ts`）、生成的 JSON Schema（`schema.json`）、发现机制（`docs/discovery.md`）和示例文档。本 SEP 是章程文件，有意不重复线路格式细节。
+</Note>
+
+## 摘要
+
+本 SEP 提议增加一种标准化、自包含的格式，用于在连接前发现 MCP 服务器。它使客户端能够在建立连接之前自动发现可用传输、协议版本和连接指导。
+
+作为扩展轨道 SEP（依据 [SEP-2133](./2133-extensions.md)），本文为**服务器卡片**扩展制定章程，并指定其工作组和维护者。详细的规范性线路格式（服务器卡片 schema、字段定义、发现机制和完整安全分析）维护在 [experimental-ext-server-card](https://github.com/modelcontextprotocol/experimental-ext-server-card) 仓库中，而不是内嵌于本文，沿用了 [SEP-1865（MCP Apps）](./1865-mcp-apps-interactive-user-interfaces-for-mcp.md)的先例。
+
+## 动机
+
+MCP 客户端需要一种带外方式，在选择或打开传输之前发现远程服务器。`server/discover` 等运行时机制只有在客户端已经知道连接位置后才可用，这给发现、集成和优化场景带来阻碍。
+
+### 当前痛点
+
+- **端点需要手动配置**：用户必须为每个服务器手动配置传输 URL，没有标准化的发现机制。
+- **没有域级发现**：客户端无法自动发现某个域上的可用 MCP 服务器，阻碍注册表抓取和服务自动检测等自动化集成场景。
+- **没有带外元数据**：运行时发现仍需要已配置的传输和活动连接，因此无法支持域抓取、索引或连接前配置。
+
+### 提议的解决方案
+
+本 SEP 引入 **MCP 服务器卡片**：服务器通过标准化机制暴露的结构化元数据文档。对于域级发现，AI Catalog 可以链接或嵌入相关服务器卡片。卡片可以托管在任意未保留 URI 上，其中 `<streamable-http-url>/server-card` 保留为推荐位置。这些文档提供静态服务器信息，不需要建立连接。
+
+### 支持的使用场景
+
+- **自动配置**：IDE 扩展指向某个域后即可自动配置，消除手动设置。
+- **自动发现**：客户端和注册表可以抓取域以发现可用 MCP 服务器，从而建立整个生态的服务器索引。
+- **降低延迟**：无需打开每个广告端点即可显示服务器信息和元数据。
+
+### 与 `server/discover` 的关系
+
+服务器卡片提供面向 HTTP 的带外发现：公开、可缓存、可索引的元数据，可以告诉客户端连接位置。已知并可访问端点后，[`server/discover`](https://modelcontextprotocol.com/specification/draft/server/discover) RPC 会在各种传输中提供实时的协议内发现。两种机制在身份、端点和协议版本元数据上存在重叠，**应当**保持一致。如果二者不一致，客户端**应当**优先使用实时 `server/discover` 的值。
+
+### 发现
+
+#### 与 AI Catalog 的关系
+
+[AI Catalog](https://github.com/Agent-Card/ai-catalog) 提供一种去中心化、与协议无关的 AI 工件识别机制。AI Catalog 条目可以链接或嵌入 MCP 服务器卡片，由目录负责域级发现，由服务器卡片负责 MCP 特有的身份和连接详情。
+
+#### MCP 连接详情
+
+MCP 服务器卡片提供更丰富且面向 MCP 的定义，MCP 客户端可以据此实际连接并开始执行 MCP 操作。规范发现路径，以及它与更广泛 [AI Catalog](https://github.com/Agent-Card/ai-catalog) 的关系，定义在扩展仓库的 [`docs/discovery.md`](https://github.com/modelcontextprotocol/experimental-ext-server-card/blob/main/docs/discovery.md) 中。
+
+示例：
+
+- “餐厅 A”与“餐厅预订 SaaS”平台合作，为餐厅提供 MCP 驱动的预订服务；
+- 餐厅 A 还与“招聘 SaaS”平台合作，为求职者提供 MCP 驱动的职位列表；
+- 餐厅 A 在 `restaurant-a.com/.well-known/ai-catalog.json` 的 AI Catalog 中发布两张相关服务器卡片；
+- 餐厅预订 SaaS 为其托管的每家餐厅暴露一张服务器卡片；
+- 招聘 SaaS 为其托管的每个实体暴露一张服务器卡片。
+
+只要目录条目能够识别托管并维护在其他位置的服务器卡片，就可以独立开发和迭代 MCP 服务器卡片，不必与 AI Catalog 同步发布。
+
+### 与 MCP Registry 的 `server.json` 的关系
+
+MCP 服务器卡片只描述**远程** MCP 连接。MCP Registry 的 [`server.json`](https://github.com/modelcontextprotocol/registry/blob/main/docs/reference/server-json/generic-server-json.md) 单独描述注册表条目，包括可本地安装的软件包及其运行配置。Registry 负责该 schema；服务器卡片扩展不定义 `Server` 超集或包安装类型。
+
+当两种格式覆盖相同概念（例如身份、文档和远程端点）时，会尽可能使用兼容的元数据。Registry 条目可以引用或嵌入卡片的远程信息；需要直接向卡片附加安装提示的供应商可以使用命名空间化的 `_meta`。
+
+## 规范
+
+完整规范维护在 [experimental-ext-server-card](https://github.com/modelcontextprotocol/experimental-ext-server-card) 仓库中。TypeScript 文件 [`schema.ts`](https://github.com/modelcontextprotocol/experimental-ext-server-card/blob/main/schema.ts) 是唯一事实来源；生成的 [`schema.json`](https://github.com/modelcontextprotocol/experimental-ext-server-card/blob/main/schema.json) 和 [`docs/discovery.md`](https://github.com/modelcontextprotocol/experimental-ext-server-card/blob/main/docs/discovery.md) 中的发现机制都由它派生。
+
+用于 SEP 评审时，[扩展仓库快照 `526201bb`](https://github.com/modelcontextprotocol/experimental-ext-server-card/tree/526201bbc80231daa40ffcdecfc9da4e54e5dc93)记录了本提案考虑的契约。接受后，实现者应遵循当前的、有版本的扩展规范，而不是这个历史快照。依据 [SEP-2133](./2133-extensions.md#iteration)，扩展维护者可以在保持向后兼容的同时独立演进规范；破坏性变更需要新的扩展标识符。
+
+概括来说，服务器卡片扩展引入：
+
+- **服务器卡片文档**：描述**远程** MCP 服务器的静态元数据，包括身份（`name`、`version`、`description`，可选的 `title` / `icons` / `repository` / `websiteUrl`）、远程传输端点（URL、请求头、变量模板、支持的协议版本）和可选的命名空间化 `_meta` 数据。`_meta` 不用于播发 MCP 能力或协商的扩展支持。准确字段集定义在扩展仓库的 [`schema.ts`](https://github.com/modelcontextprotocol/experimental-ext-server-card/blob/main/schema.ts)。
+- **发现**：AI Catalog 可以链接或嵌入多张卡片。卡片可以托管在任意未保留 URI 上，其中 `<streamable-http-url>/server-card` 保留为推荐位置。媒体类型、目录格式以及面向浏览器的 CORS 和缓存指导定义在 [`docs/discovery.md`](https://github.com/modelcontextprotocol/experimental-ext-server-card/blob/main/docs/discovery.md)。
+
+作为扩展，MCP 服务器卡片是**可选且附加的**：不发布卡片的服务器仍可通过标准 MCP 连接和运行时发现正常工作（见[向后兼容](#backward-compatibility)）。
+
+## 设计理由
+
+### 为什么 AI Catalog 使用 `.well-known`
+
+对于自动化域级发现，可以在 `/.well-known/ai-catalog.json` 发布 AI Catalog。`.well-known` URI 模式是已有的 IETF 标准（RFC 8615），许多协议都用它进行服务发现，包括 OAuth 2.0 授权服务器元数据（RFC 8414）。它提供可预测的标准位置，不要求事先知道服务器配置，使用标准 HTTP 基础设施，并且对 Web 服务开发者很熟悉。
+
+### 为什么与 Registry 元数据对齐
+
+MCP 服务器卡片提供服务器身份和连接详情的静态表示，让客户端无需事先知道服务器存在即可发现并连接。MCP Registry 和服务器卡片服务于不同消费者，但共享服务器身份和远程端点等概念。在重叠概念上复用兼容字段名，可以减少不必要的转换，同时允许各自的所有者独立演进 schema。
+
+### 为什么排除原语
+
+本规范有意从服务器卡片中省略原语定义（工具、资源和提示）。服务器暴露的原语可能因认证用户、会话、配置、功能开关和部署状态等因素动态变化，静态文档无法可靠表示这些内容。目前也没有替代协议标准操作（`tools/list`、`resources/list`、`prompts/list`）并使用登录用户身份进行运行时列表的可行方案。过早加入原语会使动态服务器处于不利地位，并鼓励客户端依赖可能不正确的信息。后续 SEP 应先解决变体枚举和明确消费者契约等前置条件，再加入原语播发。
+
+出于相同原因，初始服务器卡片格式不播发 MCP 能力或扩展支持。`supportedProtocolVersions` 让客户端判断是否可以尝试连接；能力和扩展描述协商后的运行时行为，并可能取决于客户端、身份、配置和部署状态。它们仍通过实时协议协商提供。命名空间化 `_meta` 用于非标准元数据，不能替代标准化能力或扩展字段。
+
+### 为什么不等原语
+
+发现（知道服务器存在、连接位置以及支持哪些传输和协议版本）本身就极有价值，是最终用户或 IDE 安装和配置服务器以及注册表索引服务器所需的信息，不依赖提前知道服务器的工具列表。服务器卡片已经支持自动配置、域级发现、低延迟元数据获取和注册表集成。生态拥有安全播发原语的合适机制后，可以在未来修订中加入它们。
+
+### 其他考虑过的发现机制
+
+**基于 DNS 的发现**：DNS TXT 记录只适用于域级发现，不适用于基于路径或端口的 MCP 服务器，因此限制过大。
+
+**基于请求头的发现**：使用 HTTP 请求头播发服务器卡片位置需要先向主端点发出请求，会消除许多连接前发现的收益。
+
+## 向后兼容
+
+本 SEP 与现有 MCP 实现完全向后兼容：
+
+- 服务器卡片是**可选的**，不实现它们的服务器仍可通过标准 MCP 连接和运行时发现正常工作；
+- 不支持服务器卡片的客户端可以忽略它们，使用已配置端点连接；
+- 不需要修改核心 MCP 协议消息或连接流程。
+
+### 迁移路径
+
+1. **阶段 1（可选）**：服务器可以开始暴露服务器卡片，不要求客户端支持。
+2. **阶段 2（推荐）**：客户端可以实现服务器卡片获取，以增强发现和连接前验证。
+3. **阶段 3（未来）**：生态可以围绕服务器卡片为注册表、安全扫描和自动发现开发工具。
+
+## 安全影响
+
+服务器卡片是通过 HTTP 提供的公开、只读元数据文档：
+
+- **信息披露**：卡片按设计公开；服务器**不得**包含凭据、内部网络拓扑、专有逻辑或用户／会话特定数据。
+- **排除原语是一项安全属性**：客户端不能依靠静态清单做访问控制或安全决策；原语始终通过标准列表操作在运行时验证。
+- **CORS**：允许完全开放的 CORS（`Access-Control-Allow-Origin: *`），因为卡片只携带公开只读元数据。
+- **传输安全和中间人攻击**：卡片**应当**通过 HTTPS 提供并验证证书；客户端会将声明与实时运行时元数据核对，被入侵的卡片主要影响可发现性，而不是安全性。
+- **拒绝服务**：服务器**应当**限制发现端点的速率，客户端**应当**遵守缓存请求头。
+
+完整威胁模型以及规范性 CORS、缓存和传输要求维护在扩展仓库的 [`docs/discovery.md`](https://github.com/modelcontextprotocol/experimental-ext-server-card/blob/main/docs/discovery.md) 中。
+
+## 参考实现
+
+服务器卡片扩展在 [experimental-ext-server-card](https://github.com/modelcontextprotocol/experimental-ext-server-card) 仓库中孵化，该仓库包含 TypeScript schema 的事实来源、生成的 JSON Schema、发现文档以及有效／无效示例文档。
+
+[python-sdk#2951](https://github.com/modelcontextprotocol/python-sdk/pull/2951) 是 @dsp-ant 为 Python SDK 提供的实验性实现，包含服务器端卡片构造和提供、客户端获取与验证以及 `ServerCard` 的 Pydantic 模型。
+
+[go-sdk#1024](https://github.com/modelcontextprotocol/go-sdk/pull/1024) 提供了实验性的 Go SDK 服务器端参考实现。
+
+[tadasant/goose#1](https://github.com/tadasant/goose/pull/1) 展示了 Goose CLI 和桌面客户端中的服务器卡片发现与安装。
+
+## 工作组与维护者
+
+- **工作组**：服务器卡片工作组（见[服务器卡片工作组讨论 #2563](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions/2563)）。
+- **扩展维护者**：David Soria Parra（@dsp-ant）、Sam Morrow（@SamMorrowDrums）、Tadas Antanavicius（@tadasant）。
+- **扩展仓库**：[modelcontextprotocol/experimental-ext-server-card](https://github.com/modelcontextprotocol/experimental-ext-server-card)（接受后将升级为 `ext-server-card`）。
+
+## 参考
+
+- [SEP-1865：MCP Apps（扩展轨道先例）](./1865-mcp-apps-interactive-user-interfaces-for-mcp.md)
+- [SEP-2133：扩展](./2133-extensions.md)
+- [RFC 8414：OAuth 2.0 授权服务器元数据](https://datatracker.ietf.org/doc/html/rfc8414)
+- [RFC 8615：Well-Known URI](https://datatracker.ietf.org/doc/html/rfc8615)
+- [MCP 协议规范](https://modelcontextprotocol.com/specification)
+- [原始 GitHub Issue #1649](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1649)

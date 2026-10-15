@@ -7,7 +7,7 @@ MCP 的 2026-07-28 修订版对协议进行了重大更改。因此，Inspector 
 
 ## `Protocol Era` 设置
 
-每个服务器都有一个 `protocolEra`，其值可以是 `legacy`、`auto` 或 `modern`。在 Web 客户端中，它位于**服务器设置**中；在目录或配置文件中，它是 `protocolEra` 字段；在 CLI 和 TUI 中，它来自同一个文件。
+每个服务器都有一个 `protocolEra`，其值可以是 `legacy`、`auto` 或 `modern`。在 Web 客户端中，它位于**服务器设置**中；在目录或配置文件中，它是 `protocolEra` 字段；CLI 和 TUI 从同一个文件读取该值，而它们的 `--protocol-era <legacy|auto|modern>` 标志可以为单次运行覆盖该值。
 
 | 时代     | 检查器在连接时的行为                                                                    |
 | -------- | --------------------------------------------------------------------------------------- |
@@ -22,9 +22,7 @@ MCP 的 2026-07-28 修订版对协议进行了重大更改。因此，Inspector 
   客户端按照你配置的方式运行时所看到的内容。
 </Note>
 
-三种客户端中的时代选择方式相同。
-
-连接后，协商出的时代会显示在连接标头和**连接信息**中。在现代连接中，`server/discover` 还会提供 `capabilities`（包括 `extensions`）、`instructions` 以及 `supportedVersions` 列表。服务器的名称和版本会在结果的 `_meta` 中以 `io.modelcontextprotocol/serverInfo` 的形式提供。
+连接后，协商出的时代会作为徽章显示在**协议**标签页的“消息”标题和**连接信息**中。在现代连接中，`server/discover` 还会提供 `capabilities`（包括 `extensions`）、`instructions` 以及 `supportedVersions` 列表。服务器的名称和版本会在结果的 `_meta` 中以 `io.modelcontextprotocol/serverInfo` 的形式提供。
 
 <Frame caption="服务器设置：协议时代选择器，包含全部三个选项。">
   <img src="/images/inspector/settings-protocol-era.png" />
@@ -32,13 +30,21 @@ MCP 的 2026-07-28 修订版对协议进行了重大更改。因此，Inspector 
 
 ## 在本地重现各个时代
 
-下面的每个部分末尾都有一个指向 **使用……重现** 的链接，指向 Inspector 代码库中提供的某个**可组合测试服务器**的 JSON 配置。克隆代码库，构建测试服务器，然后将 Inspector 指向该部分指定的配置。
+下面的每个部分末尾都有一个指向 **使用……重现** 的链接，指向 Inspector 代码库中提供的某个**可组合测试服务器**的 JSON 配置。克隆代码库并构建测试服务器：
 
 ```bash
 git clone https://github.com/modelcontextprotocol/inspector
 cd inspector && npm install && npm run build
-cd clients/web && npm run test-servers:build
+cd clients/web && npm run test-servers:build && cd ../..
 ```
+
+然后在仓库根目录中，从某个部分指定的配置启动服务器：
+
+```bash
+node test-servers/build/server-composable.js --config test-servers/configs/<name>.json
+```
+
+服务器会将 URL 打印到 stderr。如果配置中的端口已被占用，它会绑定下一个空闲端口，因此应使用打印出的 URL，不要假定端口未发生变化。将该 URL 添加为 Inspector 中的服务器，并选择该部分指定的协议时代。
 
 ---
 
@@ -91,11 +97,11 @@ cd clients/web && npm run test-servers:build
   </Tab>
   <Tab title="现代版">
 
-同一个 **订阅** 按钮现在会发送 **`subscriptions/listen`**，其中包含携带 `resourceSubscriptions` 的筛选器以及 `resourcesListChanged` 选择启用项。当服务器发送 `notifications/subscriptions/acknowledged` 时，订阅即得到确认。
+同一个 **订阅** 按钮现在会发送 **`subscriptions/listen`**，其中包含携带 `resourceSubscriptions` 的筛选器以及适用的 `*ListChanged` 选择启用项（例如 `resourcesListChanged`）。当服务器发送 `notifications/subscriptions/acknowledged` 时，订阅即得到确认。
 
-由于订阅现在是长连接流，而不再是会话标志，订阅部分的标题中会显示一个 **流状态徽章**，状态从 `Connecting...` 变为 `Listening`。如果流断开，Inspector 会通过重新发送 `subscriptions/listen` 进行重连。
+由于订阅现在是长连接流，而不再是会话标志，订阅部分的标题中会显示一个 **流状态徽章**，状态从 `Connecting...` 变为 `Listening`。如果流断开，徽章会在 Inspector 重新发送 `subscriptions/listen` 时显示 `Reconnecting...`，流永久关闭后显示 `Stream ended`。如果服务器以普通结果响应监听请求却始终不发送确认，徽章会显示 `Not acknowledged`，此时 Inspector 不会重试。
 
-使用 `test-servers/configs/subscriptions-modern-http.json` 复现。
+使用 `test-servers/configs/subscriptions-modern-http.json` 复现。要查看 `Not acknowledged` 状态，请使用 `test-servers/configs/subscriptions-never-acknowledged-http.json`。该服务器会确认第一次订阅，然后拒绝之后的所有监听请求，因此订阅第二个资源即可触发该徽章。
 
   </Tab>
 </Tabs>
@@ -120,7 +126,7 @@ cd clients/web && npm run test-servers:build
   </Tab>
   <Tab title="现代版">
 
-任务是一个**扩展**（`io.modelcontextprotocol/tasks`，[SEP-2663](/seps/2663-tasks-extension)），因此该标签页取决于_协商完成的扩展_，而不是 `capabilities.tasks`。
+任务是一个**扩展**（`io.modelcontextprotocol/tasks`，[SEP-2663](/seps/2663-tasks-extension)），因此该标签页取决于服务器_播发该扩展_，而不是 `capabilities.tasks`。
 
 将工具作为任务运行时，`tools/call` 会返回一个 `CreateTaskResult`（`resultType: "task"`，可在 Protocol 和 Network 标签页中看到）。检查器仅轮询 **`tasks/get`**；不存在 `tasks/list`，因此 **Refresh** 会重新轮询客户端已知的句柄。已完成的任务会**内联其结果**，不会调用阻塞式 `tasks/result`。
 
@@ -156,15 +162,20 @@ Inspector 会**手动**驱动 MRTR，因此每一轮都会在标记为 `input_re
 | `mrtr_sample`   | 嵌入式 sampling 请求，路由至 Sampling 面板。                                  |
 | `mrtr_roots`    | 嵌入式 `roots/list`，从已配置的根目录静默响应（无模态框）。                    |
 | `mrtr_edge`     | 仅包含 `inputRequests` 的一轮，然后是仅包含 `requestState` 的一轮。            |
+| `mrtr_empty`    | 一轮 elicitation，随后以空结果完成（没有 `content` 或 `structuredContent`）。 |
 | `mrtr_loop`     | 永不完成，因此客户端会在达到 `MRTR_MAX_ROUNDS` 限制时停止。                    |
 
 <Note>
-  旧版的 `collect_elicitation` 模式（服务器调用
-  `server.elicitInput`）在 2026-07-28 连接上会**报错**，因为此时不允许服务器向客户端发送请求。MRTR 是它的现代替代方案。
+  旧版的服务器调用 `server.elicitInput` 的模式（测试服务器中的
+  `collect_elicitation` 预设）在 2026-07-28 连接上会**报错**，因为此时不允许服务器向客户端发送请求。MRTR 是它的现代替代方案。
 </Note>
 
 <Frame caption="MRTR 轮次在标记为 input_required 的待处理请求模态框处暂停。回答后会重试原始请求。">
   <img src="/images/inspector/mrtr-pending-request.png" />
+</Frame>
+
+<Frame caption="mrtr_confirm 完成后监控侧栏的协议标签页。两轮 tools/call 都位于同一个 MRTR 会话中，第一轮标记为 input_required，第二轮标记为 complete；无关流量则位于会话之外。">
+  <img src="/images/inspector/mrtr-protocol-conversation.png" />
 </Frame>
 
 ---
@@ -180,22 +191,23 @@ Inspector 在 **Tools** 标签页中展示该契约的两部分：
 
 使用 `test-servers/configs/xmcpheader-modern-http.json` 进行复现。
 
-<Warning>
-  **SDK 在浏览器中会跳过 `Mcp-Param-*` 镜像。** 从*网页*客户端调用镜像工具时会省略该请求头，因此严格的服务器会返回 `-32020`（`HeaderMismatch`，请参阅下方的[网络和协议请求头及错误分类](#network-and-protocol-headers-and-the-error-taxonomy)）。从 **CLI** 或 **TUI** 调用同一工具时，由于二者都运行在 Node 上，因此可以正确进行镜像。该请求头由 SDK 内部的环境检查丢弃，不受 Inspector 控制。
-</Warning>
+<Note>
+  在现代连接中，Inspector 会在三个客户端中自行将 `x-mcp-header` 参数镜像到
+  `Mcp-Param-*` 请求头。在 **Web** 客户端中，请求头由发出上游请求的 Inspector Node 后端添加，因此即使浏览器不会发送这些请求头，它们仍会到达服务器。
+</Note>
 
-<Frame caption="get_weather 显示其镜像的 city -> Mcp-Param-City 请求头，而 invalid_header_tool 则在 Excluded (SEP-2243) 分隔线下以删除线显示。">
+<Frame caption="get_weather 显示其镜像的 city -> Mcp-Param-City 请求头，Network 侧栏确认调用携带了 mcp-param-city: Boston；invalid_header_tool 则在 Excluded (SEP-2243) 分隔线下以删除线显示。">
   <img src="/images/inspector/tools-sep2243.png" />
 </Frame>
 
 ### `-32602` 错误面板
 
-在现代协议时代，返回 `-32602` 的 `tools/call` 会呈现为独立的**错误面板**：
+返回 `-32602` 的 `tools/call` 在两个时代都会呈现为独立的**错误面板**：
 
 - **未知工具**：当消息中指定的工具未被服务器列出时。调用服务器 `tools/list` 中不存在的任意名称即可复现。
 - **无效参数**：其他任何 `-32602` 错误。使用上述配置中的 `trigger_invalid_params` 工具即可复现。
 
-两个时代都会返回 `-32602`；变化的只有 Inspector 的呈现方式。在旧版连接上，你会得到一个通用的 JSON-RPC 失败结果，必须阅读消息才能判断遇到的是哪种情况。
+这两种情况共用一个错误码，因此 Inspector 会读取消息来区分它们。其他错误码则会呈现为通用失败。
 
 ---
 
@@ -225,8 +237,18 @@ Inspector 在 **Tools** 标签页中展示该契约的两部分：
 
 ---
 
+## 取消
+
+在传统版连接中，取消正在执行的工具调用会发送 `notifications/cancelled`。在现代 Streamable HTTP 连接中，Inspector 会改为关闭该请求自己的 SSE 响应流，这是 2026-07-28 的取消信号。通过 stdio 传输时，取消仍使用 `notifications/cancelled`。
+
+使用 `test-servers/configs/cancellation-modern-http.json` 复现：运行 `slow_task`，几秒后点击 **取消**，服务器终端会打印任务停止前执行到的进度。
+
+---
+
 ## 会话
 
 传统的 Streamable HTTP 连接可能携带由服务器分配的会话 ID（`Mcp-Session-Id`），客户端会通过 HTTP `DELETE` 将其终止。现代连接则是**无会话且按请求进行的**：在没有会话 ID 的情况下，客户端 SDK 不会向服务器发送 `DELETE`，因此断开连接完全是本地操作。
+
+传统版连接还会在 `initialize` 之后打开独立的 `GET` 通知流，用于承载不属于任何请求的通知。传统版专用的**抑制通知流**选项位于**服务器设置**中；启用后会跳过该流，以便检查无法服务第二个并发请求的服务器。现代连接从不打开该流，因此该选项对现代连接不适用。
 
 这对你自己的测试服务器有一个实际影响。每次请求构造的无状态现代处理程序无法在调用之间保存状态，这也是为什么 `test-servers/configs/subscriptions-modern-http.json` 不同于其传统版本，省略了 `update_resource` 工具：该变更会针对一个用完即弃的服务器实例执行，后续读取时将无法看到变更。

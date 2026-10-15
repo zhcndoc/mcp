@@ -1,0 +1,7 @@
+{
+  "app_dir": "/",
+  "install_command": "npm ci",
+  "build_command": "mkdir -p .zb-mintlify-source dist && cp -R -L docs/. .zb-mintlify-source/ && cd .zb-mintlify-source && npx mint export --output /tmp/mcp-mintlify-export.zip && cd .. && unzip -q /tmp/mcp-mintlify-export.zip -d dist",
+  "output_dir": "dist",
+  "ignore_dockerfile": true
+}

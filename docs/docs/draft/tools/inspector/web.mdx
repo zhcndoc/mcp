@@ -21,7 +21,7 @@ Web 客户端背后的 Node 服务器会使用每次启动时生成的令牌保�
 2. `?MCP_INSPECTOR_API_TOKEN=...` 查询字符串，这是打印出的 URL 所采用的形式。
 3. `sessionStorage`，作为备用方案。
 
-设置 `MCP_INSPECTOR_API_TOKEN` 环境变量可以固定一个已知令牌（便于脚本化启动），或者设置 `DANGEROUSLY_OMIT_AUTH=true` 完全禁用检查，但只能在没有其他设备能够访问该端口的机器上这样做。两者都在[Web 后端环境变量](/docs/draft/tools/inspector/configuration#web-backend-environment-variables)部分进行了说明。
+设置 `MCP_INSPECTOR_API_TOKEN` 环境变量可以固定一个已知令牌（便于脚本化启动），或者设置 `DANGEROUSLY_OMIT_AUTH=true` 完全禁用检查，但只能在没有其他设备能够访问该端口的机器上这样做。两者都在[Web 后端环境变量](/docs/draft/tools/inspector/configuration#web-backend-environment-variables)部分进行了说明。令牌的保护范围请参阅[安全性](/docs/draft/tools/inspector/security#the-web-backend-and-its-api-token)。
 
 ## 开发模式
 
@@ -42,6 +42,7 @@ mcp-inspector --web --dev
 | **Tools**     | `tools` 能力                                                         | 浏览模式、填写参数、调用工具、检查结果。                                 |
 | **Prompts**   | `prompts` 能力                                                       | 列出提示词、提供参数、预览生成的消息。                                     |
 | **Resources** | `resources` 能力                                                     | 浏览、读取和订阅资源。                                                   |
+| **Skills**    | 服务器在任一时代播发 Skills 扩展（SEP-2640）                          | 浏览并获取服务器的技能。                                                 |
 | **Tasks**     | `capabilities.tasks`（旧时代）或任务扩展（现代）                     | 跟踪长时间运行的工具调用。                                               |
 | **Logs**      | `logging` 能力                                                       | 服务器的 `notifications/message` 输出，以及与时代相应的级别控制。         |
 | **Protocol**  | 始终显示                                                            | JSON-RPC 记录：请求、响应和通知。                                         |
@@ -56,9 +57,9 @@ mcp-inspector --web --dev
 
 ### 监控侧边栏
 
-**Tasks**、**Logs**、**Protocol**、**Network** 和 **Console** 组成一个_监控组_。固定该组后，它们会离开标签栏，移入可调整大小的右侧栏，这样你就可以在使用 Tools 或 Resources 时监视流量。栏宽度和选中的监控标签会在重新加载后保留。
+**Tasks**、**Logs**、**Protocol**、**Network** 和 **Console** 组成一个_监控组_。固定该组后，它们会离开标签栏，移入可调整大小的右侧栏，这样你就可以在使用 Tools 或 Resources 时监视流量。拖动侧栏边缘即可将宽度调整为 320 至 720 像素。栏宽度和选中的监控标签会在重新加载后保留。
 
-<Frame caption="固定在 Tools 屏幕旁的监控侧边栏。在操作过程中，Protocol 流会持续可见。">
+<Frame caption="固定在 Tools 屏幕旁并拖到最大宽度的监控侧边栏；Protocol 流中展开显示了工具调用的请求和响应。">
   <img src="/images/inspector/web-monitor-sidebar.png" />
 </Frame>
 
@@ -75,7 +76,7 @@ mcp-inspector --web --dev
 | `--config <path>`                            | 该文件，只读（从不写入或创建）                                           | 否       |
 | `--server-url <url>` 或位置参数命令          | 一个临时服务器，保存在内存中                                             | 否       |
 
-首次启动时，Web 客户端会在目录中创建两个示例服务器：一个作用域为 `/tmp` 的文件系统服务器，以及规范的“everything”参考服务器。有关完整规则（包括 CLI 和 TUI 为何改为创建空目录），请参阅[配置和标志](/docs/draft/tools/inspector/configuration)。
+首次启动时，Web 客户端会在目录中创建三个示例服务器：一个作用域为 `/tmp` 的文件系统服务器、规范的“everything”参考服务器，以及 MCP 组织托管的示例服务器（可流式 HTTP，并通过动态客户端注册使用 OAuth）。有关完整规则（包括 CLI 和 TUI 为何改为创建空目录），请参阅[配置和标志](/docs/draft/tools/inspector/configuration)。
 
 ### 服务器设置
 
@@ -83,8 +84,11 @@ mcp-inspector --web --dev
 - **每个请求的日志级别**：现代时代连接默认在每个发出的请求上标记的级别，或设为 `off` 以选择退出（请参阅[日志记录](/docs/draft/tools/inspector/protocol-eras#logging)）。
 - **声明的扩展**：Inspector 在 `capabilities.extensions` 中声明的扩展。一个用于调试的选项：服务器可能会根据你声明的扩展，合理地改变其注册内容。取消选中 Tasks 扩展，然后针对 `test-servers/configs/advertised-extensions-http.json` fixture 重新连接（设置方法见[在本地复现各个时代](/docs/draft/tools/inspector/protocol-eras#reproducing-each-era-locally)），即可观察到某个工具消失。
 - **根目录**：通过 `roots` 客户端能力声明的根目录。例如，`@modelcontextprotocol/server-filesystem` 会调用 `roots/list` 来了解其获准访问的目录。
-- **请求头**、**超时**和 **OAuth** 字段。
+- **请求头**、**超时**和 **OAuth** 字段。请求头会按原样保存到目录中；OAuth 客户端密钥和 stdio `env:` 值会写入[机密信息存储](/docs/draft/tools/inspector/configuration#where-secrets-are-stored)。
+- **OAuth 设置**：客户端 ID 和密钥、可复制到预注册客户端的只读**重定向 URI**（取决于你打开 Inspector 时使用的来源）、**作用域**（以空格分隔）、**请求刷新令牌**、**清除时撤销令牌**、其他授权参数、授权和令牌 URL 覆盖，以及**权限不足响应**。最后一项决定 `403 insufficient_scope` 是触发[会话中途重新授权](/docs/draft/tools/inspector/authorization#mid-session-re-authorization)，还是直接显示错误。
 - **逐页获取列表**：关闭时，连接时会自动聚合所有页面的列表结果；开启时，每个列表只加载第 1 页，并显示 **加载下一页** 控件以及“已加载 N 页”状态。可使用 `test-servers/configs/pagination-http.json` 复现，该配置会将 12 个工具、资源和提示分页为各三页。
+
+**服务器设置**、**客户端设置**以及**添加／编辑／克隆服务器**对话框底部的页脚会标明正在使用的机密信息存储方式，因此你输入机密信息时就能看到存放位置。如果机密信息仅存于内存（重启后丢失）、位于未加密文件、位于权限过宽的文件或位于无法读取的文件中，页脚会变为警告。
 
 <Frame caption="展开“声明的扩展”后的服务器设置。取消选中某个扩展会改变 Inspector 在连接时声明的内容。">
   <img src="/images/inspector/web-server-settings.png" />
@@ -118,11 +122,11 @@ mcp-inspector --web --dev
 
 ## 应用
 
-[MCP 应用](/extensions/apps/overview)是携带 UI 的工具。Apps 标签页会在由**独立端口**提供服务的沙盒 iframe 中渲染应用，使用 `ui/*` 桥接，并在侧边面板中显示视图的 `ui/message` 提交内容及其 `notifications/message` 日志。
+[MCP 应用](/extensions/apps/overview)是携带 UI 的工具。Apps 标签页会在由**独立端口**提供服务的沙盒 iframe 中渲染应用，使用 `ui/*` 桥接，并在框架下方的面板中显示视图的 `ui/message` 提交内容及其 `notifications/message` 日志。
 
-- 默认情况下，沙盒端口是动态的；如果需要公开或转发该端口，请使用 `MCP_SANDBOX_PORT` 固定端口。
+- 沙盒监听自己的端口，默认为 `6275`（使用 `MCP_SANDBOX_PORT` 设置）。如果 UI 资源声明了 `_meta.ui.domain`，应用文档会由第三个监听器（应用来源）提供服务，默认为 `6278`（使用 `MCP_APP_ORIGIN_PORT` 设置）。请将这两个端口与 Web 端口一起公开或转发。
 - 沙盒受 `frame-ancestors` CSP 限制，而带方括号的 IPv6 字面量不是有效的 CSP 主机源，因此请通过 `localhost`、`127.0.0.1`、主机名或局域网 IPv4 地址访问 Inspector，**不要**通过裸 `http://[::1]:...` 访问。
-- 沙盒 URL 始终使用普通的 `http`，因此 `https://` Inspector 页面会因混合内容而阻止该框架。当前 MCP 应用需要普通的 `http` 源。
+- 默认情况下，沙盒 URL 使用绑定地址上的普通 `http`，因此 `https://` Inspector 页面会因混合内容而阻止该框架。位于 TLS 反向代理之后时，请将 `MCP_SANDBOX_FULL_ADDRESS`（以及 `MCP_APP_ORIGIN_FULL_ADDRESS`）设置为浏览器访问各监听器时使用的公共 `https://` 地址。二者都不能与 Inspector UI 共享来源；如果设置了共享来源，会发出警告并忽略该值。
 
 有关以 CLI 优先的自动化审查流程，请参阅 [食谱](/docs/draft/tools/inspector/recipes#reviewing-an-mcp-app)。
 
@@ -138,7 +142,7 @@ mcp-inspector --web --dev
 - **网络**：SSE 和 Streamable HTTP 服务器的 HTTP 层。包括状态码、请求和响应标头以及正文。在现代连接中，标准化的 `Mcp-*` 标头会突出显示，并对哨兵值进行解码。
 - **控制台**：已连接的 stdio 服务器进程的 `stderr`，大多数 stdio 服务器会在此输出自身的诊断信息。
 
-这些视图会对机密信息进行遮蔽，并且可以清除或导出条目。
+Network 请求头和正文中的机密信息会被遮盖，并提供显示原文的控件；Protocol 和 Console 会按发送时的内容显示流量。条目可以清除或导出。
 
 <Frame caption="展开某个条目后的“协议”标签页，显示完整的 JSON-RPC 交换内容。">
   <img src="/images/inspector/web-protocol.png" />
@@ -162,7 +166,7 @@ http://127.0.0.1:6274/?serverUrl=<url>&transport=http|sse&autoConnect=<token>
 
 ## 主机绑定与来源
 
-默认情况下，Inspector 绑定 `localhost`，并且只接受来自其端口对应回环来源的请求。请将这两个默认设置都视为安全边界，因为后端会在你的计算机上生成进程。
+默认情况下，Inspector 绑定 `127.0.0.1`，并且只接受来自其端口对应回环来源的请求。请将这两个默认设置都视为安全边界，因为后端会在你的计算机上生成进程。
 
 绑定所有接口（`HOST=0.0.0.0`）将被**拒绝**，除非你设置 `DANGEROUSLY_BIND_ALL_INTERFACES=true`。绑定某个_特定的_非回环地址时无需选择加入，因为这是一种有意的单一暴露，而不是一次性暴露所有接口。
 
