@@ -4,7 +4,7 @@
     if (toc && !toc.querySelector(".wwads-cn.wwads-vertical")) {
       const verticalAd = document.createElement("div");
       verticalAd.className = "wwads-cn wwads-vertical";
-      verticalAd.setAttribute("style", "margin-top: 0; margin-bottom: 1rem; max-width: 200px;");
+      verticalAd.setAttribute("style", "margin-top: 1rem; margin-bottom: 0; max-width: 200px;");
       verticalAd.setAttribute("data-id", "354");
       toc.insertBefore(verticalAd, toc.firstChild);
     }
