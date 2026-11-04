@@ -1,0 +1,23 @@
+FROM --platform=$BUILDPLATFORM node:24-bookworm AS builder
+
+WORKDIR /app
+
+ENV CI=true
+
+RUN npm install -g mint
+
+COPY . .
+
+WORKDIR /app/docs
+
+RUN cp -R -L .mintlify /tmp/mcp-mintlify \
+    && rm -r .mintlify \
+    && mv /tmp/mcp-mintlify .mintlify
+
+RUN mint export --output /tmp/mcp-docs.zip && unzip -q /tmp/mcp-docs.zip -d /app/dist
+
+FROM ikxin/caddy:latest
+
+COPY --from=builder /app/dist /usr/share/caddy
+
+EXPOSE 8080
