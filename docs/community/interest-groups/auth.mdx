@@ -3,16 +3,20 @@ title: 授权章程
 description: MCP 授权兴趣组的章程。
 ---
 
+<a id="group-type" />
 ## 组类型
 
 **兴趣组**
 
+<a id="mission-statement" />
 ## 使命声明
 
 授权兴趣组是 MCP 授权工作的唯一正式场所。它汇集 MCP 实施者、身份提供商厂商和安全从业者，提出真实世界中的授权问题，决定这些问题是否值得解决以及是否属于 MCP 范畴，并为作者提供一个可靠的平台，用于展示 [SEP](/community/sep-guidelines)、[ext-auth](https://github.com/modelcontextprotocol/ext-auth) 草案、原型和部署结果，以获得跨主题反馈。本章程定义工作范围；讨论和粗略共识在一个频道和一个定期会议中进行，产出物是草案和演示，而不是新的常设小组。
 
+<a id="scope" />
 ## 范围
 
+<a id="in-scope" />
 ### 范围内
 
 - **部署经验报告**：实施者如何将当前授权规范（OAuth 2.1、[RFC 9728](https://www.rfc-editor.org/rfc/rfc9728) 受保护资源元数据、[RFC 7591](https://www.rfc-editor.org/rfc/rfc7591) 动态客户端注册、客户端 ID 元数据文档）与真实授权服务器集成，以及该规范在哪些方面存在不足
@@ -26,6 +30,7 @@ description: MCP 授权兴趣组的章程。
 - **SEP 和草案反馈**：在 [SEP 流程](/community/sep-guidelines)之前和期间，与授权相关的 SEP、ext-auth 草案、参考实现和演示会在会议以及 `#auth-ig` 线程中进行展示并征求反馈；兴趣组的粗略共识会记录在会议纪要中，供赞助者和核心维护者参考
 - **问题陈述和需求**：在 `#auth-ig` 线程和 SEP 拉取请求中分享用例目录和建议，供 SEP 作者使用
 
+<a id="out-of-scope" />
 ### 范围外
 
 - **接受 SEP 或扩展**：兴趣组提供反馈并表达支持；赞助和接受遵循 [SEP 指南](/community/sep-guidelines)，并由维护者和核心维护者负责
@@ -35,40 +40,46 @@ description: MCP 授权兴趣组的章程。
 - **最终用户产品配置演练**：兴趣组讨论模式，而不是针对单个 IdP 产品的逐步设置。厂商报告的授权服务器或 IdP 能够或不能够实现的限制属于部署经验范围
 - **具有竞争敏感性或非公开的商业信息**：遵循 [MCP 反垄断政策](/community/antitrust)
 
+<a id="related-groups" />
 ### 相关组
 
-- **[安全兴趣组](/community/interest-groups/security)**：令牌受众混淆、签发者验证和账户关联风险处于两个组的交界处
-- **[传输工作组](/community/working-groups/transports)**：授权目前在 HTTP 传输层面进行规范定义；传输方式的变化会影响凭据的承载位置
-- **代理工作组**：委派式／代表他人访问以及多代理链中的同意与代理式用例高度重叠
-- **[服务器卡片工作组](/community/working-groups/server-card)／[注册表](/community/working-groups/registry)**：客户端和服务器身份、发现元数据以及信任建立，与授权服务器和资源服务器的定位及验证方式相互关联
-- **SDK 维护者**：SDK 提供身份验证客户端实现；兴趣组的发现应为跨 SDK 的身份验证易用性和默认设置提供参考
+- **[Security IG](/community/interest-groups/security)**：代币受众混淆、发行人验证和账户链接风险位于两组之间的边界
+- **[Transports WG](/community/working-groups/transports)**：授权当前在 HTTP 传输级别指定；传输的更改会影响凭证的携带位置
+- **代理 IG**：多代理链的委托/代表访问和同意与代理用例严重重叠
+- **[服务器卡工作组](/community/working-groups/server-card) / [注册表](/community/working-groups/registry)**：客户端和服务器身份、发现元数据和信任建立与授权服务器和资源服务器的定位和验证方式相交叉
+- **SDK 维护者**：SDK 提供身份验证客户端实现； IG 调查结果应告知跨 SDK 身份验证人体工程学和默认值
 
+<a id="leadership" />
 ## 领导层
 
 | 角色       | 姓名          | 组织       | GitHub                                     | 任期   |
 | ---------- | ------------- | ---------- | ------------------------------------------ | ------ |
-| 协调人     | Aaron Parecki | Okta       | [@aaronpk](https://github.com/aaronpk)     | 初始   |
-| 协调人     | Darin McAdams | Amazon     | [@D-McAdams](https://github.com/D-McAdams) | 初始   |
-| 协调人     | Paul Carleton | Anthropic  | [@pcarleton](https://github.com/pcarleton) | 初始   |
+| 协调人     | 亚伦·帕雷奇 | Okta       | [@aaronpk](https://github.com/aaronpk)     | 初始   |
+| 协调人     | 达林·麦克亚当斯 | Amazon     | [@D-McAdams](https://github.com/D-McAdams) | 初始   |
+| 协调人     | 保罗·卡尔顿 | Anthropic  | [@pcarleton](https://github.com/pcarleton) | 初始   |
 
+<a id="membership" />
 ## 成员资格
 
 任何人都可以参加；加入频道、参加会议或作出贡献均不需要正式成员资格或审批步骤。本组尤其欢迎身份提供商厂商、正在发布授权支持的 MCP 客户端和服务器实施者，以及将 MCP 与企业 IdP 集成的运营者。
 
 加入 [MCP Contributors Discord](/community/communication#discord) 中的 `#auth-ig` 频道，并为你的主题发起或加入线程。会议对所有人开放，参加会议不是强制要求——在 Discord 线程中进行异步参与同样受到重视。
 
+<a id="operations" />
 ## 运作方式
 
 | 会议       | 频率       | 时长   | 目的                                                                           |
 | ---------- | ---------- | ------ | ------------------------------------------------------------------------------ |
-| Auth IG Call | 每 2 周一次 | 45 分钟 | 由议程驱动：问题提案、SEP 和草案进展、演示、部署报告 |
+| 验证 IG 通话 | 每 2 周一次 | 45 分钟 | 由议程驱动：问题提案、SEP 和草案进展、演示、部署报告 |
 
-Discord：[＃auth-ig](https://discord.com/channels/1358869848138059966/1360835991749001368)
+Discord：[#auth-ig](https://discord.com/channels/1358869848138059966/1360835991749001368)
 
+<a id="one-channel-threads-per-topic" />
 ### 一个频道，每个主题一个线程
 
 所有授权讨论都在 `#auth-ig` 中进行，每个主题对应一个 Discord 线程（例如某个 SEP 编号、草案名称或部署配对）。不存在按主题划分的频道。会议议程和纪要位于频道中每次会议对应的议程线程内，并根据[组治理规则](/community/working-interest-groups)的要求，将链接交叉发布到 [GitHub Discussions](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions)。
 
+<a id="agenda-driven-calls" />
 ### 由议程驱动的会议
 
 会议固定每两周举行一次，但每次会议都根据议程安排：
@@ -79,6 +90,7 @@ Discord：[＃auth-ig](https://discord.com/channels/1358869848138059966/13608359
 
 典型时段包括问题提案、SEP 或 ext-auth 草案的进展更新、原型或参考实现的演示，或者已发布扩展的实施者提交的部署或互操作性报告。
 
+<a id="from-problem-to-sep" />
 ### 从问题到 SEP
 
 在任何人投入编写 SEP 之前，每个问题提案都必须回答以下两个固定问题：
@@ -88,10 +100,12 @@ Discord：[＃auth-ig](https://discord.com/channels/1358869848138059966/13608359
 
 当两个问题的答案都是肯定时，提案者会按照常规的 [SEP 流程](/community/sep-guidelines)起草 SEP 或 ext-auth 拉取请求，寻找赞助者，并在草案逐渐成熟的过程中回到会议中展示进展和演示。兴趣组不会针对每个主题设立子组、频道或系列会议。已经针对某个主题单独开展会议的贡献者可以继续这样做，并将结果作为议程时段带回会议。如果某项交付物确实需要独立的决策权，仍然可以按照标准流程提议成立单独的[工作组](/community/working-interest-groups)，但这属于例外，而不是默认路径。
 
+<a id="deliverables-success-metrics" />
 ## 交付物和成功指标
 
 兴趣组的产出是经过其推动的草案和演示：记录有兴趣组反馈的授权 SEP 和 ext-auth 规范、参考实现和一致性场景、互操作性和部署报告，以及发布的会议纪要。兴趣组负责维护 [modelcontextprotocol/ext-auth](https://github.com/modelcontextprotocol/ext-auth)，授权扩展规范通过拉取请求在其中落地。成功的表现是：授权提案在进入核心维护者审查时，已经纳入跨主题反馈；已发布的扩展则不断积累独立的互操作实现。
 
+<a id="consolidated-channels" />
 ### 合并频道
 
 以下 Discord 频道此前承载授权子组。自本次重新制定章程起，这些频道已归档（只读），其主题将继续以 `#auth-ig` 线程和议程时段的形式进行。[企业管理授权兴趣组](/community/interest-groups/enterprise-managed-authorization)也以同样的方式并入本组：EMA 实施者将互操作性和部署进展作为演示时段带到会议中，而不是提交给一个长期独立存在的组。
@@ -106,6 +120,7 @@ Discord：[＃auth-ig](https://discord.com/channels/1358869848138059966/13608359
 | `#auth-wg-improve-devx`        | 规范性规范之外的最佳实践指南和教程                                                                                     | 休眠       | 按需在 `#auth-ig` 线程中进行                              |
 | `#enterprise-managed-auth-ig`  | EMA 扩展互操作性（IdP、客户端、授权服务器）                                                                             | 活跃       | `#auth-ig` EMA 互操作线程和部署报告时段                    |
 
+<a id="changelog" />
 ## 变更日志
 
 | 日期       | 变更                                                                                                                                                                               |

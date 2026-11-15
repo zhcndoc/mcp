@@ -1,0 +1,93 @@
+---
+title: Agents 兴趣组章程
+description: MCP Agents 兴趣组章程。
+---
+
+<a id="group-type" />
+## 组别类型
+
+**兴趣组**
+
+<a id="mission-statement" />
+## 使命声明
+
+Agents 兴趣组旨在推动基于代理的系统通过 MCP 实现互操作。如今，这类系统通常以普通工具或特定框架集成的形式提供服务，而持久执行、能力发现、委派和多轮交互则依赖临时约定。兴趣组将评估哪些遗留问题需要协议支持。根据生产用例和原型，兴趣组会建议如何演进协议、创建其他扩展，或说明如何一致地使用现有 MCP 基元。
+
+<a id="scope" />
+## 范围
+
+<a id="in-scope" />
+### 范围内
+
+- **Agents 扩展评估**：评估基于代理的 MCP 用例，包括代理即工具、远程代理和监督者/子代理模式，以确定是否需要 Agents 扩展来补充 Tasks。
+- **原型和提案**：在有助于确定应引入 Agents 扩展、演进 Tasks，还是依赖现有 MCP 基元时，开发范围明确的概念验证。
+- **跨领域议题**：当评估的代理用例涉及 tasks、传输、事件、技能、授权、元数据或外部互操作问题时，与相关小组协调。
+- **文档**：记录基于代理的 MCP 用例、发现结果以及小组提出的建议。
+
+<a id="out-of-scope" />
+### 范围外
+
+- 构建或标准化通用代理框架和运行时，包括规划、记忆、模型选择和编排等内部决策。小组关注 MCP 互操作边界上的行为，而非主机或服务器实现的内部细节。
+- 传输线格式和会话机制，这些由 Transports 工作组负责。
+- Tasks、通用事件传递和回调机制，这些由 Tasks 与 Events 工作组负责。
+
+本章程不预先决定推理或代理循环在哪里运行，也不预先决定某项能力应属于 Tasks、Agents 扩展还是现有 MCP 基元。兴趣组将通过讨论评估这些问题。
+
+<a id="related-groups" />
+### 相关小组
+
+- **[Transports 工作组](/community/working-groups/transports)**：任务轮询、多轮往返请求、无状态操作和请求关联都依赖传输及消息流语义。
+- **[Tasks 与 Events 工作组](/community/working-groups/tasks-events)**：Tasks 以及主动推送任务状态和完成通知由该工作组负责。兴趣组会提供用例和需求。
+
+<a id="leadership" />
+## 负责人
+
+| 角色 | 姓名 | 组织 | GitHub | 任期 |
+| --- | --- | --- | --- | --- |
+| 召集人 | 张卢卡 | 亚马逊网络服务 | [@LucaButBoring](https://github.com/LucaButBoring) | 初始任期 |
+
+<a id="membership" />
+## 成员
+
+| 姓名 | 组织 | GitHub | Discord | 级别 |
+| --- | --- | --- | --- | --- |
+| 张卢卡 | 亚马逊网络服务 | [@LucaButBoring](https://github.com/LucaButBoring) |  | 召集人 |
+
+<a id="operations" />
+## 运作方式
+
+| 会议 | 频率 | 时长 | 目的 |
+| --- | --- | --- | --- |
+| 工作会议 | 每周 | 30 分钟 | 技术讨论、研究和提案审查 |
+
+会议安排发布于 [meet.modelcontextprotocol.io](https://meet.modelcontextprotocol.io)。
+
+Discord：`#agents-wg`
+
+<a id="resources" />
+## 资源
+
+- 小组仓库：[modelcontextprotocol/agents-wg](https://github.com/modelcontextprotocol/agents-wg)
+
+<a id="discussion-topics" />
+## 讨论主题
+
+| 事项 | 状态 | 目标日期 | 负责人 |
+| --- | --- | --- | --- |
+| Agents 扩展评估与建议 | 进行中 |  | 待定 |
+| 两级代理定义概念验证 | 进行中 |  | [@LucaButBoring](https://github.com/LucaButBoring)、[@madhaviai](https://github.com/madhaviai) |
+
+<a id="planned-outputs" />
+### 计划产出
+
+- 小组将发布评估结果，说明是否需要 Agents 扩展来补充 Tasks，并以记录在案的用例和相关原型证据作为依据。
+- 根据评估结果，小组将建议演进 Tasks、建议采用 Agents 扩展，或说明现有 MCP 基元已足够。
+- 在推进拟议的代理协议接口之前，先通过原型和实现反馈进行评估。
+
+<a id="changelog" />
+## 修订记录
+
+| 日期 | 变更 |
+| --- | --- |
+| 2026-08-04 | 初始章程（当时名为 Agents 工作组） |
+| 2026-10-16 | 转为兴趣组；Tasks 相关范围移交给 Tasks 与 Events 工作组。 |

@@ -7,10 +7,12 @@ sidebarTitle: 包类型
   MCP 注册表目前处于预览阶段。在正式发布之前，可能会发生破坏性更改或数据重置。如果遇到任何问题，请在 [GitHub](https://github.com/modelcontextprotocol/registry/issues) 上报告。
 </Note>
 
+<a id="package-types" />
 # 包类型
 
 MCP 注册表支持几种不同的包类型，每种包类型都有其自己的验证方法。
 
+<a id="npm-packages" />
 ## npm 包
 
 对于 npm 包，MCP 注册表目前仅支持 npm 公共注册表（`https://registry.npmjs.org`）。
@@ -37,6 +39,7 @@ npm 包在 `server.json` 中使用 `"registryType": "npm"`。例如：
 }
 ```
 
+<a id="ownership-verification" />
 ### 所有权验证
 
 MCP 注册表通过检查 `package.json` 中的 `mcpName` 来验证 npm 包的所有权。`mcpName` 属性**必须**与 `server.json` 中的服务器名称匹配。例如：
@@ -49,6 +52,7 @@ MCP 注册表通过检查 `package.json` 中的 `mcpName` 来验证 npm 包的�
 }
 ```
 
+<a id="pypi-packages" />
 ## PyPI 包
 
 对于 PyPI 包，MCP 注册表目前仅支持官方 PyPI 注册表（`https://pypi.org`）。
@@ -75,6 +79,7 @@ PyPI 包在 `server.json` 中使用 `"registryType": "pypi"`。例如：
 }
 ```
 
+<a id="ownership-verification-1" />
 ### 所有权验证
 
 MCP 注册表通过检查包 README 中是否存在 `mcp-name: $SERVER_NAME` 字符串来验证 PyPI 包的所有权（该 README 会成为 PyPI 上的包描述）。该字符串可以隐藏在注释中，但 `$SERVER_NAME` 部分**必须**与 `server.json` 中的服务器名称匹配。例如：
@@ -87,6 +92,9 @@ This MCP server executes SQL queries and manages database connections.
 <!-- mcp-name: io.github.username/database-query-mcp -->
 ```
 
+`mcp-name:` 标记后面必须跟有边界 — 换行符、空格、HTML 标记或注释关闭 `-->`。使其保持在自己的线上或位于 `<!-- … -->` 内；不要将其直接粘贴到尾随字符，例如句子结束句点 (`…/database-query-mcp.`)，这会阻止匹配。
+
+<a id="nuget-packages" />
 ## NuGet 包
 
 对于 NuGet 包，MCP 注册表目前仅支持官方 NuGet 注册表（`https://api.nuget.org/v3/index.json`）。
@@ -113,6 +121,7 @@ NuGet 包在 `server.json` 中使用 `"registryType": "nuget"`。例如：
 }
 ```
 
+<a id="ownership-verification-2" />
 ### 所有权验证
 
 MCP 注册表通过检查包 README 中是否存在 `mcp-name: $SERVER_NAME` 字符串来验证 NuGet 包的所有权。该字符串可以隐藏在注释中，但 `$SERVER_NAME` 部分**必须**与 `server.json` 中的服务器名称匹配。例如：
@@ -125,7 +134,10 @@ This MCP server manages Azure DevOps work items and pipelines.
 <!-- mcp-name: io.github.username/azure-devops-mcp -->
 ```
 
-## Cargo（Rust）包
+`mcp-name:` 标记后面必须跟有边界 — 换行符、空格、HTML 标记或注释关闭 `-->`。使其保持在自己的线上或位于 `<!-- … -->` 内；不要将其直接粘贴到尾随字符，例如句子结束句点 (`…/azure-devops-mcp.`)，这会阻止匹配。
+
+<a id="cargo-rust-packages" />
+## 货物（生锈）包裹
 
 对于 Cargo 包，MCP 注册表目前仅支持官方 crates.io 注册表（`https://crates.io`）。
 
@@ -151,6 +163,7 @@ Cargo 包在 `server.json` 中使用 `"registryType": "cargo"`。例如：
 }
 ```
 
+<a id="runtime-model" />
 ### 运行时模型
 
 Cargo 的运行时模型不同于 npm、PyPI 和 NuGet。`cargo install <crate>` 会将编译后的二进制文件放置在 PATH 中的 `~/.cargo/bin`，之后 MCP 客户端会直接按名称调用它。不存在与 `npx`（npm）、`uvx`（PyPI）或 `dnx`（NuGet、.NET 10 SDK Preview 6+）等效的、针对每次调用的运行器——安装只需执行一次，运行时按二进制文件名称执行。出于这一原因，上面的 Cargo 示例特意省略了 `runtimeHint`。
@@ -162,6 +175,7 @@ Rust MCP 作者有两种一等分发路径：
 
 两种路径都受支持；选择权在作者手中。提供 Cargo 原生支持，是为了让偏好源代码分发的 Rust 作者不必被迫采用 MCPB 二进制打包变通方案。
 
+<a id="ownership-verification-3" />
 ### 所有权验证
 
 MCP 注册表通过检查包 README 中是否存在 `mcp-name: $SERVER_NAME` 字符串来验证 Cargo 包的所有权（该 README 会被渲染为 HTML，并由 crates.io 的静态 CDN 提供）。`$SERVER_NAME` 部分**必须**与 `server.json` 中的服务器名称匹配。例如：
@@ -176,16 +190,17 @@ A Rust-native MCP server for widget operations.
 
 **Cargo 特有的注意事项：**不同于 PyPI 和 NuGet（它们在 README 渲染时会保留 HTML 注释），**crates.io 会在 markdown→HTML 转换过程中移除 HTML 注释**。适用于 PyPI/NuGet 的 `<!-- mcp-name: ... -->` 隐藏注释形式**不适用于 cargo**——该令牌不会出现在验证器检查的渲染后 HTML 中。Cargo 作者必须将 `mcp-name:` 令牌作为可见的 markdown 文本包含在内。在 Links 部分添加一个简单的项目符号是推荐的方式。
 
+<a id="dockeroci-images" />
 ## Docker/OCI 镜像
 
 对于 Docker/OCI 镜像，MCP 注册表目前支持：
 
-- Docker Hub (`docker.io`)
+- Docker 中心 (`docker.io`)
 - GitHub 容器注册表 (`ghcr.io`)
-- Google Artifact Registry（任何 `*.pkg.dev` 域名）
+- Quay.io (`quay.io`)
+- Google Artifact 注册表（任何 `*.pkg.dev` 域）
 - Azure 容器注册表 (`*.azurecr.io`)
-- Microsoft 容器注册表 (`mcr.microsoft.com`)
-
+- 微软容器注册表（`mcr.microsoft.com`）
 Docker/OCI 镜像在 `server.json` 中使用 `"registryType": "oci"`。例如：
 
 ```json server.json highlight={9}
@@ -207,8 +222,9 @@ Docker/OCI 镜像在 `server.json` 中使用 `"registryType": "oci"`。例如：
 }
 ```
 
-`identifier` 的格式是 `registry/namespace/repository:tag`。例如，`docker.io/user/app:1.0.0` 或 `ghcr.io/user/app:1.0.0`。标签也可以指定为摘要。
+`identifier` 的格式为 `registry/namespace/repository:tag`。例如，`docker.io/user/app:1.0.0`、`ghcr.io/user/app:1.0.0` 或 `quay.io/myorg/my-mcp-server:1.0.0`。标签也可以指定为摘要。
 
+<a id="ownership-verification-4" />
 ### 所有权验证
 
 MCP 注册表通过检查 `io.modelcontextprotocol.server.name` 注解来验证 Docker/OCI 镜像的所有权。`io.modelcontextprotocol.server.name` 注解的值**必须**与 `server.json` 中的服务器名称匹配。例如：
@@ -217,6 +233,7 @@ MCP 注册表通过检查 `io.modelcontextprotocol.server.name` 注解来验证 
 LABEL io.modelcontextprotocol.server.name="io.github.username/kubernetes-manager-mcp"
 ```
 
+<a id="mcpb-packages" />
 ## MCPB 包
 
 对于 MCPB 包，MCP 注册表目前支持通过 GitHub 或 GitLab 发布版本托管的 MCPB 工件。
@@ -243,6 +260,7 @@ MCPB 包在 `server.json` 中使用 `"registryType": "mcpb"`。例如：
 }
 ```
 
+<a id="verification" />
 ### 验证
 
 MCPB 包 URL（`server.json` 中的 `identifier`）**必须**包含字符串 "mcp"。这可以是 `.mcpb` 文件扩展名的一部分，也可以是存储库名称的一部分。

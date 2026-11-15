@@ -27,7 +27,22 @@ MCP Registry 通过 `server.json` 中的 `remotes` 属性支持远程 MCP 服务
 
 远程服务器在其指定 URL 上 **必须** 是公开可访问的。
 
-## 传输类型
+仅具有 `remotes` 的服务器不需要 `packages` 条目，因此[包类型](./package-types) 中描述的包所有权验证不适用。
+
+<a id="ownership-verification" />
+## 所有权验证
+
+当您发布时，注册表会验证您是否使用[身份验证方法](./authentication) 控制服务器 `name` 中的命名空间。无论身份验证方法如何，它**不会**验证您是否控制远程 URL：
+- 通过 [GitHub 身份验证](./authentication#github-authentication)，名为 `io.github.my-username/weather` 的服务器证明对 `my-username` GitHub 帐户的控制，而不是对服务远程 URL 的域的控制。
+- 通过 [DNS 身份验证](./authentication#dns-authentication) 或 [HTTP 身份验证](./authentication#http-authentication)，名为 `com.example/weather` 的服务器证明对 `example.com` 的控制，但注册表不会检查远程 URL 是否位于 `example.com` 上。
+如果您的远程 URL 位于您控制的域上，请考虑使用 DNS 或 HTTP 身份验证，以便服务器名称反映该域。这可以让用户看到服务器名称和远程 URL 属于同一发布者。
+
+多个服务器名称可以引用相同的远程 URL。现有列表不会保留该 URL 或阻止其他发布者在他们控制的命名空间下列出它。共享 URL 并不授予发布、编辑或更改其他发布者列表状态的权限。
+
+消费者应该通过服务器名称和版本来识别注册表记录，而不是通过远程 URL。 URL 查找可能匹配多个服务器名称，每个服务器名称都有自己的元数据、标头和模板变量。请勿合并配置或从共享 URL 推断发布者所有权或认可。
+
+<a id="transport-type" />
+## 运输类型
 
 远程服务器应使用 Streamable HTTP 传输。SSE 传输已[弃用](/specification/draft/deprecated)，因此仅在需要支持现有客户端时才发布 `"sse"` 远程端点。远程服务器也可以在不同 URL 上同时支持这两种传输。
 
@@ -53,6 +68,7 @@ MCP Registry 通过 `server.json` 中的 `remotes` 属性支持远程 MCP 服务
 }
 ```
 
+<a id="url-template-variables" />
 ## URL 模板变量
 
 远程服务器可以使用 `{curly_braces}` 表示法定义 URL 模板变量。这使得多租户部署成为可能，其中单个服务器定义可以支持具有可配置值的多个端点：
@@ -111,6 +127,7 @@ MCP Registry 通过 `server.json` 中的 `remotes` 属性支持远程 MCP 服务
 }
 ```
 
+<a id="http-headers" />
 ## HTTP 头
 
 可以通过向 `remotes` 条目添加 `headers` 属性来指示 MCP 客户端发送特定的 HTTP 头：
@@ -139,6 +156,7 @@ MCP Registry 通过 `server.json` 中的 `remotes` 属性支持远程 MCP 服务
 }
 ```
 
+<a id="supporting-remote-and-non-remote-installation" />
 ## 支持远程和非远程安装
 
 `remotes` 属性可以与 `server.json` 中的 `packages` 属性共存，以允许 MCP 宿主应用程序选择首选的安装方法。

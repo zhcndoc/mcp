@@ -1,5 +1,15 @@
 ---
-title: Changelog
+title: 变更日志
 ---
 
-Changes since the most recent release will accumulate here.
+自最新版本以来的更改将累积在这里。
+
+<a id="minor-changes" />
+## 小改动
+
+1. 将[OAuth客户端ID元数据文档](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-client-id-metadata-document-03)的引用版本从`draft-ietf-oauth-client-id-metadata-document-00`更新为`draft-ietf-oauth-client-id-metadata-document-03`。支持客户端 ID 元数据文档的 MCP 实现**必须**遵循此版本。
+
+<a id="other-schema-changes" />
+## 其他架构更改
+
+1. 恢复 `CreateMessageRequestParams`、`ElicitRequestFormParams`、`ElicitRequestURLParams`、`ElicitResult` 和 `ListRootsResult` 上的可选 `_meta` 字段。它在 2026 年 7 月 28 日被无意中删除，当时这些类型停止扩展 `TaskAugmentedRequestParams` 和 `Result`，使 `ListRootsRequest` 成为唯一可以携带 `_meta` 的输入请求 ([#3468](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/3468))。

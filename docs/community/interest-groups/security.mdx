@@ -3,27 +3,51 @@ title: 安全章程
 description: MCP 安全兴趣组章程。
 ---
 
+<a id="group-type" />
 ## 组类型
 
 **兴趣组**
 
+<a id="mission-statement" />
 ## 使命声明
 
-安全兴趣组负责梳理 MCP 特有的威胁，审查与安全相关的提案，并将已验证的问题范围收敛到聚焦的工作组或 [SEP](/community/sep-guidelines)。
+安全兴趣组是 MCP 特定安全主题的第一站。它审查传入的
+威胁、安全相关提案和披露问题，然后将经过验证的工作发送给
+拥有它的工作组或 [SEP](/community/sep-guidelines)。
 
+<a id="scope" />
 ## 范围
 
+<a id="in-scope" />
 ### 范围内
 
-- **威胁建模**：开发并维护一套共享的、分层的 MCP 攻击面视图，涵盖接入与身份、调用方治理、运行时行为、拦截与强制执行以及可审计性，为单个提案提供统一的参考框架
-- **服务器身份、证明与接入**：在客户端向服务器分发请求之前，确立服务器确实如其所声称的那样的要求，包括签名断言、信任根，以及协议级验证与注册表级验证之间的边界
-- **供应链与来源证明**：本地执行的服务器二进制文件和软件包的完整性（拼写抢注、未锁定的依赖、未签名的制品）以及客户端如何验证其启动的内容
-- **运行时漂移与接入后的变更**：服务器获批后，工具、模式或行为发生变更时如何处理，以及此类变更应被视为版本变更、重新审批还是安全事件
-- **可审计性与可观测性**：关于工具调用做了什么、在何种授权下进行的防篡改记录要求，用于合规与事件审查
-- **传输相关安全**：针对 stdio 和其他非 HTTP 传输的密钥处理、进程隔离以及未认证的攻击面，因为 HTTP 授权规范不适用
-- **安全最佳实践文档**：编写并审查 [安全最佳实践](/docs/tutorials/security/security_best_practices) 指南中的条目，包括与 OWASP GenAI 和 CoSAI 等外部机构就 MCP 特定内容进行联络
-- **漏洞披露路由**：为已针对 MCP 仓库提交私密安全公告、并需要帮助联系到合适维护者的报告者提供一个已知联系点
+- **分类和路由**：接收在 Discord 或 GitHub 上提出的安全主题并提交
+  所属组（Auth IG、传输工作组、注册表工作组、工具注释 IG、SDK 维护者）
+- **威胁建模**：开发和维护 MCP 攻击面的共享分层视图
+  涵盖准入和身份、调用者治理、运行时行为、拦截和执行，
+  和可审计性，为各个提案提供共同的参考框架
+- **服务器身份、证明和准入**：建立服务器的要求
+  在客户端发送给它之前它所声称的内容，包括签名的断言、信任根、
+  以及协议级和注册表级验证之间的界限
+- **供应链和出处**：本地执行的服务器二进制文件和包的完整性
+  （误植、未固定的依赖项、未签名的工件）以及客户如何验证他们的内容
+  产卵
+- **运行时漂移和准入后更改**：对工具、模式或行为更改后的处理
+  服务器已获得批准，以及此类更改是否是版本控制、重新批准或安全性
+  事件
+- **可审计性和可观察性**：对工具调用内容的防篡改记录的要求
+  进行了合规性和事件审查以及在什么授权下进行的
+- **邻近传输的安全性**：秘密处理、进程隔离和未经身份验证的表面
+  用于 stdio 和其他 HTTP 授权规范不涉及的非 HTTP 传输的区域
+  申请
+- **安全最佳实践文档**：创作和审查条目
+  [安全最佳实践](/docs/tutorials/security/security_best_practices) 指南，包括
+  与 OWASP GenAI 和 CoSAI 等外部机构就 MCP 特定内容进行联络
+- **漏洞披露路由**：为有以下情况的记者提供已知的联系点：
+  针对 MCP 存储库提交了私人安全咨询，并需要帮助达到正确的要求
+  维护者
 
+<a id="out-of-scope" />
 ### 范围外
 
 - **授权协议机制**：OAuth 流程、作用域、客户端注册和令牌处理属于 [授权 IG](/community/interest-groups/auth) 及其衍生的工作组
@@ -33,6 +57,7 @@ description: MCP 安全兴趣组章程。
 - **产品特定的加固指南**：面向单个宿主应用或云平台的逐步配置说明属于这些产品的文档，而非协议工作
 - **具有竞争敏感性或非公开的商业信息**，依据 [MCP 反垄断政策](/community/antitrust)
 
+<a id="related-groups" />
 ### 相关组
 
 - **[Authorization IG](/community/interest-groups/auth)**：令牌混淆、受众不匹配和元数据发现中的 SSRF 位于两个组的交界处
@@ -42,53 +67,63 @@ description: MCP 安全兴趣组章程。
 - **[Transports WG](/community/working-groups/transports)**：stdio 进程隔离和未认证的方法面
 - **SDK 维护者**：协调处理 SDK 安全公告和跨 SDK 安全默认设置
 
+<a id="leadership" />
 ## 领导层
 
 | 角色 | 姓名 | 组织 | GitHub | 任期 |
 | --- | --- | --- | --- | --- |
-| 召集人 | Den Delimarsky | Anthropic | [@localden](https://github.com/localden) | 初始 |
-| 召集人 | Paul Carleton | Anthropic | [@pcarleton](https://github.com/pcarleton) | 初始 |
+| 召集人 | 登·德利马斯基 | Anthropic | [@localden](https://github.com/localden) | 初始 |
+| 召集人 | 保罗·卡尔顿 | Anthropic | [@pcarleton](https://github.com/pcarleton) | 初始 |
 
+<a id="membership" />
 ## 成员
 
 | 姓名 | 组织 | GitHub | Discord | 级别 |
 | ------------------------ | ------------ | ---------------------------------------------------- | ---------------- | ----------- |
-| Sam Morrow               | GitHub       | [@SamMorrowDrums](https://github.com/SamMorrowDrums) | `sammorrowdrums` | 参与者 |
-| Ola Hungerford           | Nordstrom    | [@olaservo](https://github.com/olaservo)             | `olaservo`       | 参与者 |
-| Peder Holdgaard Pedersen | Saxo Bank    | [@PederHP](https://github.com/PederHP)               | `pederhp`        | 参与者 |
-| Stefano Ortolani         | Broadcom     | [@ostefano](https://github.com/ostefano)             | `ostefano.`      | 参与者 |
+| 萨姆·莫罗               | GitHub       | [@SamMorrowDrums](https://github.com/SamMorrowDrums) | `sammorrowdrums` | 参与者 |
+| 奥拉·亨格福德           | Nordstrom    | [@olaservo](https://github.com/olaservo)             | `olaservo`       | 参与者 |
+| 佩德·霍尔德加德·佩德森 | 盛宝银行    | [@PederHP](https://github.com/PederHP)               | `pederhp`        | 参与者 |
+| 斯特凡诺·奥托拉尼         | Broadcom     | [@ostefano](https://github.com/ostefano)             | `ostefano.`      | 参与者 |
 
-欢迎任何人加入。请加入 [MCP Contributors Discord](/community/communication#discord) 中的 `#security-ig` 频道。会议对外开放，且非常鼓励积极参与。该组正在寻找愿意参与提案并帮助推动工作前进，而不只是旁观的贡献者。
+向任何人开放。加入 `#security-ig` 频道
+[MCP 贡献者Discord](/community/communication#discord)。讨论异步运行
+电话会议之间的频道以及每个月电话会议的议程都在那里汇总。该团体是
+寻找愿意参与提案并帮助推动工作向前发展的贡献者，而不是
+观察。
 
+<a id="operations" />
 ## 运作
 
-| 会议 | 频率 | 时长 | 目的 |
-| ------------ | ------------- | -------- | ----------------------------------------------------------------------- |
-| 办公时间 | 每 2 周一次 | 45 分钟 | 威胁审查、提案分流、部署报告、WG 提案范围界定 |
+| 会议    | 频率 | 时长 | 目的                                                                   |
+| ---------- | --------- | -------- | ------------------------------------------------------------------------- |
+| 论坛电话 | Monthly   | 45 min   | 对已发布议程上的主题进行分类和路由，工作组提案范围界定 |
+| Digest     | Monthly   | n/a      | 路由项目、开放主题和建议的摘要                      |
 
-每次会议前都会在 `#security-ig` 中共享议程。
+协调员在每次每月电话会议之前在 `#security-ig` 中发布议程呼吁，任何人
+可以为其添加主题。
 
-Discord: [#security-ig](https://discord.com/channels/1358869848138059966/1379811011669921883)
-
+Discord：[#security-ig](https://discord.com/channels/1358869848138059966/1379811011669921883)
 会议记录会发布到 GitHub Discussions 中的
 [Meeting Notes - Security IG](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions/categories/meeting-notes-security-ig)
 分类下。
 
+<a id="discussion-topics" />
 ## 讨论主题
 
 以下项目构成该 IG 当前的讨论议程。该列表并不详尽，会随着该组识别出新的兴趣领域而不断演进。
 
-| 项目 | 名称 | 状态 | 负责人 |
-| ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ----------- | -------------------------------------------------------- |
-| [SEP-2809](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2809) | 已证明的工具-服务器接入（ATSA） | 草案 | [@metereconsulting](https://github.com/metereconsulting) |
-| — | SDK 漏洞披露 | 进行中 | 召集人 |
-| — | 运行时漂移：批准后的 `list_changed` 语义 | 开放 | — |
-| — | 供应链完整性：协议、注册表或配套标准 | 开放 | — |
-| — | 跨服务器的工具身份 | 开放 | — |
-| — | 能力声明：提示或契约（与 [工具注解 IG](/community/interest-groups/tool-annotations) 联合） | 开放 | — |
+| 事项 | 姓名                                                                                                                        | 状态      | 负责人     |
+| ---- | --------------------------------------------------------------------------------------------------------------------------- | ----------- | ------------ |
+| —    | SDK漏洞披露                                                                                                | 进行中 | 召集人 |
+| —    | 运行时漂移：批准后的 `list_changed` 语义                                                                      | Open        | —            |
+| —    | 供应链完整性：协议、注册或配套标准                                                           | Open        | —            |
+| —    | 跨服务器的工具身份                                                                                                | Open        | —            |
+| —    | 能力声明：提示或契约（与[工具注释IG](/community/interest-groups/tool-annotations)联合） | Open        | —            |
 
+<a id="changelog" />
 ## 更新日志
 
-| 日期 | 变更 |
-| ---------- | --------------- |
-| 2026-06-13 | 初始章程 |
+| Date       | Change                                                                                                                                                                                                                                    |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-08-26 | 重组为路由组，用每月议程驱动的电话会议和摘要取代每两周一次的办公时间（核心维护者会议，[讨论#3316](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions/3316)） |
+| 2026-06-13 | 初始包机                                                                                                                                                                                                                           |

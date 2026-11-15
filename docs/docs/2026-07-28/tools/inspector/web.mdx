@@ -11,6 +11,7 @@ npx @modelcontextprotocol/inspector node build/index.js   # 使用临时 stdio �
 npx @modelcontextprotocol/inspector --catalog ./mcp.json  # 使用目录文件
 ```
 
+<a id="the-session-token" />
 ## 会话令牌
 
 Web 客户端背后的 Node 服务器会使用每次启动时生成的令牌保护每个 `/api/*` 路由，因为它可以在你的计算机上生成进程。启动器会打印一个包含该令牌的 URL：**请打开该 URL**，不要凭记忆输入 `localhost:6274`。
@@ -23,6 +24,7 @@ Web 客户端背后的 Node 服务器会使用每次启动时生成的令牌保�
 
 设置 `MCP_INSPECTOR_API_TOKEN` 环境变量可以固定一个已知令牌（适用于脚本化启动），或者设置 `DANGEROUSLY_OMIT_AUTH=true` 以完全禁用检查，但只能在没有其他设备或程序能够访问该端口的计算机上这样做。两者都在[Web 后端环境变量](/docs/2026-07-28/tools/inspector/configuration#web-backend-environment-variables)中有说明。令牌的保护范围请参阅[安全性](/docs/2026-07-28/tools/inspector/security#the-web-backend-and-its-api-token)。
 
+<a id="dev-mode" />
 ## 开发模式
 
 `--dev` 是一个**仅限 Web** 的标志。它会运行 Vite 开发服务器，而不是提供预构建的 bundle；如果你正在开发 Inspector 本身，这一点很重要：
@@ -33,6 +35,7 @@ mcp-inspector --web --dev
 
 生产环境中的 `--web` 会提供已构建的 bundle。在已发布的软件包中，该 bundle 始终会随包提供；而在全新的源代码检出中，它并不存在，因此运行器会在你首次启动时按需构建它。
 
+<a id="the-tab-bar" />
 ## 标签栏
 
 | 标签          | 显示条件                                                            | 功能                                                                    |
@@ -55,6 +58,7 @@ mcp-inspector --web --dev
   <img src="/images/inspector/web-tab-bar.png" />
 </Frame>
 
+<a id="the-monitoring-sidebar" />
 ### 监控侧边栏
 
 **任务**、**日志**、**协议**、**网络**和**控制台**组成一个_监控组_。固定该组后，它们会离开标签栏，移至右侧可调整大小的栏中，这样你就可以在使用工具或资源时监控流量。拖动侧栏边缘即可将宽度调整为 320 至 720 像素。栏宽度和选中的监控标签会在重新加载后保留。
@@ -63,6 +67,7 @@ mcp-inspector --web --dev
   <img src="/images/inspector/web-monitor-sidebar.png" />
 </Frame>
 
+<a id="servers" />
 ## 服务器
 
 “服务器”屏幕是入口。每一行服务器都会显示其传输方式、连接状态，以及一个用于打开该服务器专属设置的控件。
@@ -78,6 +83,7 @@ mcp-inspector --web --dev
 
 首次启动时，Web 客户端会使用三个示例服务器初始化目录：一个作用域为 `/tmp` 的文件系统服务器、规范的“everything”参考服务器，以及 MCP 组织托管的示例服务器（可流式 HTTP，并通过动态客户端注册使用 OAuth）。有关完整规则（包括 CLI 和 TUI 为何初始化空目录），请参阅[配置和标志](/docs/2026-07-28/tools/inspector/configuration)。
 
+<a id="server-settings" />
 ### 服务器设置
 
 - **协议时代**：`legacy` / `auto` / `modern`。请参阅[协议时代](/docs/2026-07-28/tools/inspector/protocol-eras)。
@@ -94,6 +100,7 @@ mcp-inspector --web --dev
   <img src="/images/inspector/web-server-settings.png" />
 </Frame>
 
+<a id="tools" />
 ## 工具
 
 选择一个工具以查看其描述、以表单形式呈现的输入架构及其注释。填写表单并调用工具；结果将显示在下方，其中结构化内容、嵌入资源和图像均会以原生方式处理。
@@ -104,6 +111,7 @@ mcp-inspector --web --dev
   <img src="/images/inspector/web-tools.png" />
 </Frame>
 
+<a id="resources" />
 ## 资源
 
 列出资源和资源模板及其 MIME 类型与描述，在选择资源时读取内容，并在支持订阅的服务器上提供**订阅**功能。订阅机制因时代而异；请参阅[资源订阅](/docs/2026-07-28/tools/inspector/protocol-eras#resource-subscriptions)。
@@ -112,6 +120,7 @@ mcp-inspector --web --dev
   <img src="/images/inspector/web-resources.png" />
 </Frame>
 
+<a id="prompts" />
 ## 提示词
 
 列出带有其参数的提示词模板，并渲染根据你提供的参数生成的消息，这是确认提示词是否产生预期结果的最快方式。
@@ -120,20 +129,21 @@ mcp-inspector --web --dev
   <img src="/images/inspector/web-prompts.png" />
 </Frame>
 
+<a id="apps" />
 ## 应用
 
 [MCP 应用](/extensions/apps/overview) 是携带 UI 的工具。Apps 标签页会在由**独立端口**提供服务的沙盒 iframe 中渲染一个应用，调用 `ui/*` 桥接，并在框架下方的面板中显示视图提交的 `ui/message` 和其 `notifications/message` 日志。
 
-- 沙盒监听自己的端口，默认为 `6275`（使用 `MCP_SANDBOX_PORT` 设置）。如果 UI 资源声明了 `_meta.ui.domain`，应用文档会由第三个监听器（应用来源）提供服务，默认为 `6278`（使用 `MCP_APP_ORIGIN_PORT` 设置）。请将这两个端口与 Web 端口一起公开或转发。
-- 沙盒受 `frame-ancestors` CSP 限制，并且带方括号的 IPv6 字面量不是有效的 CSP host-source，因此请通过 `localhost`、`127.0.0.1`、主机名或局域网 IPv4 地址访问 Inspector，**不要**通过裸的 `http://[::1]:...` 访问。
-- 默认情况下，沙盒 URL 使用绑定地址上的普通 `http`，因此 `https://` Inspector 页面会因混合内容而阻止该框架。位于 TLS 反向代理之后时，请将 `MCP_SANDBOX_FULL_ADDRESS`（以及 `MCP_APP_ORIGIN_FULL_ADDRESS`）设置为浏览器访问各监听器时使用的公共 `https://` 地址。二者都不能与 Inspector UI 共享来源；如果设置了共享来源，会发出警告并忽略该值。
-
+- 沙箱默认监听其自己的端口 `6275`（使用 `MCP_SANDBOX_PORT` 设置）。 UI 资源声明 `_meta.ui.domain` 的应用程序的文档默认由第三个侦听器（应用程序源）在 `6278` (`MCP_APP_ORIGIN_PORT`) 上提供。将两者与 Web 端口一起公开或转发。
+- 沙箱由 `frame-ancestors` CSP 控制，并且括号内的 IPv6 文字不是有效的 CSP 主机源，因此请在 `localhost`、`127.0.0.1`、主机名或 LAN IPv4 上浏览Inspector，**而不是**在裸露的 `http://[::1]:...` 上浏览。
+- 默认情况下，沙箱 URL 在绑定地址上是纯 `http`，因此 `https://` Inspector页面会阻止框架作为混合内容。无论页面是通过代理还是通过 `INSPECTOR_TLS_KEY_PATH` 和 `INSPECTOR_TLS_CERT_PATH`（仅覆盖 UI 侦听器），这都适用。在 TLS 反向代理后面，将 `MCP_SANDBOX_FULL_ADDRESS`（和 `MCP_APP_ORIGIN_FULL_ADDRESS`）设置为浏览器到达每个侦听器的公共 `https://` 地址。两者都不能与 Inspector UI 共享同源；这样做的值将被忽略并发出警告。
 请参阅 [Recipes](/docs/2026-07-28/tools/inspector/recipes#reviewing-an-mcp-app)，了解以 CLI 为优先的自动化审查流程。
 
 <Frame caption="在其沙盒框架中渲染的 MCP 应用，应用自身的日志显示在其下方。">
   <img src="/images/inspector/web-apps.png" />
 </Frame>
 
+<a id="protocol-network-and-console" />
 ## 协议、网络和控制台
 
 这三个选项卡以不同的详细程度显示相同的流量：
@@ -148,6 +158,7 @@ Network 请求头和正文中的机密信息会被遮盖，并提供显示原文
   <img src="/images/inspector/web-protocol.png" />
 </Frame>
 
+<a id="deep-links" />
 ## 深层链接
 
 驱动程序（脚本、CI 测试工具，或 CLI 的 [`--print-handoff`](/docs/2026-07-28/tools/inspector/authorization#handing-off-from-the-web-client-to-the-cli)）可以通过一次导航访问一个_已连接的_ Inspector：
@@ -164,10 +175,13 @@ http://127.0.0.1:6274/?serverUrl=<url>&transport=http|sse&autoConnect=<token>
 
 另外三个参数可以将你带到一个_渲染后的应用_：`openApp=<toolName>` 指定工具名称，`appArgs=<base64url(JSON)>` 提供其参数（与工具架构的默认值合并），而 `autoOpen=<token>` 会自动触发工具调用。由于 `autoOpen` 会触发调用，因此它与 `autoConnect` 一样带有相同的必需令牌门槛。
 
+<a id="host-binding-and-origins" />
 ## 主机绑定与来源
 
 默认情况下，Inspector 绑定 `127.0.0.1`，并且仅接受来自其端口的环回来源的请求。请将这两个默认设置都视为安全边界，因为后端会在您的计算机上生成进程。
 
-除非设置 `DANGEROUSLY_BIND_ALL_INTERFACES=true`，否则将所有接口绑定到 (`HOST=0.0.0.0`) 会被**拒绝**。绑定到某个_特定的_非环回地址时无需选择加入，因为这表示一次有意的单独暴露，而不是同时暴露所有接口。
+`Host` 标头允许列表在每个路由之前运行，包括 `GET /`。除非 `Host` 是 `localhost` 或 `*.localhost` 名称、IPv4 或括号内的 IPv6 文字、绑定主机、`ALLOWED_ORIGINS` 条目的主机名或 `MCP_INSPECTOR_ALLOWED_HOSTS` 条目，否则请求将被应答为 `403`。端口不进行比较。同源 `GET /` 不携带 `Origin` 标头，因此源允许列表永远看不到它，而 `Host` 检查阻止 DNS 重新绑定页面加载页面并从中读取令牌。
+
+绑定所有接口（`HOST=0.0.0.0`）将被**拒绝**，除非您设置了 `DANGEROUSLY_BIND_ALL_INTERFACES=true`。允许绑定_特定_非环回地址，无需选择加入，因为这是一次故意暴露，而不是同时暴露每个接口。
 
 请参阅[在网络上托管](/docs/2026-07-28/tools/inspector/recipes#hosting-on-a-network)配方以了解完整矩阵，并参阅[配置](/docs/2026-07-28/tools/inspector/configuration#web-backend-environment-variables)了解相关变量。

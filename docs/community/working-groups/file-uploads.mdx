@@ -1,47 +1,74 @@
 ---
-title: File Uploads Charter
+title: 文件上传章程
 description: MCP 文件上传工作组章程。
 ---
 
+<a id="group-type" />
 ## 小组类型
 
 **工作组**
 
+<a id="mission-statement" />
 ## 使命宣言
 
-文件上传工作组旨在定义 MCP 工具和引导请求如何声明文件输入，以便宿主能够呈现原生文件选择器，并将用户选定的文件内容传递给服务器。如今，需要从用户处获取文件的服务器往往会退而求其次，使用自然语言说明来要求提供 base64 字符串或本地路径，这会导致不一致的用户体验，并将编码细节推给最终用户。该工作组将基于 [SEP-2356](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2356)，为声明文件输入和交付这些输入的线格式制定一个最小的、schema 级别的机制。
+文件上传工作组的存在是为了定义 MCP 工具和获取请求如何声明文件
+输入，以便主机可以呈现本机文件选择器并将用户选择的文件内容传递到服务器。
 
+如今，需要用户提供文件的服务器诉诸于要求 Base64 字符串的散文指令
+或本地路径，这会产生不一致的用户体验并将编码详细信息推送给最终用户。本工作组
+将指定一个最小的模式级机制来声明文件输入和有线格式
+交付它们，锚定于 [SEP-2356](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2356)。
+
+作为次要目标，工作组涵盖了工具如何返回对于 JSON-RPC 消息来说太大的文件
+或者需要授权才能获取。
+
+<a id="scope" />
 ## 范围
 
+<a id="in-scope" />
 ### 范围内
 
-- **规范工作**：定义在工具输入 schema 和引导请求 schema 上声明式文件输入描述符的 SEP、文件内容的线格式编码，以及宿主侧处理要求。
-- **参考实现**：`FileInputDescriptor` 的 SDK 类型和辅助方法、data URI 编码，以及一个演示文件选择器调用和值替换的宿主流程示例。
-- **跨领域协作**：与 MCP Apps WG 协调，以处理嵌入式 UI 自带文件选择器的场景；并与 Security WG 协调宿主侧验证要求。
-- **文档**：覆盖文件输入声明的规范章节，以及面向当前使用临时 base64 指令的服务器的迁移指南。
+- **规范工作**：SEP 定义工具输入模式上的声明性文件输入描述符和
+  诱导请求模式、文件内容的有线编码以及主机端处理
+  要求。
+- **文件下载（次要）**：工具如何返回对于 JSON-RPC 消息来说太大的文件
+  或者需要授权才能获取。上传工作优先。
+- **参考实现**：`FileInputDescriptor` 的 SDK 类型和帮助程序、数据 URI 编码、
+  以及演示选择器调用和值替换的示例主机流程。
+- **跨领域问题**：与存在嵌入式 UI 表面的 MCP 应用程序工作组进行协调
+  他们自己的文件选择器，以及安全 IG 的主机端验证要求。
+- **文档**：涵盖文件输入声明和迁移指南的规范部分
+  适用于当前使用 ad-hoc base64 指令的服务器。
 
+<a id="out-of-scope" />
 ### 范围外
 
-- 服务器到客户端的文件传递，这一部分已经由 Resources 和 `BlobResourceContents` 覆盖。
-- 对传输层或会话模型的更改。
-
+- 服务器到客户端的小文件传送，资源和 `BlobResourceContents` 已经涵盖了。
+- 传输层或会话模型的更改。
 作为设计工作的一部分，WG 可以评估流式传输、分块传输或预签名上传 URL 等方案；这些方案是落入初始 SEP 还是后续补充，由 WG 决定，而不是章程约束。
 
+<a id="related-groups" />
 ### 相关小组
 
-- **MCP Apps WG** — 嵌入式应用 UI 可能会呈现自己的文件选择器；描述符格式应在该场景中可复用。
-- **Security WG** — 针对用户提供文件内容的宿主侧验证要求（该 SEP 参考了 [OWASP ASVS V5](https://owasp.org/projects/asvs) 作为通用上传卫生规范）。
-- **Tool Annotations IG** — 文件输入描述符是输入参数元数据的一种形式，应与更广泛的注解分类保持一致。
+- **MCP 应用程序工作组** — 嵌入式应用程序 UI 可能会显示自己的文件选择器；描述符格式
+  在这种情况下应该可以重用。
+- **[Security IG](/community/interest-groups/security)** — 用户提供的文件内容的主机端验证要求（SEP
+  参考资料 [OWASP ASVS V5](https://owasp.org/projects/asvs)
+  用于一般上传卫生）。
+- **工具注释 IG** — 文件输入描述符是输入参数元数据的一种形式，应该
+  与更广泛的注释分类保持一致。
 
+<a id="leadership" />
 ## 领导层
 
 | 角色 | 姓名           | 组织         | GitHub                                   | 任期    |
 | ---- | -------------- | ------------ | ---------------------------------------- | ------- |
-| 负责人 | Den Delimarsky | Anthropic    | [@localden](https://github.com/localden) | 初始    |
+| 负责人 | 登·德利马斯基 | Anthropic    | [@localden](https://github.com/localden) | 初始    |
 
 由 Den Delimarsky（[@localden](https://github.com/localden)）和 Nick Cooper
 ([@nickcoai](https://github.com/nickcoai)) 赞助。
 
+<a id="authority-decision-rights" />
 ## 权限与决策权
 
 | 决策类型                           | 权限级别                                             |
@@ -55,32 +82,37 @@ description: MCP 文件上传工作组章程。
 | 范围扩展                           | 需要 Core Maintainer 批准                              |
 | WG 成员批准                        | WG 成员赞助人                                          |
 
+<a id="membership" />
 ## 成员
 
 | 姓名           | 组织         | GitHub                                   | Discord | 级别       |
 | -------------- | ------------ | ---------------------------------------- | ------- | ---------- |
-| Den Delimarsky | Anthropic    | [@localden](https://github.com/localden) |         | 负责人     |
-| Nick Cooper    | OpenAI       | [@nickcoai](https://github.com/nickcoai) |         | WG 成员    |
-| Olivier Chafik | Anthropic    | [@ochafik](https://github.com/ochafik)   |         | WG 成员    |
+| 登·德利马斯基 | Anthropic    | [@localden](https://github.com/localden) |                  | 负责人     |
+| 尼克·库珀    | OpenAI       | [@nickcoai](https://github.com/nickcoai) |                  | WG 成员    |
+| 奥利维尔·查菲克 | Anthropic    | [@ochafik](https://github.com/ochafik)   |                  | WG 成员    |
 
+<a id="operations" />
 ## 运营
 
 | 会议             | 频率     | 时长     | 目的                                 |
 | --------------- | -------- | -------- | ------------------------------------- |
-| Working Session | 每两周   | 30 分钟  | 技术讨论、提案审查                      |
+| 工作会议 | 每两周   | 30 分钟  | 技术讨论、提案审查                      |
 
 Discord: `#file-uploads-wg`
 
+<a id="deliverables-success-metrics" />
 ## 交付物与成功指标
 
+<a id="active-work-items" />
 ### 进行中的工作项
 
 | 项目                                                                                                        | 状态 | 目标日期 | 负责人                               |
 | ----------------------------------------------------------------------------------------------------------- | ------ | ----------- | -------------------------------------- |
-| [SEP-2356: Declarative file inputs](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2356) | Draft  | 5 月底      | [@ochafik](https://github.com/ochafik) |
-| TypeScript SDK reference implementation                                                                     | —      | 5 月底      | [@ochafik](https://github.com/ochafik) |
-| Reference implementation in a second Tier-1 SDK                                                             | —      | 6 月底      | TBD                                    |
+| [SEP-2356：声明性文件输入](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2356) | Draft  | 5 月底      | [@ochafik](https://github.com/ochafik) |
+| TypeScript SDK 参考实现                                                                     | —      | 5 月底      | [@ochafik](https://github.com/ochafik) |
+| 第二个 Tier-1 SDK 中的参考实现                                                             | —      | 6 月底      | 待定                                    |
 
+<a id="success-criteria" />
 ### 成功标准
 
 - 一份已接受的 SEP，定义文件输入描述符和线格式编码。
@@ -88,8 +120,10 @@ Discord: `#file-uploads-wg`
 - 至少有一个生产环境宿主能够根据该描述符渲染原生文件选择器。
 - 新 schema 关键字具有一致性测试覆盖。
 
+<a id="changelog" />
 ## 更新日志
 
-| 日期       | 变更          |
-| ---------- | --------------- |
-| 2026-04-23 | 初始章程 |
+| Date       | Change                                          |
+| ---------- | ----------------------------------------------- |
+| 2026-04-23 | 初始包机                                 |
+| 2026-10-21 | 将文件下载添加到范围作为次要项目 |

@@ -13,6 +13,7 @@ description: Model Context Protocol 路线图，涵盖核心维护者和工作�
 
 </Note>
 
+<a id="sep-prioritization" />
 ## SEP 优先级
 
 **属于以下优先领域的[规范增强提案](/community/sep-guidelines)（SEPs）将获得加速审核，并最有可能被接受。**不属于这些领域的 SEPs 不会被自动拒绝，但预计会面临更长的排队时间和更高的论证门槛。维护者的审核时间十分有限。我们会优先投入在这些领域。
@@ -21,21 +22,22 @@ description: Model Context Protocol 路线图，涵盖核心维护者和工作�
 
 每个优先领域都会列出负责该领域的核心维护者，任何有兴趣参与贡献的人都可以通过[Discord](/community/communication#discord)联系他们。每个领域下列出的项目是本路线图周期内的优先交付成果。每个领域的其余部分属于开放范围，工作组应在其中进一步定义并贡献工作。
 
+<a id="priority-areas" />
 ## 优先领域
 
+<a id="1-agentic-messaging-primitives" />
 ### 1. 智能体消息传递原语
 
-核心维护者：[**Caitie McCaffrey**](https://github.com/CaitieM20)、[**Clare Liguori**](https://github.com/clareliguori)、[**Peter Alexander**](https://github.com/pja-ant)
-
+核心维护者：[**Caitie McCaffrey**](https://github.com/CaitieM20)、[**Clare Liguori**](https://github.com/clareliguori)、[**Peter Alexander**](https://github.com/poita)
 智能体工作负载需要超越请求和响应的[消息传递模式](/specification/2026-07-28/basic/patterns)：运行数分钟的工作、主动推送的服务器、流式传输的结果，以及在工作进行期间对其进行引导的方式。MCP 已经围绕这些需求形成了一组概念，包括[Tasks](/extensions/tasks/overview)、[`subscriptions/listen`](/specification/2026-07-28/basic/patterns/subscriptions)和[进度通知](/specification/2026-07-28/basic/patterns/progress)，它们分散在多个工作组中。风险在于，当“服务器还没完成”时出现三种彼此不同的处理方式，而它们没有共享生命周期、取消模型或错误呈现方式。我们希望让它们能够组合使用。
 
 **本路线图周期内：**
 
-- **服务器发起的事件**：[Triggers & Events WG](/community/working-groups/triggers-events)。用于推送交付的通道和订阅，包括 Webhook。随着我们通过 Tasks 和其他事件处理异步工作负载，我们需要一些扩展，让服务器能够在工作完成时通知客户端，而不是完全依赖成本高昂的客户端轮询。
-- **组合审查**：[Agents](/community/working-groups/agents)、Transports 和 [Triggers & Events](/community/working-groups/triggers-events) 工作组。正在形成的原语（例如 Tasks 和 Triggers）需要彼此干净地组合，并适用于具体用例。
-
+- **服务器启动的事件**：[任务和事件工作组](/community/working-groups/tasks-events)。用于推送交付的渠道和订阅，包括 Webhooks。当我们通过任务和其他事件处理异步工作负载时，我们需要扩展，让服务器告诉客户端工作何时完成，而不必纯粹依赖昂贵的客户端轮询。
+- **组成审查**：[任务和事件](/community/working-groups/tasks-events) 和运输工作组，以及[特工](/community/interest-groups/agents) IG。制作中的原语（例如任务和触发器）需要相互干净地组合并适合具体的用例。
 除此之外，我们预计会继续推进 Tasks（[SEP-2663](/seps/2663-tasks-extension)），最终将该扩展纳入核心协议。
 
+<a id="2-http-native-transport-unification-and-hardening" />
 ### 2. HTTP 原生传输统一与强化
 
 核心维护者：[**Kurtis Van Gent**](https://github.com/kurtisvg)、[**Nick Cooper**](https://github.com/nickcoai)
@@ -49,6 +51,7 @@ description: Model Context Protocol 路线图，涵盖核心维护者和工作�
 
 除此之外，我们希望研究所有表面中的标准化错误处理、[SEP-2575](/seps/2575-stateless-mcp)之后工具列表的能力范围，以及以安全方式向服务器提供配置选项。
 
+<a id="3-agent-identity-and-enterprise-ready-security" />
 ### 3. 智能体身份与企业级安全
 
 核心维护者：[**Paul Carleton**](https://github.com/pcarleton)、[**Den Delimarsky**](https://github.com/localden)
@@ -62,10 +65,10 @@ MCP 授权假设在用户同意时，有一个人正在使用浏览器。越来�
 
 除此之外，还有其他几个主题正在讨论中，随着工作组组建，这些主题可能会纳入范围，包括用于区分交互式客户端和无头智能体的人类在场证明，以及其他智能体身份相关问题。
 
+<a id="4-improved-primitives" />
 ### 4. 改进原语
 
-核心维护者：[**Kurtis Van Gent**](https://github.com/kurtisvg)、[**Peter Alexander**](https://github.com/pja-ant)、[**Den Delimarsky**](https://github.com/localden)
-
+核心维护者：[**Kurtis Van Gent**](https://github.com/kurtisvg)、[**Peter Alexander**](https://github.com/poita)、[**Den Delimarsky**](https://github.com/localden)
 MCP 的工具调用接口一直运行良好。然而，`tools/call`允许同时返回`content`和`structuredContent`，这让服务器和客户端作者都感到困惑，并导致实现出现分歧。我们希望在本路线图周期内改进`tools/call`接口的形式，以实现更一致的语义。社区也反复反馈，服务器需要更多选项来引导客户端处理大量工具、资源和其他原语，因此我们将围绕**渐进式发现**开展专门工作，以定义实验性的服务器端发现机制应当是什么样的。
 
 **本路线图周期内：**
@@ -76,6 +79,7 @@ MCP 的工具调用接口一直运行良好。然而，`tools/call`允许同时�
 
 此外，[File Uploads WG](/community/working-groups/file-uploads)将继续推进有范围限制的文件操作和类似文件系统的资源语义（范围读取、分层列表）。
 
+<a id="5-improved-sdk-developer-experience" />
 ### 5. 改进 SDK 开发者体验
 
 核心维护者：[**Den Delimarsky**](https://github.com/localden)、[**David Soria Parra**](https://github.com/dsp-ant)
@@ -89,6 +93,7 @@ MCP 的工具调用接口一直运行良好。然而，`tools/call`允许同时�
 
 除此之外，我们希望重新审视参考服务器和快速入门仓库的所有权及更新时效预期，并将生成失败暴露出的规范清晰度问题视为文档缺陷。
 
+<a id="get-involved" />
 ## 参与其中
 
 上述每个优先领域背后都有一个工作组，或正在围绕其组建工作组，而所有工作组都有空间吸纳更多贡献者。参与方式有以下几种：

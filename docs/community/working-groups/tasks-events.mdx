@@ -1,0 +1,119 @@
+---
+title: Tasks 与 Events 工作组章程
+description: MCP Tasks 与 Events 工作组章程。
+---
+
+<a id="group-type" />
+## 组别类型
+
+**工作组**
+
+<a id="mission-statement" />
+## 使命声明
+
+Tasks 与 Events 工作组将继续开发 Tasks（MCP 现有的持久异步执行基础），并定义服务器主动通知客户端状态变更的方式。如今，客户端通过轮询或保持 SSE 连接来获知服务器端更新。本工作组将制定标准化回调机制（例如 webhook），让服务器在有新数据时推送通知，并定义适用于所有传输的顺序保证。
+
+<a id="scope" />
+## 范围
+
+<a id="in-scope" />
+### 范围内
+
+- **Tasks**：推动 [`io.modelcontextprotocol/tasks`](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2663) 扩展稳定化并纳入 MCP 核心协议，包括收集实现反馈、消除歧义以及评估对其生命周期的拟议变更。
+- **规范工作**：制定有关触发器/回调机制、订阅生命周期、传递语义和事件顺序保证的 SEP。
+- **参考实现**：开发 SDK 组件，以展示服务器发起的通知和客户端回调处理。
+- **跨领域议题**：与 Transports 工作组协调传输相关的传递行为，并与 Agents 兴趣组协作处理依赖 Tasks 或事件触发器的代理用例。
+- **文档**：维护 Tasks 规范，以及涵盖事件驱动模式和从轮询方式迁移的规范章节。
+
+<a id="out-of-scope" />
+### 范围外
+
+- 更改传输线格式或会话模型（由 Transports 工作组负责）。
+- 超出 MCP 协议要求范围的通用发布/订阅基础设施。
+- 与服务器主动发起传递无关的现有通知基元（`notifications/resources/updated`、`notifications/tools/list_changed` 等）的修改。
+- 评估基于代理的 MCP 用例及可能的 Agents 扩展（由 Agents 兴趣组负责）。
+
+<a id="related-groups" />
+### 相关小组
+
+- **[Transports 工作组](/community/working-groups/transports)**：传递和顺序保证取决于传输能力；回调语义必须与 stdio、Streamable HTTP 和未来的传输保持一致。
+- **[Agents 兴趣组](/community/interest-groups/agents)**：代理即工具、远程代理和监督者/子代理模式依赖 Tasks 及任务完成通知。兴趣组提供用例和需求，本工作组负责协议接口。
+
+<a id="leadership" />
+## 负责人
+
+| 角色 | 姓名 | 组织 | GitHub | 任期 |
+| --- | --- | --- | --- | --- |
+| 负责人 | 克莱尔·利古里 | 亚马逊网络服务 | [@clareliguori](https://github.com/clareliguori) | 初始任期 |
+| 负责人 | 彼得·亚历山大 | - | [@poita](https://github.com/poita) | 初始任期 |
+| 负责人 | 张卢卡 | 亚马逊网络服务 | [@LucaButBoring](https://github.com/LucaButBoring) | 初始任期 |
+| 负责人 | 凯蒂·麦卡弗里 | Microsoft | [@CaitieM20](https://github.com/CaitieM20) | 初始任期 |
+
+<a id="authority-decision-rights" />
+## 权限与决策权
+
+| 决策类型 | 权限级别 |
+| --- | --- |
+| 会议事务和安排 | 工作组负责人（自主决定） |
+| 工作组内的提案优先级 | 工作组负责人（自主决定） |
+| SEP 分流与结案（范围内） | 工作组负责人（自主决定并记录理由） |
+| 范围内的技术设计 | 工作组共识 |
+| 规范变更（增补） | 工作组达成共识 → 核心维护者批准 |
+| 规范变更（破坏性/根本性） | 工作组达成共识 → 核心维护者批准并进行更广泛审查 |
+| 扩大范围 | 必须经核心维护者批准 |
+| 工作组成员审批 | 由工作组成员提名担保 |
+
+<a id="membership" />
+## 成员
+
+| 姓名 | 组织 | GitHub | Discord | 级别 |
+| --- | --- | --- | --- | --- |
+| 克莱尔·利古里 | 亚马逊网络服务 | [@clareliguori](https://github.com/clareliguori) |  | 负责人 |
+| 彼得·亚历山大 | - | [@poita](https://github.com/poita) |  | 负责人 |
+| 张卢卡 | 亚马逊网络服务 | [@LucaButBoring](https://github.com/LucaButBoring) |  | 负责人 |
+| 凯蒂·麦卡弗里 | Microsoft | [@CaitieM20](https://github.com/CaitieM20) |  | 负责人 |
+
+<a id="operations" />
+## 运作方式
+
+| 会议 | 频率 | 时长 | 目的 |
+| --- | --- | --- | --- |
+| 工作会议 | 每周 | 30 分钟 | 技术讨论、提案审查 |
+
+会议安排发布于 [meet.modelcontextprotocol.io](https://meet.modelcontextprotocol.io)。
+
+<a id="resources" />
+## 资源
+
+- 孵化仓库：[modelcontextprotocol/experimental-ext-triggers-events](https://github.com/modelcontextprotocol/experimental-ext-triggers-events)
+- Tasks 扩展仓库：[modelcontextprotocol/ext-tasks](https://github.com/modelcontextprotocol/ext-tasks)
+- Tasks 规范：[SEP-2663：Tasks 扩展](/seps/2663-tasks-extension)
+
+<a id="deliverables-success-metrics" />
+## 交付成果与成功指标
+
+<a id="active-work-items" />
+### 正在进行的工作
+
+| 事项 | 状态 | 目标日期 | 负责人 |
+| --- | --- | --- | --- |
+| Tasks 稳定化并纳入核心协议 | 进行中 |  | [@LucaButBoring](https://github.com/LucaButBoring) |
+| SEP：MCP v1 中的 Events RFC | 构思中 | 4 月底 | 待定 |
+| Tier 1 SDK 参考实现 | — | 4 月底 | 待定 |
+
+<a id="success-criteria" />
+### 成功标准
+
+- 根据实现反馈使 Tasks 完全稳定，并从扩展纳入 MCP 核心协议。
+- 解决阻碍 Tasks 稳定化的生命周期歧义和一致性差距，或明确记录其处理结论。
+- 接受一份定义触发器/回调机制及其订阅生命周期的 SEP。
+- 至少在两个 Tier 1 SDK 中提供参考实现。
+- 为新基元提供一致性测试覆盖。
+
+<a id="changelog" />
+## 修订记录
+
+| 日期 | 变更 |
+| --- | --- |
+| 2026-03-24 | 初始章程（当时名为 Triggers and Events 工作组） |
+| 2026-10-16 | 更名为 Tasks 与 Events 工作组；Tasks 范围及其负责人从 Agents 工作组移交至此。 |

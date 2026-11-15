@@ -7,8 +7,10 @@ sidebarTitle: 常见问题
   MCP Registry 目前处于预览阶段。在正式发布之前，可能会发生破坏性更改或数据重置。如果遇到任何问题，请在 [GitHub](https://github.com/modelcontextprotocol/registry/issues) 上报告。
 </Note>
 
+<a id="general" />
 ## 常规
 
+<a id="what-is-the-difference-between-official-mcp-registry-mcp-registry-mcp-registry-mcp-registry-api-etc" />
 ### "Official MCP Registry"、"MCP Registry"、"MCP registry"、"MCP Registry API" 等之间有什么区别？
 
 - "MCP Registry API" — 一个实现了 MCP Registry 定义的 [OpenAPI 规范](https://github.com/modelcontextprotocol/registry/blob/main/docs/reference/api/openapi.yaml) 的 API。
@@ -16,14 +18,31 @@ sidebarTitle: 常见问题
 - "MCP registry" — 提供 MCP Registry API 的第三方服务。
 - "Official MCP Registry"（或 "The MCP Registry"）— 位于 `https://registry.modelcontextprotocol.io` 的服务。
 
+<a id="can-i-deleteunpublish-my-server" />
 ### 我可以删除/取消发布我的服务器吗？
 
-目前不行。在撰写本文时，正在进行 [公开讨论](https://github.com/modelcontextprotocol/registry/issues/104)。
+是的，您可以使用 `mcp-publisher status` 命令将服务器的状态更改为 `deleted`：
 
+```bash
+# Delete a specific version
+mcp-publisher status --status deleted --message "No longer maintained" \
+  io.github.my-username/my-server 1.0.0
+
+# Delete all versions
+mcp-publisher status --status deleted --all-versions --message "Project archived" \
+  io.github.my-username/my-server
+```
+
+已删除的服务器在默认 API 列表中隐藏，但仍可以使用 `include_deleted=true` 进行检索。您可以通过将已删除的服务器的状态设置回 `active` 来恢复该服务器。
+
+**注意**：服务器元数据永远不会从注册表中永久删除。 `deleted` 状态隐藏服务器不被发现，但保留历史记录。
+
+<a id="how-do-i-update-my-server-metadata" />
 ### 如何更新我的服务器元数据？
 
 提交一个带有唯一版本字符串的新 `server.json`。一旦发布，版本元数据是不可变的（类似于 npm）。
 
+<a id="can-i-add-custom-metadata-when-publishing" />
 ### 发布时可以添加自定义元数据吗？
 
 可以，发布到注册表时，`_meta.io.modelcontextprotocol.registry/publisher-provided` 下的自定义元数据会被保留。这允许你包含特定于发布过程的自定义元数据。
@@ -34,13 +53,16 @@ sidebarTitle: 常见问题
 
 </Warning>
 
+<a id="reporting-issues" />
 ## 报告问题
 
+<a id="what-if-i-need-to-report-a-spam-or-malicious-server" />
 ### 如果我需要报告垃圾或恶意服务器怎么办？
 
 1. 将其作为滥用行为报告给底层包注册表（例如 NPM、PyPI、DockerHub 等）；并且
 2. 在该注册表仓库上提交一个 GitHub issue，标题以 `Abuse report: ` 开头
 
+<a id="what-if-i-need-to-report-a-security-vulnerability-in-the-registry-itself" />
 ### 如果我需要报告注册表本身的安全漏洞怎么办？
 
 遵循 [MCP 社区 SECURITY.md](https://github.com/modelcontextprotocol/.github/blob/main/SECURITY.md)。

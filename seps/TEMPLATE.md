@@ -1,24 +1,28 @@
+<a id="sep-number-title" />
 # SEP-{NUMBER}: {标题}
 
-> **注意**: 此模板为 SEPs 提供了标准结构。你可以根据提案的具体需求调整各部分。例如，流程类 SEP 可能不需要“向后兼容性”部分，而标准跟踪类 SEP 应包含详细的技术规范。
+> **注意**: 此模板为 SEPs 提供了标准结构。你可以根据提案的具体需求调整各部分。例如，流程类 SEP 可能不需要“向后兼容性”部分，而标准轨道类 SEP 应包含详细的技术规范。
 
-- **状态**: Draft | In-Review | Accepted | Rejected | Withdrawn | Final | Superseded | Dormant
-- **类型**: Standards Track | Informational | Process | Extensions Track
-- **创建日期**: YYYY-MM-DD
-- **作者**: Name <email> (@github-username)
-- **赞助人**: @github-username（如果正在寻找赞助人，则为 "None"）
-- **PR**: https://github.com/modelcontextprotocol/modelcontextprotocol/pull/{NUMBER}
+- **状态**：草案|评论中 |已接受 |被拒绝 |撤回 |决赛|取代 |休眠状态
+- **类型**：标准轨道 |信息 |流程|扩展轨道
+- **创建**：YYYY-MM-DD
+- **作者**：姓名 <email> (@github-username)
+- **发起人**：姓名（@github-username），代表 X 工作组或核心维护者（“无”，直到其中一人同意发起）
+- **PR**：https://github.com/modelcontextprotocol/modelcontextprotocol/pull/{NUMBER}
 
+<a id="abstract" />
 ## 摘要
 
 对提案的简要（约 200 字）技术总结。这里应提供一个简明概述，使读者能够快速理解该 SEP 提议了什么。
 
+<a id="motivation" />
 ## 动机
 
 为什么需要这个变更？为什么当前的协议规范不足以解决该 SEP 所要解决的问题？
 
 对于希望修改 Model Context Protocol 的 SEPs 来说，动机部分至关重要。缺乏充分动机的 SEP 提交可能会被直接拒绝。
 
+<a id="specification" />
 ## 规范
 
 对所提议变更的详细技术规范。该规范应足够详细地描述任何新协议特性的语法和语义，以便不同实现能够互操作。
@@ -36,6 +40,7 @@
 - 角色与职责
 - 时间线或里程碑
 
+<a id="rationale" />
 ## 原因说明
 
 解释为何做出特定的设计决策。本节应：
@@ -46,6 +51,7 @@
 - 记录讨论中提出的重要反对意见或担忧
 - 提供社区内达成共识的证据
 
+<a id="backward-compatibility" />
 ## 向后兼容性
 
 **适用于引入向后不兼容性的 SEPs。**
@@ -59,6 +65,7 @@
 
 如果不存在向后兼容性问题，请明确说明。
 
+<a id="security-implications" />
 ## 安全影响
 
 描述与该提案相关的任何安全问题，包括：
@@ -70,6 +77,7 @@
 
 如果没有安全影响，请明确说明。
 
+<a id="reference-implementation" />
 ## 参考实现
 
 提供一个展示该提案的可运行原型链接，例如 SDK 分支或 fork、独立的概念验证，或参考服务器或客户端。SEP 被接受前必须提供原型，且原型无需达到可用于生产环境的程度。有关符合要求的内容，请参阅[原型要求](https://modelcontextprotocol.io/community/sep-guidelines#prototype-requirements)。
@@ -78,26 +86,32 @@ SEP 达到“Final”状态前，参考实现必须完成，并且任何所需�
 
 ---
 
+<a id="additional-optional-sections" />
 ## 其他可选部分
 
 根据你的 SEP，你可能还希望包括：
 
+<a id="performance-implications" />
 ### 性能影响
 
 此变更如何影响性能、可扩展性或资源使用？
 
+<a id="testing-plan" />
 ### 测试计划
 
 将如何测试该提案？实现应覆盖哪些测试用例？
 
+<a id="alternatives-considered" />
 ### 替代方案
 
 对被否决的替代方法进行详细讨论，以及为何被拒绝。
 
+<a id="open-questions" />
 ### 未解决的问题
 
 需要社区输入或进一步讨论的未决问题。
 
+<a id="acknowledgments" />
 ### 致谢
 
 感谢提供想法、反馈或审阅的人。

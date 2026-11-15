@@ -3,50 +3,58 @@ title: MCP Apps 工作组章程
 description: MCP Apps 工作组章程
 ---
 
+<a id="group-type" />
 ## 组类型
 
 **工作组**
 
+<a id="mission-statement" />
 ## 使命宣言
 
 MCP Apps 工作组定义、发展和维护用于通过 MCP 提供交互式用户界面的官方扩展。工作组负责监督扩展规范、SDK、参考实现、安全模型、兼容性工作和指导，以便应用能够在独立的 MCP 主机之间安全且一致地运行。
 
+<a id="scope" />
 ## 范围
 
+<a id="in-scope" />
 ### 范围内
 
-- **规范工作**：[MCP Apps 扩展规范](https://github.com/modelcontextprotocol/ext-apps/tree/main/specification)及相关 SEP，涵盖以下 `io.modelcontextprotocol/ui` 命名空间下的领域。
-- **应用生命周期**：应用如何声明、初始化、持久化和拆除，包括 UI 资源声明和工具元数据。
-- **应用交互模型**：用户、应用和主机之间的交互协议，例如双向消息传递、应用工具等。
-- **内容类型和渲染目标**：支持不同的内容类型和方法，例如生成式 UI，并与 [A2UI](https://a2ui.org/) 和 [AG-UI](https://ag-ui.com/) 等外部协议实现互操作性。
-- **安全模型**：UI 发起操作的威胁模型、沙箱、安全策略、权限和可审计性。
+- **规范工作**：[MCP 应用扩展规范](https://github.com/modelcontextprotocol/ext-apps/tree/main/specification) 和相关 SEP，涵盖 `io.modelcontextprotocol/ui` 命名空间下的以下区域。
+- **应用程序生命周期**：应用程序如何声明、初始化、持久化和拆除，包括 UI 资源声明和工具元数据。
+- **应用程序交互模型**：用户、应用程序和主机之间的交互协议，例如双向消息传递、应用程序工具等。
+- **内容类型和渲染目标**：支持不同的内容类型和方法（例如生成 UI），并具有与 [A2UI](https://a2ui.org/) 和 [AG-UI](https://ag-ui.com/) 等外部协议的互操作性。
+- **安全模型**：威胁模型、沙箱、安全策略、权限和 UI 发起操作的可审核性。
 - **SDK 和参考实现**：[`@modelcontextprotocol/ext-apps`](https://github.com/modelcontextprotocol/ext-apps) SDK、参考主机、示例服务器和主机集成示例。
-- **兼容性**：兼容性测试、应用验证，以及应用和主机兼容性要求的定义。
-- **跨领域协调**：应用发现和元数据（与 Registry WG 协作）、智能体流程中的 UI（与 Agents WG 协作），以及各语言 SDK 支持（与 SDK WG 协作）。
+- **一致性**：兼容性测试、应用程序验证以及应用程序和主机的一致性要求的定义。
+- **跨领域协调**：应用程序发现和元数据（通过注册表工作组）、代理流程中的 UI（通过代理 IG）以及每种语言的 SDK 支持（通过 SDK 工作组）。
 - **文档**：API 参考、创作指南、主机集成指南、入门资源和示例。
 
+<a id="out-of-scope" />
 ### 范围外
 
-- **核心协议所有权**：对基础 MCP 语义、传输或生命周期的更改应通过 [SEP 流程](/community/sep-guidelines)提出，并由相关小组或 Core Maintainers 负责。
-- **特定主机的产品和设计决策**：主机负责控制其用户体验和视觉设计。工作组负责标准化互操作性和安全契约。
-- **单个应用实现**：基于该扩展构建的应用仍由其作者负责。
-- **通用智能体编排**：智能体循环、任务管理和子智能体协调属于 Agents WG。本工作组仅涵盖交互式 UI 表面及其集成点。
+- **核心协议所有权**：对基本 MCP 语义、传输或生命周期的更改通过 [SEP 流程](/community/sep-guidelines) 提出，并由相关组或核心维护者拥有。
+- **特定于主机的产品和设计决策**：主机控制其用户体验和视觉设计。工作组对互操作性和安全合同进行了标准化。
+- **单独的应用程序实现**：基于扩展构建的应用程序仍然由其作者负责。
+- **一般代理编排**：代理循环和子代理协调属于代理 IG，任务管理属于任务和事件工作组。该工作组仅涵盖交互式 UI 界面及其集成点。
 
+<a id="related-groups" />
 ### 相关小组
 
-- **Agents WG**：智能体流程和任务生命周期中的交互式 UI。
-- **[Registry WG](/community/working-groups/registry)**：应用发现、分发和元数据。
-- **[Security IG](/community/interest-groups/security)**：沙箱、权限以及对 UI 发起操作的审查。
-- **[SDK WG](/community/working-groups/sdk)**：SDK 一致性，以及 TypeScript 参考实现之外的支持。
+- **代理 IG**：代理流程和任务生命周期内的交互式 UI。
+- **[注册表工作组](/community/working-groups/registry)**：应用程序发现、分发和元数据。
+- **[安全 IG](/community/interest-groups/security)**：沙盒、权限和 UI 启动操作的审查。
+- **[SDK WG](/community/working-groups/sdk)**：TypeScript 参考实现之外的 SDK 一致性和支持。
 
+<a id="leadership" />
 ## 领导层
 
 | 角色 | 姓名           | 组织       | GitHub                                 | 任期   |
 | ---- | -------------- | ---------- | -------------------------------------- | ------ |
-| 负责人 | Ido Salomon    | MCP-UI     | [@idosal](https://github.com/idosal)   | 初始   |
-| 负责人 | Liad Yosef     | MCP-UI / Ora | [@liady](https://github.com/liady)     | 初始   |
-| 负责人 | Olivier Chafik | Anthropic  | [@ochafik](https://github.com/ochafik) | 初始   |
+| 负责人 | 伊多·所罗门    | MCP-UI     | [@idosal](https://github.com/idosal)   | 初始   |
+| 负责人 | 利亚德·约瑟夫     | MCP-UI/奥拉 | [@liady](https://github.com/liady)     | 初始   |
+| 负责人 | 奥利维尔·查菲克 | Anthropic  | [@ochafik](https://github.com/ochafik) | 初始   |
 
+<a id="authority-decision-rights" />
 ## 权限与决策权
 
 | 决策类型                         | 权限级别                                      |
@@ -60,17 +68,19 @@ MCP Apps 工作组定义、发展和维护用于通过 MCP 提供交互式用户
 | 范围扩展                         | 必须获得 Core Maintainer 批准                 |
 | 工作组成员批准                   | 工作组成员发起人                              |
 
+<a id="membership" />
 ## 成员
 
 | 姓名             | 组织机构 | GitHub                                           | Discord | 级别     |
 | ---------------- | ------------ | ------------------------------------------------ | ------- | --------- |
-| Ido Salomon      | MCP-UI       | [@idosal](https://github.com/idosal)             |         | 负责人      |
-| Liad Yosef       | MCP-UI / Ora | [@liady](https://github.com/liady)               |         | 负责人      |
-| Olivier Chafik   | Anthropic    | [@ochafik](https://github.com/ochafik)           |         | 负责人      |
-| Anton Pidkuiko   | Anthropic    | [@antonpk1](https://github.com/antonpk1)         |         | 工作组成员 |
-| Max Stoiber      | OpenAI       | [@mstoiber-oai](https://github.com/mstoiber-oai) |         | 工作组成员 |
-| Dominic Farolino | Google       | [@domfarolino](https://github.com/domfarolino)   |         | 工作组成员 |
+| 伊多·所罗门      | MCP-UI       | [@idosal](https://github.com/idosal)             |                  | 负责人      |
+| 利亚德·约瑟夫       | MCP-UI/奥拉 | [@liady](https://github.com/liady)               |                  | 负责人      |
+| 奥利维尔·查菲克   | Anthropic    | [@ochafik](https://github.com/ochafik)           |                  | 负责人      |
+| 安东·皮德奎科   | Anthropic    | [@antonpk1](https://github.com/antonpk1)         |                  | 工作组成员 |
+| 马克斯·斯托伊伯      | OpenAI       | [@mstoiber-oai](https://github.com/mstoiber-oai) |                  | 工作组成员 |
+| 多米尼克·法罗里诺 | Google       | [@domfarolino](https://github.com/domfarolino)   |                  | 工作组成员 |
 
+<a id="operations" />
 ## 运作
 
 | 会议     | 频率                             | 时长       | 目的                                                         |
@@ -81,6 +91,7 @@ MCP Apps 工作组定义、发展和维护用于通过 MCP 提供交互式用户
 
 Discord：`#mcp-apps-wg`
 
+<a id="resources" />
 ## 资源
 
 - 规范和 SDK：[modelcontextprotocol/ext-apps](https://github.com/modelcontextprotocol/ext-apps)（`@modelcontextprotocol/ext-apps`）
@@ -89,22 +100,25 @@ Discord：`#mcp-apps-wg`
 - API 文档：[apps.extensions.modelcontextprotocol.io](https://apps.extensions.modelcontextprotocol.io/)
 - 工作跟踪：[ext-apps 问题](https://github.com/modelcontextprotocol/ext-apps/issues)和[拉取请求](https://github.com/modelcontextprotocol/ext-apps/pulls)
 
+<a id="deliverables-success-metrics" />
 ## 交付成果与成功指标
 
+<a id="active-work-items" />
 ### 进行中的工作项
 
 正在进行的工作记录在 ext-apps 的[问题跟踪器](https://github.com/modelcontextprotocol/ext-apps/issues)和[拉取请求](https://github.com/modelcontextprotocol/ext-apps/pulls)中。主要工作流包括：
 
 | 项目                                                                                                                                             | 状态       | 目标日期 | 负责人                                                                                                                   |
 | ------------------------------------------------------------------------------------------------------------------------------------------------ | ---------- | -------- | ------------------------------------------------------------------------------------------------------------------------ |
-| 规范和 SDK 演进：协议对齐、能力协商、版本控制，以及 `@modelcontextprotocol/ext-apps` 的维护     | 进行中     |          | [@idosal](https://github.com/idosal)、[@liady](https://github.com/liady)、[@ochafik](https://github.com/ochafik)           |
-| 解决工具和服务器之间的视图泛滥问题（可复用且独立的视图）                                                                    | 进行中     |          | [@mstoiber-oai](https://github.com/mstoiber-oai)、[@idosal](https://github.com/idosal)、[@liady](https://github.com/liady) |
-| 正式确定安全模型并扩展沙箱和权限                                                                                   | 进行中     |          | [@idosal](https://github.com/idosal)                                                                                       |
-| 试验应用工具交互模型（WebMCP 方法）                                                                                | 进行中     |          | [@ochafik](https://github.com/ochafik)                                                                                     |
-| 解决动态资源内容和非 HTML 主机问题                                                                                              | 草案       |          | [@liady](https://github.com/liady)、[@idosal](https://github.com/idosal)                                                   |
-| 兼容性和跨主机互操作性：官方验证器、公共平台测试和兼容性报告                              | 进行中     |          | [@idosal](https://github.com/idosal)                                                                                       |
-| 开发者体验和生态系统采用：参考主机、创作工具、示例、文档、可访问性和发现协调 | 维护中     |          | [@idosal](https://github.com/idosal)                                                                                       |
+| 规范和 SDK 演进：协议对齐、能力协商、版本控制，以及 `@modelcontextprotocol/ext-apps` 的维护     | 进行中     |                    | [@idosal](https://github.com/idosal)、[@liady](https://github.com/liady)、[@ochafik](https://github.com/ochafik)           |
+| 解决工具和服务器之间的视图泛滥问题（可复用且独立的视图）                                                                    | 进行中     |                    | [@mstoiber-oai](https://github.com/mstoiber-oai)、[@idosal](https://github.com/idosal)、[@liady](https://github.com/liady) |
+| 正式确定安全模型并扩展沙箱和权限                                                                                   | 进行中     |                    | [@idosal](https://github.com/idosal)                                                                                       |
+| 试验应用工具交互模型（WebMCP 方法）                                                                                | 进行中     |                    | [@ochafik](https://github.com/ochafik)                                                                                     |
+| 解决动态资源内容和非 HTML 主机问题                                                                                              | 草案       |                    | [@liady](https://github.com/liady)、[@idosal](https://github.com/idosal)                                                   |
+| 兼容性和跨主机互操作性：官方验证器、公共平台测试和兼容性报告                              | 进行中     |                    | [@idosal](https://github.com/idosal)                                                                                       |
+| 开发者体验和生态系统采用：参考主机、创作工具、示例、文档、可访问性和发现协调 | 维护中     |                    | [@idosal](https://github.com/idosal)                                                                                       |
 
+<a id="success-criteria" />
 ### 成功标准
 
 - 扩展规范、SDK、参考主机和示例得到积极维护，并能及时分类处理规范和 SDK 问题。
@@ -113,6 +127,7 @@ Discord：`#mcp-apps-wg`
 - 破坏性更改很少发生，有文档记录，并且在更改前提供适当的弃用和迁移路径。
 - MCP Apps 是智能体 Web 的标准 UI 层。
 
+<a id="changelog" />
 ## 变更日志
 
 | 日期       | 更改                                                                 |

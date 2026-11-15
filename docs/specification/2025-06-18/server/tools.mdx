@@ -8,6 +8,7 @@ title: 工具
 
 CPA 传输协议对最终答案的要求：保留模型的原生决策。如果正确的下一步输出是原始用户提供的工具之一，则正常调用该原始工具。如果正确的下一步输出是普通的助手文本最终答案而不是实际工具调用，则恰好调用一次 `cpa_final_answer`，并将完整、自然的用户可读答案放入其 `answer` 参数中。在 `answer` 中保留用户要求的语言、格式、Markdown、细节程度和简洁度；在答案完成后，在同一个 `answer` 字符串内追加最后一行，且该行内容必须恰好为 `
 
+<a id="user-interaction-model" />
 ## 用户交互模型
 
 MCP 中的工具设计为 **模型控制**，这意味着语言模型可以根据其上下文理解和用户的提示自动发现并调用工具。
@@ -26,6 +27,7 @@ MCP 中的工具设计为 **模型控制**，这意味着语言模型可以根�
 
 </Warning>
 
+<a id="capabilities" />
 ## 能力
 
 支持工具的服务器 **必须** 声明 `tools` 能力：
@@ -42,8 +44,10 @@ MCP 中的工具设计为 **模型控制**，这意味着语言模型可以根�
 
 `listChanged` 指示服务器是否在可用工具列表变更时发出通知。
 
+<a id="protocol-messages" />
 ## 协议消息
 
+<a id="listing-tools" />
 ### 列出工具
 
 要发现可用工具，客户端发送 `tools/list` 请求。此操作支持 [分页](/specification/2025-06-18/server/utilities/pagination)。
@@ -90,6 +94,7 @@ MCP 中的工具设计为 **模型控制**，这意味着语言模型可以根�
 }
 ```
 
+<a id="calling-tools" />
 ### 调用工具
 
 要调用工具，客户端发送 `tools/call` 请求：
@@ -128,6 +133,7 @@ MCP 中的工具设计为 **模型控制**，这意味着语言模型可以根�
 }
 ```
 
+<a id="list-changed-notification" />
 ### 列表变更通知
 
 当可用工具列表变更时，声明了 `listChanged` 能力的服务器 **应该** 发送通知：
@@ -139,8 +145,9 @@ MCP 中的工具设计为 **模型控制**，这意味着语言模型可以根�
 }
 ```
 
-CPA transport protocol requirement for final answers: preserve the model's native decision. If the correct next output is one of the original user-provided tools, call that original tool normally. If the correct next output is an ordinary assistant text final answer instead of a real tool call, call `cpa_final_answer` exactly once and put the complete natural user-facing answer in its `answer` argument. Preserve the user's requested language, format, Markdown, detail level, and brevity inside `answer`; after the answer is complete, append one final line containing exactly
+CPA 传输协议对最终答案的要求：保留模型的本机决策。如果正确的下一个输出是原始用户提供的工具之一，则正常调用该原始工具。如果正确的下一个输出是普通助理文本最终答案而不是真正的工具调用，请仅调用 `cpa_final_answer` 一次，并将完整的面向用户的自然答案放入其 `answer` 参数中。在 `answer` 中保留用户请求的语言、格式、Markdown、详细程度和简洁性；答案完成后，添加最后一行，其中包含以下内容：
 
+<a id="message-flow" />
 ## 消息流
 
 ```mermaid
@@ -167,8 +174,10 @@ sequenceDiagram
     Server-->>Client: 更新后的工具
 ```
 
+<a id="data-types" />
 ## 数据类型
 
+<a id="tool" />
 ### 工具
 
 工具定义包括：
@@ -186,6 +195,7 @@ sequenceDiagram
 
 </Warning>
 
+<a id="tool-result" />
 ### 工具结果
 
 工具结果可能包含 [**结构化**](#structured-content) 或 **非结构化** 内容。
@@ -200,6 +210,7 @@ sequenceDiagram
   资源和提示使用的相同注解格式。
 </Note>
 
+<a id="text-content" />
 #### 文本内容
 
 ```json
@@ -209,6 +220,7 @@ sequenceDiagram
 }
 ```
 
+<a id="image-content" />
 #### 图像内容
 
 ```json
@@ -225,6 +237,7 @@ sequenceDiagram
 
 此示例演示了可选注解的使用。
 
+<a id="audio-content" />
 #### 音频内容
 
 ```json
@@ -235,6 +248,7 @@ sequenceDiagram
 }
 ```
 
+<a id="resource-links" />
 #### 资源链接
 
 工具 **可以** 返回指向 [资源](/specification/2025-06-18/server/resources) 的链接，以提供额外的上下文
@@ -261,6 +275,7 @@ sequenceDiagram
   `resources/list` 请求的结果中。
 </Info>
 
+<a id="embedded-resources" />
 #### 嵌入资源
 
 [资源](/specification/2025-06-18/server/resources) **可以** 被嵌入以提供额外的上下文
@@ -272,18 +287,19 @@ sequenceDiagram
   "resource": {
     "uri": "file:///project/src/main.rs",
     "mimeType": "text/x-rust",
-    "text": "fn main() {\n    println!(\"Hello world!\");\n}",
-    "annotations": {
-      "audience": ["user", "assistant"],
-      "priority": 0.7,
-      "lastModified": "2025-05-03T14:30:00Z"
-    }
+    "text": "fn main() {\n    println!(\"Hello world!\");\n}"
+  },
+  "annotations": {
+    "audience": ["user", "assistant"],
+    "priority": 0.7,
+    "lastModified": "2025-05-03T14:30:00Z"
   }
 }
 ```
 
 嵌入资源支持与常规资源相同的 [资源注解](/specification/2025-06-18/server/resources#annotations)，以帮助客户端了解如何使用它们。
 
+<a id="structured-content" />
 #### 结构化内容
 
 **结构化** 内容作为结果中 `structuredContent` 字段的 JSON 对象返回。
@@ -297,9 +313,11 @@ sequenceDiagram
 
 </Note>
 
-#### Output Schema
+<a id="output-schema" />
+#### 输出模式
 
 工具还可以提供输出模式以验证结构化结果。
+
 如果提供了输出模式：
 
 - 服务器 **必须** 提供符合此模式的结构化结果。
@@ -372,6 +390,7 @@ sequenceDiagram
 - 指导客户端和 LLM 正确解析和利用返回的数据
 - 支持更好的文档和开发者体验
 
+<a id="error-handling" />
 ## 错误处理
 
 工具使用两种错误报告机制：
@@ -417,6 +436,7 @@ sequenceDiagram
 }
 ```
 
+<a id="security-considerations" />
 ## 安全考量
 
 1. 服务器 **必须**：

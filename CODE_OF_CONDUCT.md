@@ -1,141 +1,171 @@
-# Contributor Covenant Code of Conduct
+<a id="contributor-covenant-code-of-conduct" />
+# 贡献者契约行为准则
 
-## Our Pledge
+<a id="our-pledge" />
+## 我们的承诺
 
-We as members, contributors, and leaders pledge to make participation in our community a
-harassment-free experience for everyone, regardless of age, body size, visible or
-invisible disability, ethnicity, sex characteristics, gender identity and expression,
-level of experience, education, socio-economic status, nationality, personal appearance,
-race, religion, or sexual identity and orientation.
+作为成员、贡献者和领导者，我们承诺让参与我们的社区成为一种
+为每个人提供无骚扰的体验，无论年龄、体型、可见度或
+隐形残疾、种族、性别特征、性别认同和表达，
+经验水平、教育程度、社会经济地位、国籍、个人外表、
+种族、宗教或性认同和取向。
 
-We pledge to act and interact in ways that contribute to an open, welcoming, diverse,
-inclusive, and healthy community.
+我们承诺以有助于营造开放、热情、多元化、
+包容、健康的社区。
 
-## Our Standards
+<a id="our-standards" />
+## 我们的标准
 
-Examples of behavior that contributes to a positive environment for our community
-include:
+为我们的社区营造积极环境的行为示例
+包括：
+- 对他人表现出同理心和友善
+- 尊重不同的意见、观点和经验
+- 给予并优雅地接受建设性反馈
+- 接受责任并向受我们的错误影响的人道歉，以及
+  从经验中学习
+- 关注不仅对我们个人最有利，而且对整个社区最有利的事情
+不可接受的行为示例包括：
+- 使用性语言或图像，以及任何形式的性关注或挑逗
+- 恶搞、侮辱或贬损评论，以及人身或政治攻击
+- 公开或私人骚扰
+- 未经许可而公开他人的私人信息，例如实际地址或电子邮件地址
+  他们的明确许可
+- 携带第三方人工智能记事本、会议机器人或其他非官方录音或
+  将工具转录为社区会议（请参阅[社区会议](#community-meetings)）
+- 专业人士合理认为不适当的其他行为
+  设置
 
-- Demonstrating empathy and kindness toward other people
-- Being respectful of differing opinions, viewpoints, and experiences
-- Giving and gracefully accepting constructive feedback
-- Accepting responsibility and apologizing to those affected by our mistakes, and
-  learning from the experience
-- Focusing on what is best not just for us as individuals, but for the overall community
+<a id="community-meetings" />
+## 社区会议
 
-Examples of unacceptable behavior include:
+工作组、兴趣小组和其他社区会议使用官方 Google Meet
+转录，由会议主持人启用。想要会议记录的参与者
+应使用该记录和已发布的会议记录。
 
-- The use of sexualized language or imagery, and sexual attention or advances of any kind
-- Trolling, insulting or derogatory comments, and personal or political attacks
-- Public or private harassment
-- Publishing others' private information, such as a physical or email address, without
-  their explicit permission
-- Other conduct which could reasonably be considered inappropriate in a professional
-  setting
+参与者不得添加第三方人工智能记录员、会议机器人或其他自动化工具
+录音或转录服务（例如 Otter.ai、Fireflies.ai、Read.ai 或类似服务）
+工具）参加社区会议，无论是直接邀请他们还是让他们加入
+自动从个人日历或帐户。参与者也不得记录或
+使用自己的工具转录会议。这些服务捕捉了人们的声音和话语
+每个人都未经同意就出席，并根据项目规定的条款存储数据
+不控制。
 
-## Enforcement Responsibilities
+会议主持人可以随时从会议中删除未经授权的机器人，恕不另行通知。
 
-Community leaders are responsible for clarifying and enforcing our standards of
-acceptable behavior and will take appropriate and fair corrective action in response to
-any behavior that they deem inappropriate, threatening, offensive, or harmful.
+反复将机器人或非官方录音工具带入会议属于违反规定的行为
+本行为准则并根据[执行指南](#enforcement-guidelines) 进行处理。
 
-Community leaders have the right and responsibility to remove, edit, or reject comments,
-commits, code, wiki edits, issues, and other contributions that are not aligned to this
-Code of Conduct, and will communicate reasons for moderation decisions when appropriate.
+<a id="enforcement-responsibilities" />
+## 执法职责
 
-## Scope
+社区领袖负责阐明和执行我们的标准
+可接受的行为，并将采取适当和公平的纠正措施来应对
+他们认为不适当、威胁、冒犯或有害的任何行为。
 
-This Code of Conduct applies within all community spaces, and also applies when an
-individual is officially representing the community in public spaces. Examples of
-representing our community include using an official e-mail address, posting via an
-official social media account, or acting as an appointed representative at an online or
-offline event.
+社区领袖有权利和责任删除、编辑或拒绝评论，
+与此不一致的提交、代码、wiki 编辑、问题和其他贡献
+行为准则，并将在适当的时候传达审核决定的原因。
 
-## Enforcement
+<a id="scope" />
+## 范围
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to
-the community leaders responsible for enforcement at mcp-coc@anthropic.com. All
-complaints will be reviewed and investigated promptly and fairly.
+本行为准则适用于所有社区空间，也适用于
+个人在公共场所正式代表社区。的例子
+代表我们的社区包括使用官方电子邮件地址、通过
+官方社交媒体帐户，或作为在线或社交媒体的指定代表
+线下活动。
 
-All community leaders are obligated to respect the privacy and security of the reporter
-of any incident.
+<a id="enforcement" />
+## 执行
 
-## Enforcement Guidelines
+辱骂、骚扰或其他不可接受的行为的情况可能会报告给
+负责执行的社区领导在 mcp-coc@anthropic.com。全部
+投诉将得到及时、公正的审查和调查。
 
-Community leaders will follow these Community Impact Guidelines in determining the
-consequences for any action they deem in violation of this Code of Conduct:
+所有社区领导都有义务尊重记者的隐私和安全
+任何事件。
 
-### 1. Correction
+<a id="enforcement-guidelines" />
+## 执行指南
 
-**Community Impact**: Use of inappropriate language or other behavior deemed
-unprofessional or unwelcome in the community.
+社区领导者将遵循这些社区影响指南来确定
+他们认为违反本行为准则的任何行为的后果：
 
-**Consequence**: A private, written warning from community leaders, providing clarity
-around the nature of the violation and an explanation of why the behavior was
-inappropriate. A public apology may be requested.
+<a id="1-correction" />
+### 1. 更正
 
-### 2. Warning
+**社区影响**：使用不当语言或其他被视为的行为
+不专业或在社区中不受欢迎。
 
-**Community Impact**: A violation through a single incident or series of actions.
+**后果**：来自社区领袖的私人书面警告，提供清晰的信息
+围绕违规行为的性质以及对行为原因的解释
+不合适。可能会要求公开道歉。
 
-**Consequence**: A warning with consequences for continued behavior. No interaction with
-the people involved, including unsolicited interaction with those enforcing the Code of
-Conduct, for a specified period of time. This includes avoiding interactions in community
-spaces as well as external channels like social media. Violating these terms may lead to
-a temporary or permanent ban.
+<a id="2-warning" />
+### 2.警告
 
-### 3. Temporary Ban
+**社区影响**：通过单个事件或一系列行为造成的违规行为。
 
-**Community Impact**: A serious violation of community standards, including sustained
-inappropriate behavior.
+**后果**：对持续行为产生后果的警告。没有互动
+相关人员，包括与执行《守则》的人员主动互动
+在指定的时间内进行。这包括避免在社区中互动
+空间以及社交媒体等外部渠道。违反这些条款可能会导致
+临时或永久禁令。
 
-**Consequence**: A temporary ban from any sort of interaction or public communication
-with the community for a specified period of time. No public or private interaction with
-the people involved, including unsolicited interaction with those enforcing the Code of
-Conduct, is allowed during this period. Violating these terms may lead to a permanent
-ban.
+<a id="3-temporary-ban" />
+### 3. 临时禁令
 
-### 4. Permanent Ban
+**社区影响**：严重违反社区标准，包括持续
+不当行为。
 
-**Community Impact**: Demonstrating a pattern of violation of community standards,
-including sustained inappropriate behavior, harassment of an individual, or aggression
-toward or disparagement of classes of individuals.
+**后果**：暂时禁止任何形式的互动或公共交流
+在指定的时间内与社区合作。没有公开或私人互动
+相关人员，包括与执行《守则》的人员主动互动
+在此期间，行为是允许的。违反这些条款可能会导致永久
+禁令。
 
-**Consequence**: A permanent ban from any sort of public interaction within the
-community.
+<a id="4-permanent-ban" />
+### 4. 永久封禁
 
-## Appeals
+**社区影响**：展示违反社区标准的模式，
+包括持续的不当行为、对个人的骚扰或攻击
+针对或贬低个人阶级。
 
-If you believe an enforcement action taken against you was made in error, you may appeal
-it by emailing appeals@modelcontextprotocol.io. This channel exists specifically for
-appealing Code of Conduct enforcement actions, including organization-level bans.
+**后果**：永久禁止在社区内进行任何形式的公共互动
+社区。
 
-Because appeals are handled over email rather than on GitHub, you can reach the team even
-if your access to GitHub repositories, issues, or pull requests has been removed as part
-of an enforcement action.
+<a id="appeals" />
+## 上诉
 
-When submitting an appeal, please include:
+如果您认为针对您采取的强制措施是错误的，您可以提出上诉
+发送电子邮件至 appeals@modelcontextprotocol.io。该频道专门针对
+呼吁行为准则执行行动，包括组织级别的禁令。
 
-- The account or username affected by the action
-- The action you are appealing (for example, a temporary or permanent ban)
-- Why you believe the action should be reconsidered, with thorough evidence supporting
-  any surrounding context
+由于申诉是通过电子邮件而不是 GitHub 处理的，因此您甚至可以联系团队
+如果您对 GitHub 存储库、问题或拉取请求的访问权限已被删除
+的强制执行行动。
 
-Appeals are reviewed by the moderation and lead maintainer team. While we will make an
-effort to respond to appeals filed in good faith, bandwidth constraints mean we may not
-be able to respond to every appeal. We will only review one appeal per enforcement action,
-so please be thorough when submitting your appeal.
+提交申诉时，请包括：
+- 受该操作影响的帐户或用户名
+- 您上诉的行动（例如，临时或永久禁令）
+- 为什么您认为应该重新考虑该行动，并有充分的证据支持
+  任何周围环境
+申诉由审核和首席维护团队审核。虽然我们会做一个
+尽力回应善意提出的上诉，但带宽限制意味着我们可能无法
+能够回应每一个呼吁。每项执法行动我们只会审查一项上诉，
+因此，提交申诉时请务必彻底。
 
-## Attribution
+<a id="attribution" />
+## 归因
 
-This Code of Conduct is adapted from the [Contributor Covenant][homepage], version 2.0,
-available at https://www.contributor-covenant.org/version/2/0/code_of_conduct.html.
-
-Community Impact Guidelines were inspired by
-[Mozilla's code of conduct enforcement ladder](https://github.com/mozilla/diversity).
+本行为准则改编自[贡献者契约][主页]2.0版，
+可在 https://www.contributor-covenant.org/version/2/0/code_of_conduct.html. 购买
+社区影响指南的灵感来自
+[Mozilla 行为准则执行阶梯](https://github.com/mozilla/diversity)。
 
 [homepage]: https://www.contributor-covenant.org
 
-For answers to common questions about this code of conduct, see the FAQ at
-https://www.contributor-covenant.org/faq. Translations are available at
+有关此行为准则的常见问题的解答，请参阅常见问题解答：
+
+https://www.contributor-covenant.org/faq. 翻译可在
 https://www.contributor-covenant.org/translations.

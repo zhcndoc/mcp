@@ -17,38 +17,42 @@ MCP 支持三种客户端注册机制。请根据你的场景进行选择：
 3. 如果授权服务器支持（通过 OAuth Authorization Server Metadata 中的 `registration_endpoint`），则将动态客户端注册作为回退方案
 4. 如果没有其他可用选项，则提示用户输入客户端信息
 
+<a id="client-id-metadata-documents" />
 ## 客户端 ID 元数据文档
 
-MCP 客户端和授权服务器 **SHOULD** 支持 OAuth 客户端 ID 元数据文档，如
-[OAuth Client ID Metadata Document](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-client-id-metadata-document-00)
-所定义，用于客户端注册。
+MCP 客户端和授权服务器 **应该** 支持 OAuth 客户端 ID 元数据文档，如
+[OAuth 客户端 ID 元数据文档](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-client-id-metadata-document-03)
+用于客户注册。
 
 这种方式允许客户端使用 HTTPS URL 作为客户端标识符，其中该 URL 指向一个包含客户端元数据的 JSON 文档。
+
 这解决了 MCP 的常见场景：服务器和客户端之间没有预先存在的关系。
 
+<a id="implementation-requirements" />
 ### 实现要求
 
-支持客户端 ID 元数据文档的 MCP 实现 **MUST** 遵循
-[OAuth Client ID Metadata Document](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-client-id-metadata-document-00) 中规定的要求。
-关键要求包括：
+支持客户端 ID 元数据文档的 MCP 实现**必须**遵循中指定的要求
+[OAuth 客户端 ID 元数据文档](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-client-id-metadata-document-03)。
+
+主要要求包括：
 
 **对于 MCP 客户端：**
 
-- 客户端 **MUST** 将其元数据文档托管在符合 RFC 要求的 HTTPS URL 上
-- `client_id` URL **MUST** 使用 `"https"` 方案并包含路径组件，例如 `https://example.com/client.json`
-- 元数据文档 **MUST** 至少包含以下属性：`client_id`、`client_name`、`redirect_uris`
-- 客户端 **MUST** 确保元数据中的 `client_id` 值与文档 URL 完全一致
-- 客户端 **MAY** 在客户端认证中使用 `private_key_jwt`（例如用于 token endpoint 请求），并按照 [Client ID Metadata Document 第 6.2 节](https://www.ietf.org/archive/id/draft-ietf-oauth-client-id-metadata-document-00.html#section-6.2) 所述进行适当的 JWKS 配置
-
+- 客户端**必须**按照 RFC 要求将其元数据文档托管在 HTTPS URL 上
+- `client_id` URL **必须**使用“https”方案并包含路径组件，例如`https://example.com/client.json`
+- 元数据文档**必须**至少包含以下属性：`client_id`、`client_name`、`redirect_uris`
+- 客户端**必须**确保元数据中的 `client_id` 值与文档 URL 完全匹配
+- 客户端 **可以** 使用 `private_key_jwt` 进行客户端身份验证（例如，用于向令牌端点发出请求），并具有适当的 JWKS 配置，如 [客户端 ID 元数据文档第 5 节](https://www.ietf.org/archive/id/draft-ietf-oauth-client-id-metadata-document-03.html#section-5) 中所述
 **对于授权服务器：**
 
-- 在遇到 URL 格式的 `client_id` 时，**SHOULD** 获取元数据文档
-- **MUST** 验证获取到的文档中的 `client_id` 与 URL 完全匹配
-- **SHOULD** 按照 HTTP 缓存头缓存元数据
-- **MUST** 根据元数据文档验证授权请求中提供的重定向 URI
-- **MUST** 验证文档结构是否为有效 JSON 且包含必需字段
-- **SHOULD** 遵循 [Client ID Metadata Document 第 6 节](https://www.ietf.org/archive/id/draft-ietf-oauth-client-id-metadata-document-00.html#section-6) 和 [Client ID Metadata Document 安全注意事项](/specification/draft/basic/authorization/security-considerations#client-id-metadata-document-security) 中的安全考虑
+- **应该** 在遇到 URL 格式的 client_ids 时获取元数据文档
+- **必须** 验证获取的文档的 `client_id` 是否与 URL 完全匹配
+- **应该** 缓存有关 HTTP 缓存标头的元数据
+- **必须** 根据元数据文档中的重定向 URI 验证授权请求中提供的重定向 URI
+- **必须** 验证文档结构是有效的 JSON 并包含必填字段
+- **应该**遵循[客户端 ID 元数据文档第 10 节](https://www.ietf.org/archive/id/draft-ietf-oauth-client-id-metadata-document-03.html#section-10) 和 [客户端 ID 元数据文档安全](/specification/draft/basic/authorization/security-considerations#client-id-metadata-document-security) 中的安全注意事项
 
+<a id="example-metadata-document" />
 ### 元数据文档示例
 
 ```json
@@ -67,6 +71,7 @@ MCP 客户端和授权服务器 **SHOULD** 支持 OAuth 客户端 ID 元数据�
 }
 ```
 
+<a id="client-id-metadata-documents-flow" />
 ### 客户端 ID 元数据文档流程
 
 下图展示了使用客户端 ID 元数据文档时的完整流程：
@@ -110,6 +115,7 @@ sequenceDiagram
     Note over Server: Cache metadata for future requests<br/>(respecting HTTP cache headers)
 ```
 
+<a id="advertising-cimd-support" />
 ### 宣告 CIMD 支持
 
 授权服务器通过在其 OAuth Authorization Server metadata 中包含以下属性，来表明它们支持使用客户端 ID 元数据文档的客户端：
@@ -124,6 +130,7 @@ MCP 客户端 **SHOULD** 检查此能力，并在不可用时 **MAY** 回退到
 [动态客户端注册](#dynamic-client-registration)
 或 [预注册](#pre-registration)。
 
+<a id="pre-registration" />
 ## 预注册
 
 MCP 客户端 **SHOULD** 支持静态客户端凭据选项，例如由预注册流程提供的凭据。这可以是：
@@ -131,6 +138,7 @@ MCP 客户端 **SHOULD** 支持静态客户端凭据选项，例如由预注册�
 1. 为 MCP 客户端硬编码一个客户端 ID（以及在适用时的客户端凭据），专门用于与该授权服务器交互，或
 2. 向用户提供一个 UI，让他们在自行注册 OAuth 客户端后输入这些详细信息（例如，通过服务器托管的配置界面）。
 
+<a id="dynamic-client-registration" />
 ## 动态客户端注册
 
 <Warning>
@@ -143,8 +151,10 @@ MCP 客户端 **SHOULD** 支持静态客户端凭据选项，例如由预注册�
 MCP 客户端和授权服务器 **MAY** 支持
 OAuth 2.0 动态客户端注册协议 [RFC7591](https://datatracker.ietf.org/doc/html/rfc7591)
 ，以便 MCP 客户端在无需用户交互的情况下获取 OAuth 客户端 ID。
+
 此选项包含在内是为了与早期版本的 MCP 授权规范向后兼容。
 
+<a id="application-type-and-redirect-uri-constraints" />
 ### 应用类型与重定向 URI 限制
 
 当授权服务器支持 OpenID Connect（OIDC）和
@@ -153,6 +163,7 @@ OAuth 2.0 动态客户端注册协议 [RFC7591](https://datatracker.ietf.org/doc
 参数，对重定向 URI 施加额外限制。
 
 MCP 客户端 **MUST** 在动态客户端注册期间指定适当的 `application_type`。
+
 省略该参数在 OIDC 下默认值为
 `"web"`，这可能与原生风格的重定向
 URI 冲突；非 OIDC 服务器会安全地忽略该参数。
@@ -169,6 +180,7 @@ URI 冲突；非 OIDC 服务器会安全地忽略该参数。
 客户端 **SHOULD** 向用户或开发者显示有意义的错误。客户端 **MAY**
 使用调整后的 `application_type` 或符合特定应用类型的授权服务器要求的重定向 URI 重新尝试注册。
 
+<a id="authorization-server-binding" />
 ## 授权服务器绑定
 
 使用预注册凭据，或持久化通过动态客户端
@@ -186,4 +198,5 @@ URI 冲突；非 OIDC 服务器会安全地忽略该参数。
 
 基于客户端 ID 元数据文档的客户端 ID
 在不同授权服务器之间是可移植的，因为它们是由授权服务器按需解析的自托管 HTTPS URL。
+
 当授权服务器发生变化时，无需重新注册。

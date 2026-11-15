@@ -3,6 +3,7 @@ title: 扩展概述
 description: 模型上下文协议的可选扩展
 ---
 
+<a id="mcp-extensions" />
 # MCP 扩展
 
 MCP 扩展是规范的可选补充，定义了核心协议之外的能力。扩展支持模块化（例如，身份验证等独立功能）、专业化（例如，特定行业的逻辑）或实验性（例如，正在孵化以潜在纳入核心的功能）的功能。
@@ -15,10 +16,26 @@ MCP 扩展是规范的可选补充，定义了核心协议之外的能力。扩�
 
 </Tip>
 
-## 官方扩展仓库
+<a id="extension-lifecycle" />
+## 扩展生命周期
 
-官方扩展位于 [模型上下文协议 GitHub 组织](https://github.com/modelcontextprotocol/) 内，仓库名称带有 `ext-` 前缀。
+每个扩展都处于三个阶段之一，稍后可能会提升到核心规范中。该阶段决定允许哪些更改、谁批准这些更改以及实施者可以期望什么。有关完整详细信息，请参阅 [SEP-3392：扩展生命周期](/seps/3392-extension-lifecycle)。
+| 阶段            | 协议变更                                      | 变更批准者  | 进入方式                            | 实施者可以期待什么                            |
+| ---------------- | ----------------------------------------------------- | -------------------- | -------------------------------- | ------------------------------------------------------- |
+| **Experimental** | 随时更改，恕不另行通知               | 扩展维护者 | 由扩展维护者添加 | 什么也没有。设计可能会改变或消失。            |
+| **Beta**         | 任何改变，预计突破性改变很少见 | 扩展维护者 | 扩展轨道 SEP             | 欢迎实际使用。重大变更已记录在案。 |
+| **Stable**       | 仅具有新的核心协议修订版                | 扩展维护者 | 第二次扩展轨道 SEP      | 行为在协议修订版中是固定的。           |
 
+扩展一开始是实验性的，并且必须通过 Beta 阶段。从 Beta 版开始，它要么变为稳定版，要么标准轨道 SEP 将其提升为核心规范。稳定的扩展也可以稍后升级。每个 Beta 扩展都会说明其预期目标（稳定版或核心版），在 Beta 版期间可能会发生变化。
+
+当扩展的阶段改变时，它的标识符不会改变。
+
+<a id="official-extension-repositories" />
+## 官方扩展存储库
+
+官方扩展位于 [模型上下文协议 GitHub 组织](https://github.com/modelcontextprotocol/) 的存储库中，前缀为 `ext-`。一个存储库可以在不同阶段保存多个相关扩展。在存储库内，保存扩展规范的目录显示其阶段：`specification/experimental/`、`specification/beta/` 或 `specification/stable/`。升级为核心规范或已结束的扩展移至 `specification/archived/`。
+
+<a id="mcp-authorization-extensions" />
 ### MCP 授权扩展
 
 <Card
@@ -29,11 +46,12 @@ MCP 扩展是规范的可选补充，定义了核心协议之外的能力。扩�
   核心规范之外的补充授权机制扩展。
 </Card>
 
-| 扩展                                                                                   | 描述                                                                      |
-| -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| [OAuth 客户端凭证](/extensions/auth/oauth-client-credentials)                          | 用于机器到机器身份验证的 OAuth 2.0 客户端凭证流程。                       |
-| [企业托管授权](/extensions/auth/enterprise-managed-authorization)                      | 需要集中访问控制的企业环境框架。                                          |
+| 扩展                                                                             | 阶段  | 说明                                                                 |
+| ------------------------------------------------------------------------------------- | ------ | --------------------------------------------------------------------------- |
+| [OAuth 客户端凭据](/extensions/auth/oauth-client-credentials)                 | Stable | 用于机器对机器身份验证的 OAuth 2.0 客户端凭据流。    |
+| [企业管理授权](/extensions/auth/enterprise-managed-authorization) | Stable | 需要集中访问控制的企业环境框架。 |
 
+<a id="mcp-apps" />
 ### MCP 应用
 
 <Card
@@ -44,19 +62,28 @@ MCP 扩展是规范的可选补充，定义了核心协议之外的能力。扩�
   用于对话式 MCP 客户端中交互式 UI 元素的扩展。
 </Card>
 
-| 扩展                                  | 描述                                                                                                           |
-| ------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| [MCP 应用](/extensions/apps/overview) | 允许 MCP 服务器在对话中内联显示交互式 UI 元素（图表、表单、视频播放器）                                        |
+| 扩展                             | 阶段  | 说明                                                                                                      |
+| ------------------------------------- | ------ | ---------------------------------------------------------------------------------------------------------------- |
+| [MCP Apps](/extensions/apps/overview) | Stable | 允许 MCP 服务器在对话中内嵌显示交互式 UI 元素（图表、表单、视频播放器） |
 
 要开始构建 MCP 应用，请参阅 [快速入门指南](/extensions/apps/build#getting-started) 或阅读完整的 [MCP 应用文档](https://apps.extensions.modelcontextprotocol.io/api/documents/Quickstart.html)。
 
-### MCP Tasks
+<a id="mcp-tasks" />
+### MCP 任务
 
-| 扩展                                  | 描述                                                                                                           |
-| ------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| [MCP Tasks](/extensions/tasks/overview) | 用于长时间运行操作的异步任务执行，支持轮询、执行中的输入以及持久化句柄。 |
+<Card
+  title="modelcontextprotocol/ext-tasks"
+  icon="github"
+  href="https://github.com/modelcontextprotocol/ext-tasks"
+>
+  长时间运行操作的扩展。
+</Card>
+| 扩展                               | 阶段         | 说明                                                                                                   |
+| --------------------------------------- | ------------- | ------------------------------------------------------------------------------------------------------------- |
+| [MCP Tasks](/extensions/tasks/overview) | Beta，目标为 Core | 用于长时间运行操作的异步任务执行，具有轮询、飞行中输入和持久句柄。 |
 
-### Skills over MCP
+<a id="skills-over-mcp" />
+### MCP 技能
 
 <Card
   title="modelcontextprotocol/ext-skills"
@@ -66,58 +93,76 @@ MCP 扩展是规范的可选补充，定义了核心协议之外的能力。扩�
   从 MCP 服务器发现并读取 Agent Skills。
 </Card>
 
-| 扩展                                      | 描述                                                                     |
-| ---------------------------------------------- | ------------------------------------------------------------------------------- |
-| [Skills over MCP](/extensions/skills/overview) | 通过 MCP 资源发现工作流说明并读取支持文件。 |
+| 扩展                                      | 阶段                            | 说明                                                                     |
+| ---------------------------------------------- | -------------------------------- | ------------------------------------------------------------------------------- |
+| [Skills over MCP](/extensions/skills/overview) | Beta，目标阶段待定 | 通过 MCP 资源了解工作流程说明并阅读支持文件。 |
 
 请参阅 [Skills 概述](/extensions/skills/overview) 以开始使用，并参阅[客户端矩阵](/extensions/client-matrix)了解实现支持情况。
 
+<a id="mcp-server-cards" />
+### MCP 服务器卡
+
+<Card
+  title="modelcontextprotocol/ext-server-card"
+  icon="github"
+  href="https://github.com/modelcontextprotocol/ext-server-card"
+>
+  MCP 服务器元数据的 HTTP 发现。
+</Card>
+| 扩展                                   | 阶段                            | 说明                                                        |
+| ------------------------------------------- | -------------------------------- | ------------------------------------------------------------------ |
+| [Server Cards](/seps/2127-mcp-server-cards) | Beta，目标阶段待定 | 允许客户端在连接到服务器之前发现服务器的元数据。 |
+
+<a id="experimental-extensions" />
 ## 实验性扩展
 
-实验性扩展为[工作组和兴趣组](/community/working-interest-groups)提供了一条孵化路径，使其能够在正式提交 SEP 之前对想法进行原型设计，并围绕扩展概念展开协作。
+实验性扩展为[工作组和兴趣组](/community/working-interest-groups) 提供了一个孵化途径，可以在 SEP 之前或同时就扩展概念进行原型设计和协作。
 
-实验性扩展仓库位于 MCP GitHub 组织内，并使用 `experimental-ext-` 前缀（例如，`experimental-ext-interceptors`）。
+实验扩展位于现有 `ext-` 存储库中的 `specification/experimental/` 下，或者位于其自己的带有 `experimental-ext-` 前缀的存储库中（例如，`experimental-ext-interceptors`）。 `experimental-ext-` 存储库中的所有内容都是实验性的。
 
+<a id="ground-rules" />
 ### 基本规则
 
-- 每个实验性扩展都必须与一个工作组或兴趣组相关联
-- 仓库和已发布的软件包必须明确表明其实验性状态（例如，在 README 和软件包名称中）
-- [核心维护者](/community/contributor-ladder#core-maintainer)保留对实验性扩展仓库的监督权，包括将其归档或移除的权力
+- 每个实验扩展都需要与工作组或兴趣组相关联
+- 发布的包需要清楚地表明其实验状态（例如，在 README 和包名称中）
+- 实施者应该固定到标签或提交，因为实验扩展的两个修订版不需要兼容
+- [核心维护者](/community/contributor-ladder#core-maintainer) 保留对实验性扩展的监督，包括存档或删除它们的能力
 
-### 晋升为官方状态
-
-要将实验性扩展晋升为官方扩展，必须经过标准 SEP 流程（扩展轨道）。欢迎引用实验性仓库以及在孵化期间构建的任何参考实现，以证明扩展的实用性。
-
+<a id="creating-extensions" />
 ## 创建扩展
 
-官方扩展的生命周期遵循基于 SEP 的流程。有关详细信息，请参阅 [SEP-2133: 扩展](/seps/2133-extensions)。
+1. **原型**：在 `ext-` 存储库中的 `specification/experimental/` 下添加扩展，或创建 `experimental-ext-` 存储库。
+2. **建议 Beta**：使用 [标准 SEP 指南](/community/sep-guidelines) 在主 MCP 存储库中创建类型为 **Extensions Track** 的 SEP。说明该扩展是否打算成为稳定版本或升级为核心版本。
+3. **实现**：在官方 SDK 中构建至少一个参考实现。在审查 SEP 之前，这是必需的。
+4. **审核**：[核心维护者](/community/contributor-ladder#core-maintainer) 审核 SEP 并拥有最终收录权。
+5. **发布**：接受 SEP 后，打开一个 PR，将扩展移动到 `ext-` 存储库中的 `specification/beta/`。核心维护者批准了这一举动。
+6. **收集证据**：在测试期间，保留已知实现的公开列表以及从它们收到的反馈。
+7. **稳定或升级**：第二个扩展轨道 SEP 将扩展移至稳定。它需要两个独立的、互操作的实现（一个客户端，一个服务器端）和一个[一致性场景](/community/sep-guidelines#conformance-test-requirement)。或者，标准轨道 SEP 可以促进核心规范的扩展。
 
-1. **提议**：使用 [标准 SEP 指南](/community/sep-guidelines) 在主 MCP 仓库中创建 SEP，类型为 **扩展轨道**。
-2. **实现**：在官方 SDK 中构建至少一个参考实现——这是 SEP 可以被审查之前的必要条件。
-3. **审查**：[核心维护者](/community/contributor-ladder#core-maintainer) 审查 SEP 并对是否纳入拥有最终决定权。
-4. **发布**：一旦获批，打开一个 PR 将扩展添加到扩展仓库。
-5. **采用**：之后，其他客户端、服务器和 SDK 也可以实现该扩展。
-
+<a id="requirements" />
 ### 要求
 
-- 扩展规范需要使用 RFC 2119 语言（MUST, SHOULD, MAY）
-- 扩展必须有一个关联的工作组或兴趣小组
+- 扩展规范需要使用RFC 2119语言（MUST、SHOULD、MAY）
+- 扩展必须有一个相关的工作组或兴趣组，并且至少有一个在存储库的 `MAINTAINERS.md` 中列出的扩展维护者
 
+<a id="sdk-implementation" />
 ### SDK 实现
 
 SDK 可以选择实现扩展，但这不是协议一致性的必要条件。SDK 维护者对其支持的扩展拥有完全的自主权。如果 SDK 确实支持扩展，SDK 文档应列出支持的扩展。
 
 <Note>
 
-扩展默认始终处于禁用状态，需要开发人员明确选择加入。
-
+默认情况下，扩展始终处于禁用状态，并且在每个阶段都需要开发人员明确选择加入。
 </Note>
 
+<a id="evolution" />
 ### 演进
 
-扩展独立于核心协议演进。更新由扩展仓库维护者管理，不需要核心维护者审查。
-
-话虽如此，向后兼容性很重要。当您需要更改扩展时，优先使用扩展设置对象内的能力标志或版本控制，而不是创建新的扩展标识符。如果破坏性变更不可避免，请使用新的标识符（例如，`io.modelcontextprotocol/my-extension-v2`）。
+对扩展的更改由其扩展维护者批准，不需要核心维护者审查。可能发生的变化取决于阶段：
+- **实验性**：任何时间，任何事情。
+- **Beta**：更喜欢附加更改，例如设置对象中的新可选字段或功能标志。允许进行重大变更，但应尽量少见并分批进行，首先在工作组或兴趣组中宣布，并记录在变更日志中。进行重大更改的扩展应在其设置对象中添加或增加 `revision` 字符串，以便对等方可以检测到不匹配。
+- **稳定**：作为针对核心协议修订的修订版发布，例如 `specification/stable/<name>/2026-07-28/`。已发布的修订版是不可变的。更改会累积在 `draft/` 目录中，并且仅在新的核心协议修订版中生效。一对对等点的扩展行为是为它们协商的协议修订版定义的行为。
+重大更改保留了扩展程序的标识符。仅当新旧行为必须在一个协议修订版下共存时，才使用新标识符（例如，`io.modelcontextprotocol/my-extension-v2`）。
 
 **破坏性变更**是指任何会导致现有实现失败或行为不正确的修改，包括：
 
@@ -126,10 +171,19 @@ SDK 可以选择实现扩展，但这不是协议一致性的必要条件。SDK 
 - 改变现有行为的语义
 - 添加新的必填字段
 
-## 协商
+<a id="promotion-to-core" />
+### 晋升至核心
+
+当标准轨道 SEP 将扩展提升到协议修订版 R 中的核心规范时，该功能是声明 R 或更高版本的请求的核心行为，无论扩展是否已公布。对于早期版本，扩展的最终版本仍然适用，因此支持早期版本的客户端应继续宣传扩展。 R 发布后，扩展的规范将更改为 `specification/archived/`。
+
+<a id="negotiation" />
+## 谈判
 
 客户端和服务器会在各自的能力声明中的 `extensions` 字段里声明其对扩展的支持。
 
+以下示例使用协议版本 `2026-07-28` 及更高版本。对于 `2025-11-25` 及更早版本，请参阅[基于初始化的版本](#initialization-based-versions)。
+
+<a id="client-capabilities" />
 ### 客户端能力
 
 客户端在每个请求中的 `_meta["io.modelcontextprotocol/clientCapabilities"]` 中声明扩展支持：
@@ -162,6 +216,7 @@ SDK 可以选择实现扩展，但这不是协议一致性的必要条件。SDK 
 }
 ```
 
+<a id="server-capabilities" />
 ### 服务器能力
 
 服务器在 `server/discover` 响应中声明扩展支持：
@@ -193,7 +248,68 @@ SDK 可以选择实现扩展，但这不是协议一致性的必要条件。SDK 
 
 每个扩展都会指定其设置对象的模式；空对象表示没有设置。
 
-### 优雅降级
+<a id="initialization-based-versions" />
+### 基于初始化的版本
+
+扩展在 `2026-07-28` 版本中成为协议的正式部分。在此之前，许多 SDK、客户端和服务器已经在 [`initialize` 握手](/specification/2025-11-25/basic/lifecycle#initialization) 期间协商了 `2025-11-25` 及更早版本的扩展，在请求中使用 `params.capabilities.extensions`，在响应中使用 `result.capabilities.extensions`。扩展标识符和设置对象遵循与上述相同的规则。
+<Note>
+
+`extensions` 字段不是这些协议版本的已发布架构的一部分，并且不需要支持它来实现一致性。我们鼓励可以承载 `capabilities.extensions` 到 `initialize` 的 SDK 这样做，以便扩展在不同协议版本之间一致地工作。检查您的 SDK 是否可以发送和接收此字段，并且扩展程序是否支持协商的协议版本。如果对方的功能省略了 `extensions`，或省略了给定的扩展，则将该扩展视为不受支持，并遵循[优雅降级](#graceful-degradation)。
+</Note>
+
+**客户要求**
+客户端在 `initialize` 请求中通告扩展支持：
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "initialize",
+  "params": {
+    "protocolVersion": "2025-11-25",
+    "capabilities": {
+      "roots": {
+        "listChanged": true
+      },
+      "extensions": {
+        "io.modelcontextprotocol/ui": {
+          "mimeTypes": ["text/html;profile=mcp-app"]
+        }
+      }
+    },
+    "clientInfo": {
+      "name": "ExampleClient",
+      "version": "1.0.0"
+    }
+  }
+}
+```
+
+**服务器响应**
+服务器在 `initialize` 响应中通告扩展支持：
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "protocolVersion": "2025-11-25",
+    "capabilities": {
+      "tools": {},
+      "extensions": {
+        "io.modelcontextprotocol/ui": {}
+      }
+    },
+    "serverInfo": {
+      "name": "ExampleServer",
+      "version": "1.0.0"
+    }
+  }
+}
+```
+
+<a id="graceful-degradation" />
+### 优雅的降级
 
 如果一方支持某个扩展而另一方不支持，支持方需要么回退到核心协议行为，要么在该扩展是强制性的情况下，使用适当的错误拒绝请求。
 

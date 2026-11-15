@@ -18,6 +18,7 @@ sidebarTitle: 认证
 | 基于 GitHub   | `io.github.username/*` 或 `io.github.orgname/*` | `io.github.alice/weather-server`     |
 | 基于域名   | `com.example.*/*`                               | `io.modelcontextprotocol/everything` |
 
+<a id="github-authentication" />
 ## GitHub 认证
 
 GitHub 认证使用由 `mcp-publisher` CLI 工具发起的 OAuth 流程。
@@ -47,12 +48,39 @@ mcp-publisher login github
 ✓ 成功登录
 ```
 
-## DNS 认证
+<a id="personal-vs-organization-namespaces" />
+### 个人命名空间与组织命名空间
+
+GitHub 身份验证始终授予您的个人命名空间 `io.github.<your-username>/*`。
+
+要在 **组织** 命名空间 (`io.github.<orgname>/*`) 下发布，您必须是该组织的 **所有者**。普通组织成员资格不再足够：注册表会检查您的成员资格角色，并仅将组织命名空间授予管理员。这可以防止仅属于某个组织的任何人以该组织的名义发布（或覆盖）服务器。
+<Warning>
+  **`mcp-publisher login github` 当前无法发布到组织命名空间。**
+交互式设备流针对 GitHub 应用程序进行身份验证，并且 GitHub 应用程序用户令牌无法读取组织成员资格 - GitHub 返回空列表，因此注册表看不到您拥有的任何组织，并且仅授予您的个人命名空间。这会影响到每个人，无论您在组织中的角色如何，也无论您的成员资格是否公开。跟踪问题：[#1468](https://github.com/modelcontextprotocol/registry/issues/1468)。
+
+要立即发布组织服务器，请使用可以证明您的组织角色的两个路径之一：
+- **[GitHub Actions](./github-actions)** — 通过 OIDC 发布，不受影响。
+  - **个人访问令牌** — `mcp-publisher login github --token <YOUR_TOKEN>`，满足以下要求。
+</Warning>
+如果您使用个人访问令牌进行身份验证（在 CI 中，或为了解决上述限制），则该令牌必须让注册表读取您的组织角色。无法发布的令牌仍会发布到您的个人命名空间，但组织发布将静默不可用。确切的要求取决于令牌类型：
+- **经典 PAT**：授予 `read:org` 范围。
+- **细粒度PAT**：授予**组织权限→成员→只读**权限（相当于`read:org`的细粒度）。如果没有它，GitHub 不会返回该令牌的组织成员身份，您将仅获得您的个人命名空间。请注意，细粒度 PAT 绑定到单个资源所有者，因此它只能看到为其创建的组织。
+无论哪种方式，令牌都不需要**存储库范围 - 注册表永远不会读取或写入您的代码。
+
+<a id="dns-authentication" />
+## DNS 验证
 
 DNS 认证是一种基于域名的认证方法，依赖于 DNS TXT 记录。
 
-要使用 `mcp-publisher` CLI 工具执行 DNS 认证，请在您的服务器项目目录中运行以下命令，以基于公钥/私钥对生成 TXT 记录：
+<Warning>
+  TXT 记录必须放置在您的域的**顶点**（例如 `example.com`），**不能**放置在 `_mcp-auth.example.com` 或 `_mcp-registry.example.com` 等选择器下。 MCP DNS 身份验证遵循 SPF 样式放置（顶点），而不是 DKIM 样式（选择器）。如果将记录放在选择器下，注册表将看不到它，并且身份验证将失败并出现一般签名错误。
 
+如果您轮换密钥，还请记住从顶点中删除以前的 TXT 记录 - 将首先尝试留下的过时记录并导致验证失败。
+</Warning>
+要使用 `mcp-publisher` CLI 工具执行 DNS 身份验证，请在服务器项目目录中运行以下命令以基于公钥/私钥对生成 TXT 记录：
+<Note>
+  Ed25519 代码路径需要 **OpenSSL 3.0 或更高版本**。 macOS 默认情况下附带 LibreSSL（系统 `openssl` 二进制文件），它没有在 `genpkey` 中实现 Ed25519，并且会失败并显示 `Algorithm Ed25519 not found`。在 macOS 上，安装 OpenSSL 3 (`brew install openssl@3`) 并显式调用它 - 例如，在下面的命令中将 `openssl` 替换为 `/opt/homebrew/opt/openssl@3/bin/openssl` (Apple Silicon) 或 `/usr/local/opt/openssl@3/bin/openssl` (Intel)。 ECDSA P-384 代码路径适用于 LibreSSL。
+</Note>
 <CodeGroup>
 
 ```bash Ed25519
@@ -151,7 +179,7 @@ mcp-publisher login dns --domain "${MY_DOMAIN}" --private-key "${PRIVATE_KEY}"
 MY_DOMAIN="example.com"
 
 PRIVATE_KEY="$(openssl ec -in key.pem -noout -text | grep -A4 "priv:" | tail -n +2 | tr -d ' :\n')"
-mcp-publisher login dns --domain "${MY_DOMAIN}" --private-key "${PRIVATE_KEY}"
+mcp-publisher login dns --algorithm ecdsap384 --domain "${MY_DOMAIN}" --private-key "${PRIVATE_KEY}"
 ```
 
 ```bash Google KMS
@@ -173,12 +201,16 @@ mcp-publisher login dns azure-key-vault --domain="${MY_DOMAIN}" --vault "${MY_KE
 
 </CodeGroup>
 
+<a id="http-authentication" />
 ## HTTP 认证
 
 HTTP 认证是一种基于域名的认证方法，依赖于托管在您域上的 `/.well-known/mcp-registry-auth` 文件。例如，`https://example.com/.well-known/mcp-registry-auth`。
 
 要使用 `mcp-publisher` CLI 工具执行 HTTP 认证，请在您的服务器项目目录中运行以下命令，以基于公钥/私钥对生成 `mcp-registry-auth` 文件：
 
+<Note>
+  与 DNS 身份验证一样，Ed25519 代码路径需要 **OpenSSL 3.0 或更高版本**。 macOS 的系统 LibreSSL 不支持 `genpkey` 中的 Ed25519。有关 macOS 解决方法，请参阅 [DNS 身份验证](#dns-authentication) 部分中的注释。
+</Note>
 <CodeGroup>
 
 ```bash Ed25519
@@ -271,7 +303,7 @@ mcp-publisher login http --domain "${MY_DOMAIN}" --private-key "${PRIVATE_KEY}"
 ```bash ECDSA P-384
 MY_DOMAIN="example.com"
 PRIVATE_KEY="$(openssl ec -in key.pem -noout -text | grep -A4 "priv:" | tail -n +2 | tr -d ' :\n')"
-mcp-publisher login http --domain "${MY_DOMAIN}" --private-key "${PRIVATE_KEY}"
+mcp-publisher login http --algorithm ecdsap384 --domain "${MY_DOMAIN}" --private-key "${PRIVATE_KEY}"
 ```
 
 ```bash Google KMS
@@ -292,3 +324,84 @@ mcp-publisher login http azure-key-vault --domain="${MY_DOMAIN}" --vault "${MY_K
 ```
 
 </CodeGroup>
+
+<a id="troubleshooting-failed-http-verification" />
+### HTTP 验证失败故障排除
+
+当您运行 `mcp-publisher login http` 时，注册表会从其自己的基础架构中获取验证文件，因此在您的计算机上成功的 `curl` 并不能证明登录可以正常工作。注册表本身必须能够到达端点。
+<Warning>
+  如果注册表无法使用端点，则即使文件已正确提供给所有其他客户端，登录也会失败并显示 `token exchange failed with status 401`。
+</Warning>
+提取是一个普通的 HTTPS 请求，具有以下属性：
+| Property | Requirement |
+| --- | --- |
+| Request | `GET https://<domain>/.well-known/mcp-registry-auth`，与 `Accept: text/plain` 和 `User-Agent: mcp-registry/1.0` 一起发送 |
+| 状态 | `200 OK`。不遵循重定向，因此 `3xx` 验证失败 |
+| Body | 证明记录，最多4096字节。周围的空白被忽略 |
+| Timeout | 整个请求需要 10 秒 |
+| Origin | 托管注册表在 Google Cloud 上运行，因此请求来自 Google Cloud 地址，而不是您可以将每个请求列入白名单的固定地址 |
+
+由于请求源自云基础设施而不是住宅网络上的浏览器，因此失败的常见原因是阻止它的边缘规则：
+- 挑战或阻止非浏览器客户端的 WAF、机器人管理或“受到攻击”规则
+- 排除 Google Cloud 地址范围的地理封锁或 IP 许可名单
+- 指向无法访问的地址的 `AAAA` (IPv6) 记录。如果无法访问任何域的公共地址，即使 IPv4 在浏览器中工作，验证也会失败
+- `301`/`302` 重定向到另一个主机或路径，注册表不遵循该重定向
+- `/.well-known/mcp-registry-auth` 用 HTML 错误页面而不是证明记录回答 `200 OK`
+要查看注册表所看到的内容，请以相同的方式请求文件，最好是从您自己的网络以外的网络请求：
+
+```bash
+curl -sS -o - -w '\n%{http_code}\n' \
+  -H 'Accept: text/plain' \
+  -A 'mcp-registry/1.0' \
+  https://example.com/.well-known/mcp-registry-auth
+```
+
+响应正文必须是登录命令打印的证明记录（`v=MCPv1; k=...; p=...`）。当Registry无法使用端点时，登录错误会携带Registry自身的获取失败，例如`dial tcp <ip>:443: i/o timeout`、`HTTP 403: failed to fetch key from ...`或`HTTP 301: failed to fetch key from ...`。允许普通 HTTPS 客户端通过 `/.well-known/mcp-registry-auth`，提供不重定向的路径，然后重试。
+
+解析为环回、专用、链路本地或运营商级 NAT 范围的地址在设计上会被拒绝，因此端点必须可通过公共地址访问。
+
+<a id="troubleshooting-dns-and-http-authentication" />
+## DNS 和 HTTP 身份验证故障排除
+
+如果 `mcp-publisher login dns` 或 `login http` 失败，请在更改密钥或重试之前检查已发布的证明记录。获取失败和签名不匹配有不同的原因；阅读注册表返回的详细错误。
+
+<a id="compare-the-expected-proof-record-against-what-is-actually-published" />
+### 将“预期证明记录”与实际发布的内容进行比较
+
+每个登录调用都会打印 `Expected proof record:` 行，例如：
+
+```text Output
+Expected proof record:
+v=MCPv1; k=ed25519; p=CmELkdW27Q+pySZRD1ezkXAG/SbeDhGWAjtuKKMKixg=
+```
+
+检查已发布的 MCPv1 记录中的算法 (`k=`) 和公钥 (`p=`) 是否与当前登录命令的输出匹配。轮换密钥后重新运行登录命令，以便与新派生的公钥进行比较。对于 HTTP 验证，周围的空格和尾随换行符将被修剪；它们的存在本身不会导致签名不匹配。避免编辑或包装公钥数据本身。
+
+当签名不匹配时，注册表的错误包括它尝试的已发布密钥的指纹。将它们与您打算发布的密钥进行比较，以帮助识别过时的记录或私钥与已发布的公钥之间的不匹配。
+
+<a id="dns-verify-the-txt-record-before-logging-in" />
+### DNS：登录前验证TXT记录
+
+确认 MCPv1 TXT 记录是在传递给 `--domain` 的确切域中发布的，而不是在 `_mcp-auth.<domain>` 等选择器中发布的：
+
+```bash
+dig TXT example.com +short
+# Expect a record like:
+# "v=MCPv1; k=ed25519; p=CmELkdW27Q+pySZRD1ezkXAG/SbeDhGWAjtuKKMKixg="
+```
+
+如果没有出现 MCPv1 记录，请检查 DNS 提供商的记录名称和值，然后在更正后允许 DNS 传播和缓存响应。如果 `dig TXT _mcp-auth.example.com +short` 返回证明记录，但 `dig TXT example.com +short` 没有返回，则它会以错误的名称发布（请参阅上面的顶点警告）。
+
+当注册表在已知的错误选择器（`_mcp-auth.<domain>` 或 `_mcp-registry.<domain>`）处找到格式良好的 MCPv1 记录，但在请求的域中没有找到时，它会返回一个特定错误，标识放错位置的记录。
+
+注册中心尝试所有有效的已发布 MCP 密钥；另一个 TXT 记录中的不同密钥不会优先于正确的密钥。确保至少一条记录包含登录命令所使用的私钥的公钥。当不再需要时删除已停用的 MCP 身份验证记录，同时保留仍在使用的密钥和其他服务的 TXT 记录。
+
+<a id="http-verify-the-well-known-endpoint-before-logging-in" />
+### HTTP：登录前验证已知端点
+
+按照[HTTP 验证失败问题排查](#troubleshooting-failed-http-verification) 了解确切的请求、超时、响应大小限制、重定向策略和网络要求。来自您自己的计算机的成功请求并不表明注册表可以到达端点。
+
+<a id="confirm-the-algorithm-matches-the-key" />
+### 确认算法与密钥匹配
+
+`--algorithm` 标志（默认 `ed25519`）必须与已发布的证明记录的 `k=` 字段中声明的算法匹配。根据 `ecdsap384` 证明记录签署 Ed25519 时间戳（反之亦然）无法验证。如果您使用与发布的算法不同的算法重新生成密钥对，请在重试之前更新 TXT 记录或 `mcp-registry-auth` 文件。

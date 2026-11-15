@@ -3,14 +3,22 @@ title: 构建 MCP 应用
 description: 使用 MCP 应用构建交互式 UI 应用的入门指南
 ---
 
+<a id="prerequisites" />
 ## 前提条件
 
-你需要 [Node.js](https://nodejs.org/en/download) 18 或更高版本。建议熟悉 [MCP 工具](/specification/latest/server/tools) 和 [资源](/specification/latest/server/resources)，因为 MCP 应用结合了这两种原语。拥有 [MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk) 的经验将有助于你更好地理解服务器端模式。
+您需要 [Node.js](https://nodejs.org/en/download) 20 或更高版本。熟悉度
+使用 [MCP 工具](/specification/latest/server/tools) 和
+[资源](/specification/latest/server/resources)自MCP以来推荐
+应用程序结合了这两种原语。经验与
+[MCP TypeScript SDK](https://github.com/modelcontextprotocol/typescript-sdk)
+将帮助您更好地理解服务器端模式。
 
+<a id="getting-started" />
 ## 快速开始
 
 创建 MCP 应用最快的方法是使用具有 MCP 应用技能的 AI 编码代理。如果你更喜欢手动设置项目，请跳至 [手动设置](#manual-setup)。
 
+<a id="using-an-ai-coding-agent" />
 ### 使用 AI 编码代理
 
 支持 Skills 的 AI 编码代理可以为你搭建完整的 MCP 应用项目。Skills 是你的代理在相关时加载的指令和资源文件夹。它们教会 AI 如何执行 specialized 任务，如创建 MCP 应用。
@@ -43,7 +51,7 @@ git clone https://github.com/modelcontextprotocol/ext-apps.git
 
 | Agent                                                                                                                                                                        | Skills 目录 (macOS/Linux) | Skills 目录 (Windows)            |
 | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ | ------------------------------------- |
-| [Claude Code](https://docs.anthropic.com/en/docs/claude-code/skills)                                                                                                         | `~/.claude/skills/`            | `%USERPROFILE%\.claude\skills\`       |
+| [克劳德代码](https://docs.anthropic.com/en/docs/claude-code/skills)                                                                                                         | `~/.claude/skills/`            | `%USERPROFILE%\.claude\skills\`       |
 | [VS Code](https://code.visualstudio.com/docs/copilot/customization/agent-skills) 和 [GitHub Copilot](https://docs.github.com/en/copilot/concepts/agents/about-agent-skills) | `~/.copilot/skills/`           | `%USERPROFILE%\.copilot\skills\`      |
 | [Gemini CLI](https://geminicli.com/docs/cli/skills/)                                                                                                                         | `~/.gemini/skills/`            | `%USERPROFILE%\.gemini\skills\`       |
 | [Cline](https://cline.bot/blog/cline-3-48-0-skills-and-websearch-make-cline-smarter)                                                                                         | `~/.cline/skills/`             | `%USERPROFILE%\.cline\skills\`        |
@@ -141,6 +149,7 @@ npm install; npm run build; npm run serve
 </Step>
 </Steps>
 
+<a id="manual-setup" />
 ### 手动设置
 
 如果你不使用 AI 编码代理，或者更喜欢了解设置过程，请遵循以下步骤。
@@ -179,7 +188,7 @@ npm install -D typescript vite vite-plugin-singlefile express cors @types/expres
 <Step title="配置项目">
 
 <Tabs>
-<Tab title="package.json">
+<Tab title="包.json">
 
 `"type": "module"` 设置启用 ES 模块语法。`build` 脚本使用 `INPUT` 环境变量告诉 Vite 捆绑哪个 HTML 文件。`serve` 脚本使用 `tsx` 运行你的服务器以进行 TypeScript 执行。
 
@@ -242,10 +251,12 @@ export default defineConfig({
 </Step>
 </Steps>
 
+<a id="building-an-mcp-app" />
 ## 构建 MCP 应用
 
 让我们构建一个简单的应用来显示当前服务器时间。此示例展示了完整模式：注册带有 UI 元数据的工具，将捆绑的 HTML 作为资源提供，以及构建与服务器通信的 UI。
 
+<a id="server-implementation" />
 ### 服务器实现
 
 服务器需要做两件事：注册包含 `_meta.ui.resourceUri` 字段的工具，并注册提供捆绑 HTML 的资源处理程序。以下是完整的服务器文件：
@@ -343,6 +354,7 @@ expressApp.listen(3001, (err) => {
 - **`registerAppResource`**：当主机请求 UI 资源时提供捆绑的 HTML。
 - **Express 服务器**：在端口 3001 上通过 HTTP 暴露 MCP 服务器。
 
+<a id="ui-implementation" />
 ### UI 实现
 
 UI 由一个 HTML 页面和一个使用 `App` 类与主机通信的 TypeScript 模块组成。以下是 HTML：
@@ -405,6 +417,7 @@ getTimeBtn.addEventListener("click", async () => {
 
 `App` 类提供了额外的方法用于日志记录、打开 URL 以及使用来自你的应用的结构化数据更新模型的上下文。请参阅完整的 [API 文档](https://apps.extensions.modelcontextprotocol.io/api/)。
 
+<a id="testing-your-app" />
 ## 测试你的应用
 
 要测试你的 MCP 应用，构建 UI 并启动本地服务器：
@@ -425,6 +438,7 @@ npm run build; npm run serve
 `http://localhost:3001/mcp`。但是，要查看你的应用渲染效果，你需要一个支持 MCP 应用的 MCP
 主机。你有几个选项。
 
+<a id="testing-with-claude" />
 ### 使用 Claude 测试
 
 [Claude](https://claude.ai)（网页版）和 [Claude Desktop](https://claude.ai/download)
@@ -455,6 +469,7 @@ npx cloudflared tunnel --url http://localhost:3001
   />
 </Frame>
 
+<a id="testing-with-the-basic-host" />
 ### 使用 basic-host 测试
 
 `ext-apps` 仓库包含一个用于开发的测试主机。克隆仓库并
@@ -501,6 +516,7 @@ $env:SERVERS='["http://localhost:3001/mcp"]'; npm start
   />
 </Frame>
 
+<a id="learn-more" />
 ## 了解更多
 
 <CardGroup cols={2}>
@@ -527,9 +543,11 @@ $env:SERVERS='["http://localhost:3001/mcp"]'; npm start
   </Card>
 </CardGroup>
 
+<a id="feedback" />
 ## 反馈
 
 MCP 应用正在积极开发中。如果你遇到问题或有改进想法，请在
 [GitHub 仓库](https://github.com/modelcontextprotocol/ext-apps/issues) 上提交一个 issue。
+
 关于扩展方向的更广泛讨论，请加入对话
 在 [GitHub Discussions](https://github.com/modelcontextprotocol/ext-apps/discussions) 中。

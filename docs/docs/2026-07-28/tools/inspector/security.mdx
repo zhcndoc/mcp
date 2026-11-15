@@ -12,17 +12,19 @@ Inspector 是一个会持有真实凭据并启动真实进程的开发者工具�
 - **stdio 服务器以你的身份运行。** Inspector 能读取的内容，所启动的服务器通常也能读取。
 - **mcpdo 守护进程是持有活动连接的长期进程**，由令牌和同用户文件权限保护。
 
+<a id="the-web-backend-and-its-api-token" />
 ## Web 后端及其 API 令牌
 
 Web 客户端是由 Node 服务器支持的浏览器应用，该服务器负责 MCP 连接。它可以按请求启动 stdio 进程，因此每个 `/api/*` 路由都需要每次启动专用的 bearer 令牌（`x-mcp-remote-auth: Bearer <token>`）。浏览器如何获取令牌，请参阅[会话令牌](/docs/2026-07-28/tools/inspector/web#the-session-token)。
 
 令牌能保护和不能保护的内容如下：
 
-- **令牌是非浏览器客户端的真正守门机制。** 来源允许列表（`ALLOWED_ORIGINS`）可以阻止其他网页驱动后端，但不带 **`Origin`** 请求头的请求（curl、脚本以及任何非浏览器客户端）会完全跳过该检查。
-- **`GET /` 会披露令牌。** 后端会将令牌注入所提供的 HTML，使重新加载或书签继续工作。因此任何能够加载该页面的人都可以读取令牌，这就是绑定地址比令牌值更重要的原因。设置自定义 `MCP_INSPECTOR_API_TOKEN` 不会改变这一点，因为自定义令牌也会以同样方式披露。
-- **`DANGEROUSLY_OMIT_AUTH=true` 会完全移除守门机制。** 任何能够访问端口的对象都可以以你的身份启动进程，并使用 Inspector 持有的任何 OAuth 令牌。只有 `true` 或 `1` 会关闭身份验证；包括 `false` 在内的其他值都会保持开启。
-- **只有 `/api/*` 受到令牌保护。** 页面本身、静态资源以及 `GET /healthz` 无需令牌即可提供。`/healthz` 只返回 `{"status":"ok"}`，供容器和编排器探测。
+- **令牌是非浏览器客户端的真正守护者。** 源允许列表 (`ALLOWED_ORIGINS`) 会阻止其他网页驱动后端，但带有**无** `Origin` 标头（curl、脚本、任何非浏览器客户端）到达的请求会完全跳过该检查。 `Host` 标头允许列表在每个路由（包括 `GET /`）之前运行，并对 `Host` 不是环回名称、IP 文本、绑定主机、`ALLOWED_ORIGINS` 主机名或 `MCP_INSPECTOR_ALLOWED_HOSTS` 条目的请求应答 `403`，因此 DNS 重新绑定页面无法加载该页面并读取该页面令牌（请参阅[主机绑定和起源](/docs/2026-07-28/tools/inspector/web#host-binding-and-origins)）。
+- **`GET /` 公开令牌。** 后端将其注入到所提供的 HTML 中，以便重新加载或书签继续工作。因此，任何可以加载页面的人都可以读取令牌，这就是为什么绑定地址比令牌的值更重要的原因。固定您自己的 `MCP_INSPECTOR_API_TOKEN` 不会改变这一点，因为自定义令牌的公开方式与生成的令牌完全相同。
+- **`DANGEROUSLY_OMIT_AUTH=true` 完全删除了防护。** 任何可以到达端口的东西都可以像您一样生成进程并使用 Inspector 持有的任何 OAuth 令牌。仅 `true` 或 `1` 关闭身份验证；任何其他值（包括 `false`）都会使其保持打开状态。
+- **仅 `/api/*` 被门禁。** 页面本身、其静态资产和 `GET /healthz` 无需令牌即可提供服务。对于容器和协调器探针，`/healthz` 仅返回 `{"status":"ok"}`。
 
+<a id="where-the-backend-listens" />
 ### 后端监听位置
 
 后端默认绑定 `127.0.0.1`。除非设置 `DANGEROUSLY_BIND_ALL_INTERFACES=true`，否则绑定所有接口（`0.0.0.0`、`::` 以及等效写法）会被拒绝。绑定某一个特定地址无需该选择加入，因为它只暴露一个有意指定的地址，而不是一次性暴露所有地址。请参阅[在网络上托管](/docs/2026-07-28/tools/inspector/recipes#hosting-on-a-network)。
@@ -31,10 +33,12 @@ Web 客户端是由 Node 服务器支持的浏览器应用，该服务器负责 
   切勿将 `DANGEROUSLY_OMIT_AUTH` 与非环回绑定组合使用。如果需要让其他人访问 Inspector，请在它前面放置真正的访问控制边界：需要身份验证的反向代理、SSH 隧道或私有网络。
 </Warning>
 
-## Docker
+<a id="docker" />
+## 码头工人
 
 [Docker 镜像](/docs/2026-07-28/tools/inspector/recipes#docker)会改变上面描述的两个方面。
 
+<a id="publish-the-port-on-loopback-only" />
 ### 仅在环回地址上发布端口
 
 容器内的 Inspector 必须绑定 `0.0.0.0` 才能通过 `-p` 访问，因此镜像设置了 `DANGEROUSLY_BIND_ALL_INTERFACES=true`。这个选择加入只影响**容器**接口，不影响主机接口。哪些主机接口可以看到 Inspector，取决于发布端口的方式：
@@ -46,12 +50,14 @@ Web 客户端是由 Node 服务器支持的浏览器应用，该服务器负责 
 
 裸写 `-p` 会将能够创建进程的后端以及会披露令牌的页面暴露到本地网络。发布每个端口（`6274`，以及 MCP Apps 监听器的 `6275` / `6278`）时都应保留 `127.0.0.1:` 前缀。
 
+<a id="the-data-volume-puts-secrets-on-disk" />
 ### 数据卷会将机密信息放到磁盘
 
 容器没有操作系统钥匙串。没有挂载 `/home/node/.mcp-inspector` 卷时，机密信息会在会话期间保留在**内存**中，容器退出后丢失。为了保留服务器列表而挂载该目录，会同时将机密信息切换到卷上的 `secrets.json` 文件；该文件**除非提供密钥否则为明文**。root、主机上 `docker` 组的每个成员（其权限等同于 root），以及获得该卷备份、快照或副本的任何人都可以读取它。
 
 请通过 `MCP_INSPECTOR_SECRET_KEY_FILE` 以文件形式提供密钥（使用 Docker 或 Compose secret），不要使用环境变量：通过 `-e MCP_INSPECTOR_SECRET_KEY=…` 传入的密钥可被能够运行 `docker inspect` 或 `docker exec` 的任何人看到。配方页展示了两种方式。
 
+<a id="secret-storage" />
 ## 机密信息存储
 
 Inspector 不会将凭据写入 `mcp.json`、`client.json` 和 `oauth.json`，这样共享、提交或同步这些文件就不会泄露凭据。以下内容会作为机密信息存储：
@@ -65,6 +71,7 @@ Inspector 不会将凭据写入 `mcp.json`、`client.json` 和 `oauth.json`，�
 
 存储方式如何选择以及如何更改，请参阅[机密信息存储位置](/docs/2026-07-28/tools/inspector/configuration#where-secrets-are-stored)。本节说明相关风险。
 
+<a id="the-automatic-plaintext-fallback" />
 ### 自动回退到明文
 
 <Warning>
@@ -79,6 +86,7 @@ Inspector 不会将凭据写入 `mcp.json`、`client.json` 和 `oauth.json`，�
 - 使用 `MCP_INSPECTOR_SECRET_KEY_FILE` 中的生成密钥加密文件；
 - 设置 `MCP_INSPECTOR_SECRET_STORE=memory`，每次会话重新输入机密信息。
 
+<a id="what-the-file-store-protects-against" />
 ### 文件存储可以防范什么
 
 文件存储用于没有钥匙串的机器，安全性弱于钥匙串。即使经过加密，也应将把机密信息保存在其中视为中等风险。
@@ -111,6 +119,7 @@ Inspector 不会将凭据写入 `mcp.json`、`client.json` 和 `oauth.json`，�
 - 如果密钥文件缺失、不可读或为空，如果 `MCP_INSPECTOR_SECRET_KEY_FILE` 设置为空值，或者同时设置了两个密钥变量，存储方式会**拒绝读写**，而不是回退到明文。
 - 如果口令发生变化或丢失，现有文件将无法解密。Inspector 会将其读取为空，并**拒绝覆盖**，因此请恢复口令，或删除文件后重新输入值。
 
+<a id="stdio-servers-run-as-you" />
 ## stdio 服务器以你的身份运行
 
 stdio MCP 服务器是 Inspector 以你的用户权限启动的进程，与任何 MCP 主机的行为相同。
@@ -120,10 +129,12 @@ stdio MCP 服务器是 Inspector 以你的用户权限启动的进程，与任�
 
 只连接你愿意让其访问这些机密信息的 stdio 服务器。若不完全信任某个服务器，请将其命令包装在容器中，例如将 `docker run -i --rm --network none <image>` 作为 stdio 命令。HTTP 和 SSE 服务器不会运行本地代码，因此不需要进程隔离。
 
+<a id="the-mcpdo-connection-daemon" />
 ## mcpdo 连接守护进程
 
 [mcpdo](/docs/2026-07-28/tools/inspector/mcpdo) 通过将连接交给后台守护进程 `mcpdod`，在命令之间保持连接。它会在第一次需要命令时**自动启动**（`mcpdo connect` 或任何针对连接的命令），不需要单独的“启动守护进程”步骤。本节说明该进程暴露的内容。
 
+<a id="how-clients-reach-it-and-who-else-can" />
 ### 客户端如何访问它，以及谁还能访问
 
 | 平台          | 端点                                                                                                                                       |
@@ -135,6 +146,7 @@ stdio MCP 服务器是 Inspector 以你的用户权限启动的进程，与任�
 
 目录按以下顺序选择：`MCP_INSPECTOR_DAEMON_DIR`、`MCP_STORAGE_DIR`、`~/.mcp-inspector`。如果 socket 路径超过平台限制（macOS 约 104 字节、Linux 108 字节），会提前拒绝，并在错误中指出要缩短的变量。
 
+<a id="how-it-authenticates-commands" />
 ### 如何验证命令
 
 每个请求都必须携带 bearer 令牌，不存在未授权请求路径。
@@ -148,6 +160,7 @@ stdio MCP 服务器是 Inspector 以你的用户权限启动的进程，与任�
   私有模式可以隔离不同 shell 之间的连接和守护进程状态，但它**不是**针对同一用户其他进程的安全边界：任何拥有你的 UID 且知道守护进程目录的进程都可以读取令牌。需要硬边界时，请使用单独的用户账户或容器。
 </Note>
 
+<a id="what-it-holds-in-memory" />
 ### 它在内存中持有什么
 
 在守护进程运行期间，每个打开的连接都会持有：
@@ -161,6 +174,7 @@ stdio MCP 服务器是 Inspector 以你的用户权限启动的进程，与任�
 
 在没有钥匙串的主机上，mcpdo 不会自动回退到内存存储。它的前端命令和守护进程是不同进程，按进程存储无法在二者之间传递令牌，因此 mcpdo 使用**共享的 `secrets.json` 文件**，并遵循上文“除非提供密钥否则为明文”的规则。显式设置 `MCP_INSPECTOR_SECRET_STORE=memory` 仍然优先。mcpdo 每次 `connect` 打印一次存储警告，而不是每条命令都打印。
 
+<a id="lifetime" />
 ### 生命周期
 
 - **启动：**第一次需要命令时启动。如果两个命令同时启动，`O_EXCL` 锁（`mcpdod.lock`）保证只有一个成功。已退出守护进程留下的锁会被回收，运行中的守护进程永远不会被接管。
@@ -170,6 +184,7 @@ stdio MCP 服务器是 Inspector 以你的用户权限启动的进程，与任�
 
 使用 `pgrep mcpdod` 查找遗留的守护进程。它会将进程标题设置为 `mcpdod`。
 
+<a id="what-it-writes-to-disk" />
 ### 写入磁盘的内容
 
 所有内容都位于权限为 `0700` 的守护进程目录中：

@@ -1,7 +1,8 @@
+<a id="sep-1577-sampling-with-tools" />
 # SEP-1577: 使用工具进行采样
 
 - **状态**: 最终版
-- **类型**: 标准跟踪
+- **类型**: 标准轨道
 - **创建时间**: 2025-09-30
 - **作者**: Olivier Chafik (@ochafik)
 - **问题**: #1577
@@ -9,7 +10,7 @@
 | SEP 编号          | #1577                                                                                                                         |
 | ----------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | **标题**          | 使用工具进行采样                                                                                                              |
-| **作者**          | Olivier Chafik                                                                                                                |
+| **作者**          | 奥利维尔·查菲克                                                                                                                |
 | **赞助者**        | @bhosmer-ant                                                                                                                  |
 | **状态**          | 草案                                                                                                                         |
 | **创建时间**      | 2025-09-29                                                                                                                    |
@@ -32,10 +33,12 @@
 - _11 月 10 日_：移除 `disable_parallel_tool_use`，将其留待后续更新，因为 Gemini API 目前无法实现此功能。
 - _11 月 11 日_：补充关于 Gemini API 函数调用模式和角色的说明；要求包含工具结果内容的 SamplingMessage 不得与其他内容类型混合使用
 
+<a id="abstract" />
 ## 摘要
 
 本 SEP 为 `sampling/createMessage` 引入了 `tools` 和 `toolChoice` 参数，并将 `includeContext` 软弃用（将 `thisServer` 和 `allServers` 置于某项能力之下）。这使得 MCP 服务器能够使用客户端的 tokens 运行自己的 agentic 循环（仍然处于用户监督之下），并降低客户端实现的复杂性（上下文支持变为显式可选）。
 
+<a id="motivation" />
 ## 动机
 
 - [采样](https://modelcontextprotocol.io/specification/2025-06-18/client/sampling) 不支持工具调用，尽管这是现代代理式行为的基石。若没有对其的显式支持，使用采样的 MCP 服务器要么尝试通过复杂提示词 / 对输出进行自定义解析来模拟工具调用，要么只能处理更简单、非代理式的请求。增加对工具调用的支持，可能会在 MCP 生态中解锁许多新的用例。
@@ -44,17 +47,18 @@
 
 请注意一些相关工作：
 
-- [MCP Sampling](https://docs.google.com/document/d/1KUsloHpsjR4fdXdJuofb9jUuK0XWi88clbRm9sWE510/edit?tab=t.0#heading=h.5diekssgi3pq)（@jerome3o-anthropic）：一个极其相似的提案：
-  - 增加相同的工具语义，
-  - 废弃 `includeContext`（文档解释了为什么其语义是模糊的）
-  - （进一步建议显式上下文共享，但这超出了本提案的范围）
-- [允许 Prompt/Sampling Messages 包含多个内容块。 #198](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/198)
-  - 在这个 PR 中，我们让 `{CreateMessageResult,SamplingMessage}.content` 接受单个内容或内容数组。`result.content` 的变更与旧版本不兼容，但支持并行工具调用是必需的。随后 `SamplingMessage.content` 的变更使编写工具循环变得更加自然（参见参考实现中的示例：[toolLoopSampling.ts](https://github.com/modelcontextprotocol/typescript-sdk/blob/ochafik/sep1577/src/examples/server/toolLoopSampling.ts)）
-
+- [MCP 采样](https://docs.google.com/document/d/1KUsloHpsjR4fdXdJuofb9jUuK0XWi88clbRm9sWE510/edit?tab=t.0#heading=h.5diekssgi3pq) (@jerome3o-anthropic)：极其相似的提案：
+  - 添加相同的工具语义，
+  - 弃用 `includeContext` （文档解释了为什么它的语义不明确）
+  -（进一步建议显式上下文共享，这超出了本提案的范围）
+- [允许提示/采样消息包含多个内容块。 #198]（https://github.com/modelcontextprotocol/modelcontextprotocol/pull/198）
+  - 在此 PR 中，我们使 `{CreateMessageResult,SamplingMessage}.content` 接受单个内容或内容数组。 `result.content` 更改向后不兼容，但需要支持并行工具调用。 `SamplingMessage.content` 的更改使得编写工具循环变得更加自然（请参阅参考实现中的示例：[toolLoopSampling.ts](https://github.com/modelcontextprotocol/typescript-sdk/blob/d372eff7a764c72619b15a9f31c2756fa402fa14/src/examples/server/toolLoopSampling.ts)）
 在下面的“可能的后续工作”部分中，我们给出了一些超出本 SEP 范围但我们注意使其与本 SEP 保持合理兼容的功能示例。
 
+<a id="specification" />
 ## 规范
 
+<a id="overview" />
 ### 概述
 
 - 在 [CreateMessageRequest](https://modelcontextprotocol.io/specification/2025-06-18/schema#createmessagerequest) 中添加传统工具调用支持，增加 `tools`（带 JSON schema）和 `toolChoice` 参数，并要求服务端工具循环
@@ -69,6 +73,7 @@
 - 对 [CreateMessageRequest.params.includeContext](https://modelcontextprotocol.io/specification/2025-06-18/schema#createmessagerequest) != ‘none’ 进行软弃用（现在由 capability 限制）
   - 鼓励实现无上下文采样
 
+<a id="protocol-changes" />
 ### 协议变更
 
 - `sampling/createMessage`
@@ -79,6 +84,7 @@
     - 注：这是 Claude API 实现的要求（并行工具调用必须一次性全部响应）
   - 带工具结果内容块的 SamplingMessage MUST NOT 包含其他内容类型。
 
+<a id="schema-changes" />
 ### Schema 变更
 
 - [ClientCapabilities](https://modelcontextprotocol.io/specification/2025-06-18/schema#clientcapabilities)
@@ -284,10 +290,12 @@
         - OpenAI 的 [ChatCompletion](https://platform.openai.com/docs/api-reference/chat/object): `finish_reason: “stop" | “length" | “tool_use”`（…？）
         - [Anthropic](https://docs.claude.com/en/api/handling-stop-reasons): `stop_reason: “end_turn" | “max_tokens" | “stop_sequence" | “tool_use" | “pause_turn" | “refusal”`
 
+<a id="possible-follow-ups" />
 ## 可能的后续事项
 
 这些内容不在本 SEP 的范围内，但我们注意避免排除它们，因此在适当的地方给出了一些如何在本 SEP 之上或之后实现它们的示例。
 
+<a id="streaming-support" />
 ### 流式支持
 
 参见：[流式工具使用结果 #117](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/117)
@@ -296,6 +304,7 @@
 
 一种可能的实现方式是使用带负载的通知，并且可能创建一个新的方法 `sampling/createMessageStreamed`。这两者都应与本 SEP 正交（但我们需要为结果创建增量类型，类似推理 API 中的流式 API，例如 Claude API 和 OpenAI API）。
 
+<a id="cache-friendliness-updates" />
 ### 提升缓存友好性
 
 这里需要两点：
@@ -320,6 +329,7 @@
     }
     ```
 
+<a id="allow-client-to-call-the-servers-tools-by-itself-in-an-agentic-loop" />
 ### 允许客户端在代理循环中自行调用服务器的工具
 
 从服务器的角度看，这样就不需要服务器自己调用工具/在后续采样调用中注入工具结果了。
@@ -338,6 +348,7 @@ MCP 服务器只需在采样请求中允许列出自己的工具，并使用一�
 - 安全，且仅限于该服务器的工具。
 - 如果我们传播 mcp-session-id，就可以利用并保留任何服务器端会话上下文/缓存
 
+<a id="allow-client-to-call-any-other-mcp-servers-tools-by-itself-in-an-agentic-loop" />
 ### 允许客户端在代理循环中自行调用任何其他 MCP 服务器的工具
 
 虽然这听起来与前一个方案相似（只允许同一服务器的工具），但这个选项不需要协议变更/完全可以由客户端作为其采样支持的实现细节来完成。
@@ -356,6 +367,7 @@ MCP 服务器只需在采样请求中允许列出自己的工具，并使用一�
 - 可能需要分类器来避免高风险的隐私泄露/滥用
   - 如果用户错误地批准了 Gmail MCP 工具的使用/委派，服务器就会通过采样获取他们的私人电子邮件访问权限
 
+<a id="allow-server-to-list-call-clients-tools-clientserver-p2p" />
 ### 允许服务器列出并调用客户端的工具（客户端/服务器 → p2p）
 
 如果我们说客户端现在可以暴露服务器可调用的工具，那么这将开启一系列可能性：
@@ -366,6 +378,7 @@ MCP 服务器只需在采样请求中允许列出自己的工具，并使用一�
   - 既然如此，客户端也可以向服务器请求采样
   - 协议层面是对称的，但传输层面仍然具有方向性（例如对于 HTTP 传输，POST 请求的方向仍然很重要）
 
+<a id="simplify-structured-outputs-use-case" />
 ### 简化结构化输出用例
 
 采样的一个主要用例是获取符合给定模式的输出。

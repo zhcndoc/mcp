@@ -1,45 +1,48 @@
-# MCP Spec Plugin for Claude
+<a id="mcp-spec-plugin-for-claude" />
+# Claude 的 MCP Spec 插件
 
-Skills for researching and contributing to the Model Context Protocol specification.
+研究和贡献模型上下文协议规范的技能。
 
-## Installation
+<a id="installation" />
+## 安装
 
-### Claude Code
+<a id="claude-code" />
+### 克劳德·代码
 
 ```bash
 /plugin marketplace add modelcontextprotocol/modelcontextprotocol
 ```
 
-### Claude Cowork
+<a id="claude-cowork" />
+### 克劳德·科沃克
 
-Navigate to Customize >> Browse Plugins >> Personal >> Plus Button >> Add marketplace from GitHub and add `modelcontextprotocol/modelcontextprotocol`
+导航至自定义 >> 浏览插件 >> 个人 >> 加号按钮 >> 从 GitHub 添加市场并添加 `modelcontextprotocol/modelcontextprotocol`
 
-## Available Skills
+<a id="available-skills" />
+## 可用技能
 
 ### `/search-mcp-github <topic>`
 
-Search across MCP GitHub discussions, issues, and pull requests to find relevant information about a topic.
+搜索 MCP GitHub 讨论、问题和拉取请求以查找有关主题的相关信息。
 
-**Sources searched:**
-
-- [Org-level Discussions](https://github.com/orgs/modelcontextprotocol/discussions)
-- [Spec-level Discussions](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions)
-- [Spec-level Issues](https://github.com/modelcontextprotocol/modelcontextprotocol/issues)
-- [Spec-level Pull Requests](https://github.com/modelcontextprotocol/modelcontextprotocol/pulls)
-
+**搜索来源：**
+- [组织级讨论](https://github.com/orgs/modelcontextprotocol/discussions)
+- [规范级别讨论](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions)
+- [规范级别问题](https://github.com/modelcontextprotocol/modelcontextprotocol/issues)
+- [规范级别拉取请求](https://github.com/modelcontextprotocol/modelcontextprotocol/pulls)
 **Example:**
 
 ```
 /search-mcp-github Tool Annotations
 ```
 
-**Note:** The skill searches both open AND closed issues/PRs, which is important for understanding past decisions and historical context.
+**注意：** 该技能搜索开放和封闭的问题/PR，这对于理解过去的决策和历史背景非常重要。
 
 ### `/draft-sep <idea>`
 
-Research and draft a Specification Enhancement Proposal that conforms to the [SEP governance process](https://modelcontextprotocol.io/community/sep-guidelines). Gates on whether the idea is SEP-worthy, interviews the author, checks existing spec coverage and prior art, then fills the template's required and optional sections and writes `seps/0000-{slug}.md`. Optionally opens a draft PR, backfills the SEP number, and runs `npm run generate:seps` and `npm run format:docs` so CI stays green.
+研究起草符合【SEP治理流程】（https://modelcontextprotocol.io/community/sep-guidelines）的规范增强提案。盖茨询问该想法是否值得 SEP，采访作者，检查现有规范覆盖范围和现有技术，然后填写模板的必填和可选部分并写入 `seps/0000-{slug}.md`。 （可选）打开草稿 PR，回填 SEP 编号，并运行 `npm run generate:seps` 和 `npm run format:docs`，以便 CI 保持绿色。
 
-**Prerequisite:** Run from a local clone of this repository or your fork of it (the skill reads `seps/TEMPLATE.md` and writes into `seps/`).
+**先决条件：** 从该存储库或其分支的本地克隆运行（该技能读取 `seps/TEMPLATE.md` 并写入 `seps/`）。
 
 **Example:**
 
@@ -47,4 +50,4 @@ Research and draft a Specification Enhancement Proposal that conforms to the [SE
 /draft-sep add websocket transport
 ```
 
-**Note:** The skill will ask clarifying questions (SEP type, breaking-change status, prototype, prior discussion, sponsor, security) before writing anything. The SEP guidelines advise discussing an idea in Discord or a Working Group before drafting — the skill will flag if that hasn't happened.
+**注意：** 在编写任何内容之前，该技能将提出澄清问题（SEP 类型、重大变更状态、原型、先前讨论、赞助商、安全性）。 SEP 指南要求工作组赞助 SEP，如果没有这样做，该技能将被标记。如果没有发起人，它打开的拉取请求只是用于公开开发想法的拉取请求草案。

@@ -14,6 +14,7 @@ description: Model Context Protocol 的补充授权机制
   MCP 授权扩展的源代码、规范和参考实现。
 </Card>
 
+<a id="why-authorization-extensions" />
 ## 为什么需要授权扩展？
 
 核心 MCP 规范包含一个基于 OAuth 2.0 构建的稳健的 [授权框架](/specification/latest/basic/authorization)。该框架很好地处理了常见情况：用户交互式地授予 MCP 客户端代表他们访问服务器的权限。
@@ -25,6 +26,7 @@ description: Model Context Protocol 的补充授权机制
 
 ext-auth 扩展解决了这些差距。
 
+<a id="available-extensions" />
 ## 可用扩展
 
 <CardGroup cols={2}>
@@ -44,6 +46,7 @@ ext-auth 扩展解决了这些差距。
   </Card>
 </CardGroup>
 
+<a id="choosing-the-right-extension" />
 ## 选择合适的扩展
 
 | 场景                                                 | 推荐扩展                                                                 |
@@ -55,10 +58,12 @@ ext-auth 扩展解决了这些差距。
 | 组织范围内的 MCP 访问策略执行                        | [企业托管授权](/extensions/auth/enterprise-managed-authorization)        |
 | 标准交互式用户授权                                   | 核心 MCP 规范（不需要扩展）                                            |
 
+<a id="client-support" />
 ## 客户端支持
 
 授权扩展支持因客户端而异。请参阅 [客户端矩阵](/extensions/client-matrix) 了解完整细分。这两个扩展都需要 MCP 客户端的明确支持——它们默认永远不会激活。
 
+<a id="specification" />
 ## 规范
 
-这两个扩展都在 [ext-auth 仓库](https://github.com/modelcontextprotocol/ext-auth/tree/main/specification/draft) 中指定。它们使用标准的 MCP [扩展协商](/extensions/overview#negotiation) 机制：客户端在每个请求的 `_meta` 中发送的 `io.modelcontextprotocol/clientCapabilities` 的 `extensions` 字段里声明支持，而服务器则在 [`server/discover`](/specification/draft/server/discover) 返回的 capabilities 中声明它们的支持。
+这两个扩展均在 [ext-auth 存储库](https://github.com/modelcontextprotocol/ext-auth/tree/main/specification/stable) 中指定。它们使用标准 MCP [扩展协商](/extensions/overview#negotiation) 机制：客户端在每个请求的 `_meta` 中发送的 `io.modelcontextprotocol/clientCapabilities` 的 `extensions` 字段中声明支持，服务器在 [`server/discover`](/specification/draft/server/discover) 返回的功能中通告其支持。

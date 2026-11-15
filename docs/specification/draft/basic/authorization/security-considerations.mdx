@@ -1,5 +1,5 @@
 ---
-title: Authorization Security Considerations
+title: 授权安全注意事项
 sidebarTitle: 安全注意事项
 ---
 
@@ -9,6 +9,7 @@ sidebarTitle: 安全注意事项
 
 此外，实现者**必须**遵循 OAuth 2.1 安全最佳实践，如 [OAuth 2.1 第 7 节“安全注意事项”](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-13#name-security-considerations) 所述。
 
+<a id="token-audience-binding-and-validation" />
 ## 令牌受众绑定与验证
 
 [RFC 8707](https://www.rfc-editor.org/rfc/rfc8707.html) 资源指示器通过将令牌绑定到其预期受众，可提供关键的安全收益，**前提是授权服务器支持该能力**。为促进当前及未来的采用：
@@ -16,9 +17,10 @@ sidebarTitle: 安全注意事项
 - MCP 客户端**必须**在授权和令牌请求中包含 `resource` 参数，具体见 [资源参数实现](/specification/draft/basic/authorization#resource-parameter-implementation) 部分
 - MCP 服务器**必须**验证提交给它们的令牌是专门为其用途签发的
 
-The [Security Best Practices document](/docs/draft/tutorials/security/security_best_practices#token-passthrough)
-outlines why token audience validation is crucial and why token passthrough is explicitly forbidden.
+[安全最佳实践文档](/docs/draft/tutorials/security/security_best_practices#token-passthrough)
+概述了为什么令牌受众验证至关重要以及为什么明确禁止令牌传递。
 
+<a id="token-theft" />
 ## 令牌窃取
 
 攻击者如果获取了客户端存储的令牌，或服务器缓存或记录的令牌，就可以通过看似合法的请求访问受保护资源。
@@ -27,6 +29,7 @@ outlines why token audience validation is crucial and why token passthrough is e
 
 授权服务器**应当**签发短期有效的访问令牌，以降低令牌泄露的影响。对于公共客户端，授权服务器**必须**按照 [OAuth 2.1 第 4.3.1 节“令牌端点扩展”](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-13#section-4.3.1) 的描述轮换刷新令牌。
 
+<a id="communication-security" />
 ## 通信安全
 
 实现**必须**遵循 [OAuth 2.1 第 1.5 节“通信安全”](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-13#section-1.5)。
@@ -36,12 +39,15 @@ outlines why token audience validation is crucial and why token passthrough is e
 1. 所有授权服务器端点**必须**通过 HTTPS 提供服务。
 1. 所有重定向 URI**必须**是 `localhost` 或使用 HTTPS。
 
+<a id="authorization-code-protection" />
 ## 授权码保护
 
 攻击者如果获取了授权响应中包含的授权码，可以尝试用该授权码兑换访问令牌，或以其他方式利用该授权码。
+
 （详见 [OAuth 2.1 第 7.5 节](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-13#section-7.5)）
 
 为缓解这一风险，MCP 客户端**必须**按照 [OAuth 2.1 第 7.5.2 节](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-13#section-7.5.2) 实现 PKCE，并且在继续授权前**必须**验证 PKCE 支持。
+
 PKCE 通过要求客户端创建一对秘密的 verifier-challenge，从而帮助防止授权码拦截和注入攻击，确保只有原始请求方才能将授权码兑换为令牌。
 
 当技术上可行时，MCP 客户端**必须**使用 `S256` 代码挑战方法，正如 [OAuth 2.1 第 4.1.1 节](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-13#section-4.1.1) 所要求的那样。
@@ -54,10 +60,12 @@ PKCE 通过要求客户端创建一对秘密的 verifier-challenge，从而帮�
 
 提供 OpenID Connect Discovery 1.0 的授权服务器**必须**在其元数据中包含 `code_challenge_methods_supported`，以确保与 MCP 兼容。
 
+<a id="mix-up-attacks" />
 ## 混淆攻击
 
-An attacker that controls one of the authorization servers an MCP client interacts with may attempt to have the client send it an authorization code or token issued by a different, honest authorization server (a mix-up attack, described in [RFC9207 Section 1](https://datatracker.ietf.org/doc/html/rfc9207#section-1)). [Authorization Response Validation](/specification/draft/basic/authorization#authorization-response-validation) specifies the required mitigation.
+控制与 MCP 客户端交互的授权服务器之一的攻击者可能会尝试让客户端向其发送由不同的诚实授权服务器颁发的授权代码或令牌（混合攻击，如 [RFC9207 第 1 部分](https://datatracker.ietf.org/doc/html/rfc9207#section-1) 中所述）。 [授权响应验证](/specification/draft/basic/authorization#authorization-response-validation) 指定所需的缓解措施。
 
+<a id="open-redirection" />
 ## 开放重定向
 
 攻击者可能伪造恶意重定向 URI，将用户引导至钓鱼网站。
@@ -72,19 +80,24 @@ MCP 客户端**应当**在授权码流程中使用并验证 state 参数，并�
 
 如果授权服务器信任该重定向 URI，**应当**只自动重定向用户代理。如果该 URI 不受信任，授权服务器**可以**通知用户，并依赖用户作出正确决定。
 
+<a id="client-id-metadata-document-security" />
 ## 客户端 ID 元数据文档安全性
 
-在实现 [客户端 ID 元数据文档](/specification/draft/basic/authorization/client-registration#client-id-metadata-documents) 时，授权服务器**必须**考虑 [OAuth 客户端 ID 元数据文档，第 6 节](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-client-id-metadata-document-00#name-security-considerations) 中详细说明的安全影响。
-关键考虑包括：
+实施 [客户端 ID 元数据文档](/specification/draft/basic/authorization/client-registration#client-id-metadata-documents) 时，授权服务器**必须**考虑安全隐患
+详细信息请参阅 [OAuth 客户端 ID 元数据文档，第 10 节](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-client-id-metadata-document-03#name-security-considerations)。
 
+主要考虑因素包括：
+
+<a id="authorization-server-abuse-protection" />
 ### 授权服务器滥用防护
 
-Authorization servers fetching metadata documents **SHOULD** consider
-[Server-Side Request Forgery (SSRF)](https://developer.mozilla.org/docs/Web/Security/Attacks/SSRF) risks, as described in [OAuth Client ID Metadata Document: Server Side Request Forgery (SSRF) Attacks](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-client-id-metadata-document-00#name-server-side-request-forgery).
+授权服务器获取元数据文档**应该**考虑
+[服务器端请求伪造 (SSRF)](https://developer.mozilla.org/docs/Web/Security/Attacks/SSRF) 风险，如 [OAuth 客户端 ID 元数据文档：服务器端请求伪造 (SSRF) 攻击](https://datatracker.ietf.org/doc/html/draft-ietf-oauth-client-id-metadata-document-03#name-server-side-request-forgery) 中所述。
 
+<a id="localhost-redirect-uri-risks" />
 ### localhost 重定向 URI 风险
 
-Client ID Metadata Documents cannot prevent `localhost` URL impersonation by themselves.
+客户端 ID 元数据文档本身无法阻止 `localhost` URL 模拟。
 
 授权服务器：
 
@@ -92,28 +105,32 @@ Client ID Metadata Documents cannot prevent `localhost` URL impersonation by the
 - **可以**要求额外的证明机制以增强安全性
 - **必须**在授权期间清楚显示重定向 URI 的主机名
 
+<a id="trust-policies" />
 ### 信任策略
 
-Authorization servers **MAY** implement domain-based trust policies for accepting Client ID Metadata Documents, as described in [Section 6.4](https://www.ietf.org/archive/id/draft-ietf-oauth-client-id-metadata-document-00.html#section-6.4) and [Section 6.8](https://www.ietf.org/archive/id/draft-ietf-oauth-client-id-metadata-document-00.html#section-6.8) of the Client ID Metadata Document specification.
+授权服务器 **可以** 实施基于域的信任策略来接受客户端 ID 元数据文档，如客户端 ID 元数据文档规范的 [第 10.6 节](https://www.ietf.org/archive/id/draft-ietf-oauth-client-id-metadata-document-03.html#section-10.6) 和 [第 10.8 节](https://www.ietf.org/archive/id/draft-ietf-oauth-client-id-metadata-document-03.html#section-10.8) 中所述。
 
+<a id="confused-deputy-problem" />
 ## 受困代理问题
 
-Attackers can exploit MCP servers acting as intermediaries to third-party APIs, leading to [confused deputy vulnerabilities](/docs/draft/tutorials/security/security_best_practices#confused-deputy-problem).
-By using stolen authorization codes, they can obtain access tokens without user consent.
+攻击者可以利用充当第三方 API 中介的 MCP 服务器，从而导致[混淆代理漏洞](/docs/draft/tutorials/security/security_best_practices#confused-deputy-problem)。
+
+通过使用窃取的授权码，他们可以在未经用户同意的情况下获取访问令牌。
 
 使用静态客户端 ID 的 MCP 代理服务器**必须**在转发到第三方授权服务器之前，为每个
 [动态注册客户端](/specification/draft/basic/authorization/client-registration#dynamic-client-registration)
 获取用户同意（第三方授权服务器可能还需要额外同意）。
 
+<a id="access-token-privilege-restriction" />
 ## 访问令牌权限限制
 
 如果服务器接受为其他资源签发的令牌，攻击者可能获得未授权访问，或以其他方式危害 MCP 服务器。
 
-MCP servers **MUST** validate access tokens before processing the request, ensuring the access token is issued specifically for the MCP server, and take all necessary steps to ensure no data is returned to unauthorized parties.
+MCP 服务器 **必须** 在处理请求之前验证访问令牌，确保访问令牌是专门为 MCP 服务器颁发的，并采取所有必要的步骤确保不会将数据返回给未经授权的各方。
 
 MCP 服务器**必须**遵循 [OAuth 2.1 - 第 5.2 节](https://www.ietf.org/archive/id/draft-ietf-oauth-v2-1-13.html#section-5.2) 中的指南来验证传入令牌。
 
-MCP servers **MUST** only accept tokens specifically intended for themselves and **MUST** reject tokens that do not include them in the audience claim or otherwise verify that they are the intended recipient of the token. See the [Security Best Practices Token Passthrough section](/docs/draft/tutorials/security/security_best_practices#token-passthrough) for details.
+MCP 服务器**必须**仅接受专门为其自身设计的令牌，并且**必须**拒绝不将其包含在受众声明中的令牌，或者以其他方式验证它们是否是令牌的预期接收者。有关详细信息，请参阅[安全最佳实践令牌传递部分](/docs/draft/tutorials/security/security_best_practices#token-passthrough)。
 
 如果 MCP 服务器向上游 API 发起请求，它可能会作为这些 API 的 OAuth 客户端。上游 API 使用的访问令牌是单独的令牌，由上游授权服务器签发。MCP 服务器**不得**透传其从 MCP 客户端收到的令牌。
 

@@ -3,45 +3,89 @@ title: 文件系统章程
 description: MCP 文件系统工作组章程
 ---
 
+<a id="group-type" />
 ## 工作组类型
 
 **工作组**
 
+<a id="mission-statement" />
 ## 使命声明
 
-文件系统工作组旨在使 MCP Resources 具备双向能力，从而让智能体能够将结果写回它读取输入的服务器。智能体平台正逐渐将服务以文件系统的形式呈现给模型，而 Resources 已经通过 URI 处理内容，其中 [`file://` 方案由规范定义为用于标识“行为类似文件系统的资源”](/specification/draft/server/resources#common-uri-schemes)。目前，Resources 仅覆盖读取方向。该工作组将制定一份 Extensions Track SEP，涵盖写入操作、乐观并发控制，以及写入操作与变更通知和缓存之间的交互。
+文件系统工作组的存在是为了使 MCP 资源与通用文件系统语义保持一致，以便 MCP 客户端能够
+一个用于跨源发现、检索和修改文件系统型资源的界面，并且可以这样做
+高效。代理平台正在向模型提供服务作为文件系统，并且资源已经
+在 [`file://` 方案下通过 URI 寻址内容，该规范将其定义为标识“行为类似的资源”
+文件系统"](/specification/draft/server/resources#common-uri-schemes)。工作组将确定哪个文件系统
+语义适合 MCP 并生成一个或多个扩展跟踪 SEP，将这些语义一致地应用于资源。
 
+<a id="scope" />
 ## 范围
 
+<a id="in-scope" />
 ### 范围内
 
-- **规范工作**：一份暂定标题为 Resources 的文件系统操作的 Extensions Track SEP，涵盖：
-  1. **操作**。定义创建、更新、删除以及元数据读取（`stat`），用于在不获取正文的情况下回答单个 URI 的存在性、大小和最后修改时间。
-  2. **乐观并发控制**。规定两个写入者如何避免更新丢失，以及客户端如何在仅当不存在的前提条件下创建资源。
-  3. **变更通知和缓存**。规定写入操作如何与 `notifications/resources/updated`、生存时间和缓存范围字段 `ttlMs` 与 `cacheScope`，以及 `lastModified` 注解交互。
-- **跨领域关注点**：协调将这一原语扩展为统一连贯设计的提案。[SEP-2571，面向智能体协调的资源提交](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2571) 提议使用 `resources/create` 和 `resources/delete`。[SEP-2532，二进制内容交付的资源流式传输](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2532) 提议使用 `resources/stream`。[SEP-1708，MCP 客户端代理的文件系统访问](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1708) 曾提议使用与 Resources 并列的 `files/*` 方法族，并于 2026 年 1 月 23 日关闭。
-- **文档**：在规范中记录新操作，并为服务器作者提供关于如何在资源写入路径和基于工具的路径之间进行选择的指导。
+- **规范工作**：一个或多个扩展跟踪定义资源操作的 SEP，涵盖：
+  1. **范围列表和目录遍历。** 研究范围为 URI 的层次结构感知列表，包括
+     枚举 URI 下面一级的操作，类似于 `readdir`，遍历整个子树，以及如何
+     两者都与现有的扁平 `resources/list` 操作相关。
+  2. **服务器端搜索。** 研究服务器评估的搜索和全局匹配，以便客户端可以找到内容
+     无需列出和阅读所有资源。这超出了描述服务器 URI 的资源模板的范围
+     接受。与范围列表和遍历一起，这涵盖了客户端如何发现服务器上的内容。
+  3. **读取语义。** 研究哪种文件系统读取语义适合 MCP，包括批量读取以下文件系统中的多个 URI
+     一个请求以及协议是否可以支持 `seek` 操作。
+  4. **写入和元数据操作。** 定义创建、更新、删除和应答的元数据读取 (`stat`)
+     一个 URI 的存在、大小和最后修改时间，无需获取正文。
+  5. **乐观并发控制。** 指定两个写入器如何避免丢失更新，以及客户端如何创建更新
+     在“缺席时创建”前提下的资源。
+  6. **键入的错误。** 定义资源操作的错误，例如未找到、已存在、前提条件失败且
+     权限被拒绝，因此客户端在服务器之间以相同的方式处理故障。目前缺少资源
+     返回通用 `-32602`（无效参数）。
+  7. **更改通知和缓存。** 指定文件系统操作如何与
+     `notifications/resources/updated`、生存时间和缓存范围字段 `ttlMs` 和 `cacheScope` 以及
+     `lastModified` 注释。
+- **跨领域关注点**：协调将该原语扩展为一个连贯设计的提案。
+  [SEP-2571，代理协调的资源提交](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2571)
+  提出`resources/create`和`resources/delete`。
+  [SEP-2532，用于二进制内容交付的资源流](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2532)
+  建议`resources/stream`。
+  [SEP-1708，MCP 客户端代理的文件系统访问](https://github.com/modelcontextprotocol/modelcontextprotocol/issues/1708)
+  提出了与 Resources 并存的 `files/*` 方法系列，并于 2026 年 1 月 23 日关闭。
+- **文档**：记录规范中采用的文件系统语义，并为服务器作者提供指导
+  在资源操作和基于工具的操作之间进行选择。
 
+<a id="out-of-scope" />
 ### 范围外
 
-- 与 Resources 并列的另一套 `files/*` 原语。该工作组扩展现有的 Resources 原语。
-- 主机端沙箱和本地磁盘语义。该工作组标准化客户端与服务器之间的线路格式。主机如何将资源具体化为供模型使用的文件系统仍属于主机关注事项。
-- 写入授权策略，但需说明现有 MCP 授权规范适用的位置。
+- 并行的 `files/*` 原语位于资源旁边。工作组扩展了现有的资源原语。
+- POSIX 或其他操作系统的文件系统 API 的完整映射。工作组将选择适合的语义
+  客户端-服务器协议并记录任何排除的理由。
+- 主机端沙箱和本地磁盘语义。工作组标准化了客户端和服务器的有线格式。怎样当主持人
+  将资源具体化到模型的文件系统中仍然是主机关注的问题。
+- 文件系统操作的授权策略，超出说明现有 MCP 授权规范的位置
+  适用。
 
+<a id="related-groups" />
 ### 相关工作组
 
-- **File Uploads WG**。两个工作组都会向服务器传输内容。需要协调上传导向的流程在哪里结束，以及资源写入操作从哪里开始。
-- **[Skills Over MCP WG](/community/working-groups/skills-over-mcp)**。已发布的 [Skills 扩展](/extensions/skills/overview) 使用 Resources 读取文件，并定义可选的目录读取。它不依赖文件系统写操作；未来影响技能的资源操作需要进行协调。
-- **Agents WG**。多智能体和作业编排系统是共享写入路径的主要使用者。
+- **文件上传工作组。** 两个组都将内容传输到服务器。需要对面向上传的流程进行协调
+  结束并开始资源写入操作。发现、搜索、元数据和小型内联写入不依赖于
+  大内容传输，并且可以独立进行。工具已经返回资源链接，因此组
+  还应该就接受文件的工具输入是否可以引用资源达成一致。
+- **[MCP WG 的技能](/community/working-groups/skills-over-mcp).** 已发布
+  [技能扩展](/extensions/skills/overview) 使用资源进行文件读取并定义可选的目录读取。
+  它不依赖于文件系统写操作；协调影响技能的未来资源运营。
+- **代理 IG。** 多代理和作业编排系统是共享文件系统语义的激励消费者。
 
+<a id="leadership" />
 ## 领导层
 
 | 角色 | 姓名            | 组织机构    | GitHub                                               | 任期    |
 | ---- | --------------- | ----------- | ---------------------------------------------------- | ------- |
-| 负责人 | Sambhav Kothari | Bloomberg   | [@sambhav](https://github.com/sambhav)               | 初始 |
-| 负责人 | Ola Hungerford  | Nordstrom   | [@olaservo](https://github.com/olaservo)             | 初始 |
-| 负责人 | Daniel Temesgen | Bloomberg   | [@DanielTemesgen](https://github.com/DanielTemesgen) | 初始 |
+| 负责人 | 桑巴夫·科塔里 | Bloomberg   | [@sambhav](https://github.com/sambhav)               | 初始 |
+| 负责人 | 奥拉·亨格福德  | Nordstrom   | [@olaservo](https://github.com/olaservo)             | 初始 |
+| 负责人 | 丹尼尔·特梅斯根 | Bloomberg   | [@DanielTemesgen](https://github.com/DanielTemesgen) | 初始 |
 
+<a id="authority-decision-rights" />
 ## 权限与决策权
 
 | 决策类型                         | 权限级别                                         |
@@ -55,12 +99,14 @@ description: MCP 文件系统工作组章程
 | 范围扩展                         | 需要核心维护者批准                               |
 | 工作组成员批准                   | 工作组成员发起人                                 |
 
+<a id="membership" />
 ## 成员
 
 | 姓名          | 组织机构   | GitHub                                           | Discord | 级别       |
 | ------------- | ---------- | ------------------------------------------------ | ------- | ---------- |
-| Michael Cheah | Bloomberg  | [@michaelcheah](https://github.com/michaelcheah) |         | 工作组成员 |
+| 迈克尔·谢 | Bloomberg  | [@michaelcheah](https://github.com/michaelcheah) |                  | 工作组成员 |
 
+<a id="operations" />
 ## 运作方式
 
 | 会议         | 频率       | 时长       | 目的                           |
@@ -71,26 +117,36 @@ Discord：`#filesystems-wg`。
 
 **注意** 上述频率为暂定安排。首次工作会议确定后，可能会进行调整
 
+<a id="deliverables-success-metrics" />
 ## 交付成果与成功指标
 
+<a id="active-work-items" />
 ### 进行中的工作项
 
 | 项目                                     | 状态     | 目标日期 | 负责人 |
 | ---------------------------------------- | -------- | -------- | ------ |
-| SEP：Resources 的文件系统操作            | 构思中   |          | 待定   |
-| 与 SEP-2571 作者共同推进                 | 构思中   |          | 待定   |
+| SEP：Resources 的文件系统操作            | 构思中   |                    | 待定   |
+| 与 SEP-2571 作者共同推进                 | 构思中   |                    | 待定   |
 
 该小组的首项工作是与 SEP-2571 的作者共同推进该提案，因为它已经涵盖创建和删除。
 
+<a id="success-criteria" />
 ### 成功标准
 
-- 一份已接受的 Extensions Track SEP，涵盖创建、更新、删除和 `stat`，并定义乐观并发控制机制，规定其与 `notifications/resources/updated`、`ttlMs`、`cacheScope` 和 `lastModified` 的交互。
-- 该领域的每项提案都得到解决。撰写本文时，SEP-2571 和 SEP-2532 仍处于开放状态，最终应当被纳入、取代，或明确排除在范围之外。
-- 至少两个 Tier 1 SDK 中提供参考实现。
-- 两个独立的服务器实现通过通用客户端使用写入路径。
+- 一个或多个接受的扩展跟踪定义范围列表和目录遍历、服务器端搜索和
+  支持的读取、写入和元数据语义，包括批量读取。接受的作品必须记录工作组的
+  关于`seek`的结论，定义乐观并发控制机制和一组类型错误，并指定
+  与 `notifications/resources/updated`、`ttlMs`、`cacheScope` 和 `lastModified` 相互作用。
+- 此空间中的每个提案均已解决。 SEP-2571 和 SEP-2532 在撰写本文时处于打开状态，并且每个最终都应折叠起来
+  纳入、取代或明确界定范围。
+- 至少两个第 1 层 SDK 中的参考实现。
+- 两个独立的服务器实现针对公共客户端执行所采用的文件系统操作。
 
+<a id="changelog" />
 ## 更新日志
 
-| 日期       | 变更          |
-| ---------- | ------------- |
-| 2026-08-24 | 初始章程      |
+| Date       | Change                                                    |
+| ---------- | --------------------------------------------------------- |
+| 2026-10-27 | 将搜索、批量读取和键入错误添加到资源范围 |
+| 2026-09-10 | 扩大文件系统语义的范围                     |
+| 2026-08-24 | 初始包机                                           |

@@ -237,7 +237,9 @@ Check correctness, tests, and compatibility.
         "name": "checklist.md",
         "mimeType": "text/markdown"
       }
-    ]
+    ],
+    "ttlMs": 300000,
+    "cacheScope": "public"
   }
 }
 ```
@@ -346,7 +348,8 @@ sequenceDiagram
 - 将 Skill 内容视为不受信任的输入。宿主端代码执行以及授予 `allowed-tools` 等权限，需要针对每个 Skill 的明确用户批准。
 - 在激活嵌套 Skill 之前获得新的用户同意。将其 `SKILL.md` 作为支持内容读取不会激活该 Skill 或其 frontmatter。
 
-完整的批准、来源和缓存规则请参见[安全要求](https://github.com/modelcontextprotocol/ext-skills/blob/main/specification/stable/skills.mdx#security-considerations)。
+See the [security requirements](https://github.com/modelcontextprotocol/ext-skills/blob/main/specification/beta/skills.mdx#security-considerations)
+for the full approval, origin, and cache rules.
 
 ## 错误处理
 
@@ -365,5 +368,5 @@ sequenceDiagram
 
 ## 规范
 
-完整规范位于 [ext-skills repository](https://github.com/modelcontextprotocol/ext-skills/blob/main/specification/stable/skills.mdx)。
-开发工作由 [Skills Over MCP Working Group](/community/working-groups/skills-over-mcp) 协调。
+The full specification is in the [ext-skills repository](https://github.com/modelcontextprotocol/ext-skills/blob/main/specification/beta/skills.mdx).
+Development is coordinated by the [Skills Over MCP Working Group](/community/working-groups/skills-over-mcp).

@@ -1,21 +1,29 @@
 ---
-title: 组章程模板
-description: MCP 工作组和兴趣组章程的模板。
+title: 团体章程模板
+description: MCP 工作组和兴趣组的章程模板以及如何提交章程。
 ---
 
-每个 MCP 工作组和兴趣组都必须维护一份遵循此结构的章程文档。章程存储在 [modelcontextprotocol 仓库](https://github.com/modelcontextprotocol/modelcontextprotocol) 中的 `docs/community/working-groups/<group-name>.mdx` 或 `docs/community/interest-groups/<group-name>.mdx`，并添加到 `docs/docs.json` 中。
+本页面提供了每个工作组和兴趣小组必须遵循的章程模板，并解释了如何提交章程。该模板已被规范增强提案 (SEP) [SEP-2149](/seps/2149) 采用，并与 [工作组和兴趣组](/community/working-interest-groups) 中的规则一起由流程 SEP 进行更改。每个章程位于 [modelcontextprotocol 存储库](https://github.com/modelcontextprotocol/modelcontextprotocol) 中的 `docs/community/working-groups/<name>.mdx` 或 `docs/community/interest-groups/<name>.mdx`，仅记录小组的使命、范围、领导、成员资格和运营，并且不重述这些适用于每个小组的规则。标记为 **（仅限 WG）** 的部分对于工作组是必需的，对于兴趣组是可选的。要创建群组，请参阅[组建群组](/community/working-interest-groups#forming-a-group)。
 
-章程用于记录特定于您所在组的信息。治理规则——领导要求、决策流程、会议要求、升级路径——在 [工作组和兴趣组](/community/working-interest-groups) 文档中定义并自动适用。不要在此处重复它们。
+<a id="submitting-a-charter" />
+## 提交章程
 
-标记为 **(仅工作组)** 的部分是工作组必需的，对于兴趣组是可选的。
-
+- 该团体必须已经在[组建团体](/community/working-interest-groups#forming-a-group)下得到赞助。
+- 将下面的模板复制到章程文件中并替换占位符。删除 `{/* */}` 指导注释或保留其原样：HTML 注释会破坏 MDX 构建，而 `npm run format` 会损坏跨行的 `{/* */}` 注释。
+- 运行 `npm run prep`，然后推送。
+- 打开一个拉取请求，添加章程文件、`docs/docs.json` 中工作组或兴趣组下的导航条目以及 [当前组](/community/working-interest-groups#current-groups) 下的一行。
+- 核心维护者将按照[修改或撤销组](/community/working-interest-groups#amending-or-retiring-a-group) 要求中的概述审核拉取请求。
+- 后续更改遵循[修改或退休小组](/community/working-interest-groups#amending-or-retiring-a-group) 并在章程的变更日志中添加一行。
 <Note>
-  将下面的 markdown 复制到 `docs/community/working-groups/<group-name>.mdx`（如果是 IG，则复制到 `interest-groups/`）中，并替换占位文本。
+  [运输](/community/working-groups/transports) 和
+  [安全](/community/interest-groups/security) 是填写的示例，用于
+  分别是工作组和兴趣小组。
 </Note>
 
----
+<a id="template" />
+## 模板
 
-```markdown
+```mdx
 ---
 title: <Group Name> Charter
 description: MCP <Group Name> <Working Group | Interest Group> 的章程。
@@ -23,50 +31,33 @@ description: MCP <Group Name> <Working Group | Interest Group> 的章程。
 
 ## Group Type
 
-<!-- 说明这是工作组还是兴趣组。 -->
+{/* Keep one, delete the other. */}
 
 **工作组** | **兴趣组**
 
 ## Mission Statement
 
-<!--
-用 2-3 句话总结组的目的。
-- 正在解决的问题空间
-- 为什么需要跨部门协作
-- 对于 WG：组将产生的具体交付物
-- 对于 IG：组将促进的讨论和知识共享
--->
+{/* Two or three sentences: the problem space, why it needs collaboration across groups, and the deliverables the WG will produce or the discussions the IG will host. */}
+{/* Example opening: "The <Group Name> Working Group exists to <deliverable> so that <outcome>." */}
 
 ## Scope
 
 ### In Scope
 
-<!--
-对于 WG：
-- 规范工作：拥有的特定规范部分或 SEP
-- 参考实现：SDK 组件或参考实现
-- 跨部门关注点：需要与其他组协调的领域
-- 文档：文档责任
-
-对于 IG：
-- 讨论的主题领域
-- 输出类型（问题陈述、用例、建议）
--->
+{/* WG: Specification Work (spec sections or SEPs the group owns), Reference Implementations (SDK components or reference implementations), Cross-Cutting Concerns (areas needing coordination with other groups), and Documentation responsibilities. */}
+{/* IG: topic areas for discussion, and the kinds of output (problem statements, use cases, recommendations). */}
 
 ### Out of Scope
 
-<!-- 明确声明不在组职权范围内的内容，以防止任务蔓延。 -->
+{/* Explicit statements of what is not within the group's purview, to prevent mission creep. */}
 
 ### Related Groups
 
-<!-- 列出工作相交的其他 WG 或 IG 以及重叠的性质。 -->
+{/* Other WGs or IGs with intersecting work and the nature of the overlap. */}
 
 ## Leadership
 
-<!--
-领导要求和职责在治理规则中定义。
-列出当前的 Leads (WG) 或 Facilitators (IG)。
--->
+{/* List current Leads (WG) or Facilitators (IG). Requirements and duties are defined at /community/working-interest-groups#leadership. */}
 
 | Role | Name | Organization | GitHub | Term |
 | ---- | ---- | ------------ | ------ | ---- |
@@ -74,13 +65,9 @@ description: MCP <Group Name> <Working Group | Interest Group> 的章程。
 
 ## Authority & Decision Rights (WG only)
 
-<!--
-决策流程（懒惰共识 → 投票 → 升级）在
-治理规则中定义。此表记录此 WG 可以在
-哪个权限级别做出哪些决策。
-
-IG 不做绑定决策，不需要此部分。
--->
+{/* The progression from lazy consensus to vote to escalation is defined at /community/working-interest-groups#making-decisions, not here. */}
+{/* The rows below record the level at which this WG takes each kind of decision. They are the usual allocation and are approved with the charter. A change to any row follows /community/working-interest-groups#amending-or-retiring-a-group and gets a Changelog row. */}
+{/* IGs do not make binding decisions and omit this section. */}
 
 | Decision Type                       | Authority Level                                        |
 | ----------------------------------- | ------------------------------------------------------ |
@@ -95,11 +82,8 @@ IG 不做绑定决策，不需要此部分。
 
 ## Membership
 
-<!--
-列出当前的组成员及其参与级别（如果有）。
-如果还没有成员，请省略。参与层级和成员
-资格标准在治理规则中定义。
--->
+{/* List current members and their participation level. Omit this section until the group has members. */}
+{/* Participation tiers and membership criteria are defined at /community/working-interest-groups#participation-levels. */}
 
 | Name | Organization | GitHub | Discord | Level |
 | ---- | ------------ | ------ | ------- | ----- |
@@ -107,11 +91,8 @@ IG 不做绑定决策，不需要此部分。
 
 ## Operations
 
-<!--
-记录组当前的会议方法。会议要求（公开、
-提前 7 天发布、议程/笔记到 GitHub Discussions）和沟通
-渠道在治理规则中定义。
--->
+{/* List the group's regular meetings. Meeting and channel rules are defined at /community/working-interest-groups#meetings-and-channels. */}
+{/* External repositories, proposal documents or meeting notes may be listed below the table. */}
 
 | Meeting         | Frequency | Duration | Purpose                               |
 | --------------- | --------- | -------- | ------------------------------------- |
@@ -120,20 +101,17 @@ IG 不做绑定决策，不需要此部分。
 
 ## Deliverables & Success Metrics (WG only)
 
-<!--
-跟踪带有状态和所有权的活动工作项。
-IG 可以在此处可选地列出当前的讨论主题或计划的输出。
--->
+{/* IGs may list current discussion topics or planned outputs here instead. */}
 
 ### Active Work Items
 
-| Item          | Status                    | Target Date | Champion |
-| ------------- | ------------------------- | ----------- | -------- |
-| SEP-XXX: Name | Draft / Review / Approved |             |          |
+| Item           | Status                       | Target Date | Champion |
+| -------------- | ---------------------------- | ----------- | -------- |
+| SEP-XXXX: Name | draft / in-review / accepted |             |          |
 
 ### Success Criteria
 
-<!-- WG 成功的可衡量成果。 -->
+{/* State measurable outcomes. */}
 
 ## Changelog
 
@@ -141,15 +119,3 @@ IG 可以在此处可选地列出当前的讨论主题或计划的输出。
 | ---- | ------ |
 |      |        |
 ```
-
----
-
-## 使命声明示例
-
-**工作组：**
-
-> 传输工作组旨在演进 MCP 的传输机制，以支持多样化的部署场景——从本地子进程通信到水平扩展的云部署——同时保持协议一致性和向后兼容性。
-
-**兴趣组：**
-
-> 企业兴趣组探索在企业环境中部署 MCP 的挑战，收集用例和需求以为未来的规范工作提供信息。

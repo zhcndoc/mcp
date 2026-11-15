@@ -17,6 +17,7 @@ ShowToc: true
 
 _企业管理授权扩展现已稳定。组织可以集中
 管理 MCP 服务器的授权，终端用户只需一次登录即可访问所有已连接的 MCP 服务器。
+
 该扩展正被 Anthropic、Microsoft、Okta 以及
 越来越多的 MCP 服务器采用。_
 
@@ -26,11 +27,13 @@ _企业管理授权扩展现已稳定。组织可以集中
 
 EMA 允许组织通过其受信任的
 身份提供商集中控制 MCP 服务器访问权限。对于终端用户而言，这意味着零接触设置：
+
 他们需要的 MCP 服务器会在首次登录时自动连接，无需逐个应用 OAuth，也无需
 进行一次性的额外配置。
 
 ![标准的 MCP 授权需要逐个对每台服务器进行身份验证。企业管理授权则通过你的身份提供商只认证一次，管理员授权的每台服务器都会自动连接，并按用户的组和角色进行范围限定。](ema-comparison.png)
 
+<a id="per-user-auth-is-high-friction" />
 ## 按用户授权摩擦很大
 
 标准的 MCP 授权模型是为用户范围内的授权而设计的，并绑定到
@@ -47,11 +50,14 @@ EMA 允许组织通过其受信任的
 变通方案。在没有用于保留共享认证状态的通用标准时，每个人都要发明自己
 专门定制的解决方案。数据和工具都已具备，但按用户授权所付出的代价让大多数人仍然把它们关闭着。
 
+<a id="authorize-once-inherit-everywhere" />
 ## 授权一次，到处继承
 
 [企业管理授权](https://modelcontextprotocol.io/extensions/auth/enterprise-managed-authorization)
 让组织的 IdP 成为 MCP 服务器访问的权威决策者。
+
 管理员只需定义一次策略，用户就可以用自己现有的身份在 MCP 主机中进行认证。
+
 IdP 可以基于组成员身份、角色以及条件访问规则来授予或拒绝访问。
 
 在底层，客户端在单点登录期间从 IdP 获取
@@ -70,6 +76,7 @@ IdP 可以基于组成员身份、角色以及条件访问规则来授予或拒�
 我们认为，这为企业中的 MCP 树立了全新的基线。当用户登录时，
 他们的客户端应当已经连接到其被授权使用的工具和数据，中间不应再有额外步骤。
 
+<a id="early-adopters" />
 ## 早期采用者
 
 此次发布汇聚了三组密切合作、共同将实现变为现实的参与者：
@@ -109,28 +116,32 @@ IdP 可以基于组成员身份、角色以及条件访问规则来授予或拒�
 >
 > — **Tom Moor，Linear 工程负责人**
 
+<a id="get-involved" />
 ## 参与进来
 
 与所有其他 MCP 扩展、功能和增强一样，我们欢迎你的反馈。
+
 我们鼓励客户端、服务器和身份平台审阅该扩展
 规范，并将对这一新标准的支持加入其产品中：
 
-- **阅读要求：** 该
-  [企业托管授权页面](https://modelcontextprotocol.io/extensions/auth/enterprise-managed-authorization)
-  记录了客户端、服务器和授权服务器的流程。
-- **源码与规范：** 请参阅
-  [ext-auth 仓库](https://github.com/modelcontextprotocol/ext-auth) 和
-  [规范](https://github.com/modelcontextprotocol/ext-auth/blob/main/specification/stable/enterprise-managed-authorization.mdx)
-  了解 EMA 的最新演进，以及任何有助于你
-  快速上手的支持材料。
+- **阅读要求：**
+  [企业管理授权页面](https://modelcontextprotocol.io/extensions/auth/enterprise-managed-authorization)
+  记录客户端、服务器和授权服务器的流程。
+- **来源和规格：**参见
+  [ext-auth 存储库](https://github.com/modelcontextprotocol/ext-auth) 和
+  [规格](https://github.com/modelcontextprotocol/ext-auth/blob/main/specification/stable/enterprise-managed-authorization/2026-07-28/enterprise-managed-authorization.mdx)
+  了解 EMA 演变的最新信息以及任何可帮助您获得的支持材料
+  开始了。
 
 如果你有兴趣讨论该扩展、分享兼容性报告，或者
 围绕该扩展进行迭代，请加入
 [EMA 兴趣小组](https://modelcontextprotocol.io/community/interest-groups/enterprise-managed-authorization)。
 
+<a id="acknowledgements" />
 ## 致谢
 
 企业管理授权是 MCP 社区共同努力的成果：SEP-990 的作者、
 [ext-auth 仓库](https://github.com/modelcontextprotocol/ext-auth) 的维护者，以及最早
 测试实现并推动规范前进的身份与 MCP 提供商。
+
 感谢每一位做出贡献的人。

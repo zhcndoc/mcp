@@ -15,6 +15,7 @@ npx @modelcontextprotocol/inspector --cli node build/index.js --method tools/lis
 
 下面的示例使用已安装的 `mcp-inspector` 二进制文件。如果未进行全局安装，请像上面一样，在每条命令前加上 `npx @modelcontextprotocol/inspector`。
 
+<a id="choosing-a-server" />
 ## 选择服务器
 
 CLI 接受位置参数命令（stdio）、`--server-url`（HTTP/SSE），或从目录或配置文件中选择命名服务器：
@@ -35,27 +36,29 @@ mcp-inspector --cli --config ./mcp.json --server myserver --method tools/list
 后续示例会将你所使用的上述任一种形式，以及其 `--transport` 或 `--config`/`--server` 标志，统称为 `<server>`。
 
 <Note>
-  **配置文件是为运行提供
-  [根目录](/specification/draft/client/roots)的唯一持久方式：**没有 roots 标志，并且 CLI 没有
-  `roots/set` 方法。为服务器配置的根目录会在连接时公布，因此调用
-  `roots/list` 的服务器（例如 `@modelcontextprotocol/server-filesystem`，它会通过此调用了解其允许访问的目录）可以获取这些根目录。
+  **配置文件是唯一持久的运行方式
+  [roots](/specification/2026-07-28/client/roots):** 没有 root 标志，并且
+  CLI 没有 `roots/set` 方法。为服务器配置的根是
+  在连接时公布，因此调用 `roots/list` 的服务器（如
+  `@modelcontextprotocol/server-filesystem` 确实如此，了解其允许
+  目录）获取它们。
 </Note>
-
 请参阅[配置和标志](/docs/2026-07-28/tools/inspector/configuration)，了解 `--catalog` 与 `--config`、`--` 分隔符以及通用服务器选择标志。
 
+<a id="methods" />
 ## 方法
 
 | `--method`                 | 必需的配套参数                                                   | 说明                                                                                   |
 | -------------------------- | --------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
 | `initialize`               | 无                                                              | 仅连接探测：`{serverInfo, protocolVersion, capabilities, instructions}`。              |
 | `tools/list`               | 无                                                              | `--strict` 会将其 schema 可移植性检查转为门禁（请参阅[CI 门禁](#ci-gates)）。            |
-| `tools/call`               | `--tool-name`，以及可选的 `--tool-arg` / `--tool-args-json`     |                                                                                         |
-| `resources/list`           | 无                                                              |                                                                                         |
-| `resources/read`           | `--uri`                                                         |                                                                                         |
-| `resources/templates/list` | 无                                                              |                                                                                         |
+| `tools/call`               | `--tool-name`，以及可选的 `--tool-arg` / `--tool-args-json`     |                                                                                                                                                                                  |
+| `resources/list`           | 无                                                              |                                                                                                                                                                                  |
+| `resources/read`           | `--uri`                                                         |                                                                                                                                                                                  |
+| `resources/templates/list` | 无                                                              |                                                                                                                                                                                  |
 | `resources/directory/read` | `--uri`，以及可选的 `--cursor`                                  | 一次一页；传回上一页的 `nextCursor`。                                                  |
-| `prompts/list`             | 无                                                              |                                                                                         |
-| `prompts/get`              | `--prompt-name`，以及可选的 `--prompt-args`                     |                                                                                         |
+| `prompts/list`             | 无                                                              |                                                                                                                                                                                  |
+| `prompts/get`              | `--prompt-name`，以及可选的 `--prompt-args`                     |                                                                                                                                                                                  |
 | `logging/setLevel`         | `--log-level`                                                  | 仅适用于旧版时代；现代服务器会改为按请求选择加入。                                     |
 | `skills/list`              | 无                                                              | `--verify` 会检查返回的技能（请参阅[CI 门禁](#ci-gates)）。                              |
 | `skills/get`               | `--uri`                                                         | 使用相同的 `--verify` 选项。                                                            |
@@ -67,6 +70,7 @@ mcp-inspector --cli --config ./mcp.json --server myserver --method tools/list
 
 仅限流或会话的方法（例如 `logging/tail`）会被拒绝，因为退出的进程无法保持流处于打开状态。
 
+<a id="passing-arguments" />
 ### 传递参数
 
 `--tool-arg` 接受 `key=value`，并在能够解析时通过 JSON 解析来**强制转换**每个值，因此 `count=1` 和 `zip=10001` 都会发送数字。无效 JSON（例如 `zip=012` 或裸词）会作为字符串发送，而随后会根据工具输入 schema 为该属性声明的类型转换字符串值，因此对数字类型的 `zip` 使用 `zip=012` 仍会发送 `12`：
@@ -83,6 +87,7 @@ mcp-inspector --cli <server> --method tools/call --tool-name mytool \
   --tool-args-json '{"zip":"10001"}'
 ```
 
+<a id="output" />
 ## 输出
 
 `--format text`（默认）以适合人类阅读的格式美化输出。`--format json` 会在 stdout 上输出单个 JSON 对象，不包含任何横幅信息，因此整个输出可以直接通过管道传递：
@@ -91,6 +96,7 @@ mcp-inspector --cli <server> --method tools/call --tool-name mytool \
 mcp-inspector --cli <server> --method tools/list --format json | jq '.result.tools[].name'
 ```
 
+<a id="probing-mcp-apps" />
 ## 探测 MCP 应用
 
 `--app-info` 会报告某个工具是否提供 [MCP 应用](/extensions/apps/overview) UI（包括其 `ui://` 资源、CSP 和权限），**而不会调用该工具**，因此流水线可以在调用任何工具之前决定是否需要浏览器：
@@ -114,22 +120,25 @@ CLI 无法渲染 App，因此默认不会在 `initialize` 时声明 MCP Apps 扩
   `tools/call --app-info` 的单个工具输出格式。
 </Note>
 
+<a id="exit-codes-and-error-envelopes" />
 ## 退出代码和错误信封
 
 每个非零退出代码都对应一个稳定的失败类别，因此调用方无需抓取文字描述即可根据_原因_进行分支处理：
 
-| 代码 | 含义                                                                                              |
-| ---- | ------------------------------------------------------------------------------------------------- |
-| `0`  | 成功。                                                                                            |
-| `1`  | 用法错误或意外错误（兜底项），包括无法读取的机密信息存储或 OAuth 状态文件。                       |
-| `2`  | 工具中未找到 MCP App（`--app-info` 探测）。                                                       |
-| `3`  | 服务器要求身份验证（HTTP 401/403，或 SDK 授权错误）。                                              |
-| `4`  | 服务器无法访问（DNS、连接被拒绝、超时、`fetch failed`）。                                          |
-| `5`  | 工具错误：`tools/call` 返回 `isError: true`，或未找到该工具。                                      |
-| `6`  | `--strict` 发现错误级别的工具 schema 可移植性问题。                                                |
-| `7`  | `--verify` 发现违反 SEP-2640 的技能（一致性、摘要或大小不匹配）。                                  |
-| `8`  | `--verify` 无法在读取限制内检查所有技能。                                                         |
-| `9`  | `--verify --require-digests` 发现某个技能未声明摘要。                                              |
+| 代码 | 含义                                                                                                                                                                                                          |
+| ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `0`  | Success.                                                                                                                                                                                                         |
+| `1`  | 使用或意外错误（包罗万象），包括不可读的秘密存储或 OAuth 状态文件。                                                                                                             |
+| `2`  | 工具（`--app-info` 探针）上未找到 MCP 应用程序。                                                                                                                                                               |
+| `3`  | 服务器需要身份验证（HTTP 401/403，或 SDK 授权错误）。                                                                                                                                    |
+| `4`  | 服务器无法访问（DNS、连接被拒绝、超时、`fetch failed`）。                                                                                                                                           |
+| `5`  | 工具错误：`tools/call` 返回 `isError: true`，或者找不到工具。                                                                                                                                     |
+| `6`  | `--strict` 发现错误严重性工具架构可移植性问题。                                                                                                                                              |
+| `7`  | `--verify` 发现一项违反 SEP-2640 的技能（一致性、摘要或大小不匹配）。                                                                                                                         |
+| `8`  | `--verify`无法检查其读取范围内的所有技能。                                                                                                                                                    |
+| `9`  | `--verify --require-digests` 发现了一个不发布摘要的技能。                                                                                                                                           |
+| `10` | `--load` 运行违反了 `--load-max-error-rate` 或 `--load-max-p99` 阈值。首先打印摘要，信封 `code` 将阈值命名为：`load_error_rate_exceeded` 或 `load_p99_exceeded`。   |
+| `11` | 服务器应答 HTTP 429（信封 `code` `rate_limited`）。信封还携带 `method`，加上 `retryAfter`（发送时的 `Retry-After` 标头）和 `retryAfterMs`（当服务器发送解析的标头时）。 |
 
 在任何非零退出的情况下，CLI 还会向 stderr 写入**一行 JSON**：
 
@@ -144,12 +153,13 @@ CLI 无法渲染 App，因此默认不会在 `initialize` 时声明 MCP Apps 扩
 }
 ```
 
-该信封始终包含 `code` 和 `message`，并在已知时附带 `cause`（底层错误，例如 DNS 失败）、`status`（HTTP 状态）和 `url`。URL 中的查询字符串机密信息会被清理。`code` 是失败的稳定名称，例如 `auth_required`、`unreachable`、`tool_not_found`、`tool_is_error`、`no_app`、`schema_unportable`、`store_unavailable`、`oauth_state_unrecognized` 或兜底的 `error`。
+信封始终携带 `code` 和 `message`，加上 `cause`（底层错误，例如 DNS 故障）、`status`（HTTP 状态）和 `url`（如果已知）。 URL 中的查询字符串机密已被编辑。 `code` 是故障的稳定名称：`auth_required`、`unreachable`、`tool_not_found`、`tool_is_error`、`no_app`、`schema_unportable`、`store_unavailable`、`oauth_state_unrecognized`、 `rate_limited`，或包罗万象的 `error` 等。
 
 由于它只有一行，调用方可以使用 `2>&1 | tail -1 | jq .error` 对其进行解析。
 
 返回 `isError: true` 的 `tools/call` 仍会打印其载荷，但会以 `5` 退出，因此 `&&` 链不会在调用失败时继续执行。
 
+<a id="authorization-in-scripts" />
 ## 脚本中的授权
 
 默认情况下，CLI 运行与 TUI 相同的回环 OAuth 流程：打开浏览器并等待 localhost 回调，而 CI 作业无法完成此操作。以下两个标志可让非交互式运行变得可预测：
@@ -161,8 +171,10 @@ CLI 无法渲染 App，因此默认不会在 `initialize` 时声明 MCP Apps 扩
 
 完整流程、Web 到 CLI 的交接以及 `--print-handoff`，请参阅[授权](/docs/2026-07-28/tools/inspector/authorization)。
 
+<a id="recipes" />
 ## 配方
 
+<a id="verify-a-server-in-ci" />
 ### 在 CI 中验证服务器
 
 ```bash
@@ -174,19 +186,21 @@ mcp-inspector --cli --config ./ci-servers.json --server my-server \
   | jq -e '.result.tools | map(.name) | index("get_weather")' > /dev/null
 ```
 
+<a id="ci-gates" />
 ### CI 门禁
 
-三个标志会将检查转为非零退出，并分别使用专属代码，让作业可以区分失败类型：
-
-- `--strict`（与 `tools/list` 一起使用）：在 stderr 上完整报告工具 schema 可移植性问题（路径、问题和建议修复），如果存在错误级别问题则以 `6` 退出。不使用该标志时，`tools/list` 只打印一行计数。使用 `--format json` 时，发现结果会作为 `schemaFindings` 合并到输出中
-- `--verify`（与 `skills/list` 或 `skills/get` 一起使用）：运行 SEP-2640 一致性和摘要检查，在 stdout 上为每个技能写入一份 JSON 报告；发现违规时以 `7` 退出，如果读取限制使其在检查所有技能前停止则以 `8` 退出。`--skill-catalog-max-skills` 和 `--skill-catalog-max-bytes` 可设置这些限制
-- `--require-digests`（与 `--verify` 一起使用）：对于未声明任何摘要的技能以 `9` 退出，而不是将其报告为无法验证并以 `0` 退出
-
+这些标志将检查转变为非零退出，每个退出都有自己的代码，以便作业可以区分失败：
+- `--strict`（带有 `tools/list`）：在 stderr 上完整报告工具架构可移植性问题（路径、问题、建议的修复）并退出 `6`（如果有错误严重性）。如果没有它，`tools/list` 仅打印一行计数。在 `--format json` 下，结果将作为 `schemaFindings` 折叠到输出中。
+- `--verify`（使用 `skills/list` 或 `skills/get`）：运行 SEP-2640 一致性和摘要检查，在标准输出上为每个技能写入一份 JSON 报告，并在违规时退出 `7` 或在检查每个技能之前读取边界停止时退出 `7`。 `--skill-catalog-max-skills` 和 `--skill-catalog-max-bytes` 设置这些界限。
+- `--require-digests`（与`--verify`）：对于不通告摘要的技能，退出`9`，而不是将其报告为无法验证并退出`0`。
+- `--load-max-error-rate <fraction>` 和 `--load-max-p99 <ms>`（带有 `--load`）：将负载运行变成门。运行会打印其摘要，然后在失败调用的比例高于分数（`0` 到 `1`，因此 `0` 在任何失败的调用上都会失败）、p99 延迟高于给定毫秒或没有调用完成时退出 `10`。 `--load`（使用 `tools/call --tool-name`）重复并发地调用该工具，并打印延迟和错误率摘要而不是结果，以 `--load-duration <sec>`（未设置 `--load-requests` 时默认为 `10`）和 `--load-requests <n>` 为界限，且正在进行的呼叫仍在完成。 `--load-concurrency <n>`（默认 `10`）限制飞行中的调用，`--load-connections <n>`（默认 `1`，最多 `--load-concurrency`，仅限 HTTP 和 SSE 服务器）将它们分布在计时开始之前打开的独立会话中，`--load-rate <n>`（默认无限制）限制每秒启动的调用。
 ```bash
 mcp-inspector --cli <server> --method tools/list --strict > /dev/null
 mcp-inspector --cli <server> --method skills/list --verify --require-digests
+mcp-inspector --cli <server> --method tools/call --tool-name get_weather --load --load-requests 200 --load-max-p99 500
 ```
 
+<a id="branch-on-the-failure-class" />
 ### 根据失败类别进行分支处理
 
 ```bash
@@ -201,6 +215,7 @@ else
 fi
 ```
 
+<a id="smoke-test-every-tool-that-has-a-ui" />
 ### 对所有具有 UI 的工具执行冒烟测试
 
 ```bash
@@ -208,6 +223,7 @@ mcp-inspector --cli "$URL" --transport http --method tools/list --app-info \
   | jq -r 'select(.hasApp) | .toolName'
 ```
 
+<a id="inspect-a-catalog-without-connecting" />
 ### 在不建立连接的情况下检查目录
 
 ```bash
@@ -221,6 +237,7 @@ mcp-inspector --cli --catalog ~/.mcp-inspector/mcp.json --method servers/show --
   `detail` 字段粘贴到 issue 之前，请将其视为敏感信息。
 </Warning>
 
+<a id="editing-the-catalog" />
 ### 编辑目录
 
 `servers/add`、`servers/edit` 和 `servers/remove` 会在不连接任何对象的情况下写入目录。它们使用与 Web 客户端服务器列表相同的代码，因此 `env` 值和客户端密钥会像从 UI 写入时一样进入[机密信息存储](/docs/2026-07-28/tools/inspector/configuration#where-secrets-are-stored)，运行中的 Web 客户端也会获取该变更。
@@ -238,6 +255,7 @@ mcp-inspector --cli --method servers/remove --server my-renamed-server
 
 只有可写目录（`--catalog`、`MCP_CATALOG_PATH` 或默认目录）可以写入；`--config` 会被拒绝。使用内存机密信息存储时，提供 `-e` 值的写入（以及重命名）会被拒绝，因为运行结束后机密信息会丢失。
 
+<a id="proxies" />
 ## 代理
 
 连接到远程 HTTP/SSE 服务器时，会遵循约定的代理变量：`HTTPS_PROXY` / `HTTP_PROXY`（及其小写形式）用于选择代理，`NO_PROXY` 用于排除特定主机。无需设置 Inspector 专用标志，并且代理代理器会延迟加载，因此不使用代理时不会产生任何开销。Web 客户端的后端同样如此。

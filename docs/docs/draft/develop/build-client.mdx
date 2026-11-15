@@ -8,10 +8,11 @@ description: "开始构建你自己的客户端，使其能够与所有 MCP 服�
 开始之前，建议先完成我们的[构建 MCP 服务器](/docs/draft/develop/build-server)教程，以便了解客户端和服务器如何通信。
 
 <Tabs>
-<Tab title="Python">
+<Tab title="蟒蛇">
 
 [你可以在此处找到本教程的完整代码。](https://github.com/modelcontextprotocol/quickstart-resources/tree/main/mcp-client-python)
 
+<a id="system-requirements" />
 ## 系统要求
 
 开始之前，请确保你的系统满足以下要求：
@@ -21,6 +22,7 @@ description: "开始构建你自己的客户端，使其能够与所有 MCP 服�
 - 已安装最新版本的 `uv`
 - 必须使用 Python MCP SDK 2.0.0 或更高版本
 
+<a id="setting-up-your-environment" />
 ## 设置环境
 
 首先，使用 `uv` 创建一个新的 Python 项目：
@@ -71,6 +73,7 @@ new-item client.py
 
 </CodeGroup>
 
+<a id="setting-up-your-api-key" />
 ## 设置 API 密钥
 
 你需要从 [Anthropic Console](https://console.anthropic.com/settings/keys) 获取 Anthropic API 密钥。
@@ -93,8 +96,10 @@ echo ".env" >> .gitignore
 
 </Warning>
 
+<a id="creating-the-client" />
 ## 创建客户端
 
+<a id="imports-and-setup" />
 ### 导入和设置
 
 首先，设置导入项以及文件其余部分共享的内容：
@@ -113,11 +118,16 @@ from dotenv import load_dotenv
 load_dotenv()  # load environment variables from .env
 
 MODEL = "claude-opus-5"
+# The model thinks adaptively unless told otherwise, and max_tokens caps thinking
+# plus the reply, so leave room for both.
+MAX_TOKENS = 10000
+MAX_TOOL_TURNS = 10
 anthropic = Anthropic()
 ```
 
 `Client` 是你的程序与服务器通信时使用的唯一对象。列出工具、调用工具、读取资源：这些操作都对应于它的一个方法。
 
+<a id="server-connection-management" />
 ### 服务器连接管理
 
 接下来，我们确定针对给定服务器脚本需要启动哪个进程：
@@ -141,6 +151,7 @@ def server_params(server_script_path: str) -> StdioServerParameters:
 
 `StdioServerParameters` 是配置，而不是连接。`stdio_client()` 会将其转换为 stdio 传输，而 `Client` 会在进入其 `async with` 代码块时打开该传输。我们将在 `main()` 中完成这两步。
 
+<a id="query-processing-logic" />
 ### 查询处理逻辑
 
 现在，添加处理查询和处理工具调用的核心功能：
@@ -162,32 +173,37 @@ async def process_query(client: Client, query: str) -> str:
         "input_schema": tool.input_schema
     } for tool in tool_list.tools]
 
+    final_text = []
+
     # Initial Claude API call
     response = anthropic.messages.create(
         model=MODEL,
-        max_tokens=1000,
+        max_tokens=MAX_TOKENS,
         messages=messages,
         tools=available_tools
     )
 
-    # Process response and handle tool calls
-    final_text = []
-    tool_results = []
+    for _ in range(MAX_TOOL_TURNS):
+        # Process response and collect tool calls
+        tool_uses = []
+        for content in response.content:
+            if content.type == 'text':
+                final_text.append(content.text)
+            elif content.type == 'tool_use':
+                tool_uses.append(content)
 
-    for content in response.content:
-        if content.type == 'text':
-            final_text.append(content.text)
-        elif content.type == 'tool_use':
-            tool_name = content.name
-            tool_args = content.input
+        if not tool_uses:
+            return "\n".join(final_text)
 
+        tool_results = []
+        for tool_use in tool_uses:
             # Execute tool call
-            result = await client.call_tool(tool_name, tool_args)
-            final_text.append(f"[Calling tool {tool_name} with args {tool_args}]")
+            result = await client.call_tool(tool_use.name, tool_use.input)
+            final_text.append(f"[Calling tool {tool_use.name} with args {tool_use.input}]")
 
             tool_results.append({
                 "type": "tool_result",
-                "tool_use_id": content.id,
+                "tool_use_id": tool_use.id,
                 "content": "\n".join(
                     block.text
                     for block in result.content
@@ -196,28 +212,33 @@ async def process_query(client: Client, query: str) -> str:
                 "is_error": result.is_error
             })
 
-    if tool_results:
+        # Replay the assistant turn as returned, then answer all of its
+        # tool calls in a single user message
         messages.append({"role": "assistant", "content": response.content})
         messages.append({"role": "user", "content": tool_results})
 
         # Get next response from Claude
         response = anthropic.messages.create(
             model=MODEL,
-            max_tokens=1000,
+            max_tokens=MAX_TOKENS,
             messages=messages,
             tools=available_tools
         )
 
-        for content in response.content:
-            if content.type == 'text':
-                final_text.append(content.text)
-
+    # The turn cap was hit. Keep the last response's text. If it asked for
+    # more tools, say they were not run.
+    final_text.extend(content.text for content in response.content if content.type == 'text')
+    if any(content.type == 'tool_use' for content in response.content):
+        final_text.append(f"[Stopped after {MAX_TOOL_TURNS} tool-use turns]")
     return "\n".join(final_text)
 ```
 
 `call_tool` 返回一个 `CallToolResult`。它的 `content` 是一个代码块列表，因此我们需要先将其缩小到 `TextContent`，然后再读取 `.text`。工具发生异常时不会在此处抛出异常：它会返回设置了 `is_error` 的结果，传递该标志后，Claude 就能读取消息并尝试其他操作。
 
-### 交互式聊天界面
+每个回合都会完全按照克劳德返回的方式重播辅助消息，包括思考块，并在一条用户消息中回答该回合的每个 `tool_use` 块。消息 API 会拒绝两者不相符的对话。 `tools` 会进行每次调用，以便 Claude 可以继续调用工具，并且循环会一直运行，直到 Claude 没有回答或达到 `MAX_TOOL_TURNS` 为止，此时客户端报告它已停止。
+
+<a id="interactive-chat-interface" />
+### 互动聊天界面
 
 现在添加聊天循环：
 
@@ -245,6 +266,7 @@ async def chat_loop(client: Client) -> None:
 
 `input()` 会阻塞，因此它会在工作线程上运行。这样可以让事件循环在你输入时继续处理连接。
 
+<a id="main-entry-point" />
 ### 主入口
 
 最后，添加主执行逻辑：
@@ -271,14 +293,17 @@ if __name__ == "__main__":
 
 你可以在[此处](https://github.com/modelcontextprotocol/quickstart-resources/blob/main/mcp-client-python/client.py)找到完整的 `client.py` 文件。
 
+<a id="key-components-explained" />
 ## 关键组件说明
 
+<a id="1-client-initialization" />
 ### 1. 客户端初始化
 
 - 单个 `Client` 负责维护连接，而 `async with` 包含其完整生命周期
 - 无需调用连接/关闭方法，也无需在之后进行清理
 - 配置 Anthropic 客户端以进行 Claude 交互
 
+<a id="2-server-connection" />
 ### 2. 服务器连接
 
 - 同时支持 Python 和 Node.js 服务器
@@ -286,13 +311,16 @@ if __name__ == "__main__":
 - 将服务器作为子进程启动，并通过 stdio 与其通信
 - 连接打开后列出可用工具
 
+<a id="3-query-processing" />
 ### 3. 查询处理
 
 - 维护对话上下文
-- 处理 Claude 的响应和工具调用
-- 管理 Claude 与工具之间的消息流
-- 将结果组合成连贯的响应
+- 处理克劳德的响应和工具调用
+- 运行一轮中的每个工具调用，然后在一条消息中回答它们
+- 克劳德要求工具时不断循环，最多为 `MAX_TOOL_TURNS`
+- 将结果组合成一致的响应
 
+<a id="4-interactive-interface" />
 ### 4. 交互式界面
 
 - 提供简单的命令行界面
@@ -300,19 +328,21 @@ if __name__ == "__main__":
 - 包含基本的错误处理
 - 支持正常退出
 
+<a id="5-resource-management" />
 ### 5. 资源管理
 
 - 离开 `async with` 代码块会断开连接并关闭服务器子进程
 - 查询失败时会报告错误，但不会结束会话
 - 输入 `quit` 或关闭标准输入后会正常退出
 
+<a id="common-customization-points" />
 ## 常见自定义点
 
 1. **工具处理**
-   - 修改 `process_query()` 以处理特定工具类型
+   - 修改`process_query()`以处理特定的工具类型
+   - 调整 `MAX_TOOL_TURNS` 以允许每个查询更多或更少轮次的工具调用
    - 为工具调用添加自定义错误处理
-   - 实现针对特定工具的响应格式化
-
+   - 实施特定于工具的响应格式
 2. **响应处理**
    - 自定义工具结果的格式化方式
    - 添加响应过滤或转换
@@ -323,6 +353,7 @@ if __name__ == "__main__":
    - 实现丰富的控制台输出
    - 添加命令历史或自动补全
 
+<a id="running-the-client" />
 ## 运行客户端
 
 要让客户端与任意 MCP 服务器一起运行：
@@ -353,25 +384,27 @@ uv run client.py path/to/build/index.js # node server
   <img src="/images/client-claude-cli-python.png" />
 </Frame>
 
+<a id="how-it-works" />
 ## 工作原理
 
 提交查询时：
 
-1. 客户端从服务器获取可用工具列表
-2. 将你的查询连同工具描述一起发送给 Claude
+1.客户端从服务器获取可用工具列表
+2. 您的查询以及工具说明将发送给 Claude
 3. Claude 决定使用哪些工具（如果有）
-4. 客户端通过服务器执行请求的工具调用
-5. 将结果发送回 Claude
-6. Claude 提供自然语言响应
-7. 将响应显示给你
+4. 客户端通过服务器执行任何请求的工具调用
+5. 结果发送回 Claude，重复步骤 3 到 5，同时 Claude 不断索要工具，最多为 `MAX_TOOL_TURNS`
+6. 克劳德提供自然语言回应
+7. 回复会显示给您
 
+<a id="best-practices" />
 ## 最佳实践
 
 1. **错误处理**
-   - 检查 `result.is_error`，而不是期待失败的工具抛出异常
+   - 检查 `result.is_error` 而不是期望一个失败的工具来提高
+   - 保持工具循环上限，以便永远不会解决的查询仍然返回
    - 提供有意义的错误消息
-   - 正确处理连接问题
-
+   - 优雅地处理连接问题
 2. **资源管理**
    - 让 `async with` 代码块负责连接
    - 在需要服务器期间保持连接打开
@@ -386,8 +419,10 @@ uv run client.py path/to/build/index.js # node server
    - 可以根据[此处](/specification/draft/server/tools#tool-names)指定的格式验证工具名称
    - 如果工具名称符合指定格式，则 MCP 客户端不应因验证而失败
 
+<a id="troubleshooting" />
 ## 故障排除
 
+<a id="server-path-issues" />
 ### 服务器路径问题
 
 - 仔细检查服务器脚本路径是否正确
@@ -409,6 +444,7 @@ uv run client.py C:/projects/mcp-server/weather.py
 uv run client.py C:\\projects\\mcp-server\\weather.py
 ```
 
+<a id="response-timing" />
 ### 响应时间
 
 - 首次响应可能需要最多 30 秒
@@ -419,6 +455,7 @@ uv run client.py C:\\projects\\mcp-server\\weather.py
 - 后续响应通常会更快
 - 在初始等待期间不要中断进程
 
+<a id="common-error-messages" />
 ### 常见错误消息
 
 如果看到：
@@ -430,10 +467,11 @@ uv run client.py C:\\projects\\mcp-server\\weather.py
 
 </Tab>
 
-<Tab title="TypeScript">
+<Tab title="打字稿">
 
 [你可以在此处找到本教程的完整代码。](https://github.com/modelcontextprotocol/quickstart-resources/tree/main/mcp-client-typescript)
 
+<a id="system-requirements-1" />
 ## 系统要求
 
 开始之前，请确保你的系统满足以下要求：
@@ -443,6 +481,7 @@ uv run client.py C:\\projects\\mcp-server\\weather.py
 - 已安装最新版本的 `npm`
 - Anthropic API 密钥（Claude）
 
+<a id="setting-up-your-environment-1" />
 ## 设置环境
 
 首先，创建并设置项目：
@@ -519,6 +558,7 @@ new-item index.ts
 }
 ```
 
+<a id="setting-up-your-api-key-1" />
 ## 设置 API 密钥
 
 你需要从 [Anthropic Console](https://console.anthropic.com/settings/keys) 获取 Anthropic API 密钥。
@@ -541,8 +581,10 @@ echo ".env" >> .gitignore
 
 </Warning>
 
+<a id="creating-the-client-1" />
 ## 创建客户端
 
+<a id="basic-client-structure" />
 ### 基本客户端结构
 
 首先，在 `index.ts` 中设置导入项并创建基本客户端类：
@@ -550,8 +592,11 @@ echo ".env" >> .gitignore
 ```typescript
 import { Anthropic } from "@anthropic-ai/sdk";
 import {
+  ContentBlockParam,
   MessageParam,
   Tool,
+  ToolResultBlockParam,
+  ToolUseBlock,
 } from "@anthropic-ai/sdk/resources/messages/messages.mjs";
 import { Client } from "@modelcontextprotocol/client";
 import { StdioClientTransport } from "@modelcontextprotocol/client/stdio";
@@ -565,6 +610,12 @@ if (!ANTHROPIC_API_KEY) {
   throw new Error("ANTHROPIC_API_KEY is not set");
 }
 
+const MODEL = "claude-opus-5";
+// The model thinks adaptively unless told otherwise, and max_tokens caps
+// thinking plus the reply, so leave room for both.
+const MAX_TOKENS = 10000;
+const MAX_TOOL_TURNS = 10;
+
 class MCPClient {
   private mcp: Client;
   private anthropic: Anthropic;
@@ -575,12 +626,18 @@ class MCPClient {
     this.anthropic = new Anthropic({
       apiKey: ANTHROPIC_API_KEY,
     });
-    this.mcp = new Client({ name: "mcp-client-cli", version: "1.0.0" });
+    // 'auto' probes server/discover, falling back to the 2025-11-25 handshake.
+    // The SDK's default is 'legacy'.
+    this.mcp = new Client(
+      { name: "mcp-client-cli", version: "1.0.0" },
+      { versionNegotiation: { mode: "auto" } },
+    );
   }
   // methods will go here
 }
 ```
 
+<a id="server-connection-management-1" />
 ### 服务器连接管理
 
 接下来，实现连接到 MCP 服务器的方法：
@@ -624,6 +681,7 @@ async connectToServer(serverScriptPath: string) {
 }
 ```
 
+<a id="query-processing-logic-1" />
 ### 查询处理逻辑
 
 现在，添加处理查询和处理工具调用的核心功能：
@@ -637,55 +695,88 @@ async processQuery(query: string) {
     },
   ];
 
-  const response = await this.anthropic.messages.create({
-    model: "claude-opus-5",
-    max_tokens: 1000,
+  let response = await this.anthropic.messages.create({
+    model: MODEL,
+    max_tokens: MAX_TOKENS,
     messages,
     tools: this.tools,
   });
 
-  const finalText = [];
+  const finalText: string[] = [];
 
-  for (const content of response.content) {
-    if (content.type === "text") {
-      finalText.push(content.text);
-    } else if (content.type === "tool_use") {
-      const toolName = content.name;
-      const toolArgs = content.input as { [x: string]: unknown } | undefined;
+  for (let turn = 0; turn < MAX_TOOL_TURNS; turn++) {
+    const toolUses: ToolUseBlock[] = [];
 
-      const result = await this.mcp.callTool({
-        name: toolName,
-        arguments: toolArgs,
-      });
+    for (const block of response.content) {
+      if (block.type === "text") {
+        finalText.push(block.text);
+      } else if (block.type === "tool_use") {
+        toolUses.push(block);
+      }
+    }
+
+    if (toolUses.length === 0) {
+      return finalText.join("\n");
+    }
+
+    const toolResults: ToolResultBlockParam[] = [];
+    for (const toolUse of toolUses) {
+      const toolArgs = toolUse.input as { [x: string]: unknown } | undefined;
       finalText.push(
-        `[Calling tool ${toolName} with args ${JSON.stringify(toolArgs)}]`
+        `[Calling tool ${toolUse.name} with args ${JSON.stringify(toolArgs)}]`
       );
 
-      messages.push({
-        role: "user",
+      const result = await this.mcp.callTool({
+        name: toolUse.name,
+        arguments: toolArgs,
+      });
+
+      toolResults.push({
+        type: "tool_result",
+        tool_use_id: toolUse.id,
         content: result.content
           .filter((block) => block.type === "text")
           .map((block) => block.text)
           .join("\n"),
+        is_error: result.isError === true,
       });
-
-      const response = await this.anthropic.messages.create({
-        model: "claude-opus-5",
-        max_tokens: 1000,
-        messages,
-      });
-
-      finalText.push(
-        response.content[0].type === "text" ? response.content[0].text : ""
-      );
     }
+
+    messages.push({
+      role: "assistant",
+      content: response.content as unknown as ContentBlockParam[],
+    });
+    messages.push({ role: "user", content: toolResults });
+
+    response = await this.anthropic.messages.create({
+      model: MODEL,
+      max_tokens: MAX_TOKENS,
+      messages,
+      tools: this.tools,
+    });
   }
 
+  // The turn cap was hit. Keep the last response's text. If it asked for
+  // more tools, say they were not run.
+  let wantsTools = false;
+  for (const block of response.content) {
+    if (block.type === "text") {
+      finalText.push(block.text);
+    } else if (block.type === "tool_use") {
+      wantsTools = true;
+    }
+  }
+  if (wantsTools) {
+    finalText.push(`[Stopped after ${MAX_TOOL_TURNS} tool-use turns]`);
+  }
   return finalText.join("\n");
 }
 ```
 
-### 交互式聊天界面
+每个回合在调用服务器之前都会收集每个 `tool_use` 块，然后将整个助手回合返回（包括思考块），然后是每次调用时包含一个 `tool_result` 块的用户消息。 `callTool` 返回一个 `CallToolResult`，其中 `content` 是块列表，这就是为什么在读取 `.text` 之前代码会缩小到 `text` 块。失败的工具不会在这里抛出：它会设置 `isError` 进行应答，并将该标志传递为 `is_error` 让 Claude 读取消息并尝试其他操作。每个请求都带有 `tools`，因此 Claude 可以不断调用工具，直到得到答案为止，最多 `MAX_TOOL_TURNS` 轮。
+
+<a id="interactive-chat-interface-1" />
+### 互动聊天界面
 
 现在添加聊天循环和清理功能：
 
@@ -695,13 +786,26 @@ async chatLoop() {
     input: process.stdin,
     output: process.stdout,
   });
+  // rl.question() doesn't reject on stdin EOF on its own. Wire its close
+  // event to an AbortSignal so EOF (Ctrl-D) and SIGINT both unblock it.
+  const ac = new AbortController();
+  const onClose = () => ac.abort();
+  rl.on("close", onClose);
+  const onSigint = () => rl.close();
+  process.once("SIGINT", onSigint);
 
   try {
     console.log("\nMCP Client Started!");
     console.log("Type your queries or 'quit' to exit.");
 
     while (true) {
-      const message = await rl.question("\nQuery: ");
+      let message: string;
+      try {
+        message = await rl.question("\nQuery: ", { signal: ac.signal });
+      } catch {
+        break;
+      }
+
       if (message.toLowerCase() === "quit") {
         break;
       }
@@ -709,6 +813,8 @@ async chatLoop() {
       console.log("\n" + response);
     }
   } finally {
+    process.off("SIGINT", onSigint);
+    rl.off("close", onClose);
     rl.close();
   }
 }
@@ -718,7 +824,10 @@ async cleanup() {
 }
 ```
 
-### 主入口
+关闭 stdin (Ctrl-D) 或按 Ctrl-C 会中止挂起的 `rl.question()` 并跳出循环，因此客户端到达 `cleanup()` 并以状态 0 退出，而不是以 `ERR_USE_AFTER_CLOSE` 失败。
+
+<a id="main-entry-point-1" />
+### 主入口点
 
 最后，添加主执行逻辑：
 
@@ -745,6 +854,7 @@ async function main() {
 main();
 ```
 
+<a id="running-the-client-1" />
 ## 运行客户端
 
 要让客户端与任意 MCP 服务器一起运行：
@@ -773,33 +883,36 @@ node build/index.js path/to/build/index.js # node server
    - 查看工具执行情况
    - 获取 Claude 的响应
 
+<a id="how-it-works-1" />
 ## 工作原理
 
 提交查询时：
 
-1. 客户端从服务器获取可用工具列表
-2. 将你的查询连同工具描述一起发送给 Claude
+1.客户端从服务器获取可用工具列表
+2. 您的查询以及工具说明将发送给 Claude
 3. Claude 决定使用哪些工具（如果有）
-4. 客户端通过服务器执行请求的工具调用
-5. 将结果发送回 Claude
-6. Claude 提供自然语言响应
-7. 将响应显示给你
+4. 客户端通过服务器执行每个请求的工具调用
+5. 助手轮流和所有工具结果一次请求返回给 Claude，并再次附上工具
+6. Claude 要么请求更多工具（循环允许最多 `MAX_TOOL_TURNS` 轮），要么提供自然语言响应
+7. 回复会显示给您
 
+<a id="best-practices-1" />
 ## 最佳实践
 
 1. **错误处理**
-   - 使用 TypeScript 的类型系统来更好地检测错误
-   - 将工具调用包装在 try-catch 代码块中
+   - 使用 TypeScript 的类型系统更好地检测错误
+   - 检查 `result.isError` 而不是期望抛出失败的工具
    - 提供有意义的错误消息
-   - 正确处理连接问题
-
+   - 优雅地处理连接问题
 2. **安全性**
    - 将 API 密钥安全地存储在 `.env` 中
    - 验证服务器响应
    - 谨慎处理工具权限
 
+<a id="troubleshooting-1" />
 ## 故障排除
 
+<a id="server-path-issues-1" />
 ### 服务器路径问题
 
 - 仔细检查服务器脚本路径是否正确
@@ -821,6 +934,7 @@ node build/index.js C:/projects/mcp-server/build/index.js
 node build/index.js C:\\projects\\mcp-server\\build\\index.js
 ```
 
+<a id="response-timing-1" />
 ### 响应时间
 
 - 首次响应可能需要最多 30 秒
@@ -831,6 +945,7 @@ node build/index.js C:\\projects\\mcp-server\\build\\index.js
 - 后续响应通常会更快
 - 在初始等待期间不要中断进程
 
+<a id="common-error-messages-1" />
 ### 常见错误消息
 
 如果看到：
@@ -844,18 +959,25 @@ node build/index.js C:\\projects\\mcp-server\\build\\index.js
 
 </Tab>
 
-<Tab title="Java">
+<Tab title="爪哇">
 
 <Note>
 
-这是一个基于 Spring AI MCP 自动配置和启动器的快速入门示例。
-如果想了解如何手动创建同步和异步 MCP 客户端，请参阅 [Java SDK Client](https://java.sdk.modelcontextprotocol.io/) 文档。
+该客户端使用 MCP 协议版本 2025-11-25，由最新稳定版本的 Java SDK 支持。它连接到接受该版本的服务器，但不连接到仅接受 2026-07-28 的服务器。请参阅[向后兼容性](/specification/draft/basic/versioning#backward-compatibility-with-initialization-based-versions)。
+</Note>
 
+<Note>
+
+这是一个基于 Spring AI MCP 自动配置和启动启动器的快速入门演示。
+
+要了解如何手动创建同步和异步 MCP 客户端，请参阅 [Java SDK 客户端](https://java.sdk.modelcontextprotocol.io/) 文档。
 </Note>
 
 此示例演示如何构建一个交互式聊天机器人，将 Spring AI 的模型上下文协议（MCP）与 [Brave Search MCP Server](https://github.com/modelcontextprotocol/servers-archived/tree/main/src/brave-search) 相结合。该应用程序创建了一个由 Anthropic 的 Claude AI 模型驱动的对话界面，可以通过 Brave Search 执行互联网搜索，从而使用实时 Web 数据进行自然语言交互。
+
 [你可以在此处找到本教程的完整代码。](https://github.com/spring-projects/spring-ai-examples/tree/main/model-context-protocol/web-search/brave-chatbot)
 
+<a id="system-requirements-2" />
 ## 系统要求
 
 开始之前，请确保你的系统满足以下要求：
@@ -866,6 +988,7 @@ node build/index.js C:\\projects\\mcp-server\\build\\index.js
 - Anthropic API 密钥（Claude）
 - Brave Search API 密钥
 
+<a id="setting-up-your-environment-2" />
 ## 设置环境
 
 1. 安装 npx（Node Package eXecute）：
@@ -880,7 +1003,7 @@ node build/index.js C:\\projects\\mcp-server\\build\\index.js
 
    ```bash
    git clone https://github.com/spring-projects/spring-ai-examples.git
-   cd model-context-protocol/web-search/brave-chatbot
+   cd spring-ai-examples/model-context-protocol/web-search/brave-chatbot
    ```
 
 3. 设置 API 密钥：
@@ -907,10 +1030,12 @@ node build/index.js C:\\projects\\mcp-server\\build\\index.js
 
 </Warning>
 
+<a id="how-it-works-2" />
 ## 工作原理
 
 该应用程序通过以下几个组件，将 Spring AI 与 Brave Search MCP 服务器集成：
 
+<a id="mcp-client-configuration" />
 ### MCP 客户端配置
 
 1. pom.xml 中的必需依赖：
@@ -939,7 +1064,6 @@ spring:
         type: SYNC
         request-timeout: 20s
         stdio:
-          root-change-notification: true
           servers-configuration: classpath:/mcp-servers-config.json
         toolcallback:
           enabled: true
@@ -947,10 +1071,11 @@ spring:
       api-key: ${ANTHROPIC_API_KEY}
 ```
 
-这会激活 `spring-ai-starter-mcp-client`，根据提供的服务器配置创建一个或多个 `McpClient`。
-`spring.ai.mcp.client.toolcallback.enabled=true` 属性启用工具回调机制，该机制会自动将所有 MCP 工具注册为 Spring AI 工具。
-默认情况下，此功能处于禁用状态。
+这将激活 `spring-ai-starter-mcp-client` 以根据提供的服务器配置创建一个或多个 `McpClient`。
 
+`spring.ai.mcp.client.toolcallback.enabled=true` 属性启用工具回调机制，自动将所有 MCP 工具注册为 spring ai 工具。
+
+默认情况下它是启用的。
 3. MCP 服务器配置（`mcp-servers-config.json`）：
 
 ```json
@@ -967,6 +1092,7 @@ spring:
 }
 ```
 
+<a id="chat-implementation" />
 ### 聊天实现
 
 聊天机器人使用带有 MCP 工具集成的 Spring AI `ChatClient` 实现：
@@ -974,18 +1100,19 @@ spring:
 ```java
 var chatClient = chatClientBuilder
     .defaultSystem("You are useful assistant, expert in AI and Java.")
-    .defaultToolCallbacks((Object[]) mcpToolAdapter.toolCallbacks())
-    .defaultAdvisors(new MessageChatMemoryAdvisor(new InMemoryChatMemory()))
+    .defaultTools(SyncMcpToolCallbackProvider.builder().mcpClients(mcpSyncClients).build())
+    .defaultAdvisors(MessageChatMemoryAdvisor.builder(MessageWindowChatMemory.builder().build()).build())
     .build();
 ```
 
 主要功能：
 
 - 使用 Claude AI 模型进行自然语言理解
-- 通过 MCP 集成 Brave Search，实现实时 Web 搜索能力
-- 使用 InMemoryChatMemory 维护对话记忆
+- 通过 MCP 集成 Brave Search 以实现实时网络搜索功能
+- 使用 MessageWindowChatMemory 维护对话内存
 - 作为交互式命令行应用程序运行
 
+<a id="build-and-run" />
 ### 构建和运行
 
 ```bash
@@ -1008,6 +1135,7 @@ java -jar ./target/ai-mcp-brave-chatbot-0.0.1-SNAPSHOT.jar
 - 记住对话中之前消息的上下文
 - 结合多个来源的信息，提供全面的回答
 
+<a id="advanced-configuration" />
 ### 高级配置
 
 MCP 客户端支持其他配置选项：
@@ -1036,10 +1164,16 @@ spring.ai.mcp.client.streamable-http.connections.server1.url=http://localhost:80
 
 </Tab>
 
-<Tab title="Kotlin">
+<Tab title="科特林">
 
-[你可以在此处找到本教程的完整代码。](https://github.com/modelcontextprotocol/kotlin-sdk/tree/main/samples/kotlin-mcp-client)
+<Note>
 
+该客户端使用 MCP 协议版本 2025-11-25，由 Kotlin SDK 的最新稳定版本支持。它连接到接受该版本的服务器，但不连接到仅接受 2026-07-28 的服务器。请参阅[向后兼容性](/specification/draft/basic/versioning#backward-compatibility-with-initialization-based-versions)。
+</Note>
+
+[您可以在此处找到本教程的完整代码。](https://github.com/modelcontextprotocol/kotlin-sdk/tree/main/samples/kotlin-mcp-client)
+
+<a id="system-requirements-3" />
 ## 系统要求
 
 开始之前，请确保你的系统满足以下要求：
@@ -1047,10 +1181,13 @@ spring.ai.mcp.client.streamable-http.connections.server1.url=http://localhost:80
 - JDK 11 或更高版本
 - Anthropic API 密钥（Claude）
 
+<a id="setting-up-your-environment-3" />
 ## 设置环境
 
 首先，如果尚未安装，请安装 `java` 和 `gradle`。
+
 你可以从[官方 Oracle JDK 网站](https://www.oracle.com/java/technologies/downloads/)下载 `java`。
+
 验证你的 `java` 安装：
 
 ```bash
@@ -1088,7 +1225,7 @@ gradle init
 
 ```kotlin build.gradle.kts
 // Check latest versions at https://github.com/modelcontextprotocol/kotlin-sdk/releases
-val mcpVersion = "0.9.0"
+val mcpVersion = "0.16.0"
 val ktorVersion = "3.2.3"
 val anthropicVersion = "2.15.0"
 val slf4jVersion = "2.0.17"
@@ -1097,6 +1234,10 @@ plugins {
     kotlin("jvm") version "2.3.20"
     id("com.gradleup.shadow") version "8.3.9"
     application
+}
+
+repositories {
+    mavenCentral()
 }
 
 application {
@@ -1117,6 +1258,7 @@ dependencies {
 ./gradlew build
 ```
 
+<a id="setting-up-your-api-key-2" />
 ## 设置 API 密钥
 
 你需要从 [Anthropic Console](https://console.anthropic.com/settings/keys) 获取 Anthropic API 密钥。
@@ -1133,13 +1275,21 @@ export ANTHROPIC_API_KEY='your-anthropic-api-key-here'
 
 </Warning>
 
+<a id="creating-the-client-2" />
 ## 创建客户端
 
+<a id="basic-client-structure-1" />
 ### 基本客户端结构
 
 首先，创建基本客户端类：
 
 ```kotlin
+private const val MODEL = "claude-opus-5"
+// The model thinks adaptively unless told otherwise, and max_tokens caps thinking
+// plus the reply, so leave room for both.
+private const val MAX_TOKENS = 10_000L
+private const val MAX_TOOL_TURNS = 10
+
 class MCPClient(apiKey: String) : AutoCloseable {
     private val anthropic = AnthropicOkHttpClient.builder()
         .apiKey(apiKey)
@@ -1163,6 +1313,7 @@ class MCPClient(apiKey: String) : AutoCloseable {
 }
 ```
 
+<a id="server-connection-management-2" />
 ### 服务器连接管理
 
 接下来，实现连接到 MCP 服务器的方法：
@@ -1209,7 +1360,7 @@ suspend fun connectToServer(serverScriptPath: String) {
 }
 ```
 
-<Accordion title="JsonObject.toJsonValue() helper">
+<Accordion title="JsonObject.toJsonValue() 帮助器">
 
 此辅助函数使用 Jackson 将 kotlinx.serialization `JsonObject` 转换为 Anthropic SDK `JsonValue`：
 
@@ -1223,9 +1374,10 @@ private fun JsonObject.toJsonValue(): JsonValue {
 
 </Accordion>
 
+<a id="query-processing-logic-2" />
 ### 查询处理逻辑
 
-现在，添加处理查询和处理工具调用的核心功能：
+现在让我们添加处理查询和处理工具调用的核心功能。 Claude 可以一次请求多个工具，并且可以在读取其结果后请求更多工具，因此客户端运行一个循环：它执行每个请求的工具，在一条消息中将所有结果发送回，然后重复，直到 Claude 在没有工具调用的情况下应答或达到 `MAX_TOOL_TURNS`：
 
 ```kotlin
 suspend fun processQuery(query: String): String {
@@ -1236,60 +1388,92 @@ suspend fun processQuery(query: String): String {
             .build(),
     )
 
-    val response = anthropic.messages().create(
+    var response = anthropic.messages().create(
         MessageCreateParams.builder()
-            .model("claude-opus-5")
-            .maxTokens(1024)
+            .model(MODEL)
+            .maxTokens(MAX_TOKENS)
             .messages(messages)
             .tools(tools)
             .build(),
     )
 
     val finalText = mutableListOf<String>()
-    response.content().forEach { content ->
-        when {
-            content.isText() -> finalText.add(content.text().get().text())
 
-            content.isToolUse() -> {
-                val toolName = content.toolUse().get().name()
-                val toolArgs =
-                    content.toolUse().get()._input().convert(object : TypeReference<Map<String, JsonValue>>() {})
-
-                val result = mcp.callTool(
-                    name = toolName,
-                    arguments = toolArgs ?: emptyMap(),
-                )
-                finalText.add("[Calling tool $toolName with args $toolArgs]")
-
-                messages.add(
-                    MessageParam.builder()
-                        .role(MessageParam.Role.USER)
-                        .content(
-                            result.content
-                                .filterIsInstance<TextContent>()
-                                .joinToString("\n") { it.text }
-                        )
-                        .build(),
-                )
-
-                val aiResponse = anthropic.messages().create(
-                    MessageCreateParams.builder()
-                        .model("claude-opus-5")
-                        .maxTokens(1024)
-                        .messages(messages)
-                        .build(),
-                )
-
-                finalText.add(aiResponse.content().first().text().get().text())
+    repeat(MAX_TOOL_TURNS) {
+        val toolUses = mutableListOf<ToolUseBlock>()
+        response.content().forEach { block ->
+            when {
+                block.isText() -> finalText.add(block.text().get().text())
+                block.isToolUse() -> toolUses.add(block.toolUse().get())
             }
         }
+
+        if (toolUses.isEmpty()) return finalText.joinToString("\n")
+
+        val toolResults = toolUses.map { toolUse ->
+            val toolArgs = toolUse._input().convert(object : TypeReference<Map<String, JsonValue>>() {})
+            finalText.add("[Calling tool ${toolUse.name()} with args $toolArgs]")
+
+            val result = mcp.callTool(
+                name = toolUse.name(),
+                arguments = toolArgs ?: emptyMap(),
+            )
+
+            // content is a list of block types, so forward only the text ones. MCP
+            // and Anthropic block shapes differ, so other kinds need converting.
+            ContentBlockParam.ofToolResult(
+                ToolResultBlockParam.builder()
+                    .toolUseId(toolUse.id())
+                    .content(result.content.filterIsInstance<TextContent>().joinToString("\n") { it.text })
+                    .apply { if (result.isError == true) isError(true) }
+                    .build(),
+            )
+        }
+
+        // Replay the full assistant turn, tool_use blocks included, then send
+        // every tool result of this turn in one user message.
+        messages.add(
+            MessageParam.builder()
+                .role(MessageParam.Role.ASSISTANT)
+                .contentOfBlockParams(response.content().map { it.toParam() })
+                .build(),
+        )
+        messages.add(
+            MessageParam.builder()
+                .role(MessageParam.Role.USER)
+                .contentOfBlockParams(toolResults)
+                .build(),
+        )
+
+        response = anthropic.messages().create(
+            MessageCreateParams.builder()
+                .model(MODEL)
+                .maxTokens(MAX_TOKENS)
+                .messages(messages)
+                .tools(tools)
+                .build(),
+        )
     }
+
+    // The turn cap was hit. Keep the last response's text. If it asked for
+    // more tools, say they were not run.
+    var wantsTools = false
+    response.content().forEach { block ->
+        when {
+            block.isText() -> finalText.add(block.text().get().text())
+            block.isToolUse() -> wantsTools = true
+        }
+    }
+    if (wantsTools) finalText.add("[Stopped after $MAX_TOOL_TURNS tool-use turns]")
 
     return finalText.joinToString("\n")
 }
 ```
 
-### 交互式聊天
+`callTool` 返回 `CallToolResult`。它的 `content` 是一个块列表，这就是为什么在读取 `.text` 之前代码会缩小到 `TextContent` 的原因。失败的工具不会在这里抛出：它会设置 `isError` 进行应答，并通过 `ToolResultBlockParam` 传递该标志让 Claude 读取消息并尝试其他操作。每个工具结果都带有它应答的 `tool_use` 块的 `id`，并且助理轮回完全按照返回的方式返回，因此对话对下一次调用保持有效。
+
+<a id="interactive-chat" />
+### 互动聊天
 
 添加聊天循环：
 
@@ -1313,6 +1497,7 @@ suspend fun chatLoop() {
 }
 ```
 
+<a id="main-entry-point-2" />
 ### 主入口
 
 最后，添加主执行函数：
@@ -1332,6 +1517,7 @@ fun main(args: Array<String>) = runBlocking {
 }
 ```
 
+<a id="running-the-client-2" />
 ## 运行客户端
 
 要让客户端与任意 MCP 服务器一起运行：
@@ -1366,6 +1552,7 @@ java -jar build/libs/kotlin-mcp-client-0.1.0-all.jar path/to/build/index.js # No
    - 查看工具执行情况
    - 获取 Claude 的响应
 
+<a id="how-it-works-3" />
 ## 工作原理
 
 以下是高级工作流示意图：
@@ -1385,34 +1572,38 @@ sequenceDiagram
     User->>Client: Send query
     Client<<->>MCP_Server: Get available tools
     Client->>Claude: Send query with tool descriptions
-    Claude-->>Client: Decide tool execution
-    Client->>MCP_Server: Request tool execution
-    MCP_Server->>Tools: Execute chosen tools
-    Tools-->>MCP_Server: Return results
-    MCP_Server-->>Client: Send results
-    Client->>Claude: Send tool results
+    loop Until Claude answers without tool_use blocks, or MAX_TOOL_TURNS is reached
+        Claude-->>Client: Return tool_use blocks
+        Client->>MCP_Server: Request every tool execution
+        MCP_Server->>Tools: Execute chosen tools
+        Tools-->>MCP_Server: Return results
+        MCP_Server-->>Client: Send results
+        Client->>Claude: Replay assistant turn, send all tool results in one message
+    end
     Claude-->>Client: Provide final response
     Client-->>User: Display response
 ```
 
 提交查询时：
 
-1. 客户端从服务器获取可用工具列表
-2. 将你的查询连同工具描述一起发送给 Claude
+1.客户端从服务器获取可用工具列表
+2. 您的查询以及工具说明将发送给 Claude
 3. Claude 决定使用哪些工具（如果有）
-4. 客户端通过服务器执行请求的工具调用
-5. 将结果发送回 Claude
-6. Claude 提供自然语言响应
-7. 将响应显示给你
+4. 客户端通过服务器执行每个请求的工具调用，并转发任何失败调用的 `isError` 标志
+5. 客户端重放助手回合，并将所有工具结果通过一条消息发送回 Claude，并再次附上工具说明
+6. 重复步骤 3 至 5，直到 Claude 在没有工具调用的情况下应答或达到 `MAX_TOOL_TURNS`
+7. 回复会显示给您
 
+<a id="best-practices-2" />
 ## 最佳实践
 
 1. **错误处理**
-   - 利用 Kotlin 的类型系统显式建模错误
-   - 在可能发生异常时，将外部工具和 API 调用包装在 `try-catch` 代码块中
+   - 检查每个工具结果上的 `result.isError` 并使用 `isError(true)` 转发它，因为失败的工具会使用该标志进行应答而不是抛出
+   - 将 `MAX_TOOL_TURNS` 保持在适当的位置，以便不断请求工具的运行停止并显示可见消息
+   - 利用 Kotlin 的类型系统显式地对错误建模
+   - 当可能出现异常时，将外部工具和 API 调用包装在 `try-catch` 块中
    - 提供清晰且有意义的错误消息
-   - 正确处理网络超时和连接问题
-
+   - 优雅地处理网络超时和连接问题
 2. **安全性**
    - 将 API 密钥和机密安全地存储在 `local.properties`、环境变量或机密管理器中
    - 验证所有外部响应，避免意外或不安全的数据使用
@@ -1422,8 +1613,10 @@ sequenceDiagram
    - 通过环境变量设置 `ANTHROPIC_API_KEY`，而不是硬编码
    - 在本地开发中使用带有适当 `.gitignore` 规则的 `.env` 文件
 
+<a id="troubleshooting-2" />
 ## 故障排除
 
+<a id="server-path-issues-2" />
 ### 服务器路径问题
 
 - 仔细检查服务器脚本路径是否正确
@@ -1446,11 +1639,13 @@ java -jar build/libs/client.jar C:/projects/mcp-server/build/libs/server.jar
 java -jar build/libs/client.jar C:\\projects\\mcp-server\\build\\libs\\server.jar
 ```
 
+<a id="build-issues" />
 ### 构建问题
 
 - 使用 `./gradlew build` 或 `./gradlew shadowJar`（而不是 `./gradlew jar`）来创建包含所有依赖项的 shadow JAR
 - 如果遇到 JDK 版本错误，请确保已安装的 JDK 版本与 `build.gradle.kts` 中的 `jvmToolchain` 设置相匹配或更高
 
+<a id="response-timing-2" />
 ### 响应时间
 
 - 首次响应可能需要最多 30 秒
@@ -1461,20 +1656,22 @@ java -jar build/libs/client.jar C:\\projects\\mcp-server\\build\\libs\\server.ja
 - 后续响应通常会更快
 - 在初始等待期间不要中断进程
 
+<a id="common-error-messages-2" />
 ### 常见错误消息
 
 如果看到：
 
-- `Connection refused`：确保服务器正在运行且路径正确
-- `Tool execution failed`：确认已设置工具所需的环境变量
-- `ANTHROPIC_API_KEY is not set`：检查环境变量
-
+- `Connection refused`：确保服务器正在运行并且路径正确
+- `Tool execution failed`：验证工具所需的环境变量是否已设置
+- `[Stopped after 10 tool-use turns]`：当 `MAX_TOOL_TURNS` 耗尽时，克劳德仍在请求工具，因此提高上限或缩小查询范围
+- `ANTHROPIC_API_KEY is not set`：检查您的环境变量
 </Tab>
 
 <Tab title="C#">
 
 [你可以在此处找到本教程的完整代码。](https://github.com/modelcontextprotocol/csharp-sdk/tree/main/samples/QuickstartClient)
 
+<a id="system-requirements-4" />
 ## 系统要求
 
 开始之前，请确保你的系统满足以下要求：
@@ -1483,6 +1680,7 @@ java -jar build/libs/client.jar C:\\projects\\mcp-server\\build\\libs\\server.ja
 - Anthropic API 密钥（Claude）
 - Windows、Linux 或 macOS
 
+<a id="setting-up-your-environment-4" />
 ## 设置环境
 
 首先，创建一个新的 .NET 项目：
@@ -1501,6 +1699,7 @@ dotnet add package Microsoft.Extensions.Hosting
 dotnet add package Microsoft.Extensions.AI
 ```
 
+<a id="setting-up-your-api-key-3" />
 ## 设置 API 密钥
 
 你需要从 [Anthropic Console](https://console.anthropic.com/settings/keys) 获取 Anthropic API 密钥。
@@ -1510,8 +1709,10 @@ dotnet user-secrets init
 dotnet user-secrets set "ANTHROPIC_API_KEY" "<your key here>"
 ```
 
+<a id="creating-the-client-3" />
 ## 创建客户端
 
+<a id="basic-client-structure-2" />
 ### 基本客户端结构
 
 首先，在 `Program.cs` 文件中设置基本客户端类：
@@ -1522,7 +1723,6 @@ using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using ModelContextProtocol.Client;
-using ModelContextProtocol.Protocol.Transport;
 
 var builder = Host.CreateApplicationBuilder(args);
 
@@ -1571,6 +1771,7 @@ static (string command, string[] arguments) GetCommandAndArguments(string[] args
 
 这会创建一个 MCP 客户端，该客户端连接到作为命令行参数提供的服务器，然后列出所连接服务器中的可用工具。
 
+<a id="query-processing-logic-3" />
 ### 查询处理逻辑
 
 现在，添加处理查询和处理工具调用的核心功能：
@@ -1584,7 +1785,7 @@ using var anthropicClient = new AnthropicClient(new APIAuthentication(builder.Co
 
 var options = new ChatOptions
 {
-    MaxOutputTokens = 1000,
+    MaxOutputTokens = 10000,
     ModelId = "claude-opus-5",
     Tools = [.. tools]
 };
@@ -1620,12 +1821,15 @@ static void PromptForInput()
 }
 ```
 
+<a id="key-components-explained-1" />
 ## 关键组件说明
 
+<a id="1-client-initialization-1" />
 ### 1. 客户端初始化
 
 - 使用 `McpClient.CreateAsync()` 初始化客户端，该方法设置传输类型以及运行服务器所需的命令
 
+<a id="2-server-connection-1" />
 ### 2. 服务器连接
 
 - 支持 Python、Node.js 和 .NET 服务器
@@ -1633,6 +1837,7 @@ static void PromptForInput()
 - 配置使用 stdio 与服务器通信
 - 初始化会话和可用工具
 
+<a id="3-query-processing-1" />
 ### 3. 查询处理
 
 - 使用 [Microsoft.Extensions.AI](https://learn.microsoft.com/dotnet/ai/ai-extensions) 处理聊天客户端
@@ -1641,6 +1846,7 @@ static void PromptForInput()
 - 服务器处理查询并返回响应
 - 将响应显示给用户
 
+<a id="running-the-client-3" />
 ## 运行客户端
 
 要让客户端与任意 MCP 服务器一起运行：
@@ -1675,10 +1881,11 @@ dotnet run -- path/to/server.js # node server
 
 </Tab>
 
-<Tab title="Ruby">
+<Tab title="红宝石">
 
 [你可以在此处找到本教程的完整代码。](https://github.com/modelcontextprotocol/quickstart-resources/tree/main/mcp-client-ruby)
 
+<a id="system-requirements-5" />
 ## 系统要求
 
 开始之前，请确保你的系统满足以下要求：
@@ -1687,6 +1894,7 @@ dotnet run -- path/to/server.js # node server
 - 已安装 Ruby 3.2.0 或更高版本（[Anthropic SDK](https://github.com/anthropics/anthropic-sdk-ruby) 要求）
 - Anthropic API 密钥（Claude）
 
+<a id="setting-up-your-environment-5" />
 ## 设置环境
 
 首先，创建一个新的 Ruby 项目：
@@ -1717,7 +1925,7 @@ cd mcp-client
 bundle init
 
 # Add required dependencies
-bundle add anthropic base64 dotenv mcp
+bundle add anthropic dotenv mcp
 
 # Create our main file
 new-item client.rb
@@ -1725,6 +1933,7 @@ new-item client.rb
 
 </CodeGroup>
 
+<a id="setting-up-your-api-key-4" />
 ## 设置 API 密钥
 
 你需要从 [Anthropic Console](https://console.anthropic.com/settings/keys) 获取 Anthropic API 密钥。
@@ -1747,8 +1956,10 @@ echo ".env" >> .gitignore
 
 </Warning>
 
+<a id="creating-the-client-4" />
 ## 创建客户端
 
+<a id="basic-client-structure-3" />
 ### 基本客户端结构
 
 首先，设置 require 并创建基本客户端类：
@@ -1761,6 +1972,10 @@ require "mcp"
 
 class MCPClient
   ANTHROPIC_MODEL = "claude-opus-5"
+  # The model thinks adaptively unless told otherwise, and max_tokens caps thinking
+  # plus the reply, so leave room for both.
+  MAX_TOKENS = 10000
+  MAX_TOOL_TURNS = 10
 
   def initialize
     @mcp_client = nil
@@ -1772,6 +1987,7 @@ class MCPClient
 end
 ```
 
+<a id="server-connection-management-3" />
 ### 服务器连接管理
 
 接下来，实现连接到 MCP 服务器的方法：
@@ -1798,13 +2014,12 @@ def connect_to_server(server_script_path)
 end
 ```
 
+<a id="query-processing-logic-4" />
 ### 查询处理逻辑
 
-现在，添加处理查询和处理工具调用的核心功能：
+现在让我们添加处理查询和处理工具调用的核心功能。每回合都会运行 Claude 要求的每个工具，将所有结果在一条消息中发送回，并使用附加的工具再次调用 Claude，直到 Claude 在没有工具调用的情况下应答或达到 `MAX_TOOL_TURNS`：
 
 ```ruby
-private
-
 def process_query(query)
   messages = [{ role: "user", content: query }]
 
@@ -1812,31 +2027,33 @@ def process_query(query)
     { name: tool.name, description: tool.description, input_schema: tool.input_schema }
   end
 
-  # Initial Claude API call.
-  response = chat(messages, tools: available_tools)
+  final_text = []
 
-  # Process response and handle tool calls.
-  if response.content.any?(Anthropic::Models::ToolUseBlock)
-    assistant_content = response.content.filter_map do |content_block|
-      case content_block
+  # Initial Claude API call with tools.
+  response = chat(messages, available_tools)
+
+  # Keep calling tools until Claude answers without one, up to a cap.
+  MAX_TOOL_TURNS.times do
+    tool_uses = []
+    response.content.each do |block|
+      case block
       when Anthropic::Models::TextBlock
-        { type: "text", text: content_block.text }
+        final_text << block.text
       when Anthropic::Models::ToolUseBlock
-        { type: "tool_use", id: content_block.id, name: content_block.name, input: content_block.input }
+        tool_uses << block
       end
     end
-    messages << { role: "assistant", content: assistant_content }
-  end
 
-  response.content.each_with_object([]) do |content, response_parts|
-    case content
-    when Anthropic::Models::TextBlock
-      response_parts << content.text
-    when Anthropic::Models::ToolUseBlock
-      # Execute tool call via MCP.
-      result = @mcp_client.call_tool(name: content.name, arguments: content.input)
-      response_parts << "[Calling tool #{content.name} with args #{content.input.to_json}]"
+    return final_text.join("\n") if tool_uses.empty?
 
+    # Execute every tool call in this response and collect the results.
+    tool_results = tool_uses.map do |tool_use|
+      result = @mcp_client.call_tool(name: tool_use.name, arguments: tool_use.input)
+      final_text << "[Calling tool #{tool_use.name} with args #{tool_use.input.to_json}]"
+
+      is_error = result.dig("result", "isError") == true
+
+      # content is a list of block types, so forward only the text ones.
       tool_result_content = result.dig("result", "content")
       result_text = if tool_result_content.is_a?(Array)
         tool_result_content.filter_map { |content_item| content_item["text"] }.join("\n")
@@ -1844,40 +2061,33 @@ def process_query(query)
         tool_result_content.to_s
       end
 
-      messages << {
-        role: "user",
-        content: [{
-          type: "tool_result",
-          tool_use_id: content.id,
-          content: result_text
-        }]
-      }
-
-      # Get next response from Claude.
-      response = chat(messages)
-
-      response.content.each do |content_block|
-        response_parts << content_block.text if content_block.is_a?(Anthropic::Models::TextBlock)
-      end
+      { type: "tool_result", tool_use_id: tool_use.id, content: result_text, is_error: is_error }
     end
-  end.join("\n")
-end
 
-def chat(messages, tools: nil)
-  params = { model: ANTHROPIC_MODEL, max_tokens: 1000, messages: messages }
-  params[:tools] = tools if tools
+    # Append the assistant's response and all tool results, in one user
+    # message, to the history. Every tool_use needs a matching tool_result.
+    messages << { role: "assistant", content: assistant_content(response) }
+    messages << { role: "user", content: tool_results }
 
-  anthropic_client.messages.create(**params)
-end
+    response = chat(messages, available_tools)
+  end
 
-def anthropic_client
-  @anthropic_client ||= Anthropic::Client.new(api_key: ENV["ANTHROPIC_API_KEY"])
+  # The turn cap was hit. Keep the last response's text. If it asked for
+  # more tools, say they were not run.
+  response.content.each do |block|
+    final_text << block.text if block.is_a?(Anthropic::Models::TextBlock)
+  end
+  if response.content.any?(Anthropic::Models::ToolUseBlock)
+    final_text << "[Stopped after #{MAX_TOOL_TURNS} tool-use turns]"
+  end
+  final_text.join("\n")
 end
 ```
 
+<a id="interactive-chat-interface-2" />
 ### 交互式聊天界面
 
-现在添加聊天循环和清理功能：
+现在我们将添加聊天循环和清理功能，然后是 `process_query` 依赖的私有助手：
 
 ```ruby
 def chat_loop
@@ -1907,8 +2117,43 @@ end
 def cleanup
   @transport&.close
 end
+
+private
+
+# Convert a response's content blocks back into request parameters. Thinking
+# blocks must go back unchanged, signature included, or the API rejects the
+# follow-up request.
+def assistant_content(response)
+  response.content.filter_map do |block|
+    case block
+    when Anthropic::Models::TextBlock
+      { type: "text", text: block.text }
+    when Anthropic::Models::ToolUseBlock
+      { type: "tool_use", id: block.id, name: block.name, input: block.input }
+    when Anthropic::Models::ThinkingBlock
+      { type: "thinking", thinking: block.thinking, signature: block.signature }
+    when Anthropic::Models::RedactedThinkingBlock
+      { type: "redacted_thinking", data: block.data }
+    end
+  end
+end
+
+# Tools are passed on every call so Claude can keep calling them across turns.
+def chat(messages, tools)
+  anthropic_client.messages.create(
+    model: ANTHROPIC_MODEL,
+    max_tokens: MAX_TOKENS,
+    messages: messages,
+    tools: tools
+  )
+end
+
+def anthropic_client
+  @anthropic_client ||= Anthropic::Client.new(api_key: ENV["ANTHROPIC_API_KEY"])
+end
 ```
 
+<a id="main-entry-point-3" />
 ### 主入口
 
 最后，添加主执行逻辑：
@@ -1944,14 +2189,17 @@ end
 
 你可以在[此处](https://github.com/modelcontextprotocol/quickstart-resources/blob/main/mcp-client-ruby/client.rb)找到完整的 `client.rb` 文件。
 
+<a id="key-components-explained-2" />
 ## 关键组件说明
 
+<a id="1-client-initialization-2" />
 ### 1. 客户端初始化
 
 - `MCPClient` 类初始化时使用 nil 引用，以便延迟设置
 - Anthropic 客户端通过 `anthropic_client` 方法延迟初始化
 - 使用 `dotenv` 从 `.env` 加载环境变量
 
+<a id="2-server-connection-2" />
 ### 2. 服务器连接
 
 - 支持 Ruby、Python 和 Node.js 服务器
@@ -1959,16 +2207,19 @@ end
 - 使用 `MCP::Client::Stdio` 进行 stdio 传输
 - 初始化 MCP 客户端并列出可用工具
 
+<a id="3-query-processing-2" />
 ### 3. 查询处理
 
-- 将 MCP 工具映射为 Anthropic 工具格式（`name`、`description`、`input_schema`）
+- 将 MCP 工具映射到 Anthropic 工具格式（`name`、`description`、`input_schema`）
 - 使用 `Anthropic::Models::TextBlock` 和 `Anthropic::Models::ToolUseBlock` 进行模式匹配
-- 在遍历工具调用之前构建一次 assistant 内容
+- 循环最多 `MAX_TOOL_TURNS` 次，在每个响应中运行每个工具调用
 - 通过 `@mcp_client.call_tool` 执行工具调用
-- 使用 `chat` 辅助方法封装 Anthropic API 调用
-- 使用 `result.dig("result", "content")` 提取工具结果内容
-- 将工具结果传回 Claude 以获取最终响应
+- 使用 `result.dig("result", "content")` 提取工具结果内容，并使用 `result.dig("result", "isError")` 提取错误标志
+- 在单个用户消息中发送回合的所有 `tool_result` 块，每个块都有其 `tool_use_id` 和 `is_error`
+- 使用 `assistant_content` 重播助手回合，在完整签名的情况下往返思维块
+- 使用 `chat` 帮助程序，它在每次 API 调用时传递 `tools` 和 `MAX_TOKENS`
 
+<a id="4-interactive-interface-1" />
 ### 4. 交互式界面
 
 - 提供简单的命令行界面
@@ -1976,12 +2227,14 @@ end
 - 跳过空查询
 - 包含基本的错误处理
 
+<a id="5-resource-management-1" />
 ### 5. 资源管理
 
 - 通过 `begin`...`ensure` 正确清理传输
 - 使用顶层 `rescue` 进行错误处理
 - 在连接服务器后验证 API 密钥
 
+<a id="running-the-client-4" />
 ## 运行客户端
 
 要让客户端与任意 MCP 服务器一起运行：
@@ -2007,30 +2260,33 @@ bundle exec ruby client.rb path/to/build/index.js # node server
    - 查看工具执行情况
    - 获取 Claude 的响应
 
+<a id="how-it-works-4" />
 ## 工作原理
 
 提交查询时：
 
-1. 客户端从服务器获取可用工具列表
-2. 将你的查询连同工具描述一起发送给 Claude
+1.客户端从服务器获取可用工具列表
+2. 您的查询以及工具说明将发送给 Claude
 3. Claude 决定使用哪些工具（如果有）
-4. 客户端通过服务器执行请求的工具调用
-5. 将结果发送回 Claude
-6. Claude 提供自然语言响应
-7. 将响应显示给你
+4. 客户端通过服务器执行每个请求的工具调用
+5. 辅助转弯和所有工具结果发送回Claude，并再次附加工具
+6. 重复步骤 3 至 5，直到 Claude 在没有工具调用的情况下应答或达到 `MAX_TOOL_TURNS`
+7. 克劳德提供自然语言回应
+8. 回复会显示给您
 
+<a id="best-practices-3" />
 ## 最佳实践
 
 1. **错误处理**
-   - 将工具调用包装在 `begin`...`rescue` 代码块中
+   - 将工具调用包装在 `begin`...`rescue` 块中
+   - 检查每个工具结果上的 `isError` 并将其转发为 `is_error`，而不是期望失败的工具会引发问题
    - 提供有意义的错误消息
-   - 正确处理连接问题
-
+   - 优雅地处理连接问题
 2. **资源管理**
-   - 完成后始终关闭传输
-   - 使用 `begin`...`ensure` 进行正确清理
-   - 处理服务器断开连接的情况
-
+   - 完成后务必关闭运输工具
+   - 使用 `begin`...`ensure` 进行正确的清理
+   - 使用 `MAX_TOOL_TURNS` 限制工具使用轮次，因此一个查询不能无限循环
+   - 处理服务器断开连接
 3. **安全性**
    - 将 API 密钥安全地存储在 `.env` 中
    - 验证服务器响应
@@ -2040,8 +2296,10 @@ bundle exec ruby client.rb path/to/build/index.js # node server
    - 可以根据[此处](/specification/draft/server/tools#tool-names)指定的格式验证工具名称
    - 如果工具名称符合指定格式，则 MCP 客户端不应因验证而失败
 
+<a id="troubleshooting-3" />
 ## 故障排除
 
+<a id="server-path-issues-3" />
 ### 服务器路径问题
 
 - 仔细检查服务器脚本路径是否正确
@@ -2063,6 +2321,7 @@ bundle exec ruby client.rb C:/projects/mcp-server/weather.rb
 bundle exec ruby client.rb C:\\projects\\mcp-server\\weather.rb
 ```
 
+<a id="response-timing-3" />
 ### 响应时间
 
 - 首次响应可能需要最多 30 秒
@@ -2073,29 +2332,31 @@ bundle exec ruby client.rb C:\\projects\\mcp-server\\weather.rb
 - 后续响应通常会更快
 - 在初始等待期间不要中断进程
 
+<a id="common-error-messages-3" />
 ### 常见错误消息
 
 如果看到：
 
-- `Errno::ENOENT`：检查服务器路径，并确保命令（`ruby`、`python3`、`node`）可用
-- `Connection refused`：确保服务器正在运行且路径正确
-- `Tool execution failed`：确认已设置工具所需的环境变量
-- `Anthropic::Errors::AuthenticationError`：检查 `.env` 文件中是否有有效的 `ANTHROPIC_API_KEY`
-
+- `Errno::ENOENT`：检查您的服务器路径并确保命令（`ruby`、`python3`、`node`）可用
+- `Connection refused`：确保服务器正在运行并且路径正确
+- `Tool execution failed`：验证工具所需的环境变量是否已设置
+- `Anthropic::Errors::AuthenticationError`：检查您的 `.env` 文件是否包含有效的 `ANTHROPIC_API_KEY`
+- `[Stopped after 10 tool-use turns]`：克劳德一直要求工具，所以客户端停在`MAX_TOOL_TURNS`并返回到目前为止收集的文本
 </Tab>
 
-<Tab title="Rust">
+<Tab title="铁锈">
 
 [你可以在此处找到本教程的完整代码。](https://github.com/modelcontextprotocol/quickstart-resources/tree/main/mcp-client-rust)
 
+<a id="system-requirements-6" />
 ## 系统要求
 
-开始之前，请确保你的 Linux 系统满足以下要求：
-
-- 最新稳定版的 [Rust 和 Cargo](https://www.rust-lang.org/tools/install)
-- Anthropic API 密钥（Claude）
+开始之前，请确保您的系统满足以下要求：
+- [铁锈和货物](https://www.rust-lang.org/tools/install) 1.88 或更高版本
+- Anthropic API 密钥（克劳德）
 - 要连接的 Python、Node.js 或可执行 MCP 服务器
 
+<a id="setting-up-your-environment-6" />
 ## 设置环境
 
 首先，创建一个新的 Rust 项目：
@@ -2114,19 +2375,26 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-anyhow = "1.0.100"
-genai = "0.4.2"
-rmcp = { version = "0.8.0", features = ["server", "client", "transport-io", "transport-child-process"] }
-tokio = { version = "1.47.1", features = ["full"] }
-tracing = "0.1.41"
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-serde_json = "1.0.128"
+anyhow = "1.0.104"
+jsonschema = "0.59"
+# Only the client half of rmcp is needed, over a child-process stdio transport.
+rmcp = { version = "3.4", features = [
+    "client",
+    "transport-io",
+    "transport-child-process",
+], default-features = false }
+# The Messages API is called directly, which keeps the provider's content
+# blocks verbatim. That matters for signed thinking blocks; see request_model.
+reqwest = { version = "0.13", features = ["json"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0.151"
+tokio = { version = "1.53", features = ["full"] }
 dotenvy = "0.15.7"
-reqwest = "0.12.23"
 ```
 
-[`rmcp`](https://github.com/modelcontextprotocol/rust-sdk) crate 提供 Rust MCP SDK 和子进程传输。此示例使用 [`genai`](https://github.com/jeremychone/rust-genai) crate 向 Claude 发送请求，并在模型请求中表示工具。
+[`rmcp`](https://github.com/modelcontextprotocol/rust-sdk) 箱提供 Rust MCP SDK 和子进程 stdio 传输。仅启用其客户端一半。客户端直接使用 [`reqwest`](https://docs.rs/reqwest) 调用 [消息 API](https://docs.anthropic.com/en/api/messages)。直接调用 API 会逐字保留每个回复的内容块，这在回复包含签名的思考块时很重要。 [`jsonschema`](https://docs.rs/jsonschema) 箱根据工具声明的架构验证结构化工具结果。
 
+<a id="setting-up-your-api-key-5" />
 ## 设置 API 密钥
 
 你需要从 [Anthropic Console](https://console.anthropic.com/settings/keys) 获取 Anthropic API 密钥。
@@ -2143,284 +2411,514 @@ echo "ANTHROPIC_API_KEY=your-api-key-goes-here" > .env
 echo ".env" >> .gitignore
 ```
 
+当文件存在时，客户端加载 `.env`。在 shell 中导出 `ANTHROPIC_API_KEY` 也可以。
 <Warning>
 
 请务必妥善保管你的 `ANTHROPIC_API_KEY`！
 
 </Warning>
 
+<a id="creating-the-client-5" />
 ## 创建客户端
 
 打开 `src/main.rs`，并按照以下各节逐步替换其内容。
 
+<a id="imports-and-client-structure" />
 ### 导入和客户端结构
 
-首先，添加导入项、模型常量和基本客户端结构：
+首先，添加导入和常量：
 
 ```rust
 use anyhow::{Context, Result, bail};
-use genai::Client;
-use genai::chat::{
-    ChatMessage, ChatRequest, ChatResponse, ContentPart, Tool as GenaiTool, ToolResponse,
+use jsonschema::Validator;
+use rmcp::model::{
+    CallToolRequestParams, CallToolResult, ClientCapabilities, ClientConfig, Implementation,
+    ProtocolVersion, Tool as McpTool,
 };
-use rmcp::model::{CallToolRequestParam, Tool as McpTool};
-use rmcp::service::{RoleClient, RunningService, ServiceExt};
+use rmcp::service::{ClientLifecycleMode, ClientServiceExt, RoleClient, RunningService};
 use rmcp::transport::TokioChildProcess;
-use serde_json::Value;
+use serde::{Deserialize, Serialize};
+use serde_json::{Value, json};
+use std::collections::HashMap;
+use std::time::Duration;
 use tokio::io::{self, AsyncBufReadExt, BufReader};
 use tokio::process::Command;
 
 const MODEL_ANTHROPIC: &str = "claude-opus-5";
+/// The model may think before answering, and max_tokens caps thinking
+/// plus the reply, so leave room for both.
+const MAX_TOKENS: u32 = 10000;
+const MAX_TOOL_TURNS: usize = 10;
+
+const ANTHROPIC_API_BASE: &str = "https://api.anthropic.com";
+const ANTHROPIC_VERSION: &str = "2023-06-01";
+const REQUEST_TIMEOUT: Duration = Duration::from_secs(120);
+```
+
+`MAX_TOKENS` 把思考和回复放在一起。 `MAX_TOOL_TURNS` 限制一个查询可能需要多少轮工具调用。 `REQUEST_TIMEOUT` 适用于发送到消息 API 的每个请求。
+
+接下来，添加消息 API 的类型和客户端结构：
+
+```rust
+/// One turn of the conversation, as the Messages API takes it.
+///
+/// `content` is a list of raw blocks rather than typed ones on purpose. An
+/// assistant turn is fed straight back on the next request, and Claude requires
+/// the blocks it sent to return unchanged -- a thinking block's `signature`
+/// included. Reserialising through a narrower type would drop whatever it does
+/// not model.
+#[derive(Serialize, Clone)]
+struct Message {
+    role: &'static str,
+    content: Vec<Value>,
+}
+
+impl Message {
+    fn user(content: Vec<Value>) -> Self {
+        Message {
+            role: "user",
+            content,
+        }
+    }
+
+    fn assistant(content: Vec<Value>) -> Self {
+        Message {
+            role: "assistant",
+            content,
+        }
+    }
+}
+
+/// A tool as the Messages API declares it, converted from an MCP tool.
+#[derive(Serialize, Clone)]
+struct ToolDefinition {
+    name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    description: Option<String>,
+    input_schema: Value,
+}
+
+#[derive(Serialize)]
+struct MessagesRequest<'a> {
+    model: &'a str,
+    max_tokens: u32,
+    messages: &'a [Message],
+    tools: &'a [ToolDefinition],
+}
+
+#[derive(Deserialize)]
+struct MessagesResponse {
+    content: Vec<Value>,
+}
+
+/// The `type` of a content block, when it has one.
+fn block_type(block: &Value) -> &str {
+    block
+        .get("type")
+        .and_then(Value::as_str)
+        .unwrap_or_default()
+}
 
 struct MCPClient {
-    anthropic: Client,
-    session: Option<RunningService<RoleClient, ()>>,
-    tools: Vec<GenaiTool>,
+    http: reqwest::Client,
+    session: Option<RunningService<RoleClient, ClientConfig>>,
+    tools: Vec<ToolDefinition>,
+    /// Compiled `outputSchema` per tool name. rmcp does not validate results,
+    /// so this client does it with the `jsonschema` crate.
+    output_schemas: HashMap<String, Validator>,
 }
 ```
 
-客户端会保存模型 API 客户端、活动的 MCP 会话以及所连接服务器公布的工具。
+`Message` 将一回合的内容块保存为原始 `serde_json::Value`。助手在下一个请求时返回 API，任何思考块及其 `signature` 都完好无损。正如消息 API 所声明的那样，`ToolDefinition` 是一个工具。 `MCPClient` 保留 HTTP 客户端、活动 MCP 会话、消息 API 形式的工具以及声明 `outputSchema` 的每个工具的一个已编译验证器。
 
+<a id="client-initialization" />
 ### 客户端初始化
 
-接下来，初始化模型客户端，并在没有 MCP 会话或工具的状态下启动：
+接下来，使用构造函数打开 `impl MCPClient` 块。以下部分中的方法位于此块内，该块在 `cleanup` 之后关闭：
 
 ```rust
 impl MCPClient {
     fn new() -> Result<Self> {
         Ok(MCPClient {
-            anthropic: Client::default(),
+            http: reqwest::Client::builder()
+                .timeout(REQUEST_TIMEOUT)
+                .build()
+                .context("Failed to build HTTP client")?,
             session: None,
             tools: Vec::new(),
+            output_schemas: HashMap::new(),
         })
     }
-
-    // Additional methods will go here.
-}
 ```
 
-`genai::Client::default()` 会在发送请求时读取 `ANTHROPIC_API_KEY` 环境变量。
+`new` 构建一个带有请求超时的 `reqwest::Client`。 API 密钥稍后在发送请求时读取，因此无需密钥即可连接到服务器并列出其工具。
 
+<a id="validating-structured-tool-output" />
+### 验证结构化工具输出
+
+在 `impl MCPClient` 块中添加此方法：
+
+```rust
+    /// Check a result against its tool's declared `outputSchema`. Error results
+    /// are exempt: they carry a message, not data.
+    fn validate_tool_output(&self, name: &str, result: &CallToolResult) -> Result<()> {
+        let Some(validator) = self.output_schemas.get(name) else {
+            return Ok(());
+        };
+        if result.is_error.unwrap_or(false) {
+            return Ok(());
+        }
+        let Some(structured) = &result.structured_content else {
+            bail!("Tool {name} declares an output schema but returned no structured content");
+        };
+        if let Err(error) = validator.validate(structured) {
+            bail!("Structured content from tool {name} does not match its output schema: {error}");
+        }
+        Ok(())
+    }
+```
+
+工具可以声明 `outputSchema`，并且规范要求客户端针对它验证 `structuredContent`。 rmcp 不会执行此操作，因此客户端会为每个工具保留编译后的 `jsonschema::Validator` 并检查每个成功的结果。设置为 `is_error` 的结果携带消息，因此可以免除。声明架构但不返回结构化内容的工具将报告为错误。
+
+<a id="server-connection-management-4" />
 ### 服务器连接管理
 
 在 `impl MCPClient` 代码块中添加此方法：
 
 ```rust
-async fn connect_to_server(&mut self, server_args: &[String]) -> Result<()> {
-    if self.session.is_some() {
-        bail!("Client is already connected to a server");
+    async fn connect_to_server(&mut self, server_args: &[String]) -> Result<()> {
+        if self.session.is_some() {
+            bail!("Client is already connected to a server");
+        }
+
+        let mut command = Command::new(&server_args[0]);
+        command.args(&server_args[1..]);
+
+        let process = TokioChildProcess::new(command)
+            .with_context(|| format!("Failed to spawn server process for {:?}", server_args))?;
+
+        // Without a ClientConfig the client would report rmcp's own crate name
+        // and version rather than its own.
+        let config = ClientConfig::new(
+            ClientCapabilities::default(),
+            Implementation::new("mcp-client-rust", "1.0.0"),
+        );
+
+        // `Auto` probes server/discover and falls back to the 2025-11-25
+        // initialize handshake, matching the Python and TypeScript clients.
+        // `serve` alone would only ever do the legacy handshake, under which a
+        // server cannot offer this era's features -- an array-rooted
+        // `outputSchema`, for one, which get_alerts uses.
+        let session = config
+            .serve_with_lifecycle(
+                process,
+                ClientLifecycleMode::Auto {
+                    preferred_versions: vec![ProtocolVersion::V_2026_07_28],
+                    legacy_version: Some(ProtocolVersion::V_2025_11_25),
+                },
+            )
+            .await?;
+
+        let rmcp_tools = session
+            .list_all_tools()
+            .await
+            .context("Unable to list tools from server")?;
+
+        let tool_names: Vec<String> = rmcp_tools
+            .iter()
+            .map(|tool| tool.name.to_string())
+            .collect();
+
+        let protocol_version = session
+            .peer_info()
+            .map(|info| info.protocol_version.to_string())
+            .unwrap_or_else(|| "unknown".to_string());
+        println!("Connected over protocol {protocol_version} with tools: {tool_names:?}");
+
+        // An outputSchema root may be any JSON Schema, not just an object.
+        for tool in &rmcp_tools {
+            let Some(schema) = &tool.output_schema else {
+                continue;
+            };
+            let schema = Value::Object(schema.as_ref().clone());
+            let validator = Validator::new(&schema).with_context(|| {
+                format!("Failed to compile output schema of tool {}", tool.name)
+            })?;
+            self.output_schemas.insert(tool.name.to_string(), validator);
+        }
+
+        self.tools = convert_tools(&rmcp_tools);
+        self.session = Some(session);
+        Ok(())
     }
-
-    let mut command = Command::new(&server_args[0]);
-    command.args(&server_args[1..]);
-
-    let process = TokioChildProcess::new(command)
-        .with_context(|| format!("Failed to spawn server process for {:?}", server_args))?;
-
-    let session = ().serve(process).await?;
-
-    let rmcp_tools = session
-        .list_all_tools()
-        .await
-        .context("Unable to list tools from server")?;
-
-    let tool_names: Vec<String> = rmcp_tools
-        .iter()
-        .map(|tool| tool.name.to_string())
-        .collect();
-
-    println!("Connected to server with tools: {tool_names:?}");
-
-    self.tools = convert_tools(&rmcp_tools);
-    self.session = Some(session);
-    Ok(())
-}
 ```
 
 此方法：
 
-1. 使用命令行提供的命令和参数，将服务器作为子进程启动
-2. 通过 stdio 建立 MCP 会话
-3. 列出服务器公布的所有工具
-4. 将这些工具转换为模型请求使用的格式
+1. 使用命令行上提供的命令和参数将服务器作为子进程启动
+2.通过`ClientConfig`将客户端命名为`mcp-client-rust`
+3. 与 `serve_with_lifecycle` 和 `ClientLifecycleMode::Auto` 协商协议，探测 `server/discover` 中的 `2026-07-28` 并回退到 `2025-11-25` `initialize` 握手
+4. 列出服务器通告的所有工具，并打印协商的协议版本和工具名称
+5. 从每个工具的 `outputSchema` 编译验证器
+6. 将工具转换为模型请求中使用的形式
+rmcp 的 `serve` 方法仅执行旧版握手。 `Auto` 模式使当前版本的功能可访问，包括根为数组的 `outputSchema`。
 
-### 转换 MCP 工具
-
-在 `impl MCPClient` 代码块外添加此函数：
-
-```rust
-fn convert_tools(tools: &[McpTool]) -> Vec<GenaiTool> {
-    tools
-        .iter()
-        .map(|tool| GenaiTool {
-            name: tool.name.to_string(),
-            description: tool.description.as_deref().map(str::to_string),
-            schema: Some(Value::Object(tool.input_schema.as_ref().clone())),
-            config: None,
-        })
-        .collect()
-}
-```
-
-MCP 和模型 API 使用相似的信息描述工具，但使用不同的 Rust 类型。`convert_tools` 会将每个 MCP 工具的名称、描述和输入模式映射为 `genai` 工具定义。
-
-### 发送模型请求
-
-在 `impl MCPClient` 中添加此辅助方法：
-
-```rust
-async fn request_model(&self, chat_req: &ChatRequest) -> Result<ChatResponse> {
-    let response = self
-        .anthropic
-        .exec_chat(MODEL_ANTHROPIC, chat_req.clone(), None)
-        .await
-        .context("Anthropic chat request failed")?;
-
-    Ok(response)
-}
-```
-
-这会将模型请求处理集中到一个位置，并在 API 请求失败时添加有用的上下文。
-
+<a id="query-processing-logic-5" />
 ### 查询处理逻辑
 
 现在，在 `impl MCPClient` 中添加核心查询处理方法：
 
 ```rust
-async fn process_query(&mut self, query: &str) -> Result<String> {
-    let session = self
-        .session
-        .as_ref()
-        .context("Client is not connected to any server")?;
+    async fn process_query(&mut self, query: &str) -> Result<String> {
+        let session = self
+            .session
+            .as_ref()
+            .context("Client is not connected to any server")?;
 
-    let mut messages = vec![ChatMessage::user(query)];
-    let mut final_text = Vec::new();
+        let mut messages = vec![Message::user(vec![json!({"type": "text", "text": query})])];
+        let mut final_text = Vec::new();
 
-    // Initial Claude API call with tools
-    let mut chat_req = ChatRequest::new(messages.clone()).with_tools(self.tools.clone());
-    let mut chat_rsp = self.request_model(&chat_req).await?;
+        // Initial Claude API call with tools
+        let mut content = self.request_model(&messages).await?;
 
-    // Process response content - collect text and handle tool calls
-    for text in chat_rsp.texts() {
-        final_text.push(text.to_string());
-    }
+        // Keep calling tools until Claude answers without one, up to a cap.
+        for _ in 0..MAX_TOOL_TURNS {
+            let mut tool_uses = Vec::new();
+            for block in &content {
+                match block_type(block) {
+                    "text" => {
+                        if let Some(text) = block.get("text").and_then(Value::as_str) {
+                            final_text.push(text.to_string());
+                        }
+                    }
+                    "tool_use" => tool_uses.push(block.clone()),
+                    _ => {}
+                }
+            }
 
-    let tool_calls = chat_rsp.tool_calls();
-    if !tool_calls.is_empty() {
-        // Append assistant's response to message history
-        messages.push(ChatMessage::assistant(chat_rsp.content.clone()));
+            if tool_uses.is_empty() {
+                return Ok(final_text.join("\n"));
+            }
 
-        // Execute each tool call and collect responses
-        let mut tool_results = Vec::new();
-        for tool_call in tool_calls {
-            // Add information about the tool call to final text
-            let tool_args_str = serde_json::to_string(&tool_call.fn_arguments)
-                .unwrap_or_else(|_| "{}".to_string());
+            // Execute every tool call in this response and collect the results
+            let mut tool_results = Vec::new();
+            for tool_use in &tool_uses {
+                let name = tool_use
+                    .get("name")
+                    .and_then(Value::as_str)
+                    .context("tool_use block has no name")?;
+                let id = tool_use
+                    .get("id")
+                    .and_then(Value::as_str)
+                    .context("tool_use block has no id")?;
+                let input = tool_use.get("input").cloned().unwrap_or(json!({}));
 
-            final_text.push(format!(
-                "[Calling tool {} with args {}]",
-                tool_call.fn_name, tool_args_str
-            ));
+                // Add information about the tool call to final text
+                final_text.push(format!("[Calling tool {name} with args {input}]"));
 
-            // Query the MCP server
-            let tool_result = session
-                .call_tool(CallToolRequestParam {
-                    name: tool_call.fn_name.clone().into(),
-                    arguments: tool_call.fn_arguments.as_object().cloned(),
-                })
-                .await
-                .with_context(|| format!("Tool call {} failed", tool_call.fn_name))?;
+                // Query the MCP server
+                let mut params = CallToolRequestParams::new(name.to_string());
+                if let Some(arguments) = input.as_object().cloned() {
+                    params = params.with_arguments(arguments);
+                }
+                let tool_result = match session.call_tool(params).await {
+                    Ok(result) => result,
+                    // A rejected call is the model's mistake to correct, so it
+                    // goes back as a failed tool_result rather than ending the
+                    // query. Every tool_use still needs a matching result.
+                    Err(error) => {
+                        final_text.push(format!("[{name} failed: {error}]"));
+                        tool_results.push(json!({
+                            "type": "tool_result",
+                            "tool_use_id": id,
+                            "content": format!("Tool call {name} failed: {error}"),
+                            "is_error": true,
+                        }));
+                        continue;
+                    }
+                };
 
-            let payload = serde_json::to_string(&tool_result)
-                .context("Failed to serialize tool result")?;
+                self.validate_tool_output(name, &tool_result)?;
 
-            tool_results.push(ContentPart::ToolResponse(ToolResponse::new(
-                tool_call.call_id.clone(),
-                payload,
-            )));
+                // structured_content is data the application can use directly.
+                if let Some(Value::Array(items)) = &tool_result.structured_content {
+                    final_text.push(format!("[{name} returned {} items]", items.len()));
+                }
+
+                // content is a list of block types; forward only the text ones.
+                let mut payload = tool_result
+                    .content
+                    .iter()
+                    .filter_map(|block| block.as_text().map(|text| text.text.as_str()))
+                    .collect::<Vec<_>>()
+                    .join("\n");
+
+                // A structured result SHOULD also carry serialized JSON in a text
+                // block, but only SHOULD, so fall back to serializing it rather
+                // than sending the model an empty result.
+                if payload.is_empty() {
+                    if let Some(structured) = &tool_result.structured_content {
+                        payload = structured.to_string();
+                    }
+                }
+
+                tool_results.push(json!({
+                    "type": "tool_result",
+                    "tool_use_id": id,
+                    "content": payload,
+                    "is_error": tool_result.is_error.unwrap_or(false),
+                }));
+            }
+
+            // Append the assistant's response and all tool results, in one user
+            // message, to the history. Every tool_use needs a matching
+            // tool_result, and the assistant's blocks go back as they arrived.
+            messages.push(Message::assistant(content));
+            messages.push(Message::user(tool_results));
+
+            content = self.request_model(&messages).await?;
         }
 
-        // Append tool responses to message history
-        messages.push(ChatMessage::user(tool_results));
-
-        // Build the next request and query model
-        chat_req = ChatRequest::new(messages.clone());
-        chat_rsp = self.request_model(&chat_req).await?;
-
-        // Collect text from response
-        for text in chat_rsp.texts() {
-            final_text.push(text.to_string());
+        // The turn cap was hit. Keep the last response's text. If it asked for
+        // more tools, say they were not run.
+        let mut wants_tools = false;
+        for block in &content {
+            match block_type(block) {
+                "text" => {
+                    if let Some(text) = block.get("text").and_then(Value::as_str) {
+                        final_text.push(text.to_string());
+                    }
+                }
+                "tool_use" => wants_tools = true,
+                _ => {}
+            }
         }
-    }
+        if wants_tools {
+            final_text.push(format!("[Stopped after {MAX_TOOL_TURNS} tool-use turns]"));
+        }
 
-    Ok(final_text.join("\n"))
-}
+        Ok(final_text.join("\n"))
+    }
 ```
 
-该方法首先将用户查询和可用工具发送给 Claude。当 Claude 请求工具时，客户端通过 MCP 会话执行每个请求，将结果发送回 Claude，并收集最终文本响应。
+该方法使用服务器的工具将用户的查询发送给 Claude，然后循环。每次传递都会收集回复的文本块并收集其 `tool_use` 块。当回复不包含工具使用时，将返回收集的文本。否则，客户端通过 MCP 会话调用每个请求的工具，并为每个 `tool_use` 构建一个 `tool_result` 块。服务器拒绝的呼叫会返回并设置 `is_error`，因此 Claude 可以读取消息并尝试其他操作。成功的结果将根据其输出模式进行检查。它的文本块被连接并转发给 Claude，当它没有文本块时，序列化的 `structured_content` 将被发送到它们的位置。当`structured_content`是数组时，客户端打印项目计数作为直接使用结构化数据的示例。助手的块在到达时准确地附加到历史记录中，然后是一条包含所有工具结果的用户消息，然后发送下一个请求。 `MAX_TOOL_TURNS` 轮后循环停止。此时，保留最后回复的文本，并在克劳德要求更多工具时添加注释。
 
+<a id="sending-model-requests" />
+### 发送模型请求
+
+在 `impl MCPClient` 中添加此辅助方法：
+
+```rust
+    /// Call Claude with the current history and return the content blocks of
+    /// its reply, untouched. Tools are passed on every call so Claude can keep
+    /// calling them across turns.
+    async fn request_model(&self, messages: &[Message]) -> Result<Vec<Value>> {
+        let api_key = std::env::var("ANTHROPIC_API_KEY").context("ANTHROPIC_API_KEY is not set")?;
+        // The base URL is configurable so the client can point at a local stand-in.
+        let base_url =
+            std::env::var("ANTHROPIC_BASE_URL").unwrap_or_else(|_| ANTHROPIC_API_BASE.to_string());
+
+        let request = MessagesRequest {
+            model: MODEL_ANTHROPIC,
+            max_tokens: MAX_TOKENS,
+            messages,
+            tools: &self.tools,
+        };
+
+        let response = self
+            .http
+            .post(format!("{}/v1/messages", base_url.trim_end_matches('/')))
+            .header("x-api-key", api_key)
+            .header("anthropic-version", ANTHROPIC_VERSION)
+            .json(&request)
+            .send()
+            .await
+            .context("Anthropic request failed")?;
+
+        let status = response.status();
+        let body = response
+            .text()
+            .await
+            .context("Unable to read the Anthropic response")?;
+        if !status.is_success() {
+            bail!("Anthropic request failed with {status}: {body}");
+        }
+
+        let parsed: MessagesResponse =
+            serde_json::from_str(&body).context("Unable to parse the Anthropic response")?;
+        Ok(parsed.content)
+    }
+```
+
+`request_model` 在每次调用时读取 `ANTHROPIC_API_KEY` 并使用 `x-api-key` 和 `anthropic-version` 标头将历史记录发布到 `/v1/messages`。 `ANTHROPIC_BASE_URL` 覆盖端点，允许将客户端指向本地替身。每次请求都会发送工具，这样克劳德就可以继续轮流呼叫他们。不成功状态会变成包含响应正文的错误。回复的内容块原封不动地返回。
+
+<a id="interactive-chat-interface-3" />
 ### 交互式聊天界面
 
 在 `impl MCPClient` 中添加交互式终端循环：
 
 ```rust
-async fn chat_loop(&mut self) -> Result<()> {
-    println!("\nMCP Client Started!");
-    println!("Type your queries or 'quit' to exit.");
+    async fn chat_loop(&mut self) -> Result<()> {
+        println!("\nMCP Client Started!");
+        println!("Type your queries or 'quit' to exit.");
 
-    let mut stdin = BufReader::new(io::stdin());
-    let mut input = String::new();
+        let mut stdin = BufReader::new(io::stdin());
+        let mut input = String::new();
 
-    loop {
-        print!("\nQuery: ");
-        std::io::Write::flush(&mut std::io::stdout())?;
+        loop {
+            print!("\nQuery: ");
+            std::io::Write::flush(&mut std::io::stdout())?;
 
-        input.clear();
-        if stdin.read_line(&mut input).await? == 0 {
-            break; // EOF
+            input.clear();
+            if stdin.read_line(&mut input).await? == 0 {
+                break; // EOF
+            }
+
+            let query = input.trim();
+            if query.eq_ignore_ascii_case("quit") {
+                break;
+            }
+            if query.is_empty() {
+                continue;
+            }
+
+            match self.process_query(query).await {
+                Ok(response) => println!("\n{}", response),
+                Err(err) => println!("\nError: {:#}", err),
+            }
         }
 
-        let query = input.trim();
-        if query.eq_ignore_ascii_case("quit") {
-            break;
-        }
-        if query.is_empty() {
-            continue;
-        }
-
-        match self.process_query(query).await {
-            Ok(response) => println!("\n{}", response),
-            Err(err) => println!("\nError: {}", err),
-        }
+        Ok(())
     }
-
-    Ok(())
-}
 ```
 
-循环会持续接受查询，直到用户输入 `quit` 或关闭标准输入。查询错误会被打印出来，但不会终止客户端。
+该循环接受查询，直到用户键入 `quit` 或关闭标准输入。打印查询错误而不终止客户端。 `{:#}` 格式将整个 `anyhow` 上下文链打印在一行上。
 
+<a id="cleanup" />
 ### 清理
 
-在 `impl MCPClient` 中添加此方法，以停止 MCP 会话和子进程：
+在 `impl MCPClient` 中添加此方法以停止 MCP 会话和子进程。右大括号结束 `impl MCPClient` 块：
 
 ```rust
-async fn cleanup(&mut self) -> Result<()> {
-    if let Some(session) = self.session.take() {
-        let _ = session.cancel().await;
+    async fn cleanup(&mut self) -> Result<()> {
+        if let Some(session) = self.session.take() {
+            let _ = session.cancel().await;
+        }
+        Ok(())
     }
-    Ok(())
 }
 ```
 
+<a id="main-entry-point-4" />
 ### 主入口
 
-最后，在 `impl MCPClient` 代码块外添加异步入口：
+接下来，在 `impl MCPClient` 块外部添加异步入口点：
 
 ```rust
 #[tokio::main]
 async fn main() -> Result<()> {
-    dotenvy::dotenv().context("Failed to load env file")?;
+    // .env is optional; the key may come from the environment instead.
+    let _ = dotenvy::dotenv();
 
     let mut args = std::env::args();
     let _ = args.next();
@@ -2435,6 +2933,21 @@ async fn main() -> Result<()> {
 
     let result = async {
         client.connect_to_server(&server_args).await?;
+
+        // Connecting and listing tools needs no credentials; querying them
+        // does. Matching the Python and TypeScript clients, report and exit
+        // rather than failing, so the connection itself can be exercised
+        // without a key.
+        // Empty counts as unset, as it does in the other clients: `KEY= cmd`
+        // is how the smoke test forces this path.
+        if std::env::var("ANTHROPIC_API_KEY").map_or(true, |key| key.is_empty()) {
+            println!(
+                "\nNo ANTHROPIC_API_KEY found. To query these tools with Claude, set your API key:"
+            );
+            println!("  export ANTHROPIC_API_KEY=your-api-key-here");
+            return Ok(());
+        }
+
         client.chat_loop().await
     }
     .await;
@@ -2448,15 +2961,36 @@ async fn main() -> Result<()> {
 }
 ```
 
-入口会加载 `.env`，将其余所有命令行参数视为服务器命令，连接客户端，启动聊天循环，并确保在退出前完成清理。
+当文件存在时，入口点加载 `.env`，将所有剩余的命令行参数视为服务器命令，连接客户端，并确保在退出之前运行清理。当`ANTHROPIC_API_KEY`未设置或为空时，客户端打印如何设置密钥并在列出服务器工具后退出。这将在没有凭据的情况下执行 MCP 连接。
 
+<a id="describing-tools-to-the-model" />
+### 描述模型工具
+
+最后，在 `impl MCPClient` 块之外添加此函数：
+
+```rust
+fn convert_tools(tools: &[McpTool]) -> Vec<ToolDefinition> {
+    tools
+        .iter()
+        .map(|tool| ToolDefinition {
+            name: tool.name.to_string(),
+            description: tool.description.as_deref().map(str::to_string),
+            input_schema: Value::Object(tool.input_schema.as_ref().clone()),
+        })
+        .collect()
+}
+```
+
+MCP 和消息 API 描述了不同 Rust 类型中具有相同信息的工具。 `convert_tools` 将每个 MCP 工具的名称、描述和输入模式复制到 `ToolDefinition` 中，该 `ToolDefinition` 会序列化为 `tools` 参数期望的形状。当工具没有时，说明被省略。
+
+<a id="verify-the-complete-file" />
 ### 验证完整文件
 
 运行客户端之前，确认 `src/main.rs` 中的项目位于正确的作用域：
 
-- `new`、`connect_to_server`、`process_query`、`request_model`、`chat_loop` 和 `cleanup` 都是单个 `impl MCPClient` 代码块中的方法
-- `main` 和 `convert_tools` 是 `impl MCPClient` 代码块外的函数
-
+- `new`、`validate_tool_output`、`connect_to_server`、`process_query`、`request_model`、`chat_loop` 和 `cleanup` 是单个 `impl MCPClient` 块内的方法，该块在客户端初始化中打开并在 `cleanup` 后关闭。
+- `user` 和 `assistant` 是 `impl Message` 块内的方法。
+- `block_type`、`main` 和 `convert_tools` 是两个 `impl` 块外部的函数。
 Rust 不要求这些项目按照特定顺序出现，但方法和自由函数必须位于正确的作用域中。将你的文件与[完整的 `src/main.rs` 示例](https://github.com/modelcontextprotocol/quickstart-resources/blob/main/mcp-client-rust/src/main.rs)进行比较，然后检查其是否可以编译：
 
 ```bash
@@ -2464,6 +2998,7 @@ cargo fmt --check
 cargo check
 ```
 
+<a id="running-the-client-5" />
 ## 运行客户端
 
 使用 `cargo run --`，后面跟上通常用于启动 MCP 服务器的命令：
@@ -2489,43 +3024,55 @@ cargo run -- path/to/server-binary
 
 客户端将：
 
-1. 启动并连接到指定的 MCP 服务器
-2. 列出该服务器提供的工具
-3. 启动交互式聊天会话，你可以在其中：
+1.启动并连接指定的MCP服务器
+2. 打印协商的协议版本和该服务器可用的工具
+3. 启动交互式聊天会话，您可以：
    - 输入查询
    - 查看工具执行情况
-   - 获取 Claude 的响应
+   - 得到克劳德的回复
+连接到天气服务器会打印如下行：
 
-## 工作原理
+```text
+Connected over protocol 2026-07-28 with tools: ["get_alerts", "get_forecast"]
+```
 
-提交查询时：
+如果没有 `ANTHROPIC_API_KEY`，客户端会在此行之后停止并打印如何设置密钥。
 
-1. 客户端将你的查询和服务器的可用工具发送给 Claude
+<a id="how-it-works-5" />
+## 它是如何工作的
+
+当用户提交查询时：
+1. 客户端将查询和服务器的工具定义发送给Claude
 2. Claude 决定使用哪些工具（如果有）
-3. 客户端通过 MCP 会话执行请求的工具
-4. 将工具结果发送回 Claude
-5. Claude 提供自然语言响应
-6. 在终端中显示响应
+3. 客户端通过 MCP 会话执行每个请求的工具，并根据其输出模式验证结构化结果
+4.工具结果，包括标记为`is_error`的失败，与Claude自己的块一起发送回Claude，不变
+5. 重复步骤 2 到 4，直到 Claude 在没有工具调用的情况下应答或达到 `MAX_TOOL_TURNS`
+6. 采集到的文本显示在终端中
 
+<a id="best-practices-4" />
 ## 最佳实践
 
 1. **错误处理**
-   - 在进程、MCP、模型 API 和序列化边界处为错误添加上下文
-   - 报告单个查询错误，但不要终止交互式会话
-   - 运行服务器前验证服务器命令
-
-2. **资源管理**
+   - 在流程、MCP 和模型 API 边界处添加错误上下文
+   - 将被拒绝的工具调用作为设置为 `is_error` 的 `tool_result` 发送回 Claude，因此每个 `tool_use` 都会得到答案
+   - 报告单个查询错误而不终止交互会话
+2. **对话历史记录**
+   - 喂食助手将方块准确地返回到它们到达的位置，包括思考方块及其签名
+   - 在每次请求时传递工具列表，以便克劳德可以继续轮流调用工具
+   - 限制每次查询的刀具转动次数
+3. **资源管理**
    - 清理期间始终取消 MCP 会话
-   - 确保即使连接或聊天循环操作失败也会运行清理
-   - 活动会话期间避免启动第二个服务器
+   - 即使连接或聊天循环操作失败，也确保清理运行
+   - 避免在会话处于活动状态时启动第二个服务器
+4. **安全**
+   - 将API密钥安全地存储在`.env`或环境中
+   - 根据声明的输出模式验证结构化工具结果
+   - 仅连接到受信任的服务器和可执行命令
 
-3. **安全性**
-   - 将 API 密钥安全地存储在 `.env` 中
-   - 在允许模型驱动调用之前检查服务器公开的工具
-   - 仅连接到你信任的服务器和可执行命令
-
+<a id="troubleshooting-4" />
 ## 故障排除
 
+<a id="server-command-issues" />
 ### 服务器命令问题
 
 `cargo run --` 后面的参数必须组成一个完整命令。解释执行的服务器脚本需要其运行时：
@@ -2541,26 +3088,28 @@ cargo run -- ./server/weather.py
 
 如果找不到命令，请使用其绝对路径，或确认该命令在你的 `PATH` 中可用。
 
+<a id="environment-file-issues" />
 ### 环境文件问题
 
-如果看到 `Failed to load env file`，请确保运行客户端的目录中存在 `.env`。
-
-如果模型请求报告缺少 API 密钥，请确认 `.env` 包含：
+`.env` 文件是可选的。当它丢失时，客户端从环境中读取 `ANTHROPIC_API_KEY`。当密钥未设置或为空时，客户端将连接，打印服务器的工具，然后退出并附带设置密钥的说明。导出密钥，或在客户端运行的目录中创建一个 `.env`，其中包含：
 
 ```text
 ANTHROPIC_API_KEY=your-api-key-goes-here
 ```
 
+<a id="tool-and-response-errors" />
 ### 工具和响应错误
 
-- `Unable to list tools from server`：确认服务器成功启动并通过 stdio 通信
-- `Tool call ... failed`：确认服务器工具所需的参数和环境变量
-- `Failed to serialize tool result`：检查服务器响应中是否存在不受支持或格式错误的内容
-
+- `Unable to list tools from server`：验证服务器成功启动并通过 stdio 进行通信
+- 输出中的 `[... failed: ...]`：服务器拒绝了工具调用。该消息还会以失败的 `tool_result` 的形式发送给 Claude，因此 Claude 可以使用不同的参数重试
+- `Tool ... declares an output schema but returned no structured content` 或 `Structured content from tool ... does not match its output schema`：服务器的结果不满足自己的 `outputSchema`
+- `Anthropic request failed with ...`：响应正文遵循状态并指出原因，例如密钥无效或积分不足
+- `[Stopped after 10 tool-use turns]`：查询到达`MAX_TOOL_TURNS`。提高需要更多轮数的工作流程的常量
 </Tab>
 
 </Tabs>
 
+<a id="next-steps" />
 ## 后续步骤
 
 <CardGroup cols={2}>

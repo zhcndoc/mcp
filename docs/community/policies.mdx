@@ -1,0 +1,53 @@
+---
+title: 项目政策
+description: 适用于所有 MCP 项目参与者的常设政策及其定义位置。
+---
+
+本页列出适用于所有 MCP 项目参与者的政策，包括会议、Discord 以及 [`modelcontextprotocol`](https://github.com/modelcontextprotocol) 组织下的每个仓库。小组负责人和召集人会在会议议程中链接到本页。
+
+<a id="code-of-conduct" />
+## 行为准则
+
+[行为准则](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/CODE_OF_CONDUCT.md)适用于所有频道、仓库和会议。请将报告发送至 [mcp-coc@anthropic.com](mailto:mcp-coc@anthropic.com)。[社区版主](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/MAINTAINERS.md#community-moderators)会依据[贡献者阶梯](/community/contributor-ladder#community-moderator)处理报告，并在需要时升级给核心维护者。
+
+<a id="antitrust" />
+## 反垄断
+
+参与者通常就职于相互竞争的组织。MCP 由 Model Context Protocol a Series of LF Projects, LLC 组织，因此所有参与者均须遵守[ LF Projects 政策](https://www.lfprojects.org/policies/)，包括其反垄断政策。项目自己的[反垄断政策](/community/antitrust)规定了会议和标准制定讨论的进行方式。
+
+<a id="licensing-and-intellectual-property" />
+## 许可和知识产权
+
+代码和规范贡献依据 Apache License 2.0 提供，其他文档依据 CC-BY-4.0 提供，且不转让版权。适用的规范文本见[项目通用政策](/community/governance#general-project-policies)。
+
+<a id="ai-assisted-contributions" />
+## AI 辅助贡献
+
+贡献中使用的任何 AI 辅助都必须在拉取请求或议题中披露，并说明使用范围。这也包括由 AI 撰写的审查回复和评论；只有简单的空格或错字修正可以例外。完整政策见 [AI_POLICY.md](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/AI_POLICY.md)，该政策适用于组织内的所有仓库。
+
+<a id="reporting-a-vulnerability" />
+## 报告漏洞
+
+<Warning>
+  请勿在公开议题、讨论或拉取请求中报告安全问题。
+</Warning>
+
+请在受影响的仓库中创建私有安全公告：`github.com/modelcontextprotocol/<repo>/security/advisories/new`。规范仓库以及每个官方 SDK 和项目仓库均已启用私有漏洞报告。提交前请阅读 [SECURITY.md](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/SECURITY.md)：其中说明了[应包含的内容](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/SECURITY.md#what-to-include)、[信任模型以及有意设计而非漏洞的行为](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/SECURITY.md#intended-behaviors-and-trust-model)（stdio 命令执行、stdio 对端造成的拒绝服务、服务器副作用、由 LLM 驱动的工具调用），并列出了[仍在处理范围内的事项](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/SECURITY.md#what-remains-in-scope)。
+
+私有安全公告也是项目的紧急安全报告机制。请通过受影响仓库的私有安全公告报告正在遭受利用的漏洞和严重事件。请在报告开头说明该漏洞正在遭受利用，或事件正在发生。
+
+收到报告的维护者会在所有受影响的 SDK 之间协调修复和安全公告，确保公告同时发布；如果根本原因在规范中，也会提交给规范维护者处理（见 [SDK 漏洞披露](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/SECURITY.md#sdk-vulnerability-disclosure)）。CVE 由 GitHub 的 CNA 分配。对于并非漏洞报告本身的问题（包括应向哪个仓库提交报告），请在 `#security-ig` 中联系[安全兴趣组](/community/interest-groups/security)。
+
+<a id="eu-cyber-resilience-act-cra-stewardship" />
+## 欧盟《网络韧性法案》（CRA）监管
+
+Model Context Protocol 项目发布的软件（包括官方 SDK）最终用于商业活动。项目受到 [Linux Foundation CRA 监管框架](https://www.linuxfoundation.org/security)的支持。有关 CRA 对此类项目的要求，请参阅 Linux Foundation 的[开源项目 CRA 指南](https://bestpractices.linuxfoundation.org/regulatory/cra/index.html)。
+
+获悉正在遭受利用的漏洞或严重事件（例如发布流程遭到入侵）的维护者，必须立即在 [Discord](/community/communication#discord) 的 `#security-disclosures` 频道通知核心维护者或主要维护者，同时继续修复问题；通知不能代替修复。该核心维护者或主要维护者会联系 Linux Foundation 的 CRA 监管专员 steward@linuxfoundation.org，并从此与其协作，由项目统一对接。CRA 对监管专员的报告设有较短期限：须在 24 小时内发出早期预警，并在 72 小时内提交更完整的通知。如有安全公告，其中应记录项目首次获悉问题以及通知监管专员的时间。
+
+没有遭受利用证据的漏洞不属于 CRA 升级事件。其他维护者不得直接联系监管专员；报告者必须使用私有安全公告。
+
+<a id="communication-and-records" />
+## 沟通和记录
+
+[沟通方式](/community/communication)说明了各频道的用途、频道何时可以设为私有，以及决策应记录在何处。

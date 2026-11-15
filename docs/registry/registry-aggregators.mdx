@@ -11,6 +11,7 @@ sidebarTitle: Registry 聚合器
 
 MCP Registry 提供一个无需身份验证的只读 REST API，聚合器可使用它来填充其数据存储。期望聚合器定期但不频繁地抓取数据（例如，每小时一次），并将数据持久化到自己的数据存储中。MCP Registry **不提供正常运行时间或数据耐久性保证**。
 
+<a id="consuming-the-mcp-registry-rest-api" />
 ## 使用 MCP Registry REST API
 
 MCP Registry REST API 的基础 URL 是 `https://registry.modelcontextprotocol.io`。它支持以下端点：
@@ -27,6 +28,7 @@ URL 路径参数（如 `serverName` 和 `version`）**必须**进行 URL 编码�
 
 聚合器最有可能抓取 `GET /v0.1/servers` 端点。
 
+<a id="pagination" />
 ### 分页
 
 `GET /v0.1/servers` 端点支持基于游标的分页。
@@ -55,6 +57,7 @@ curl "https://registry.modelcontextprotocol.io/v0.1/servers?limit=100"
 curl "https://registry.modelcontextprotocol.io/v0.1/servers?limit=100&cursor=com.example/my-server:1.0.0"
 ```
 
+<a id="filtering-since" />
 ### 按更新时间过滤
 
 `GET /v0.1/servers` 端点支持过滤自给定时间戳以来已更新的服务器。
@@ -65,12 +68,21 @@ curl "https://registry.modelcontextprotocol.io/v0.1/servers?limit=100&cursor=com
 curl "https://registry.modelcontextprotocol.io/v0.1/servers?updated_since=2025-10-23T00:00:00.000Z"
 ```
 
+<a id="efficient-synchronization" />
+### 高效同步
+
+初始分页下载后，使用 `updated_since` 进行后续同步，而不是再次下载整个注册表。在跟踪每个 `nextCursor` 时保持相同的时间戳，并仅在所有页面成功应用后保存新的检查点。在同步窗口之间保持较小的重叠，并按服务器名称和版本进行重复数据删除，以便重试和时间戳边界不会丢失更新。增量结果包括已删除的服务器；也将这些状态更改应用到您的本地副本。
+
+使用协商和解码 HTTP 压缩的客户端，例如 `curl --compressed`。在本地保留结果并避免对每个用户请求重复完整爬网。如果请求失败或速率受限，请使用退避重试，而不是重新启动并发完整下载。
+
+<a id="server-status" />
 ## 服务器状态
 
 服务器元数据通常是不可变的，但 `status` 字段除外，该字段可能会更新为 `"deprecated"` 或 `"deleted"` 等。我们建议聚合器保持每个服务器的 `status` 副本为最新状态。
 
 `"deleted"` 状态通常表示服务器违反了我们宽松的 [审核政策](./moderation-policy)，表明该服务器可能是垃圾邮件、恶意软件或非法内容。聚合器可能倾向于从其索引中删除这些服务器。
 
+<a id="acting-as-a-subregistry" />
 ## 作为子注册表运行
 
 子注册表是一种聚合器，它还实现了 MCP Registry 定义的 [OpenAPI 规范](https://github.com/modelcontextprotocol/registry/blob/main/docs/reference/api/openapi.yaml)。这允许客户端（例如 MCP 宿主应用程序）通过标准化接口使用服务器元数据。

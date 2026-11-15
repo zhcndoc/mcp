@@ -5,6 +5,7 @@ description: 一个关于调试 Model Context Protocol (MCP) 集成的综合指�
 
 在开发 MCP 服务器或将其与应用程序集成时，有效的调试至关重要。本指南涵盖了 MCP 生态系统中可用的调试工具和方法。
 
+<a id="debugging-tools-overview" />
 ## 调试工具概览
 
 MCP 提供了多个不同层级的调试工具：
@@ -23,8 +24,10 @@ MCP 提供了多个不同层级的调试工具：
    状态。例如下面的 [在 Claude Desktop 中调试](#debugging-in-claude-desktop)
    是一个示例，或者查阅你所使用客户端的文档。
 
+<a id="implementing-logging" />
 ## 实现日志记录
 
+<a id="server-side-logging" />
 ### 服务端日志记录
 
 当构建使用本地
@@ -96,12 +99,14 @@ MCP 定义了八个
 - 错误情况
 - 性能指标
 
+<a id="common-issues" />
 ## 常见问题
 
 下面的示例使用 Claude Desktop 的
 [`claude_desktop_config.json`](/docs/draft/develop/connect-local-servers)；相同的
 原则适用于任何基于 stdio 的 MCP 客户端。
 
+<a id="working-directory" />
 ### 工作目录
 
 当 MCP 客户端启动 stdio 服务器时：
@@ -133,6 +138,7 @@ MCP 定义了八个
 
 而不是使用相对路径，例如 `./data`
 
+<a id="environment-variables" />
 ### 环境变量
 
 通过 stdio 启动的 MCP 服务器会自动继承
@@ -154,6 +160,7 @@ MCP 定义了八个
 }
 ```
 
+<a id="server-startup" />
 ### 服务器启动
 
 常见的启动问题：
@@ -174,6 +181,7 @@ MCP 定义了八个
    - 变量值不正确
    - 权限限制
 
+<a id="connection-problems" />
 ### 连接问题
 
 当服务器无法连接时：
@@ -201,29 +209,36 @@ MCP 定义了八个
    [`server/discover`](/specification/draft/server/discover) 响应，以
    验证双方都声明了你所期望的内容
 
+<a id="debugging-in-claude-desktop" />
 ## 在 Claude Desktop 中进行调试
 
 Claude Desktop 是许多 MCP 客户端之一。它可用于
 macOS、Windows 和 Linux。
 
+<a id="checking-server-status" />
 ### 检查服务器状态
 
 点击聊天输入框中的“添加文件、连接器等”加号图标，然后
 将鼠标悬停在 **Connectors** 菜单上，查看已连接的服务器和可用工具。
 
-<img src="/images/available-mcp-tools.png" alt="Available MCP tools" />
+<img src="/images/available-mcp-tools.png" alt="可用的 MCP 工具" />
 
+<a id="viewing-logs" />
 ### 查看日志
 
 日志文件写入到：
 
-- macOS: `~/Library/Logs/Claude`
-- Windows: `%APPDATA%\Claude\logs`
-
+- macOS：`~/Library/Logs/Claude`
+- Windows：`%APPDATA%\Claude\logs`
+- Linux：`~/.config/Claude/logs`
 <CodeGroup>
 
 ```bash macOS
 tail -n 20 -F ~/Library/Logs/Claude/mcp*.log
+```
+
+```bash Linux
+tail -n 20 -F ~/.config/Claude/logs/mcp*.log
 ```
 
 ```powershell Windows
@@ -239,6 +254,7 @@ type "$env:AppData\Claude\logs\mcp*.log"
 - 运行时错误
 - 消息交换
 
+<a id="using-chrome-devtools" />
 ### 使用 Chrome DevTools
 
 在 Claude Desktop 中打开 Chrome 的开发者工具，以调查
@@ -272,8 +288,10 @@ echo '{"allowDevTools": true}' > ~/Library/Application\ Support/Claude/developer
 - 消息负载
 - 连接时序
 
+<a id="debugging-workflow" />
 ## 调试工作流
 
+<a id="development-cycle" />
 ### 开发周期
 
 1. 初始开发
@@ -286,6 +304,7 @@ echo '{"allowDevTools": true}' > ~/Library/Application\ Support/Claude/developer
    - 监控日志
    - 检查错误处理
 
+<a id="testing-changes" />
 ### 测试更改
 
 要高效测试更改：
@@ -295,8 +314,10 @@ echo '{"allowDevTools": true}' > ~/Library/Application\ Support/Claude/developer
   并重新打开；仅关闭窗口是不够的）
 - **快速迭代**：在开发期间使用 [Inspector](/docs/draft/tools/inspector)
 
+<a id="best-practices" />
 ## 最佳实践
 
+<a id="logging-strategy" />
 ### 日志策略
 
 1. **结构化日志**
@@ -317,6 +338,7 @@ echo '{"allowDevTools": true}' > ~/Library/Application\ Support/Claude/developer
    - 跟踪消息大小
    - 测量延迟
 
+<a id="security-considerations" />
 ### 安全注意事项
 
 在调试时：
@@ -334,6 +356,7 @@ echo '{"allowDevTools": true}' > ~/Library/Application\ Support/Claude/developer
 有关 MCP 攻击向量及缓解措施的完整说明，请参阅
 [安全最佳实践](/docs/draft/tutorials/security/security_best_practices)。
 
+<a id="getting-help" />
 ## 获取帮助
 
 遇到问题时：
@@ -354,6 +377,7 @@ echo '{"allowDevTools": true}' > ~/Library/Application\ Support/Claude/developer
    - 复现步骤
    - 环境详情
 
+<a id="next-steps" />
 ## 后续步骤
 
 <CardGroup cols={2}>

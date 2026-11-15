@@ -1,7 +1,7 @@
 ---
-title: "SEP-973: 为实现、资源、工具和提示词暴露额外元数据"
-sidebarTitle: "SEP-973: 为实现、资源、工具和提示词暴露额外…"
-description: "为实现、资源、工具和提示词暴露额外元数据"
+title: "SEP-973: Expose additional metadata for Implementations, Resources, Tools and Prompts"
+sidebarTitle: "SEP-973: Expose additional metadata for Implemen…"
+description: "Expose additional metadata for Implementations, Resources, Tools and Prompts"
 ---
 
 <div className="flex items-center gap-2 mb-4">
@@ -13,115 +13,120 @@ description: "为实现、资源、工具和提示词暴露额外元数据"
   </Badge>
 </div>
 
-| 字段          | 值                                                                            |
-| ------------- | ----------------------------------------------------------------------------- |
-| **SEP**       | 973                                                                           |
-| **标题**      | 为实现、资源、工具和提示词暴露额外元数据                                      |
-| **状态**      | 最终版                                                                        |
-| **类型**      | 标准轨道                                                                      |
-| **创建日期**  | 2025-07-15                                                                    |
-| **作者**      | [@jesselumarie](https://github.com/jesselumarie)                              |
-| **赞助者**    | 无                                                                            |
-| **PR**        | [#973](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/973) |
+<Note>
+  本 SEP 已达到 Final
+  状态，作为已接受设计的历史记录保留。定稿后对协议所作的变更不会反映在此处。权威要求请参阅[当前规范](/specification/latest)及其变更日志。
+</Note>
+
+| 字段         | 值                                                                            |
+| ------------ | ----------------------------------------------------------------------------- |
+| **SEP**      | 973                                                                           |
+| **标题**     | Expose additional metadata for Implementations, Resources, Tools and Prompts  |
+| **状态**     | 最终版                                                                        |
+| **类型**     | 标准轨道                                                                      |
+| **创建日期** | 2025-07-15                                                                    |
+| **作者**     | [@jesselumarie](https://github.com/jesselumarie)                              |
+| **赞助人**   | None                                                                          |
+| **PR**       | [#973](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/973) |
 
 ---
 
-## 摘要
+## Abstract
 
-本 SEP 提议添加两个可选字段——`icons` 和 `websiteUrl`。`icons` 和 `websiteUrl` 将被添加到 `Implementation` 模式中，以便客户端能够直观地识别第三方实现并直接链接到其文档。`icons` 参数也将被添加到 `Tool`、`Resource` 和 `Prompt` 模式中。虽然这对于所有实现的服务器和客户端都可以使用，但我们预计它最初将用于服务器提供的实现。
+This SEP proposes adding two optional fields—`icons` and `websiteUrl`. The `icons` and `websiteUrl` would be added to the `Implementation` schema so that clients can visually identify third-party implementations and link directly to their documentation. The `icons` parameter will also be added to the `Tool`, `Resource` and `Prompt` schemas. While this can be used by both servers and clients for all implementations, we expect it to be used initially for server-provided implementations.
 
-## 动机
+## Motivation
 
-### 当前状态
+### Current State
 
-当前的实现仅暴露命名空间元数据，迫使客户端显示没有视觉提示的通用标签。
+Current implementations only expose namespaced metadata, forcing clients to display generic labels with no visual cues.
 
 <img
   width="606"
   height="242"
-  alt="图片"
+  alt="Image"
   src="https://github.com/user-attachments/assets/0708a467-ed16-4654-8017-47fc30df9b23"
 />
 
-### 提议状态
+### Proposed State
 
-提议的实现将允许我们添加视觉辅助功能和文档链接，使得更容易直观地识别哪些服务器/客户端正在提供实现，例如斜杠命令界面中的工具：
+The proposed implementation would allow us to add visual affordances and links to documentation, making it easier to visually identify which servers/clients are providing an implementation e.g. a tool in a slash command interface:
 
 <img
   width="1104"
   height="780"
-  alt="图片"
+  alt="Image"
   src="https://github.com/user-attachments/assets/2989b847-8a35-4c49-bb73-d27828df4df6"
 />
 
-- **视觉辅助：** 图标让用户立即清楚正在使用哪个工具或资源源。
-- **可发现性：** 指向文档的链接（`websiteUrl`）允许客户端通过一次点击将用户引导至更多信息。
+- **Visual Affordance:** Icons make it immediately clear to users which tool or resource source is in use.
+- **Discoverability:** A link to documentation (`websiteUrl`) allows clients to direct users to more information with a single click.
 
-## 理由
+## Rationale
 
-此设计建立在 Web 清单（MDN）的先前工作基础上，并整合了社区反馈：
+This design builds on prior work in web manifests (MDN) and consolidates community feedback:
 
-- **合并 PR：** 将 PR #417 和 PR #862 的更改合并为一个连贯的增强功能。
-- **灵活的图标尺寸：** 支持多种图标尺寸（例如 `48x48`、`96x96` 或 `any` 用于矢量格式），以适应不同的客户端 UI 需求。
-- **可选字段：** 通过将两个字段都设为可选，现有实现保持完全兼容。
+- **Consolidation of PRs:** Merges the changes from PR #417 and PR #862 into a single, cohesive enhancement.
+- **Flexible Icon Sizes:** Supports multiple icon sizes (e.g., `48x48`, `96x96`, or `any` for vector formats) to accommodate different client UI needs.
+- **Optional Fields:** By making both fields optional, existing implementations remain fully compatible.
 
-## 规范
+## Specification
 
-扩展 `Implementation` 对象如下：
+Extend the `Implementation` object as follows:
 
 ```typescript
 /**
- * 一个指向图标 URL 或 base64 编码数据 URI 的 url
+ * A url pointing to an icon URL or a base64-encoded data URI
  *
- * 支持渲染图标的客户端必须至少支持以下 MIME 类型：
- * - image/png - PNG 图像（安全，通用兼容）
- * - image/jpeg（以及 image/jpg）- JPEG 图像（安全，通用兼容）
+ * Clients that support rendering icons MUST support at least the following MIME types:
+ * - image/png - PNG images (safe, universal compatibility)
+ * - image/jpeg (and image/jpg) - JPEG images (safe, universal compatibility)
  *
- * 支持渲染图标的客户端还应该支持：
- * - image/svg+xml - SVG 图像（可缩放但需要安全措施）
- * - image/webp - WebP 图像（现代，高效格式）
+ * Clients that support rendering icons SHOULD also support:
+ * - image/svg+xml - SVG images (scalable but requires security precautions)
+ * - image/webp - WebP images (modern, efficient format)
  */
 export interface Icon {
   /**
-   * 一个指向图标资源的标准 URI。
+   * A standard URI pointing to an icon resource.
    *
-   * 使用者必须采取措施确保提供图标的 URL 来自
-   * 与客户端/服务器相同的域或受信任的域。
+   * Consumers MUST takes steps to ensure URLs serving icons are from the
+   * same domain as the client/server or a trusted domain.
    *
-   * 使用者在使用 SVG 时必须采取适当的预防措施，因为它们可能包含
-   * 可执行的 JavaScript
+   * Consumers MUST take appropriate precautions when consuming SVGs as they can contain
+   * executable JavaScript
    *
    * @format uri
    */
   src: string;
-  /** 如果服务器的 MIME 类型缺失或通用，则为可选覆盖。 */
+  /** Optional override if the server’s MIME type is missing or generic. */
   mimeType?: string;
-  /** 例如 "48x48", "any"（用于 SVG），或 "48x48 96x96" */
+  /** e.g. "48x48", "any" (for SVG), or "48x48 96x96" */
   sizes?: string;
 }
 
 /**
- * 描述 MCP 实现
+ * Describes the MCP implementation
  */
 export interface Implementation extends BaseMetadata {
   version: string;
   /**
-   * 此实现的可选图标列表。
-   * 客户端可以使用此列表在用户界面中显示实现。
-   * 每个图标应有一个 `kind` 属性，指定它是数据表示还是 URL 源，一个 `src` 属性指向图标文件或数据表示，并且可能还包括 `mimeType` 和 `sizes` 属性。
-   * `mimeType` 属性应为图标文件的有效 MIME 类型，例如 "image/png" 或 "image/svg+xml"。
-   * `sizes` 属性应为一个字符串，指定图标文件可以使用的尺寸，例如 "48x48" 或 "any" 用于 SVG 等可缩放格式。
-   * `sizes` 属性是可选的，如果未提供，客户端应假设图标可以在任何尺寸下使用。
+   * An optional list of icons for this implementation.
+   * This can be used by clients to display the implementation in a user interface.
+   * Each icon should have a `kind` property that specifies whether it is a data representation or a URL source, a `src` property that points to the icon file or data representation, and may also include a `mimeType` and `sizes` property.
+   * The `mimeType` property should be a valid MIME type for the icon file, such as "image/png" or "image/svg+xml".
+   * The `sizes` property should be a string that specifies one or more sizes at which the icon file can be used, such as "48x48" or "any" for scalable formats like SVG.
+   * The `sizes` property is optional, and if not provided, the client should assume that the icon can be used at any size.
    */
   icons?: Icon[];
   /**
-   * 此实现的网站的可选 URL。
+   * An optional URL of the website for this implementation.
    *
-   * 使用者必须采取措施确保提供图标的 URL 来自
-   * 与客户端/服务器相同的域或受信任的域。
+   * Consumers MUST takes steps to ensure URLs serving icons are from the
+   * same domain as the client/server or a trusted domain.
    *
-   * 使用者在使用 SVG 时必须采取适当的预防措施，因为它们可能包含
-   * 可执行的 JavaScript
+   * Consumers MUST take appropriate precautions when consuming SVGs as they can contain
+   * executable JavaScript
    *
    * @format: uri
    */
@@ -129,24 +134,24 @@ export interface Implementation extends BaseMetadata {
 }
 ```
 
-使用以下类型扩展 `Tool`、`Resource` 和 `Prompt` 接口：
+Extend the `Tool`, `Resource` and `Prompt` interfaces with the following type:
 
 ```typescript
   /**
-   * 资源的可选图标列表。
-   * 客户端可以使用此列表在用户界面中显示资源的图标。
-   * 每个图标应有一个 `kind` 属性，指定它是数据表示还是 URL 源，一个 `src` 属性指向图标文件或数据表示，并且可能还包括 `mimeType` 和 `sizes` 属性。
-   * `mimeType` 属性应为图标文件的有效 MIME 类型，例如 "image/png" 或 "image/svg+xml"。
-   * `sizes` 属性应为一个字符串，指定图标文件可以使用的尺寸，例如 "48x48" 或 "any" 用于 SVG 等可缩放格式。
-   * `sizes` 属性是可选的，如果未提供，客户端应假设图标可以在任何尺寸下使用。
+   * An optional list of icons for a resource.
+   * This can be used by clients to display the resource's icon in a user interface.
+   * Each icon should have a `kind` property that specifies whether it is a data representation or a URL source, a `src` property that points to the icon file or data representation, and may also include a `mimeType` and `sizes` property.
+   * The `mimeType` property should be a valid MIME type for the icon file, such as "image/png" or "image/svg+xml".
+   * The `sizes` property should be a string that specifies one or more sizes at which the icon file can be used, such as "48x48" or "any" for scalable formats like SVG.
+   * The `sizes` property is optional, and if not provided, the client should assume that the icon can be used at any size.
    */
   icons?: Icon[];
 ```
 
-## 向后兼容性
+## Backwards Compatibility
 
-`icons` 和 `websiteUrl` 都是可选字段；忽略它们的客户端将回退到现有行为。
+Both icons and websiteUrl are optional fields; clients that ignore them will fall back to existing behavior.
 
-## 安全影响
+## Security Implications
 
-这不应引入任何新的安全影响。
+This shouldn't introduce any new security implications.

@@ -5,12 +5,14 @@ description: 目录与配置文件、各客户端拥有的标志，以及所有�
 
 `mcp-inspector` 二进制文件是一个启动器：它读取自身的两个标志，并将所有其他参数转发给三个客户端之一（Web、CLI 或 TUI）。每个客户端定义自己的标志，因此某个标志在一个客户端中有效，在另一个客户端中可能是未知标志（例如，`--method` 仅适用于 CLI）。本页面按所属客户端对标志和环境变量进行分类。
 
+<a id="the-launcher-owns-exactly-two-things" />
 ## 启动器恰好拥有两项功能
 
 | 标志                        | 行为                                                                                                                                                                                                                                                                                         |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `--web` / `--cli` / `--tui` | 选择客户端，默认为 `--web`。传入多个标志会失败，并显示 `Specify at most one of --web, --cli, or --tui.`。启动器标志必须位于开头：解析会在遇到第一个不属于启动器的参数时停止，并将从该参数开始的所有内容原样转发给客户端。 |
-| `-h` / `--help`             | 未指定模式标志时，打印启动器自身的帮助信息并退出。指定模式标志时，该参数会被转发，因此 `mcp-inspector --cli --help` 会打印 CLI 的帮助信息。                                                                                                                                            |
+| `--web` / `--cli` / `--tui` | 默认选择客户端 `--web`。传递多个失败，并显示 `Specify at most one of --web, --cli, or --tui.` 启动器标志必须首先出现：解析在启动器不拥有的第一个参数处停止，并且从该点开始的所有内容都将原封不动地转发到客户端。 |
+| `-h` / `--help`             | 如果没有模式标志，则打印启动器自己的帮助并退出。通过模式标志，它被转发，因此 `mcp-inspector --cli --help` 打印 CLI 的帮助。                                                                                                                                            |
+| `-V` / `--version`          | 在启动器的帮助中列出，但启动器不会对其进行操作。该标志被转发到选定的客户端，该客户端打印 Inspector 版本，因此 `mcp-inspector -V` 通过 Web 客户端打印它，而 `mcp-inspector --cli -V` 通过 CLI 打印它。                                       |
 
 以下内容均属于客户端。
 
@@ -18,13 +20,15 @@ description: 目录与配置文件、各客户端拥有的标志，以及所有�
   该软件包还会安装一个独立的第二个 bin：`mcpdo`，即实验性的[连接客户端](/docs/draft/tools/inspector/mcpdo)。它不通过启动器访问，也不接受模式标志。
 </Note>
 
+<a id="choosing-servers" />
 ## 选择服务器
 
+<a id="-catalog-vs-config" />
 ### `--catalog` 与 `--config`
 
 CLI 和 TUI 通过同一套共享代码解析 `--catalog` 和 `--config`，Web 客户端也遵循相同规则，因此每个标志在三个客户端中的含义都相同。两者之间的差异如下表所示。
 
-|                             | `--catalog <path>`                                                           | `--config <path>`                                       |
+|                                                          | `--catalog <path>`                                                           | `--config <path>`                                       |
 | --------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------------- |
 | **可写入？**               | 是，Inspector 自己的服务器列表。                                        | 否。按原样提供，永不写入、初始化或迁移。   |
 | **文件不存在？**           | 创建并初始化（见下文）。                                              | **报错。**                                             |
@@ -68,6 +72,7 @@ CLI 和 TUI 则会初始化为空的 `{ "mcpServers": {} }`：它们是非交互
   当您要让 Inspector 指向一个并非由您编写的配置文件时，应使用 `--config`：例如同事的配置文件、客户端应用程序的配置文件，或提交到代码仓库中的配置文件。它可以确保 Inspector 不会触碰该文件。
 </Note>
 
+<a id="ad-hoc-targets" />
 ### 临时目标
 
 您可以不使用文件，而是直接指定一个服务器，可以指定为位置命令（stdio）或 URL：
@@ -77,6 +82,7 @@ mcp-inspector node build/index.js                              # stdio，位置�
 mcp-inspector --server-url https://api.example.com/mcp --transport http
 ```
 
+<a id="shared-server-selection-flags" />
 ### 共享的服务器选择标志
 
 这些标志由 Web、CLI 和 TUI 分别定义，因此三者均可使用，差异如下：
@@ -95,6 +101,7 @@ mcp-inspector --server-url https://api.example.com/mcp --transport http
 | `--skill-catalog-max-skills <n>` / `--skill-catalog-max-bytes <n>` | 技能验证运行的预算（最多读取的技能数和字节数）。                                                    | **仅 CLI 和 TUI 支持。** 覆盖文件中的 `skillCatalogMaxSkills` / `skillCatalogMaxBytes`。                                                                                                    |
 | `[target...]`                                                      | 一个临时服务器的位置命令/URL。                                                                      | 无                                                                                                                                                                                          |
 
+<a id="the-separator" />
 ### `--` 分隔符
 
 **Web 和 TUI** 客户端会在单独出现的 `--` 处分割参数，并将其后的所有内容作为目标命令自身的参数传递。这就是传递 Inspector 原本会截获的标志的方式：
@@ -111,12 +118,14 @@ mcp-inspector node build/index.js -- --config /etc/myserver.conf --verbose
 mcp-inspector --cli node build/index.js --config /etc/myserver.conf --verbose -- --method tools/list
 ```
 
+<a id="web-only-flags" />
 ## 仅限 Web 的标志
 
 | 标志    | 含义                                                                                               |
 | ------- | ----------------------------------------------------------------------------------------------------- |
 | `--dev` | 运行 Vite 开发服务器，而不是预构建的 bundle。在开发 Inspector 本身时很有用。 |
 
+<a id="cli-and-tui-oauth-client-flags" />
 ## CLI 和 TUI：OAuth 客户端标志
 
 这五项仅由 **CLI 和 TUI** 定义。Web 客户端通过其客户端设置对话框获取相同的设置。
@@ -129,20 +138,24 @@ mcp-inspector --cli node build/index.js --config /etc/myserver.conf --verbose --
 | `--client-metadata-url <url>` | 无                        | CIMD 元数据 URL。覆盖 `client.json`。                                                                                                                                                                                                                                                                                                                     |
 | `--callback-url <url>`        | `MCP_OAUTH_CALLBACK_URL`   | 发送给授权服务器的重定向 URI。默认值为 `http://127.0.0.1:6276/oauth/callback`。必须是环回主机（`localhost`、`127.0.0.1` 或其他 `127.x.x.x` 地址，或 `[::1]`）：本地回调监听器通过明文 `http` 接收授权码，因此会拒绝任何其他主机，并且没有可用于覆盖此限制的标志。 |
 
+<a id="cli-only-flags" />
 ## 仅限 CLI 的标志
 
 整个脚本操作界面都属于 CLI。有关使用方法，请参阅 [CLI 客户端](/docs/draft/tools/inspector/cli)。
 
-| 分组               | 标志                                                                                                                                                                                                                   |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **调用内容**       | `--method`、`--tool-name`、`--tool-arg`、`--tool-args-json`、`--uri`、`--cursor`、`--prompt-name`、`--prompt-args`、`--log-level`、`--metadata`、`--tool-metadata`、`--rename`                                      |
-| **运行方式**       | `--connect-timeout`、`--format`、`-q` / `--quiet`、`--output`、`--output-format`、`--app-info`、`--advertise-apps`、`--strict`、`--verify`、`--require-digests`、`--completion <shell>`（`bash`、`zsh` 或 `fish`） |
-| **身份验证**       | `--use-stored-auth`、`--stored-auth-only`、`--relogin`、`--no-revoke`、`--wait-for-auth`、`--list-stored-auth`、`--print-handoff`                                                                                   |
+| Group              | Flags                                                                                                                                                                                                              |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **调用什么** | `--method`, `--tool-name`, `--tool-arg`, `--tool-args-json`, `--uri`, `--cursor`, `--prompt-name`, `--prompt-args`, `--log-level`, `--metadata`, `--tool-metadata`, `--rename`                                     |
+| **如何运行**  | `--connect-timeout`, `--format`, `-q` / `--quiet`, `--output`, `--output-format`, `--app-info`, `--advertise-apps`, `--strict`, `--verify`, `--require-digests`, `--completion <shell>` (`bash`, `zsh`, or `fish`) |
+| **负载测试**      | `--load`、`--load-concurrency`、`--load-connections`、`--load-duration`、`--load-requests`、`--load-rate`、`--load-max-error-rate`、`--load-max-p99`（参见[CI 门](/docs/draft/tools/inspector/cli#ci-gates)）    |
+| **Auth**           | `--use-stored-auth`, `--stored-auth-only`, `--relogin`, `--no-revoke`, `--wait-for-auth`, `--list-stored-auth`, `--print-handoff`                                                                                  |
 
+<a id="environment-variables" />
 ## 环境变量
 
 环境变量的分类方式与标志相同：其中两个由启动器本身读取，其余变量属于 CLI 和 TUI、Web 后端，或所有客户端（机密信息存储）。
 
+<a id="read-by-the-launcher" />
 ### 由启动器读取
 
 | 变量        | 作用                                                                                                                                                           |
@@ -150,39 +163,48 @@ mcp-inspector --cli node build/index.js --config /etc/myserver.conf --verbose --
 | `MCP_DEBUG` | 将错误堆栈附加到顶层失败信息中。仅在设置为有意义的值时生效：`0`、`false` 和空值均表示关闭。                                            |
 | `DEBUG`     | 规则相同：只有设置为有意义的值时才生效，因此意外设置的 `DEBUG=0` 不会启用堆栈跟踪，同时 `DEBUG` 仍可作为 npm `debug` 包的命名空间过滤器使用。 |
 
+TUI 使用相同的规则自行读取这两个变量，以了解其自身的顶级故障。
+
+<a id="cli-and-tui" />
 ### CLI 和 TUI
 
-其中一些变量也由 Web 后端读取，如**读取方**列所示。
+其中一些由 Web 后端或 `mcpdo` 读取，如 **读取者** 列所示。
+| Variable                         | 阅读者              | Effect                                                                                                                                                                                                                                                     |
+| -------------------------------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MCP_CATALOG_PATH`               | Web、CLI、TUI、mcpdo | `--catalog` 的后备。仅当没有给出临时目标时，CLI 才会尊重它，因此导出它的 shell 仍然可以运行一次性临时调用。 Web 客户端和 TUI 无论如何都会应用它，因此将其与临时目标结合起来会被拒绝。 |
+| `MCP_CLIENT_CONFIG_PATH`         | CLI、TUI、mcpdo      | `--client-config` 的后备。                                                                                                                                                                                                                            |
+| `MCP_OAUTH_CALLBACK_URL`         | CLI、TUI、mcpdo      | `--callback-url` 的后备。                                                                                                                                                                                                                             |
+| `MCP_STORAGE_DIR`                | Web、CLI、TUI、mcpdo | 存储目录。重新定位 OAuth 状态文件 (`<dir>/oauth.json`) 和机密文件 (`<dir>/secrets.json`)。                                                                                                                                        |
+| `MCP_INSPECTOR_OAUTH_STATE_PATH` | CLI、TUI、mcpdo      | OAuth 状态路径的每个文件覆盖。优先于 `MCP_STORAGE_DIR`。                                                                                                                                                                        |
+| `MCP_AUTO_OPEN_ENABLED`          | Web、CLI、mcpdo      | 控制浏览器自动打开。 `false`从来没有打开过。在 CLI 中，`true` 强制自动打开并允许交互式 OAuth 在没有 TTY 的情况下运行，并且取消设置仅在 TTY 上打开。在 Web 客户端中，取消设置会在启动时打开 UI。 TUI 不会读取它。           |
+| `MCP_INSPECTOR_LOG_DIR`          | TUI                  | TUI 的 `auth.log` 目录。默认为 `~/.mcp-inspector`。                                                                                                                                                                                         |
+| `LOG_LEVEL`                      | TUI                  | 该日志的级别，作为 pino 级别名称。默认为 `info`。                                                                                                                                                                                               |
+| `NO_COLOR`                       | CLI、mcpdo           | 任何非空值都会禁用人类可读输出中的 ANSI 样式：所有 mcpdo 的 `--format text` 输出（与 `--plain` 相同）以及 CLI 写入 stderr 的登录提示。                                                                        |
 
-| 变量                            | 读取方        | 作用                                                                                                                                                                                                                               |
-| ------------------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `MCP_CATALOG_PATH`              | Web、CLI、TUI | `--catalog` 的备用值。CLI 仅在未提供临时目标时使用，因此导出该变量的 Shell 仍可运行一次性的临时调用；Web 客户端和 TUI 始终应用它，因此与临时目标组合时会拒绝。                       |
-| `MCP_CLIENT_CONFIG_PATH`        | CLI、TUI      | `--client-config` 的备用值。                                                                                                                                                                                                        |
-| `MCP_OAUTH_CALLBACK_URL`        | CLI、TUI      | `--callback-url` 的备用值。                                                                                                                                                                                                         |
-| `MCP_STORAGE_DIR`               | Web、CLI、TUI | 存储目录。重新定位 OAuth 状态文件（`<dir>/oauth.json`）和机密信息文件（`<dir>/secrets.json`）。                                                                               |
-| `MCP_INSPECTOR_OAUTH_STATE_PATH` | CLI、TUI      | 按文件覆盖 OAuth 状态路径。优先级高于 `MCP_STORAGE_DIR`。                                                                                                                                                                           |
-| `MCP_AUTO_OPEN_ENABLED`         | Web、CLI      | 控制浏览器自动打开。`false` 表示绝不打开；在 CLI 中，`true` 强制打开并允许无 TTY 时运行交互式 OAuth，未设置时仅在 TTY 上打开；在 Web 客户端中，未设置时启动即打开 UI。TUI 不读取此变量。 |
-
+<a id="web-backend-environment-variables" />
 ### Web 后端环境变量
 
-| 变量                                      | 作用                                                                                                                    |
-| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `MCP_INSPECTOR_API_TOKEN`                 | 固定[会话令牌](/docs/draft/tools/inspector/web#the-session-token)，而不是每次启动时生成随机令牌。 |
-| `DANGEROUSLY_OMIT_AUTH`                   | 完全禁用 `/api/*` 令牌检查。只有 `true` 或 `1` 会将其关闭。                                                            |
-| `HOST`                                    | 绑定主机。默认为 `127.0.0.1`。                                                                                       |
-| `CLIENT_PORT`                             | Web UI 端口。默认为 `6274`。                                                                                          |
-| `DANGEROUSLY_BIND_ALL_INTERFACES`         | 绑定通配主机（`0.0.0.0`、`::` 或任何等效写法）所必需的显式启用项。                                    |
-| `ALLOWED_ORIGINS`                         | 以逗号分隔的来源允许列表。**替换**默认列表，而不是与其合并。                                     |
-| `MCP_PROXY_AUTH_TOKEN`                    | v1 的已弃用名称，仅在新名称未设置时作为 `MCP_INSPECTOR_API_TOKEN` 使用。                                             |
-| `MCP_SANDBOX_PORT`                        | MCP Apps 沙盒端口。默认为 `6275`；`0` 请求操作系统分配空闲端口。                                                  |
-| `SERVER_PORT`                             | v1 的代理端口；现在仅在 `MCP_SANDBOX_PORT` 未设置或无效时作为沙盒端口的后备值。                                      |
-| `MCP_APP_ORIGIN_PORT`                     | 用于声明 `_meta.ui.domain` 的 MCP Apps 的应用来源服务器端口。默认为 `6278`；`0` 请求操作系统分配端口。             |
-| `MCP_SANDBOX_FULL_ADDRESS`                | MCP Apps 沙盒代理的公开 URL，用于反向代理之后的运行方式。                                                          |
-| `MCP_APP_ORIGIN_FULL_ADDRESS`             | `_meta.ui.domain` 应用文档的公开来源，用于反向代理之后的运行方式。                                                 |
-| `MCP_LOG_FILE`                            | 将后端结构化（JSON lines）日志追加到该文件。                                                                      |
-| `MCP_AUTO_OPEN_ENABLED`                   | `false` 阻止启动时打开浏览器。请参阅[CLI 和 TUI](#cli-and-tui)。                                                   |
-| `MCP_CATALOG_PATH`、`MCP_STORAGE_DIR`     | 如[CLI 和 TUI](#cli-and-tui)所述。                                                                                |
-| `HTTPS_PROXY` / `HTTP_PROXY` / `NO_PROXY` | 用于出站 MCP 连接的标准代理路由。                                                                                 |
+| Variable                                  | Effect                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MCP_INSPECTOR_API_TOKEN`                 | 固定[会话令牌](/docs/draft/tools/inspector/web#the-session-token)，而不是每次启动时生成随机令牌。                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `DANGEROUSLY_OMIT_AUTH`                   | 完全禁用 `/api/*` 令牌检查。仅 `true` 或 `1` 将其关闭。                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `HOST`                                    | 绑定主机。默认为 `127.0.0.1`。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `CLIENT_PORT`                             | Web UI 端口。默认为 `6274`。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `DANGEROUSLY_BIND_ALL_INTERFACES`         | 需要选择加入才能绑定通配符主机（`0.0.0.0`、`::` 或任何等效拼写）。                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `ALLOWED_ORIGINS`                         | 以逗号分隔的来源允许列表。 **替换**默认列表而不是合并。                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `MCP_INSPECTOR_ALLOWED_HOSTS`             | `Host` 标头中接受逗号分隔的额外主机名，用于重写 `Host` 的反向代理。 `localhost` 和 `*.localhost`、IPv4 和括号内的 IPv6 文字、绑定主机（除非它是通配符）以及每个 `ALLOWED_ORIGINS` 条目的主机名始终被接受。以 `.` (`.example.com`) 开头的条目承认该域及其子域。带有方案、端口、路径、通配符或空格的条目将被删除并带有警告。端口不进行比较。任何其他 `Host` 都会得到 `403`。 |
+| `MCP_PROXY_AUTH_TOKEN`                    | 已弃用 `MCP_INSPECTOR_API_TOKEN` 的 v1 名称，仅在未设置新名称时使用。                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `MCP_SANDBOX_PORT`                        | MCP 应用程序沙箱端口。默认为`6275`； `0` 向操作系统请求空闲端口。                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `SERVER_PORT`                             | v1 的代理端口，现在仅在 `MCP_SANDBOX_PORT` 未设置或无效时作为沙箱端口的后备。                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `MCP_APP_ORIGIN_PORT`                     | 声明 `_meta.ui.domain` 的 MCP 应用程序使用的应用程序源服务器的端口。默认为`6278`； `0` 询问操作系统。                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `MCP_SANDBOX_FULL_ADDRESS`                | MCP Apps 沙盒代理的公共 URL，用于在反向代理后面运行。                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `MCP_APP_ORIGIN_FULL_ADDRESS`             | 提供 `_meta.ui.domain` 应用程序文档的公共来源，用于在反向代理后面运行。                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `MCP_LOG_FILE`                            | 将后端的结构化（JSON 行）日志附加到此文件。                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `INSPECTOR_TLS_KEY_PATH`                  | Web UI 侦听器的 PEM 私钥。与 `INSPECTOR_TLS_CERT_PATH` 一起设置，通过 `https` 提供 UI。设置一个而不设置另一个、不可读的文件或不是可用对的密钥和证书都是启动错误。听者不会退回到 `http`。空白值视为未设置。仅涵盖 UI 侦听器。沙箱和应用程序源侦听器保持 `http`。当两者都设置时，CLI 的 `--print-handoff` 会发出 `https://` 深层链接。                                      |
+| `INSPECTOR_TLS_CERT_PATH`                 | `INSPECTOR_TLS_KEY_PATH` 中密钥的 PEM 证书（或链）。                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `MCP_AUTO_OPEN_ENABLED`                   | `false` 阻止浏览器在启动时打开。请参阅[CLI 和 TUI](#cli-and-tui)。                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `MCP_CATALOG_PATH`, `MCP_STORAGE_DIR`     | 如 [CLI 和 TUI](#cli-and-tui) 中所述。                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `HTTPS_PROXY` / `HTTP_PROXY` / `NO_PROXY` | 用于出站 MCP 连接的标准代理路由。                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 
 <Warning>
   切勿同时使用 `DANGEROUSLY_OMIT_AUTH` 和 `DANGEROUSLY_BIND_ALL_INTERFACES`。
@@ -191,6 +213,7 @@ mcp-inspector --cli node build/index.js --config /etc/myserver.conf --verbose --
 
 令牌的保护范围请参阅[Web 后端令牌](/docs/draft/tools/inspector/security#the-web-backend-and-its-api-token)。
 
+<a id="secret-store-variables" />
 ### 机密信息存储变量
 
 由 **Web、CLI、TUI 和 [mcpdo](/docs/draft/tools/inspector/mcpdo)** 每个客户端读取。它们的组合方式请参阅[机密信息存储位置](#where-secrets-are-stored)。
@@ -203,6 +226,7 @@ mcp-inspector --cli node build/index.js --config /etc/myserver.conf --verbose --
 | `MCP_INSPECTOR_SECRET_KEY`    | 口令本身。请使用生成的高熵值。同时设置两个密钥变量（且 `MCP_INSPECTOR_SECRET_KEY` 非空）会报错。                                                      |
 | `MCP_INSPECTOR_PERSIST_TOKENS` | 持久化哪些已获取的 OAuth 令牌：`all`（默认）、`access`（不保存刷新令牌）或 `none`（每次运行都重新授权）。客户端密钥始终会持久化。                            |
 
+<a id="where-secrets-are-stored" />
 ## 机密信息存储位置
 
 Inspector 不会将凭据写入 `mcp.json`、`client.json` 和 `oauth.json`，这样共享、提交或同步这些文件就不会泄露凭据。这些凭据会存入**机密信息存储**：
@@ -213,6 +237,7 @@ Inspector 不会将凭据写入 `mcp.json`、`client.json` 和 `oauth.json`，�
 
 **`headers` 不会移动。** 它们会按原样保存到 `mcp.json`，因此携带凭据的请求头仍会留在文件中。
 
+<a id="how-the-store-is-chosen" />
 ### 选择存储方式
 
 每个进程只在第一次需要时选择一次存储方式：Web 后端在启动时选择，CLI 和 TUI 在首次使用时选择。所有客户端使用相同顺序：
@@ -228,7 +253,7 @@ Inspector 不会将凭据写入 `mcp.json`、`client.json` 和 `oauth.json`，�
 | macOS 或 Windows 桌面，或运行 Secret Service 的 Linux        | 操作系统钥匙串                     | 是                 |
 | 没有 libsecret 或 Secret Service 的 Linux                     | 文件（`secrets.json`，权限 `0600`） | 是                 |
 | 没有 D-Bus 会话的无头服务器或 SSH 会话                        | 文件                                 | 是                 |
-| Android／Termux                                                | 文件                                 | 是                 |
+| 安卓／Termux                                                | 文件                                 | 是                 |
 | 机密信息目录**没有卷**的容器                                  | 内存                                 | 否，仅当前会话     |
 | 机密信息目录**挂载了卷**的容器                                | 文件                                 | 是                 |
 
@@ -247,6 +272,7 @@ Inspector 不会将凭据写入 `mcp.json`、`client.json` 和 `oauth.json`，�
 
 [mcpdo](/docs/draft/tools/inspector/mcpdo) 不会回退到 `memory`：它的命令和守护进程是不同的进程，因此使用文件存储。
 
+<a id="the-file-store" />
 ### 文件存储
 
 如果设置了 `MCP_INSPECTOR_SECRET_FILE`，文件位于该路径；否则如果设置了 `MCP_STORAGE_DIR`，位于其中的 `secrets.json`；再否则位于 `~/.mcp-inspector/secrets.json`。默认位置位于存储目录（`~/.mcp-inspector/storage`）**旁边**，而不是其中。
@@ -257,15 +283,18 @@ Inspector 不会将凭据写入 `mcp.json`、`client.json` 和 `oauth.json`，�
 - **强制执行权限。** 文件以 `0600` 写入，并在启动时再次收紧权限。如果无法做到（所有者不同或挂载为只读），日志和设置页脚会说明原因。
 - **并发 Inspector 是安全的。** CLI 与 Web 会话同时运行时，会在文件旁的锁上串行化，并通过读回文件验证每次写入。
 
+<a id="where-the-active-store-is-reported" />
 ### 报告当前存储方式
 
 - **stderr：**选择存储方式时会输出信息；任何钥匙串回退都会发出警告，文件未加密、权限过宽或不可读时也会发出警告。两者最后都会附上 Inspector 的[机密信息存储指南](https://github.com/modelcontextprotocol/inspector/blob/main/docs/secret-storage.md)链接。Web 客户端每次启动的横幅还会包含 `Secrets:` 行。
 - **在 Web 客户端中：** **客户端设置**、**服务器设置**和**添加／编辑／克隆服务器**对话框的页脚会标明正在使用的存储方式，并在其仅存于内存、未加密、权限过宽或无法读取时变为警告。
 
+<a id="moving-back-to-a-keychain" />
 ### 迁移回钥匙串
 
 在使用文件存储的机器上安装 libsecret（或启动 Secret Service）后，下次启动会选择钥匙串并**将文件内容迁移到钥匙串**。钥匙串中已有的值优先于文件中的值。只有在所有条目都得到处理后才会删除文件；无法解密的文件会保留。设置 `MCP_INSPECTOR_SECRET_STORE=keyring` 会触发相同的迁移。选择 `file` 或 `memory` 永远不会从钥匙串复制任何内容。
 
+<a id="catalog-file-format" />
 ## Catalog 文件格式
 
 Catalog 或配置文件采用熟悉的 MCP 客户端配置结构（包含 `mcpServers` 对象），并在其中为每个服务器配置 Inspector 设置：
@@ -290,6 +319,37 @@ Catalog 或配置文件采用熟悉的 MCP 客户端配置结构（包含 `mcpSe
 }
 ```
 
-Inspector 将文件写回时会省略值等于默认值的字段，从而尽量减少差异。`protocolEra`（参见[协议时代](/docs/draft/tools/inspector/protocol-eras)）默认为 `legacy`，`modernLogLevel` 默认为 `debug`。
+当Inspector写回文件时，等于默认值的字段将被忽略，从而使差异保持最小。 `protocolEra`（请参阅[协议时代](/docs/draft/tools/inspector/protocol-eras)）默认为 `legacy` 和 `modernLogLevel` 为 `debug`。 `"type": "http"` 被接受为 `"streamable-http"` 的别名并以长格式写回。
+
+Inspector 特定的字段及其默认值：
+| 字段                        | 默认值       | 含义                                                                                                                            |
+| ---------------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| `headers`                    |                              | SSE 或 Streamable HTTP 服务器的 HTTP 标头，作为平面对象。                                                               |
+| `metadata`                   |                              | 默认 `_meta` 对象合并到每个传出请求中。值可以是任何 JSON。                                                 |
+| `protocolEra`                | `legacy`      | `legacy`、`auto` 或 `modern`。请参阅[协议时代](/docs/draft/tools/inspector/protocol-eras)。                                     |
+| `elicitCapability`           | `both`        | 向服务器通告的诱导能力：`off`、`url`、`form` 或 `both`。仅供 `mcpdo` 阅读。                            |
+| `modernLogLevel`             | `debug`       | 现代连接上标记的每个请求日志级别，或 `off`。旧连接会忽略它。                                       |
+| `connectionTimeout`          | `30000`       | 连接时间超时（以毫秒为单位）。 `0` 禁用它。                                                                                       |
+| `requestTimeout`             |                              | 每个请求的超时时间（以毫秒为单位）                                                                                                         |
+| `taskTtl`                    | `60000`       | 使用 **作为任务运行** 创建的任务的 TTL（以毫秒为单位）。                                                                                  |
+| `autoRefreshOnListChanged`   | `false`       | 刷新 `list_changed` 上的工具、资源和提示列表，而不是仅标记指示器。                          |
+| `paginatedLists`             | `false`       | 一次获取一页列表，而不是在加载时聚合每一页。                                                      |
+| `suppressNotificationStream` | `false`       | 仅限旧版 Streamable HTTP：不要打开独立的 `GET` 通知流。                                             |
+| `advertisedExtensions`       |                              | 每个扩展会覆盖 Inspector 通告的扩展，由扩展 ID 键入。                                       |
+| `maxFetchRequests`           | `1000`        | HTTP 请求保存在该服务器的网络日志中。 `0` 表示无限制。                                                        |
+| `skillCatalogMaxSkills`      | `256`         | 大多数技能都会在一次技能验证运行中读取。正整数。                                                               |
+| `skillCatalogMaxBytes`       | `67108864`    | 大多数字节在一次技能验证运行中读取所有技能 (64 MiB)。正整数。                                     |
+| `roots`                      |                              | 通过 `roots` 功能通告的根，每个 `{ "uri", "name" }`。                                                         |
+| `oauth.clientId`             |                              | 静态客户端的 OAuth 客户端 ID。                                                                                               |
+| `oauth.clientSecret`         |                              | 机密客户端的 OAuth 客户端密钥。                                                                                     |
+| `oauth.scopes`               |                              | 请求的范围，作为一个字符串。                                                                                                  |
+| `oauth.enterpriseManaged`    |                              | `true` 通过企业 IdP (EMA) 而不是标准 OAuth 连接。                                                        |
+| `oauth.onInsufficientScope`  | `reauthorize` | `403 insufficient_scope` 的升压政策：`reauthorize` 或 `throw`。                                                             |
+| `oauth.requestRefreshToken`  | `true`        | 客户端注册时是否声明 `refresh_token` 授权。只写了`false`。                                  |
+| `oauth.scopeOnRefresh`       | `false`       | 刷新令牌请求中是否携带`scope`。只写了`true`。                                                           |
+| `oauth.revokeOnClear`        | `true`        | 清除此服务器的 OAuth 状态是否也会撤销授权服务器上的授权 (RFC 7009)。只写了`false`。 |
+| `oauth.authorizationParams`  |                              | 授权请求的额外查询参数。保留键被删除并带有警告。                                    |
+| `oauth.authorizationUrl`     |                              | 覆盖授权服务器元数据通告的 `authorization_endpoint`。                                             |
+| `oauth.tokenUrl`             |                              | 覆盖授权服务器元数据通告的 `token_endpoint`。                                                     |
 
 你不必手动编写这些内容；Web 客户端可以从 Claude Desktop、Cursor、Cline 或 VS Code [导入现有客户端配置](/docs/draft/tools/inspector/recipes#importing-an-existing-client-config)，也可以导入注册表中的 `server.json`。

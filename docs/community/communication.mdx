@@ -1,110 +1,35 @@
 ---
-title: 贡献者沟通
-description: 模型上下文协议社区的沟通策略和框架
+title: 通讯
+description: MCP 项目的通信渠道，何时渠道可能是私有的，以及记录决策的地方。
 ---
 
-本文档解释了如何在模型上下文协议 (MCP) 项目内进行沟通和协作。
+此页面列出了项目的沟通渠道、渠道何时可以是私有的以及记录决策的位置。它已被规范增强提案 (SEP) [SEP-994](/seps/994) 采用，并由流程 SEP 进行更改。 [行为准则](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/CODE_OF_CONDUCT.md) 管辖每个渠道。如果您是该项目的新手，请从 [贡献](/community/contributing) 开始。
 
-## 沟通渠道
+<a id="channels" />
+## 频道
 
-| 渠道                                                                                                      | 目的               | 何时使用                                      |
-| ----------------------------------------------------------------------------------------------------------- | --------------------- | ------------------------------------------------ |
-| [Discord](https://discord.gg/6CSzBmMkjX)                                                                    | 实时讨论  | 快速提问、协调、工作组/兴趣小组讨论 |
-| [在线会议](https://meet.modelcontextprotocol.io/)                                                         | 同步进度               | 工作组/兴趣小组演示、进度报告            |
-| [GitHub Discussions](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions)              | 结构化讨论 | 提案、路线图规划、长篇辩论  |
-| [GitHub Issues](https://github.com/modelcontextprotocol/modelcontextprotocol/issues)                        | 可执行任务      | 错误报告、文档修复                 |
-| [漏洞报告](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/SECURITY.md) | 安全问题       | 漏洞 - **切勿公开发布**        |
+| Channel                                                                                        | 用它来                                                                                                                                                                         |
+| ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [Discord](https://discord.gg/6CSzBmMkjX)                                                       | 贡献者之间的实时协调，包括工作组、兴趣组和 SDK 讨论                                                                              |
+| [会议日历](https://meet.modelcontextprotocol.io/)                                      | 开放小组和维护者会议。有关会议如何进行，请参阅[会议和渠道](/community/working-interest-groups#meetings-and-channels)                                    |
+| [GitHub 讨论](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions) | 想法、带有理由的功能请求、问题、路线图讨论、公告和发布以及会议议程和笔记（会议笔记类别）                          |
+| [GitHub 问题](https://github.com/modelcontextprotocol/modelcontextprotocol/issues)           | 可重现的错误、范围文档任务以及 CI 和发布任务，通过问题表单提交。 [SEP](/community/sep-guidelines) 是对 `seps/` 的拉取请求，而不是问题 |
+| [安全公告](/community/policies#reporting-a-vulnerability)                           | 漏洞。切勿在公共频道发布                                                                                                                                |
 
-所有沟通均受我们的 [行为准则](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/CODE_OF_CONDUCT.md) 约束。我们期望在所有渠道中进行尊重、专业和包容的互动。
+每个 SDK 和项目存储库都有自己的问题跟踪器和 Discord 频道。大多数人都关闭了讨论并使用问题；该存储库和注册表是主要的例外。漏洞报告遵循[安全策略](/community/policies#reporting-a-vulnerability)。
 
+<a id="discord" />
 ## Discord
 
-[MCP 贡献者 Discord](https://discord.gg/6CSzBmMkjX) 用于实时贡献者讨论和协作。该服务器专为 **MCP 贡献者** 设计，不用于一般 MCP 支持。
+[MCP 贡献者 Discord](https://discord.gg/6CSzBmMkjX) 适合从事协议及其项目的人员，也是协议及其设计讨论的起点。它不是支持渠道：将可重现的错误报告为其影响的存储库上的问题，并从文档开始了解有关使用 MCP 的问题。不要在服务器上推销产品或服务，并且仅将供应商作为与规范相关的示例来提及。
 
-### 公共频道（默认）
+用于项目范围讨论的频道命名为 `#general`，每个工作组和兴趣组的频道命名为 `#<name>-wg` 和 `#<name>-ig`，每个 SDK 的频道命名为 `#<lang>-sdk-dev`。其他项目有 `#inspector-dev` 等频道。在 `#wg-ig-group-creation` 中提议一个新组。我们将尽力做出回应。
 
-**目的：** 开放的社区参与、协作开发和透明的项目协调。
+频道默认是公开的。私人渠道仅限于指定的维护者和社区版主，并且仅适用于安全事件（CVE 和协议漏洞）、人员和行为准则问题以及需要有限受众立即或集中响应的协调。一些维护者决策通道是只读的。私人频道是临时的事件室，不是日常开发的场所。有关个人贡献者的事宜可能会保密。
 
-**主要用例：**
-
-- SDK 和工具开发（例如 `#typescript-sdk-dev`, `#inspector-dev`）
-- [工作组和兴趣小组](/community/working-interest-groups) 讨论（例如 `#auth-wg`, `#security-ig`）
-- 社区入职和贡献指导
-- 社区反馈和协作头脑风暴
-- 公开办公时间和维护者可用性
-
-**避免：**
-
-- MCP 用户支持 - 阅读官方文档并使用 GitHub Discussions 提问
-- 服务或产品营销 - 保持讨论供应商中立；除作为与规范相关的示例外，不鼓励提及品牌
-
-### 私人频道（例外）
-
-**目的：** 机密协调和敏感事项。访问权限仅限于指定的维护者。
-
-**私人使用标准：**
-
-- 安全事件（CVE、协议漏洞）
-- 人员事项（维护者讨论、行为准则问题）
-- 需要有限受众立即或专注响应的协调
-- 某些频道为维护者决策只读
-
-**透明度要求：**
-
-- 所有影响社区的技术和治理决策必须记录在 GitHub Discussions 和/或 Issues 中，标记为 `notes`
-- 私人频道是临时的“事件室”，不用于常规开发
-- 某些与个人贡献者相关的事项在适当情况下可能保持私密
-
-Discord 上任何导致潜在决策或提案的重大讨论必须移至 GitHub Discussion 或 Issue，以保留持久、可搜索的记录。
-
-## GitHub Discussions
-
-用于关于项目方向的结构化、长篇讨论和辩论。
-
-**何时使用：**
-
-- 项目路线图规划和里程碑讨论
-- 公告和发布沟通
-- 社区投票和共识建立
-- 带有背景和理由的功能请求
-- 如果仓库未启用 Discussions，请改用 GitHub Issues
-
-## GitHub Issues
-
-用于错误报告和可执行的开发任务。功能请求应提交至 [GitHub Discussions](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions)。
-
-**何时使用：**
-
-- 带有可复现步骤的错误报告
-- 具有特定范围的文档改进
-- CI/CD 问题和基础设施问题
-- 发布任务和里程碑跟踪
-
-**注意：** SEP 提案作为拉取请求提交到 [`seps/` 目录](https://github.com/modelcontextprotocol/modelcontextprotocol/tree/main/seps)，而不是作为 GitHub Issues。请参阅 [SEP 指南](/community/sep-guidelines)。
-
-## 安全问题
-
-**切勿公开发布安全问题。**
-
-1. 使用 [SECURITY.md](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/SECURITY.md) 中的私人安全报告流程
-2. 直接联系负责人或 [核心维护者](/community/governance#current-core-maintainers)
-3. 遵循负责任的披露指南
-
+<a id="decision-records" />
 ## 决策记录
 
-所有 MCP 决策均记录在公共渠道中：
+Discord不是记录。针对技术或治理决策的 Discord 讨论必须转移到 GitHub 讨论。每个技术或治理决策，包括 SEP 的核心维护者结果，都写在带有 `notes` 标签的讨论中，或写在 SEP 的拉取请求中。规范更改也记录在[更改日志](/specification/draft/changelog)中，并在这些社区页面中处理更改。
 
-| 类型                  | 位置                                                                                      |
-| --------------------- | --------------------------------------------------------------------------------------------- |
-| 技术决策   | [GitHub Issues](https://github.com/modelcontextprotocol/modelcontextprotocol/issues) 和 SEPs |
-| 规范变更 | [变更日志](https://modelcontextprotocol.io/specification/draft/changelog)                    |
-| 流程变更       | [社区文档](https://modelcontextprotocol.io/community/governance)               |
-| 治理决策  | [GitHub Issues](https://github.com/modelcontextprotocol/modelcontextprotocol/issues) 和 SEPs |
-
-记录决策时，我们保留尽可能多的上下文：
-
-- 决策者
-- 背景上下文和动机
-- 考虑的选项
-- 所选方案的理由
-- 实施步骤
+记录列出了做出决定的人、背景、考虑的选项、理由和后续步骤。会议议程和笔记请参见[会议和渠道](/community/working-interest-groups#meetings-and-channels)。

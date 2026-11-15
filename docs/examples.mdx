@@ -5,10 +5,12 @@ description: "示例服务器和实现列表"
 
 本页面展示了各种模型上下文协议 (MCP) 服务器，展示了该协议的功能和多功能性。这些服务器使大型语言模型 (LLM) 能够安全地访问工具和数据源。
 
+<a id="reference-implementations" />
 ## 参考实现
 
 这些官方参考服务器展示了核心 MCP 功能和 SDK 用法：
 
+<a id="current-reference-servers" />
 ### 当前参考服务器
 
 - **[Everything](https://github.com/modelcontextprotocol/servers/tree/main/src/everything)** - 带有提示、资源和工具的参考/测试服务器
@@ -19,22 +21,22 @@ description: "示例服务器和实现列表"
 - **[Sequential Thinking](https://github.com/modelcontextprotocol/servers/tree/main/src/sequentialthinking)** - 通过思维序列进行动态和反思性问题解决
 - **[Time](https://github.com/modelcontextprotocol/servers/tree/main/src/time)** - 时间和时区转换功能
 
+<a id="additional-example-servers-archived" />
 ### 其他示例服务器（已归档）
 
 访问 [servers-archived 仓库](https://github.com/modelcontextprotocol/servers-archived) 以获取不再积极维护的已归档示例服务器。
 
 它们仅提供用于历史参考。
 
-## 官方集成
+<a id="more-servers" />
+## 更多服务器
 
-访问 [MCP 服务器仓库（官方集成部分）](https://github.com/modelcontextprotocol/servers?tab=readme-ov-file#%EF%B8%8F-official-integrations) 查看由公司为其平台维护的 MCP 服务器列表。
+请访问 MCP 注册表 [registry.modelcontextprotocol.io](https://registry.modelcontextprotocol.io/)，了解公司和社区成员发布的服务器。
 
-## 社区实现
-
-访问 [MCP 服务器仓库（社区部分）](https://github.com/modelcontextprotocol/servers?tab=readme-ov-file#-community-servers) 查看由社区成员维护的 MCP 服务器列表。
-
+<a id="getting-started" />
 ## 快速开始
 
+<a id="using-reference-servers" />
 ### 使用参考服务器
 
 基于 TypeScript 的服务器可以直接使用 `npx` 运行：
@@ -54,6 +56,7 @@ pip install mcp-server-git
 python -m mcp_server_git
 ```
 
+<a id="configuring-with-claude" />
 ### 与 Claude 配置
 
 要在 Claude 中使用 MCP 服务器，请将其添加到您的配置中：
@@ -72,20 +75,12 @@ python -m mcp_server_git
         "@modelcontextprotocol/server-filesystem",
         "/path/to/allowed/files"
       ]
-    },
-    "github": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-github"],
-      "env": {
-        "GITHUB_PERSONAL_ACCESS_TOKEN": "<YOUR_TOKEN>"
-      }
     }
   }
 }
 ```
 
+<a id="additional-resources" />
 ## 其他资源
 
-访问 [MCP 服务器仓库（资源部分）](https://github.com/modelcontextprotocol/servers?tab=readme-ov-file#-resources) 查看与 MCP 相关的其他资源和项目集合。
-
-访问我们的 [GitHub 讨论区](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions) 与 MCP 社区互动。
+请访问我们的 [GitHub 讨论](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions) 与 MCP 社区互动。

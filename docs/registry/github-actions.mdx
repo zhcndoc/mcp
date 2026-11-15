@@ -1,16 +1,21 @@
 ---
 title: 如何使用 GitHub Actions 自动化发布
-sidebarTitle: GitHub Actions
+sidebarTitle: GitHub 操作
 ---
 
 <Note>
   MCP Registry 目前处于预览阶段。在正式发布之前，可能会发生破坏性更改或数据重置。如果遇到任何问题，请在 [GitHub](https://github.com/modelcontextprotocol/registry/issues) 上报告。
 </Note>
 
+<a id="step-1-create-a-workflow-file" />
 ## 步骤 1：创建工作流文件
 
 在你的服务器项目目录中，创建一个 `.github/workflows/publish-mcp.yml` 文件。以下是基于 npm 的本地服务器的示例，但 MCP Registry 发布步骤对所有包类型都是相同的：
 
+这些示例将 `mcp-publisher` 固定到特定版本并验证其 Sigstore
+解压前捆绑。升级时，将`MCP_PUBLISHER_VERSION`更新为
+有意发布的标签；不要切换回可变的
+`releases/latest` 网址。
 <CodeGroup>
 
 ```yaml OIDC 认证（推荐）
@@ -26,6 +31,8 @@ jobs:
     permissions:
       id-token: write # Required for OIDC authentication
       contents: read
+    env:
+      MCP_PUBLISHER_VERSION: v1.8.1
 
     steps:
       - name: Checkout code
@@ -54,9 +61,26 @@ jobs:
 
       ### 发布 MCP 服务器：
 
-      - name: Install mcp-publisher
+      - name: Install cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+
+      - name: Download and verify mcp-publisher
         run: |
-          curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+          set -euo pipefail
+          os="$(uname -s | tr '[:upper:]' '[:lower:]')"
+          arch="$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')"
+          archive="mcp-publisher_${os}_${arch}.tar.gz"
+          base_url="https://github.com/modelcontextprotocol/registry/releases/download/${MCP_PUBLISHER_VERSION}"
+
+          curl --fail --location --silent --show-error --output "$archive" "$base_url/$archive"
+          curl --fail --location --silent --show-error --output "$archive.sigstore.json" "$base_url/$archive.sigstore.json"
+          cosign verify-blob \
+            --bundle "$archive.sigstore.json" \
+            --certificate-identity "https://github.com/modelcontextprotocol/registry/.github/workflows/release.yml@refs/tags/${MCP_PUBLISHER_VERSION}" \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+            "$archive"
+          tar xzf "$archive" mcp-publisher
+          rm -f "$archive" "$archive.sigstore.json"
 
       - name: Authenticate to MCP Registry
         run: ./mcp-publisher login github-oidc
@@ -81,8 +105,14 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    # Source MCP_GITHUB_TOKEN from a protected Environment, not a plain repo
+    # secret, and restrict that environment to your default branch / release
+    # tags. See "Securing your registry token in CI" below for why this matters.
+    environment: mcp-registry-publish
     permissions:
       contents: read
+    env:
+      MCP_PUBLISHER_VERSION: v1.8.1
 
     steps:
       - name: Checkout code
@@ -111,9 +141,26 @@ jobs:
 
       ### 发布 MCP 服务器：
 
-      - name: Install mcp-publisher
+      - name: Install cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+
+      - name: Download and verify mcp-publisher
         run: |
-          curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+          set -euo pipefail
+          os="$(uname -s | tr '[:upper:]' '[:lower:]')"
+          arch="$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')"
+          archive="mcp-publisher_${os}_${arch}.tar.gz"
+          base_url="https://github.com/modelcontextprotocol/registry/releases/download/${MCP_PUBLISHER_VERSION}"
+
+          curl --fail --location --silent --show-error --output "$archive" "$base_url/$archive"
+          curl --fail --location --silent --show-error --output "$archive.sigstore.json" "$base_url/$archive.sigstore.json"
+          cosign verify-blob \
+            --bundle "$archive.sigstore.json" \
+            --certificate-identity "https://github.com/modelcontextprotocol/registry/.github/workflows/release.yml@refs/tags/${MCP_PUBLISHER_VERSION}" \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+            "$archive"
+          tar xzf "$archive" mcp-publisher
+          rm -f "$archive" "$archive.sigstore.json"
 
       - name: Authenticate to MCP Registry
         run: ./mcp-publisher login github --token ${{ secrets.MCP_GITHUB_TOKEN }}
@@ -140,6 +187,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    env:
+      MCP_PUBLISHER_VERSION: v1.8.1
 
     steps:
       - name: Checkout code
@@ -168,9 +217,26 @@ jobs:
 
       ### 发布 MCP 服务器：
 
-      - name: Install mcp-publisher
+      - name: Install cosign
+        uses: sigstore/cosign-installer@6f9f17788090df1f26f669e9d70d6ae9567deba6 # v4.1.2
+
+      - name: Download and verify mcp-publisher
         run: |
-          curl -L "https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_$(uname -s | tr '[:upper:]' '[:lower:]')_$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/').tar.gz" | tar xz mcp-publisher
+          set -euo pipefail
+          os="$(uname -s | tr '[:upper:]' '[:lower:]')"
+          arch="$(uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')"
+          archive="mcp-publisher_${os}_${arch}.tar.gz"
+          base_url="https://github.com/modelcontextprotocol/registry/releases/download/${MCP_PUBLISHER_VERSION}"
+
+          curl --fail --location --silent --show-error --output "$archive" "$base_url/$archive"
+          curl --fail --location --silent --show-error --output "$archive.sigstore.json" "$base_url/$archive.sigstore.json"
+          cosign verify-blob \
+            --bundle "$archive.sigstore.json" \
+            --certificate-identity "https://github.com/modelcontextprotocol/registry/.github/workflows/release.yml@refs/tags/${MCP_PUBLISHER_VERSION}" \
+            --certificate-oidc-issuer "https://token.actions.githubusercontent.com" \
+            "$archive"
+          tar xzf "$archive" mcp-publisher
+          rm -f "$archive" "$archive.sigstore.json"
 
       # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
       # TODO: 将 `example.com` 替换为你的域名
@@ -190,19 +256,36 @@ jobs:
 
 </CodeGroup>
 
+<a id="step-2-add-secrets" />
 ## 步骤 2：添加密钥
 
-根据你选择的认证方法，你可能需要向仓库添加密钥：
-
-- **GitHub OIDC 认证**：无需专用密钥。
-- **GitHub PAT 认证**：添加一个 `MCP_GITHUB_TOKEN` 密钥，包含具有 `read:org` 和 `read:user` 范围的 GitHub 个人访问令牌 (PAT)。
-- **DNS 认证**：添加一个 `MCP_PRIVATE_KEY` 密钥，包含你的 Ed25519 私钥。
-
+您可能需要添加密码，具体取决于您选择的身份验证方法：
+- **GitHub OIDC 身份验证**：无需专用秘密。
+- **GitHub PAT 身份验证**：使用 GitHub 个人访问令牌添加 `MCP_GITHUB_TOKEN` 密钥。在授予其命名空间之前，注册表只需要读取您的组织角色来确认您是 **所有者**，因此授予该名称空间的最小值，并且 **无** 存储库范围（注册表从不读取或写入您的代码）：
+  - **经典 PAT**：`read:org` 范围（*不需要*需要 `read:user`；裸令牌仍然可以进行身份验证并发布到您的个人命名空间）。
+  - **细粒度PAT**：**组织权限→成员→只读**权限（相当于`read:org`）。没有它，您将只能获得您的个人名称空间。细粒度 PAT 的范围仅限于一个资源所有者，因此请为您要发布到的组织创建它。
+对于 **组织** 令牌，请将其作为 **环境机密** 存储在 `mcp-registry-publish` 环境中，而不是普通的存储库机密 - 请参阅下面的“在 CI 中保护您的注册表令牌”，了解为什么这很重要以及如何配置环境。
+- **DNS 身份验证**：使用您的 Ed25519 私钥添加 `MCP_PRIVATE_KEY` 密钥。
 你可能还需要为包注册表添加密钥。例如，上面的工作流需要一个包含你的 npm 令牌的 `NPM_TOKEN` 密钥。
 
 有关如何向仓库添加密钥的信息，请参阅 [在 GitHub Actions 中使用密钥](https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets)。
 
-## 步骤 3：打标签和发布
+<a id="securing-your-registry-token-in-ci" />
+### 在 CI 中保护您的注册表令牌
+
+无论您使用哪种令牌进行身份验证，都请将其视为高价值凭证。当您对**组织**命名空间进行身份验证时，生成的注册表令牌可以发布并覆盖 `io.github.<org>/*` 下的**任何**服务器，而不仅仅是此存储库中的服务器。因此，与您的威胁模型相关的问题是：*谁可以导致代码在暴露此秘密的作业中运行？*默认情况下，这是**每个存储库编写者**（通过分支或标签推送），而不仅仅是组织所有者 - 因此，一个简单的存储库秘密悄悄地将发布访问权限扩大到具有写入权限的每个人。
+
+GitHub 为您提供了缩小这一差距的工具。我们建议，按强度递增顺序：
+1. **将令牌存储为 [环境机密](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments)，而不是存储库或组织机密。** 作业只能在声明 `environment:` 时读取环境机密（如上面的 PAT 示例所示）。请注意，单独的 `environment:` 密钥无法保护任何内容：如果环境尚不存在，则 GitHub 在首次运行时**自动创建没有保护规则**的环境，并且声明 `environment:` 的作业仍会接收普通存储库和组织机密。保护来自于将令牌存储为该环境中的秘密并配置环境（下面的步骤 2-3），而不是来自 `environment:` 密钥本身。
+2. **使用[部署分支规则](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments#deployment-branches-and-tags)将该环境限制为默认分支和/或发布标签**，并使用[所需的拉取请求审查](https://docs.github.com/en/repositories/configuring-branches-and-merges-in-your-repository/managing-protected-branches/about-protected-branches)保护该分支。现在只有经过审查、维护者批准的代码才能到达令牌。
+3. **（最强）向环境中添加[必需的审阅者](https://docs.github.com/en/actions/how-tos/deploy/configure-and-manage-deployments/manage-environments#required-reviewers)**，以便每次发布都会暂停以获取明确的人工批准。
+无论上述情况如何，都需要避免两个陷阱：
+- **永远不要从检查 PR 头代码的 `pull_request_target` 工作流程中发布。** 该触发器在基础存储库上下文中与您的机密一起运行，因此不受信任的分叉 PR 可能会泄露令牌。环境分支规则**不**在这里保护您（参考仍然是您的基础分支）——只有必需的审阅者才能保护您。
+- **避免在公共存储库上发布作业的自托管运行器**，在公共存储库上分叉 PR 可能能够在其上安排作业。
+默认情况下，来自分叉的拉取请求不会收到任何秘密，也无法推送分支，因此如果没有上述错误配置之一，外部贡献者就无法访问令牌。
+
+<a id="step-3-tag-and-release" />
+## 步骤 3：标记并发布
 
 创建并推送版本标签以触发工作流：
 
@@ -213,13 +296,15 @@ git push origin v1.0.0
 
 工作流将运行测试、构建包、将包发布到 npm，并将服务器发布到 MCP Registry。
 
+<a id="troubleshooting" />
 ## 故障排除
 
 {/* prettier-ignore-start */}
 
 | 错误消息 | 操作 |
 | --- | --- |
-| "认证失败" | 确保为 OIDC 设置了 `id-token: write` 权限，或检查 Secrets。 |
-| "软件包验证失败" | 验证您的软件包是否已成功发布到包注册表（例如，npm、PyPI），并且您的软件包拥有 [必要的验证信息](./package-types)。 |
+| “身份验证失败” | 确保为 OIDC 设置 `id-token: write` 权限，或检查机密。 |
+| “无效观众” | 您的 `mcp-publisher` 二进制文件对于此注册表部署来说太旧了。将 `MCP_PUBLISHER_VERSION` 更新到兼容版本并重新运行工作流程。 |
+| “包验证失败” | 验证您的包是否已成功发布到包注册表（例如，npm、PyPI），并且您的包是否具有[必要的验证信息](./package-types)。 |
 
 {/* prettier-ignore-end */}

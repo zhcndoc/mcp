@@ -14,11 +14,13 @@ description: 了解如何通过本地 MCP 服务器扩展 Claude Desktop，以�
   />
 </Frame>
 
+<a id="prerequisites" />
 ## 前提条件
 
 开始本教程之前，请确保您的系统上已安装以下内容：
 
-### Claude Desktop
+<a id="claude-desktop" />
+### 克劳德桌面
 
 下载并安装适用于您的操作系统的 [Claude Desktop](https://claude.ai/download)。Claude Desktop 适用于 macOS、Windows 和 Linux。
 
@@ -34,6 +36,7 @@ node --version
 
 如果未安装 Node.js，请从 [nodejs.org](https://nodejs.org/) 下载。为了稳定性，我们推荐安装 LTS（长期支持）版本。
 
+<a id="understanding-mcp-servers" />
 ## 了解 MCP 服务器
 
 MCP 服务器是在您的计算机上运行的程序，通过标准化协议为 Claude Desktop 提供特定功能。每个服务器都公开工具供 Claude 使用以执行操作，但需经您批准。我们将安装的文件系统服务器提供以下工具：
@@ -45,6 +48,7 @@ MCP 服务器是在您的计算机上运行的程序，通过标准化协议为 
 
 所有操作在执行前都需要您的明确批准，确保您完全控制 Claude 可以访问和修改的内容。
 
+<a id="installing-the-filesystem-server" />
 ## 安装文件系统服务器
 
 该过程涉及配置 Claude Desktop，以便在每次启动应用程序时自动启动文件系统服务器。此配置是通过一个 JSON 文件完成的，该文件告诉 Claude Desktop 运行哪些服务器以及如何连接到它们。
@@ -81,9 +85,9 @@ MCP 服务器是在您的计算机上运行的程序，通过标准化协议为 
 
 如果配置文件不存在，此操作将创建一个新文件，或者打开您现有的配置。该文件位于：
 
-- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
-
+- **macOS**：`~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows**：`%APPDATA%\Claude\claude_desktop_config.json`
+- **Linux**：`~/.config/Claude/claude_desktop_config.json`
 </Step>
 
 <Step title="配置文件系统服务器">
@@ -173,16 +177,19 @@ MCP 服务器是在您的计算机上运行的程序，通过标准化协议为 
 </Step>
 </Steps>
 
+<a id="using-the-filesystem-server" />
 ## 使用文件系统服务器
 
 连接文件系统服务器后，Claude 现在可以与您的文件系统交互。尝试这些示例请求以探索功能：
 
+<a id="file-management-examples" />
 ### 文件管理示例
 
 - **“你能写一首诗并保存到我的桌面吗？”** - Claude 将创作一首诗并在您的桌面上创建一个新文本文件
 - **“我的下载文件夹里有哪些与工作相关的文件？”** - Claude 将扫描您的下载文件夹并识别与工作相关的文档
 - **“请将我桌面上的所有图片整理到一个名为'Images'的新文件夹中”** - Claude 将创建一个文件夹并将图片文件移入其中
 
+<a id="how-approval-works" />
 ### 批准如何工作
 
 在执行任何文件系统操作之前，Claude 将请求您的批准。这确保您对所有操作保持控制：
@@ -197,6 +204,7 @@ MCP 服务器是在您的计算机上运行的程序，通过标准化协议为 
 
 在批准之前仔细审查每个请求。如果您对提议的操作感到不舒服，可以随时拒绝请求。
 
+<a id="troubleshooting" />
 ## 故障排除
 
 如果在设置或使用文件系统服务器时遇到问题，这些解决方案可解决常见问题：
@@ -204,12 +212,11 @@ MCP 服务器是在您的计算机上运行的程序，通过标准化协议为 
 <AccordionGroup>
 <Accordion title="服务器未在 Claude 中显示 / 锤子图标缺失">
 
-1. 完全重启 Claude Desktop
-2. 检查您的 `claude_desktop_config.json` 文件语法
-3. 确保 `claude_desktop_config.json` 中包含的文件路径有效，且它们是绝对路径而不是相对路径
-4. 查看 [日志](#getting-logs-from-claude-for-desktop) 以了解服务器未连接的原因
-5. 在命令行中，尝试手动运行服务器（像在 `claude_desktop_config.json` 中那样替换 `username`），看看是否出现任何错误：
-
+1.完全重新启动Claude Desktop
+2.检查您的 `claude_desktop_config.json` 文件语法
+3. 确保 `claude_desktop_config.json` 中包含的文件路径有效，并且它们是绝对路径而不是相对路径
+4.查看[日志](#getting-logs-from-claude-desktop)查看服务器无法连接的原因
+5. 在命令行中，尝试手动运行服务器（像在 `claude_desktop_config.json` 中那样替换 `username`）以查看是否出现任何错误：
 <CodeGroup>
 
 ```bash macOS/Linux
@@ -227,9 +234,9 @@ npx -y @modelcontextprotocol/server-filesystem C:\Users\username\Desktop C:\User
 
 与 MCP 相关的 Claude.app 日志写入以下位置的日志文件：
 
-- macOS: `~/Library/Logs/Claude`
-- Windows: `%APPDATA%\Claude\logs`
-
+- macOS：`~/Library/Logs/Claude`
+- Windows：`%APPDATA%\Claude\logs`
+- Linux：`~/.config/Claude/logs`
 - `mcp.log` 将包含有关 MCP 连接和连接失败的一般日志。
 - 名为 `mcp-server-SERVERNAME.log` 的文件将包含所命名服务器的 stderr 输出。stdio 服务器可能会使用 stderr 记录所有日志，因此这些文件不只限于错误信息。
 
@@ -237,8 +244,12 @@ npx -y @modelcontextprotocol/server-filesystem C:\Users\username\Desktop C:\User
 
 <CodeGroup>
 
-```bash macOS/Linux
+```bash macOS
 tail -n 20 -f ~/Library/Logs/Claude/mcp*.log
+```
+
+```bash Linux
+tail -n 20 -f ~/.config/Claude/logs/mcp*.log
 ```
 
 ```powershell Windows
@@ -296,6 +307,7 @@ npm install -g npm
 </Accordion>
 </AccordionGroup>
 
+<a id="next-steps" />
 ## 下一步
 
 既然您已成功将 Claude Desktop 连接到本地 MCP 服务器，请探索以下选项来扩展您的设置：

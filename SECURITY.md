@@ -1,221 +1,272 @@
-# Security Policy
+<a id="security-policy" />
+# 安全策略
 
-Thank you for helping keep the Model Context Protocol and its ecosystem secure.
+感谢您帮助确保模型上下文协议及其生态系统的安全。
 
-## Reporting Security Issues
+<a id="eu-cyber-resilience-act-cra-stewardship" />
+## 欧盟网络弹性法案 (CRA) 管理
 
-If you discover a security vulnerability in this repository, please report it through
-the [GitHub Security Advisory process](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability)
-for this repository.
+Model Context Protocol项目发布了软件，包括官方的SDK，即
+最终用于商业活动。
 
-Please **do not** report security vulnerabilities through public GitHub issues, discussions,
-or pull requests.
+CRA 管理权：该项目得到 Linux 基金会 CRA 管理权的支持
+框架，如 https://www.linuxfoundation.org/security. 中所述
+应通过下述机制报告安全漏洞，我们
+将与我们的 CRA 管理员协调。对于积极利用的漏洞和严重的
+可能需要CRA升级的事件，请使用项目的紧急安全
+适当的报告机制。
 
-## What to Include
+请参阅 Linux 基金会的
+[CRA开源项目指南](https://bestpractices.linuxfoundation.org/regulatory/cra/index.html)
+详细了解 CRA 对此类项目的要求。
 
-To help us triage and respond quickly, please include:
+<a id="reporting-security-issues" />
+## 报告安全问题
 
-- A description of the vulnerability
-- Steps to reproduce the issue
-- The potential impact
-- Any suggested fixes (optional)
+如果您发现此存储库中存在安全漏洞，请通过以下方式报告
+[GitHub 安全咨询流程](https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability)
+对于这个存储库。
 
-## Intended Behaviors and Trust Model
+请**不要**通过公共 GitHub 问题、讨论、
+或拉取请求。
 
-This section documents behaviors that are intentional design choices in MCP and are
-**not** considered security vulnerabilities. Understanding these behaviors helps
-developers build accurate threat models, enables security researchers to focus on
-genuine vulnerabilities, and clarifies the trust boundaries within MCP for all
-implementers.
+GitHub 安全公告也是该项目的紧急安全报告机制。
 
-### Trust Model
+通过 GitHub 安全报告主动利用的漏洞和严重事件
+有关受影响存储库的建议。
 
-MCP is designed to enable AI applications to interact with external tools, data
-sources, and services. The protocol operates under the following trust assumptions:
+在报告开头说明该漏洞正在被积极利用，或者
+事件正在进行中。
 
-**MCP clients trust MCP servers they connect to.** When a user or application
-configures an MCP client to connect to a server, the client trusts that server to
-provide tools, resources, and prompts. The security of this trust relationship
-depends on proper server selection and configuration by the user or administrator.
+<a id="what-to-include" />
+## 包含哪些内容
 
-**Local MCP servers are trusted like any other software you install.** When you run a
-local MCP server, you are trusting it with the same level of access as any other
-application or package on your system. Just as you would evaluate the trustworthiness
-of a library or tool before installing it, you should evaluate MCP servers before
-running them.
+为了帮助我们快速分类和响应，请包括：
+- 漏洞描述
+- 重现问题的步骤
+- 潜在影响
+- 任何建议的修复（可选）
 
-**MCP servers trust the execution environment they run in.** Servers have access to
-the resources available in their execution context. This is by design, as servers need
-access to local files, databases, APIs, or other resources to provide their intended
-functionality.
+<a id="intended-behaviors-and-trust-model" />
+## 预期行为和信任模型
 
-**Users and administrators are responsible for server selection.** MCP clients should
-provide clear information about server capabilities, but the decision to connect to
-and use a server rests with the user or administrator. Some clients may auto-connect
-to certain servers based on configuration; users should review these settings.
+本节记录了 MCP 中有意设计选择的行为，
+**不**考虑安全漏洞。了解这些行为有助于
+开发人员构建准确的威胁模型，使安全研究人员能够专注于
+真正的漏洞，并为所有人澄清 MCP 内的信任边界
+实施者。
 
-### Behaviors That Are Not Vulnerabilities
+<a id="trust-model" />
+### 信任模型
 
-The following behaviors are intentional features of MCP and are **not** eligible for
-security vulnerability reports:
+MCP 旨在使 AI 应用程序能够与外部工具、数据进行交互
+来源和服务。该协议在以下信任假设下运行：
 
-#### Command Execution for STDIO Transport
+**MCP 客户端信任它们连接到的 MCP 服务器。** 当用户或应用程序
+配置 MCP 客户端连接到服务器，客户端信任该服务器
+提供工具、资源和提示。这种信任关系的安全性
+取决于用户或管理员正确的服务器选择和配置。
 
-MCP clients using the STDIO transport launch MCP servers by executing commands. This
-command execution is an intended feature, not a vulnerability:
+**本地 MCP 服务器像您安装的任何其他软件一样受到信任。**当您运行
+本地 MCP 服务器，您信任它具有与任何其他服务器相同的访问级别
+系统上的应用程序或软件包。正如您评估可信度一样
+在安装库或工具之前，您应该先评估 MCP 服务器
+运行它们。
 
-- Clients execute the configured command to start the server process
-- The server process runs with the same privileges as the client
-- Command arguments specified in configuration are passed to the server
+**MCP 服务器信任其运行的执行环境。** 服务器有权访问
+其执行上下文中可用的资源。这是设计使然，因为服务器需要
+访问本地文件、数据库、API 或其他资源以提供其预期的
+功能。
 
-**This is expected behavior.** Users configure which servers to run, and the client
-executes those configurations. Reports about "arbitrary command execution" via STDIO
-transport configuration, whether in MCP client applications or SDKs, are not
-vulnerabilities. Process spawning is a core feature of the STDIO transport mechanism.
+**用户和管理员负责服务器选择。** MCP 客户端应
+提供有关服务器功能的清晰信息，但决定连接到
+并使用服务器取决于用户或管理员。部分客户端可能会自动连接
+根据配置到某些服务器；用户应该检查这些设置。
 
-#### STDIO Transport Trust Boundary
+<a id="behaviors-that-are-not-vulnerabilities" />
+### 不是漏洞的行为
 
-When using the stdio transport, the client spawns the server as a local subprocess in the
-designated environment (e.g., OS, containerized sandbox) and both run with equivalent
-environment-level privilege. The SDK does not defend either peer against a malicious
-counterpart across the stdio channel: a malicious server already has arbitrary code
-execution by virtue of being run, and a malicious client already has full process control
-over the server it spawned.
+以下行为是 MCP 的故意特征，**不**符合资格
+安全漏洞报告：
 
-Out of scope (file as a regular issue, no CVE/GHSA): reports whose only impact is that one
-stdio peer can crash, hang, exhaust resources of, or otherwise deny service to the other.
-If the affected SDK code is reachable via any of the supported remote transports or results
-in vulnerabilities such as a sandbox escape, the report remains in scope. Deployments that
-run stdio servers at reduced privilege (containers, sandboxes) are responsible for enforcing
-isolation at that boundary; the SDK's stdio transport is not a sandbox.
+<a id="command-execution-for-stdio-transport" />
+#### STDIO 传输的命令执行
 
-#### Server Capabilities and Side Effects
+使用 STDIO 传输的 MCP 客户端通过执行命令来启动 MCP 服务器。这个
+命令执行是预期功能，而不是漏洞：
+- 客户端执行配置的命令来启动服务器进程
+- 服务器进程以与客户端相同的权限运行
+- 配置中指定的命令参数被传递到服务器
+**这是预期的行为。** 用户配置要运行的服务器以及客户端
+执行这些配置。有关通过 STDIO“任意命令执行”的报告
+传输配置，无论是在 MCP 客户端应用程序还是 SDK 中，都不是
+漏洞。进程生成是 STDIO 传输机制的核心功能。
 
-MCP servers provide capabilities that may have significant effects on the system or
-external services. These capabilities are features, not vulnerabilities:
+<a id="stdio-transport-trust-boundary" />
+#### STDIO 传输信任边界
 
-**File system access:** Servers like the reference filesystem server intentionally
-read, write, and list files within their configured scope. A filesystem server's
-purpose is to provide file access to AI applications.
+当使用 stdio 传输时，客户端将服务器作为本地子进程生成
+指定的环境（例如操作系统、容器化沙箱）并且都以等效的方式运行
+环境级特权。 SDK 不会保护任一对等点免受恶意攻击
+stdio 通道上的对应部分：恶意服务器已经拥有任意代码
+通过运行来执行，恶意客户端已经拥有完全的进程控制权
+在它产生的服务器上。
 
-**Git and version control:** Servers providing git functionality can execute git
-commands, which may include operations like resetting commits or force pushing. If you
-grant an AI agent unrestricted access to git commands, it can perform any git
-operation—this is not a vulnerability in the server.
+超出范围（作为常规问题提交，无 CVE/GHSA）：其唯一影响是该报告
+stdio 对等方可能会崩溃、挂起、耗尽对方的资源或以其他方式拒绝向对方提供服务。
 
-**Database operations:** Servers may execute queries, modify data, or manage database
-schemas based on their intended purpose.
+如果可以通过任何受支持的远程传输或结果访问受影响的 SDK 代码
+对于沙箱逃逸等漏洞，该报告仍在范围内。部署
+以降低的权限（容器、沙箱）运行 stdio 服务器负责强制执行
+该边界处的隔离； SDK 的 stdio 传输不是沙箱。
 
-**Network and API access:** Servers may make HTTP requests, call external APIs, or
-interact with remote services.
+<a id="server-capabilities-and-side-effects" />
+#### 服务器功能和副作用
 
-**System commands:** Some servers are designed to execute system commands or scripts.
+MCP 服务器提供可能对系统产生重大影响的功能或
+外部服务。这些功能是特性，而不是漏洞：
 
-**This is expected behavior.** Servers that perform their documented functions are
-working as intended. Reports about "server X can perform action Y" are not
-vulnerabilities when Y is the server's intended purpose. The appropriate safeguards
-and permissions for these capabilities are the responsibility of the user or
-administrator deploying the server.
+**文件系统访问：**服务器故意像参考文件系统服务器一样
+读取、写入和列出其配置范围内的文件。文件系统服务器的
+目的是提供对 AI 应用程序的文件访问。
 
-#### Resource Access Patterns
+**Git和版本控制：**提供git功能的服务器可以执行git
+命令，其中可能包括重置提交或强制推送等操作。如果你
+授予 AI 代理对 git 命令的无限制访问权限，它可以执行任何 git
+操作——这不是服务器中的漏洞。
 
-MCP resources expose data to clients. Servers may provide resources containing file
-contents, database query results, API responses, or system information.
+**数据库操作：**服务器可以执行查询、修改数据或管理数据库
+基于其预期目的的模式。
 
-**This is expected behavior.** Resources are designed to provide context and data to
-AI applications. The scope of accessible data is determined by server implementation
-and configuration.
+**网络和 API 访问：** 服务器可以发出 HTTP 请求、调用外部 API 或
+与远程服务交互。
 
-#### LLM-Driven Tool Invocation
+**系统命令：** 某些服务器被设计为执行系统命令或脚本。
 
-When AI applications use MCP, the language model determines which tools to invoke
-based on user requests and available tool descriptions. This means:
+**这是预期的行为。** 执行其记录功能的服务器是
+按预期工作。关于“服务器 X 可以执行操作 Y”的报告不是
+当 Y 是服务器的预期用途时存在漏洞。适当的保障措施
+这些功能的权限由用户或
+管理员部署服务器。
 
-- The LLM may invoke tools in ways the user did not explicitly request
-- Tool invocations depend on how the LLM interprets the user's intent
-- Multiple tools may be invoked in sequence
+<a id="resource-access-patterns" />
+#### 资源访问模式
 
-**This is expected behavior.** LLM-driven tool selection is fundamental to how AI
-applications use MCP. Reports about "LLM invoked unexpected tool" are not MCP
-vulnerabilities, as they relate to LLM behavior and application-level controls.
+MCP 资源向客户端公开数据。服务器可能提供包含文件的资源
+内容、数据库查询结果、API 响应或系统信息。
 
-### Developer and Operator Responsibilities
+**这是预期的行为。** 资源旨在提供上下文和数据
+人工智能应用。可访问数据的范围由服务器实现决定
+和配置。
 
-MCP's security model places certain responsibilities on developers and operators:
+<a id="llm-driven-tool-invocation" />
+#### LLM 驱动的工具调用
 
-**Server developers are responsible for:**
+当AI应用程序使用MCP时，语言模型决定调用哪些工具
+基于用户请求和可用工具描述。这意味着：
+- LLM 可能会以用户未明确请求的方式调用工具
+- 工具调用取决于法学硕士如何解释用户的意图
+- 可以按顺序调用多个工具
+**这是预期的行为。** LLM 驱动的工具选择是 AI 的基础
+应用程序使用 MCP。有关“LLM 调用意外工具”的报告不是 MCP
+漏洞，因为它们与 LLM 行为和应用程序级控制相关。
 
-- Implementing appropriate access controls within their servers
-- Documenting the capabilities and permissions their servers require
-- Validating inputs from clients before performing sensitive operations
-- Following the principle of least privilege in server design
+<a id="developer-and-operator-responsibilities" />
+### 开发者和运营者的责任
 
-**Client developers are responsible for:**
+MCP的安全模型给开发者和运营者赋予了一定的责任：
 
-- Providing clear information to users about server capabilities
-- Implementing appropriate consent mechanisms before connecting to servers
-- Displaying tool invocations and resource access to users when appropriate
-- Sandboxing server execution where feasible
+**服务器开发人员负责：**
+- 在其服务器内实施适当的访问控制
+- 记录其服务器所需的功能和权限
+- 在执行敏感操作之前验证客户端的输入
+- 服务器设计遵循最小权限原则
+**客户端开发人员负责：**
+- 向用户提供有关服务器功能的清晰信息
+- 在连接到服务器之前实施适当的同意机制
+- 在适当的时候向用户显示工具调用和资源访问
+- 在可行的情况下沙盒服务器执行
+**运营商和用户负责：**
+- 仅连接到受信任的 MCP 服务器
+- 部署前检查服务器配置
+- 了解它们启用的服务器的功能
+- 为其环境配置适当的访问限制
+有关构建和部署安全 MCP 实施的其他指南，请参阅
+[安全最佳实践](https://modelcontextprotocol.io/specification/draft/basic/security_best_practices)
+文档。
 
-**Operators and users are responsible for:**
+<a id="what-remains-in-scope" />
+### 范围内剩下的内容
 
-- Connecting only to trusted MCP servers
-- Reviewing server configurations before deployment
-- Understanding the capabilities of servers they enable
-- Configuring appropriate access restrictions for their environment
+以下类别**在出现时**被视为安全漏洞
+来自 MCP 规范或官方 SDK 实现中的缺陷：
+- **协议级漏洞**：MCP 规范中的缺陷导致
+  攻击，无论实施如何
+- **身份验证/授权绕过**：访问资源或调用工具的方式
+  未经适当授权
+- **实现漏洞**：特定 SDK 实现中的错误（缓冲区
+  溢出、注入缺陷等）
+- **沙箱逃逸**：明确突破预期的隔离边界
+  协议或 SDK 中定义
+- **会话劫持**：未经授权访问其他用户的会话
+- **令牌被盗或泄漏**：暴露访问令牌的漏洞
+- **跨租户访问**：访问属于其他用户的资源
+  多租户部署
+此列表并不详尽。
 
-For additional guidance on building and deploying secure MCP implementations, see the
-[Security Best Practices](https://modelcontextprotocol.io/specification/draft/basic/security_best_practices)
-documentation.
+<a id="sdk-vulnerability-disclosure" />
+## SDK漏洞披露
 
-### What Remains In Scope
+针对官方 MCP SDK 的安全报告通过 GitHub Security 处理
+有关受影响 SDK 存储库的建议。私人漏洞报告已启用
+modelcontextprotocol 组织中的每个官方 SDK 存储库。
 
-The following categories **are** considered security vulnerabilities when they arise
-from flaws in the MCP specification or official SDK implementations:
+收到报告后，该 SDK 的维护人员会评估是否存在相同问题
+影响其他官方SDK。许多 MCP 漏洞源于共享模式、传输
+多个 SDK 以相同方式实现的实现或规范级行为。的
+接收维护者与其他可能受影响的 SDK 的维护者进行协调，以
+确定哪些受到影响以及受影响的程度，以便可以进行修复和建议
+一起发布，而不是在其他 SDK 发布后将某些 SDK 暴露出来。
 
-- **Protocol-level vulnerabilities**: Flaws in the MCP specification that enable
-  attacks regardless of implementation
-- **Authentication/authorization bypasses**: Ways to access resources or invoke tools
-  without proper authorization
-- **Implementation vulnerabilities**: Bugs in specific SDK implementations (buffer
-  overflows, injection flaws, etc.)
-- **Sandbox escapes**: Breaking out of intended isolation boundaries explicitly
-  defined in the protocol or SDKs
-- **Session hijacking**: Unauthorized access to another user's session
-- **Token theft or leakage**: Vulnerabilities that expose access tokens
-- **Cross-tenant access**: Accessing resources belonging to other users in
-  multi-tenant deployments
+如果根本原因是规范中的缺陷而不是实现错误，则
+协调维护人员将与规范维护人员讨论这一点。
 
-This list is not exhaustive.
+CVE 作为 GHSA 工作流程的一部分通过 GitHub 的 CNA 进行分配。
 
-## SDK Vulnerability Disclosure
+<a id="reporting-guidelines" />
+### 报告指南
 
-Security reports against the official MCP SDKs are handled through GitHub Security
-Advisories on the affected SDK's repository. Private vulnerability reporting is enabled on
-every official SDK repository in the modelcontextprotocol organization.
+在评估是否报告潜在安全问题时：
+1. **首先检查此文档。** 如果行为按预期列出，则不属于
+   一个漏洞。
+2. **考虑信任模型。** 如果问题需要攻击者已经拥有
+   信任模型假设他们拥有的访问权限，这可能不是漏洞。
+3. **关注意外访问。** 漏洞通常涉及访问
+   资源或执行在既定条件下不可能执行的操作
+   信任边界。
+4. **提供背景信息。** 如果您认为自己发现了真正的漏洞，
+   解释它如何违反预期的安全边界。
 
-When a report is received, the maintainers of that SDK assess whether the same issue
-affects other official SDKs. Many MCP vulnerabilities stem from shared patterns, transport
-implementations, or spec-level behavior that multiple SDKs implement the same way. The
-receiving maintainers coordinate with the maintainers of other potentially affected SDKs to
-determine which are impacted and to what degree, so that fixes and advisories can be
-released together rather than leaving some SDKs exposed after others have published.
+<a id="cra-escalation-for-maintainers" />
+## 维护人员的 CRA 升级
 
-If the root cause is a defect in the specification rather than an implementation bug, the
-coordinating maintainers will discuss this with the specification maintainers.
+如果您是维护者并且您了解到一个被积极利用的漏洞或严重的
+事件，例如发布过程的妥协，通知核心维护者或领导
+维护者立即在 `#security-disclosures` 上
+[MCP 贡献者Discord](https://discord.gg/6CSzBmMkjX)。修复问题时通知他们
+出现问题，永远不要解决它。
 
-CVEs are assigned through GitHub's CNA as part of the GHSA workflow.
+您通知的核心维护者或首席维护者与 Linux 基金会 CRA 管理员联系：
 
-### Reporting Guidelines
+steward@linuxfoundation.org 并从那时起与管家合作，因此该项目涉及
+管家异口同声。请勿自行联系管家。 CRA 设定了较短的期限
+对于管家的报告，首先是在 24 小时内发出预警，然后是更全面的报告
+72 小时内通知，因此任何步骤的延迟都会给管理员留下更少的时间。
 
-When evaluating whether to report a potential security issue:
+没有利用证据的漏洞不是 CRA 升级事件。处理它
+通过正常的咨询流程。
 
-1. **Check this document first.** If the behavior is listed as intended, it is not
-   a vulnerability.
-2. **Consider the trust model.** If the issue requires the attacker to already have
-   access that the trust model assumes they have, it may not be a vulnerability.
-3. **Focus on unexpected access.** Vulnerabilities typically involve accessing
-   resources or performing actions that should not be possible given the established
-   trust boundaries.
-4. **Provide context.** If you believe you have found a genuine vulnerability,
-   explain how it violates the intended security boundaries.
+在咨询中记录（如果有的话）项目第一次了解到问题的时间以及
+当管家接到通知后。
+
+记者必须使用 GitHub 安全公告，而不是管理员地址。

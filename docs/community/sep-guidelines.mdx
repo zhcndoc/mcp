@@ -1,272 +1,153 @@
 ---
 title: SEP 指南
-description: 用于提议更改模型上下文协议 (Model Context Protocol) 的规范增强提案 (SEP) 指南
+description: 介绍何时需要规范增强提案，以及提案从拉取请求到 Final 的流程。
 ---
 
-## 什么是 SEP？
+本页说明何时需要规范增强提案（SEP），以及提案从拉取请求到 Final 的处理流程。SEP 是一份设计文档，用简明的技术规范描述一项功能或流程，并说明设计理由。作者负责推动社区达成共识，并记录不同意见。[SEP-1850](/seps/1850) 确立了此流程，[SEP-2484](/seps/2484) 确立了一致性测试门槛。修改这两项流程都需要提交流程类 SEP。本页的赞助规则遵循 [SEP-3398](/seps/3398)。
 
-SEP 代表规范增强提案 (Specification Enhancement Proposal)。SEP 是一份设计文档，用于向 MCP 社区提供信息，或描述模型上下文协议 (Model Context Protocol) 及其流程的新功能。SEP 应提供该功能的简明技术规范以及该功能的理由。
+<a id="when-you-need-a-sep" />
+## 当您需要 SEP 时
 
-SEP 是提议主要新功能、收集社区对某个问题的意见以及记录 MCP 设计决策的主要机制。SEP 作者负责在社区内建立共识并记录反对意见。
+以下变更需要编写 SEP：
+- 新的、更改的或删除的协议功能或方法（新的 RPC 方法，例如 `tools/execute`、新的功能协商字段、传输的更改）
+- 任何不向后兼容的更改
+- 消息格式或模式结构的更改
+- 核心规范之外支持的互操作性约定
+- 治理或流程变更
+- 任何有争议的或有几个看似合理的设计，例如授权工作方式的改变
+错误修复、澄清、编辑性修改、现有功能的新示例、不改变行为的架构修正和测试，都通过普通拉取请求提交。治理文件本身的修订遵循 [SEP-2085](/seps/2085) 中的流程，而不是本流程。如有疑问，请先在 [Discord](/community/communication#discord) 中询问。
 
-在起草 SEP 时，作者应查阅 [MCP 设计原则](/community/design-principles)，其中概述了指导协议演进的核心价值观和权衡。
-
-SEP 作为 markdown 文件维护在规范仓库的 [`seps/` 目录](https://github.com/modelcontextprotocol/modelcontextprotocol/tree/main/seps) 中。它们的修订历史作为功能提案的历史记录。
-
-## 何时编写 SEP
-
-SEP 流程保留给那些需要广泛社区讨论、正式设计文档和历史记录的重大更改。对于较小的更改，常规的 GitHub 拉取请求通常更合适。
-
-**如果您的更改涉及以下内容，请编写 SEP：**
-
-- **新功能或协议更改** - 在协议中添加、修改或删除功能（新的 API 方法、消息格式更改、互操作性标准）
-- **破坏性更改** - 任何不向后兼容的更改
-- **治理或流程更改** - 更改决策或贡献指南
-- **复杂或有争议的主题** - 可能有多种有效解决方案或引发重大辩论的更改
-
-**以下情况可跳过 SEP 流程：**
-
-- Bug 修复和拼写纠正
-- 文档澄清
-- 为现有功能添加示例
-- 不改变行为的次要模式修复
-
-不确定？在 [Discord](/community/communication#discord) 中询问。
-
+<a id="sep-types" />
 ## SEP 类型
 
-SEP 有四种类型：
+- 标准轨道：描述新的协议功能或实现，或核心规范之外支持的互操作标准。
+- 信息类：描述设计问题，或为社区提供指南，不引入新功能。
+- 流程类：描述 MCP 相关流程，或提议修改现有流程。
+- 扩展轨道：描述协议扩展，审查和接受流程与标准轨道相同。扩展轨道 SEP 获得接受后，扩展进入 Beta；第二份扩展轨道 SEP 可将其提升至 Stable（阶段说明见[扩展生命周期](/extensions/overview#extension-lifecycle)）。
 
-1. **标准轨道** - 描述 Model Context Protocol 的新功能或实现，或核心规范之外支持的互操作性标准。
-2. **信息性** - 描述设计问题，或在不提议新功能的情况下向社区提供指南/信息。
-3. **流程** - 描述围绕 MCP 的某个流程，或提议对某个流程的更改（如本文档）。
-4. **扩展轨道** - 描述协议扩展。遵循与标准轨道 SEP 相同的审查和接受流程，但表明该提案针对的是扩展而不是协议新增。有关扩展生命周期，请参阅 [创建扩展](/extensions/overview#creating-extensions)。
+<a id="before-you-write" />
+## 在你写之前
 
-## SEP 工作流程
+正式审查前，SEP 需要由工作组或核心维护者团队赞助（参见[赞助人](#sponsors)）。
+
+要获得工作组赞助：
+
+1. 检查想法是否符合[路线图](/development/roadmap)当前的重点。路线图优先领域之外的 SEP 可能需要等待更久，审查门槛也更高（参阅 [SEP 优先级](/development/roadmap#sep-prioritization)）。
+2. 在相关工作组的 Discord 频道或会议上提出想法（参阅[加入小组](/community/working-interest-groups#joining-a-group)）。兴趣组可以先帮助明确问题，再由工作组赞助 SEP。
+3. 在工作组中达成[共识](/community/working-interest-groups#making-decisions)，然后起草该工作组愿意[赞助](#sponsors)的 SEP。阅读[设计原则](/community/design-principles)；如果适合，先将想法作为[扩展](/extensions/overview)试行，并构建符合[原型要求](#prototype-requirements)的原型。
+4. 工作组通过[工作流程](#workflow)将 SEP 提交核心维护者审查。
+
+如果兴趣组负责该领域、但尚无工作组，兴趣组可以通过[组建小组](/community/working-interest-groups#forming-a-group)流程成立工作组，由该工作组赞助 SEP。这是兴趣组负责领域的常规路径。如果该领域目前没有工作组或兴趣组覆盖，可以通过[组建小组](/community/working-interest-groups#forming-a-group)流程提议创建工作组。也可以在 Discord 的 `#general` 频道发起讨论，寻找新工作组的参与者。
+
+<a id="workflow" />
+## 工作流程
 
 ```mermaid
 flowchart TD
-    Idea["想法"]
-    AwaitingSponsor{"等待赞助人<br/>（最多 6 个月）"}
-    Draft["草稿"]
-    Dormant["休眠<br/>（无赞助人）"]
-    Withdrawn["撤回<br/>（由作者）"]
-    InReview["审查中"]
-    Decision{"核心维护者决定"}
-    Accepted["已接受"]
-    Rejected["已拒绝"]
-    Final["最终版"]
+    Idea["Idea"]
+    DraftPR["Draft pull request<br/>(not yet in the SEP process)"]
+    Draft["draft status<br/>(pull request ready for review)"]
+    Dormant["dormant"]
+    Withdrawn["withdrawn"]
+    InReview["in-review"]
+    Decision{"Core Maintainers decide"}
+    Accepted["accepted"]
+    Rejected["rejected"]
+    Final["final"]
+    Superseded["superseded"]
 
-    Idea -->|"提交包含 SEP 文件的 PR"| AwaitingSponsor
-    AwaitingSponsor --> Draft
-    AwaitingSponsor --> Dormant
-    AwaitingSponsor --> Withdrawn
-    Draft -->|"赞助人审查"| InReview
+    Idea -->|"Developed in the open,<br/>no sponsor yet"| DraftPR
+    Idea -->|"Working group<br/>agrees to sponsor"| Draft
+    DraftPR -->|"Working group<br/>agrees to sponsor"| Draft
+    DraftPR -->|"180 days without a sponsor"| Dormant
+    Dormant -->|"Sponsor found, PR reopened"| Draft
+    Draft --> Withdrawn
+    Draft -->|"Sponsor sets in-review"| InReview
     InReview --> Decision
     Decision --> Accepted
     Decision --> Rejected
-    Accepted -->|"参考实现 +<br/>一致性测试完成"| Final
+    Decision -->|"Returned with feedback"| Draft
+    Accepted -->|"Specification text, reference implementation<br/>and conformance test complete"| Final
+    Final -->|"Replaced by a newer SEP"| Superseded
 ```
 
-### 逐步流程
+1. 将 [`seps/TEMPLATE.md`](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/seps/TEMPLATE.md) 复制为 `seps/0000-<slug>.md` 并填写。
+2. 按照[拉取请求标题指南](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/CONTRIBUTING.md#pull-request-titles)，在[规范仓库](https://github.com/modelcontextprotocol/modelcontextprotocol)中创建拉取请求，标题采用 `sep: <description>` 格式，例如 `sep: propose task cancellation`。尚未加入 `modelcontextprotocol` GitHub 组织的作者，请工作组负责人或[赞助人](#sponsors)代为创建拉取请求，并在其中注明作者。
+3. SEP 编号就是 PR 编号。创建 PR 后，按编号重命名文件（例如 PR #1850 对应 `seps/1850-<slug>.md`），更新文件头部，然后运行 `npm run generate:seps`，否则 `check:seps` CI 作业会失败。将 PR 标题改为 `sep(SEP-1850): <description>`。后续提交即可，无需 amend 或强制推送。之后有关该 SEP 的拉取请求都应以 `SEP-1850` 为范围，并在描述中链接到它。
+4. 工作组同意赞助 SEP 前，提案保留为草稿拉取请求。草稿 PR 用于公开完善提案，此时提案尚未进入 SEP 流程，SEP 文件中的 `Status` 字段保持空白，并添加 `wg-support-needed` 标签。
+5. 工作组同意[赞助](#sponsors) SEP 后，将拉取请求标记为可供审查。`Sponsor` 字段填写代表赞助小组行事的人员；该人员将状态设为 `draft`。非正式审查在 PR 评论中进行。
+6. SEP 准备就绪后，赞助人确认此前的讨论已经进行，且讨论链接已包含在 PR 描述中，然后将状态设为 `in-review`，并把 SEP 列入核心维护者会议议程。作者和赞助人可以进行介绍。
+7. 核心维护者按照[审查与接受](#review-and-acceptance)作出决定。赞助人在 PR 和 SEP 文件头部记录结果：`accepted` 或 `rejected`。
+8. SEP 被接受后，作者在同一个 PR 中添加规范正文、`schema.ts` 变更及重新生成的输出（参阅 [CONTRIBUTING.md](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/CONTRIBUTING.md#schema-changes)）、变更日志条目和所需的文档修改（弃用功能时，需完成[弃用功能](/community/feature-lifecycle#deprecating-a-feature)中列出的四项修改）。参考实现在其所在位置完成，可以是 SDK 分支、fork 或独立仓库（参阅[原型要求](#prototype-requirements)）。对于具有可观察协议行为的标准轨道 SEP，还须合并一致性测试场景和 `sep-NNNN.yaml` 文件（参阅[一致性测试要求](#conformance-test-requirement)）。达到 Final 不要求 SDK 实现。
+9. 赞助人验证这些产物并将状态设为 `final`，随后合并 PR。
 
-**Prior discussion is required.** SEP authors must discuss the idea with the relevant [working or interest group](/community/working-interest-groups) in [Discord](/community/communication#discord) before opening the SEP pull request, and the PR description must link to that discussion (a Discord thread, WG/IG meeting notes, or a GitHub Discussion). A SEP without a linked prior discussion is not accepted. If no relevant group exists, start a conversation in [GitHub Discussions](https://github.com/modelcontextprotocol/modelcontextprotocol/discussions) or the `#general` channel in [Discord](/community/communication#discord) instead. If there is enough interest, it may be worth [creating a new IG or WG](/community/working-interest-groups#creating-an-interest-group). The effort involved in finding sponsors and facilitators is a good signal of whether the idea has sufficient traction.
+八种 `Status` 状态也定义在 [SEP 索引](/seps)中：
 
-<Note>
-  为了提高 SEP 被接受的机会，请检查其与 [核心维护者](/community/governance#roles) 优先级和 [设计原则](/community/design-principles) 的一致性。优先级通常反映在 [项目路线图](/development/roadmap) 中。当前优先级之外或与设计原则冲突的提案更可能在审查过程中面临延误或额外的摩擦。
-</Note>
+| 状态 | 含义 | 设置者 |
+| ------------ | ---------------------------------------------------------------------------------- | ------------------------------------------- |
+| `draft` | 已有赞助人，PR 可供审查，正在评论中进行非正式审查 | 赞助人 |
+| `in-review` | 已列入核心维护者正式审查议程 | 赞助人 |
+| `accepted` | 已接受，等待规范正文、参考实现和一致性测试完成 | 核心维护者决定后由赞助人设置 |
+| `rejected` | 已被核心维护者拒绝 | 核心维护者决定后由赞助人设置 |
+| `withdrawn` | 作者已撤回提案 | 作者或赞助人 |
+| `final` | 所有产物均已完成且 PR 已合并 | 赞助人 |
+| `superseded` | 已被更新的 SEP 取代 | 赞助人 |
+| `dormant` | 180 天内未找到赞助人，PR 已关闭；可恢复 | 核心维护者 |
 
-1. **与相关小组讨论**：将你的想法带到匹配的[工作组或兴趣组](/community/working-interest-groups)中，并在那里完善。保留讨论链接（Discord 线程、会议记录或 GitHub Discussion），以便将其添加到 PR 描述中。
+180 天内未找到赞助人的 SEP 会标记为 `dormant`，并关闭其 PR。休眠不等于拒绝：找到赞助人并重新打开 PR，即可恢复该 SEP 并将其状态改回 `draft`。
 
-2. **起草你的 SEP**：将其写成名为 `0000-your-feature-title.md` 的 Markdown 文件，使用 `0000` 作为占位符。遵循下面的 [SEP 格式](#sep-format)。
+<a id="sponsors" />
+## 赞助商
 
-3. **创建拉取请求**：将你的 SEP 文件添加到[规范仓库](https://github.com/modelcontextprotocol/modelcontextprotocol)的 `seps/` 目录中。该仓库仅接受协作者提交的拉取请求。
+SEP 可以由工作组或核心维护者团队赞助。两种方式遵循相同的审查流程和接受要求。
 
-4. **更新 SEP 编号**：创建 PR 后，使用 PR 编号重命名文件（例如，PR #1850 变为 `1850-your-feature-title.md`）并更新 SEP 头部。
+- **工作组赞助：**SEP 所属范围的工作组通过[决策流程](/community/working-interest-groups#making-decisions)批准提案。[在起草前](#before-you-write)介绍了工作组如何决定赞助 SEP。
+- **核心维护者团队赞助：**核心维护者同意赞助 SEP，并指定一名核心维护者代表团队。不需要工作组另行批准，但指定的核心维护者会征询相关工作组意见。这是例外途径；通常核心维护者不会赞助 SEP，除非提案由核心维护者直接提出。
 
-5. **寻找赞助人**：从[维护者列表](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/MAINTAINERS.md)中标记一位核心维护者或维护者。选择负责领域与你的提案相关的人。提示：
-   - 标记 1-2 位相关维护者，而不是所有人
-   - 在相关 Discord 频道中分享你的 PR
-   - 如果 2 周后没有回应，请在 `#general` 中询问
+`Sponsor` 字段填写代表赞助团队行事的维护者或核心维护者，例如 `Name (@handle), on behalf of the Transports Working Group` 或 `Name (@handle), on behalf of the Core Maintainers`。工作组可由符合资格的工作组负责人担任此角色；核心维护者团队则由指定的核心维护者担任。本页其余部分将此人称为赞助人。
 
-6. **赞助人指派自己**：赞助人同意后，会将自己指派给 PR，并将 SEP 状态更新为 `draft`。
+赞助人负责维护 SEP 的状态和标签，并跟踪实现进度。赞助人审查提案、要求修改、与作者共同介绍提案、提交核心维护者审查、核验 Final 所需产物，并按照[工作流程](#workflow)更新每个状态。这包括 SEP 文件中的规范字段 `Status`，以及用于筛选的对应 PR 标签。没有分支写入权限时，赞助人请作者代为修改状态字段。作者不应自行修改 `Status` 或标签，而应联系赞助人。
 
-7. **非正式审查**：赞助人审查提案并可能请求更改。讨论发生在 PR 评论中。
+赞助团队、赞助人和作者共同负责推进 SEP。如果作者无权在规范仓库中创建拉取请求，由工作组负责人或赞助人代为创建，并注明作者。SEP 仍按 PR 编号。
 
-8. **正式审查**：准备就绪后，赞助人将状态更新为 `in-review`。在此之前，赞助人会确认小组讨论已经完成，并且其链接已包含在 PR 描述中。SEP 进入核心维护者的正式审查（每两周举行会议）。
+工作组负责人也可以按照[领导职责](/community/working-interest-groups#leadership)分流并关闭工作组范围内的 SEP；相关决定可向核心维护者申诉。
 
-9. **决议**：SEP 可能被标记为 `accepted`、`rejected` 或退回修改。赞助人更新状态。
-
-10. **最终确定**：接受后，必须完成参考实现。对于具有可观察协议行为的标准轨道 SEP，还必须合并一个[一致性测试](#conformance-test-requirement)。作者将规范更改（模式更改、规范文本和变更日志条目）添加到 SEP 的拉取请求中。SEP 无需 SDK 实现即可变为 `final`。完成这些工作后，赞助人将状态更新为 `final`，SEP 的 PR 即可合并。已合并的 SEP 会发布在 [SEP 索引](/seps/index)中，并可通过编号在 `modelcontextprotocol.io/seps/<number>` 访问（例如 [/seps/1850](/seps/1850)）。
-
-### SEP 状态
-
-| 状态         | 含义                                          |
-| ------------ | ------------------------------------------------ |
-| `draft`      | 有赞助人，正在进行非正式审查                   |
-| `in-review`  | 已准备好接受核心维护者的正式审查               |
-| `accepted`   | 已批准，等待实现 + 一致性验证                  |
-| `rejected`   | 被核心维护者拒绝                               |
-| `withdrawn`  | 作者撤回了提案                                 |
-| `final`      | 已完成实现和一致性验证                         |
-| `superseded` | 已被更新的 SEP 取代                            |
-| `dormant`    | 6 个月内未找到赞助人；可重新激活               |
-
-**重要区别**：`dormant` 与 `rejected` 不同。休眠的 SEP 只是没有找到赞助人——想法可能仍然有效。如果情况发生变化（新的社区兴趣、新的用例），可以通过寻找赞助人并重新打开 PR 来恢复休眠的 SEP。
-
-## SEP 格式
-
-每个 SEP 应包含以下部分：
-
-### 1. 前言
-
-简短的描述性标题、作者姓名/联系信息、当前状态、SEP 类型和 PR 编号。
-
-### 2. 摘要
-
-对所解决的技术问题的简短（约 200 字）描述。
-
-### 3. 动机
-
-为什么现有的协议规范不足。这至关重要——没有充分动机的 SEP 可能会被直接拒绝。
-
-### 4. 规范
-
-描述新功能语法和语义的技术规范。必须足够详细，以便进行竞争性的互操作实现。
-
-### 5. 理由
-
-为何做出特定的设计决策、考虑的替代设计以及相关的工作。应提供社区共识的证据并解决讨论期间提出的反对意见。
-
-### 6. 向后兼容性
-
-所有引入向后不兼容性的 SEP 必须描述这些不兼容性、其严重程度以及如何处理它们。
-
-### 7. 参考实现
-
-必须在 SEP 达到“最终”状态之前完成，但在接受之前不必完成。
-
-### 8. 安全影响
-
-任何与 SEP 相关的安全问题都应明确记录。
-
-有关完整的文件结构，请参阅 [SEP 模板](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/seps/README.md#sep-file-structure)。
-
+<a id="prototype-requirements" />
 ## 原型要求
 
-在 SEP 被接受之前，您需要“一个演示提案的原型实现”。以下是符合条件的内容：
+SEP 在获接受前必须提供可运行的原型，可以是官方 SDK 中的分支或 fork、展示关键机制的独立概念验证、覆盖拟议行为的集成测试，或参考服务器/客户端。原型应证明核心功能按描述运行、API 设计实用易用、已发现边界情况和实现问题，并且审查者能按照随附的设置说明运行它。仅有伪代码或没有代码的设计文档不符合要求。原型无需达到生产质量。
 
-**可接受的原型：**
+<a id="review-and-acceptance" />
+## 审核与验收
 
-- 官方 SDK 之一中的工作实现（作为分支/分叉）
-- 演示关键机制的独立概念验证
-- 显示提议行为的集成测试
-- 实现该功能的参考服务器或客户端
+核心维护者每两周召开一次会议，并依据[决策流程](/community/governance#decision-process)审查状态为 `in-review` 的 SEP。审查标准包括：是否有可运行的原型、是否能明显惠及 MCP 生态、是否获得社区支持并形成共识，以及是否符合路线图和设计原则。结果为 `accepted`、`rejected`，或退回 `draft` 并在 PR 中记录具体反馈。
 
-**原型应该：**
-
-- 演示核心功能按描述工作
-- 显示 API 设计是实用且符合人体工程学的
-- 揭示任何边缘情况或实现挑战
-- 可供审查者运行（包括设置说明）
-
-**不足够：**
-
-- 仅伪代码
-- 没有代码的设计文档
-- “相信我，它有效”——审查者需要看到它
-
-原型不需要达到生产就绪状态。它的存在是为了证明可行性并尽早发现问题。
-
-## 赞助人角色
-
-赞助人是核心维护者或维护者，他们在审查过程中支持 SEP。赞助人的职责包括：
-
-- 审查提案并提供建设性反馈
-- 根据社区意见请求更改
-- **更新 SEP 状态** 随着提案的进展
-- 当 SEP 准备就绪时启动正式审查
-- 在核心维护者会议上展示和讨论提案
-- 确保提案符合质量标准
-
-作者应通过其赞助人请求状态更改，而不是自己修改状态字段。
-
-## 状态管理
-
-**发起人负责更新 SEP 状态。** 这确保状态转换由具有相应权限和上下文的人适当地进行。
-
-发起人：
-
-1. 直接在 SEP markdown 文件中更新 `Status` 字段（或者，如果他们无法访问源仓库，则与作者合作设置正确的状态）
-2. 将匹配的标签应用于拉取请求（例如，`draft`、`in-review`、`accepted`）
-
-markdown 状态字段和 PR 标签都应保持同步。markdown 文件是规范记录（与提案一起版本化），而 PR 标签使其易于过滤和搜索。
-
-## SEP 审查与决议
-
-SEP 由 MCP 核心维护者团队每两周审查一次。
-
-SEP 要被接受，必须满足以下标准：
-
-- 一个展示该提案的原型实现
-- 对 MCP 生态系统有明确的好处
-- 社区支持和共识
-
-SEP 被接受后，作者将规范更改（模式更改、规范文本和变更日志条目）添加到 SEP 的拉取请求中。参考实现必须完成，同时还要完成任何所需的[一致性测试](#conformance-test-requirement)。不要求 SDK 实现。完成这些工作后，状态变为“Final”，PR 即可合并。
-
+<a id="conformance-test-requirement" />
 ## 一致性测试要求
 
-对于引入或修改可观察协议行为的**标准轨道 SEP**，在 SEP 能够达到 `Final` 状态之前，必须将一致性场景合并到 [一致性仓库](https://github.com/modelcontextprotocol/conformance) 中。
+引入或修改可观察协议行为的标准轨道 SEP，只有在[一致性测试仓库](https://github.com/modelcontextprotocol/conformance)具备以下内容后，才能达到 `final`：
+- 一个以 SEP 编号标记、针对该仓库草案规范版本标签的测试场景。
+- 一个 `sep-NNNN.yaml` 可追溯性文件，将 SEP「规范」章节中的每条 MUST、MUST NOT、SHOULD 和 SHOULD NOT 映射到检查 ID 或有记录的豁免项。如果豁免源于测试框架缺口，须提供跟踪议题。
+- 针对 SEP 参考实现通过的测试场景。
 
-**所需内容：**
+流程类 SEP、信息类 SEP，以及不改变可观察协议行为的标准轨道 SEP（例如文档澄清、不改变校验行为的架构注释、实现加固建议）可豁免此要求。
 
-- 一个标记有 SEP 编号的一致性场景，目标为一致性仓库的 draft 规范版本标签
-- 一个结构化的可追踪性文件（`sep-NNNN.yaml`），将 SEP 的规范部分中的每个 MUST/MUST NOT 和 SHOULD/SHOULD NOT 映射到检查 ID 或已记录的排除项（如果是框架缺口，则附带跟踪 issue）
-- 该场景在 SEP 的参考实现上通过测试
+任何人都可以编写测试场景，包括 SEP 作者、SDK 维护者或其他贡献者。赞助人负责确认场景已提交，且 `sep-NNNN.yaml` 覆盖所有规范性要求；一致性测试仓库的维护者负责审查测试场景 PR 的技术正确性。鼓励在核心维护者审查前编写测试场景，但不作强制要求。[SEP-2484](/seps/2484)定义了可追溯性格式和争议处理流程。
 
-**豁免内容：**
+<a id="after-the-decision" />
+## 决定后
 
-- 流程类和信息类 SEP
-- 没有可观察协议行为的标准轨道 SEP（文档澄清、非验证性 schema 注释、实现加固建议）
+被拒绝的 SEP 可以根据记录的反馈进行修改并重新提交，或者使用竞争的 SEP 进行答复。
 
-**各方职责：**
+SEP 达到 Final 前，请在其 PR 中提出问题。Final SEP 是已接受设计的冻结记录。如果它与当前规范不一致，以规范为准：请针对规范提交议题，而不要修改 SEP。
 
-- **赞助人** 确保编写一致性场景，并验证可追踪性文件覆盖 SEP 中每一项 MUST/MUST NOT 和 SHOULD/SHOULD NOT
-- **一致性仓库维护者** 审查场景 PR 的技术正确性
-- 测试**作者**可以是任何人：SEP 作者、SDK 维护者、社区贡献者
+作者可以申请撤回 SEP，由作者或赞助人将状态设为 `withdrawn`。取代早期 SEP 的提案须在文件头部添加 `Supersedes:` 行，并将早期 SEP 的状态设为 `superseded`。
 
-鼓励在 SEP 起草期间（在核心维护者审查之前）编写一致性场景，但这不是强制要求，因为它通常会提前暴露规范性语言中的歧义，而这些歧义越早修复成本越低。
+如果原作者无暇继续或无法联系，可以将 SEP 转交给新作者；原作者愿意时仍可列为共同作者。仅仅不同意原作者的方向并不足以转交提案，此时应另行撰写竞争性 SEP。
 
-有关完整规范（包括可追踪性文件格式和争议流程），请参阅 [SEP-2484](/seps/2484-conformance-tests-required-for-final-seps)。
+<a id="template-and-tooling" />
+## 模板和工具
 
-## 拒绝后
+SEP 文件存放在 [`seps/`](https://github.com/modelcontextprotocol/modelcontextprotocol/tree/main/seps) 中，每个文件的 Git 历史就是该提案的记录。[`seps/TEMPLATE.md`](https://github.com/modelcontextprotocol/modelcontextprotocol/blob/main/seps/TEMPLATE.md)规定了文档结构：序言、摘要、动机、规范、理由、向后兼容性、安全影响和参考实现。摘要约 200 字。动机不足本身就足以成为拒绝理由。规范必须详细到足以支持独立且可互操作的实现。理由章节记录考虑过的替代方案、提出的异议和达成共识的证据。只要 SEP 引入不兼容变更，就必须说明其严重程度和迁移路径。安全影响必须明确说明，包括没有安全影响的情况。
 
-拒绝不是永久性的。你可以：
-
-1. **解决反馈** - 如果提出了具体顾虑，解决它们并重新提交
-2. **讨论拒绝原因** - 在 Discord 中询问以了解理由
-3. **提交竞争性 SEP** - 有时不同的方法效果更好
-4. **等待合适的时机** - 社区需求会演变；今天被拒绝的内容以后可能会受到欢迎。
-
-## 报告 SEP 错误或更新
-
-对于尚未达到 `final` 状态的 SEP，请直接在该 SEP 的拉取请求中发表评论。
-
-最终版 SEP 作为已接受设计的历史记录予以保留。它们在最终确定后不会更新。如果规范在某个 SEP 达到 Final 状态后发生变化，则以当前规范为准。每个最终版 SEP 页面都会显示相关说明。
-
-## 转移 SEP 所有权
-
-偶尔有必要将 SEP 的所有权转移给新作者。一般来说，我们希望保留原作者作为共同作者，但这取决于原作者。
-
-转移所有权的好理由：
-
-- 原作者不再有时间和兴趣
-- 原作者无法联系
-
-不好的理由：
-
-- 你不同意方向（改为提交竞争性 SEP）。
-
-## 版权
-
-本文档置于公共领域或根据 CC0-1.0-Universal 许可发布，以较宽松者为准。
+`npm run generate:seps` 将文件渲染为 `docs/seps/`，`npm run check:seps` 验证渲染的页面是否是最新的。有关有效示例，请参阅 [SEP-2567](/seps/2567)，这是最近的最终标准轨道 SEP。

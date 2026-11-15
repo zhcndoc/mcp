@@ -7,14 +7,15 @@ title: 工具
 模型上下文协议 (MCP) 允许服务器暴露可由语言模型调用的工具。工具使模型能够与外部系统交互，例如查询数据库、调用 API 或执行计算。每个工具都由一个名称唯一标识，并包含描述其模式的元数据。
 
 <Note>
-  For brevity, the request examples on this page omit the `_meta` request
-  metadata (`io.modelcontextprotocol/protocolVersion`,
-  `io.modelcontextprotocol/clientInfo`, and
-  `io.modelcontextprotocol/clientCapabilities`). Every request **MUST** include
-  the required `_meta` fields; see
-  [`_meta`](/specification/draft/basic/index#meta).
+  为简洁起见，本页的请求示例省略了 `_meta` 请求
+  元数据（`io.modelcontextprotocol/protocolVersion`，
+  `io.modelcontextprotocol/clientInfo`，和
+  `io.modelcontextprotocol/clientCapabilities`）。每个请求**必须**包括
+  必填的 `_meta` 字段；看到
+  [`_meta`](/specification/draft/basic/index#meta)。
 </Note>
 
+<a id="user-interaction-model" />
 ## 用户交互模型
 
 MCP 中的工具设计为 **模型控制**，这意味着语言模型可以根据其上下文理解和用户的提示自动发现和调用工具。
@@ -33,6 +34,7 @@ MCP 中的工具设计为 **模型控制**，这意味着语言模型可以根�
 
 </Warning>
 
+<a id="capabilities" />
 ## 能力
 
 支持工具的服务器 **必须** 声明 `tools` 能力：
@@ -53,8 +55,10 @@ MCP 中的工具设计为 **模型控制**，这意味着语言模型可以根�
 
 服务器 **应当** 按确定性顺序返回工具（即当底层工具集合未发生变化时，不同请求之间保持相同排序）。确定性排序使客户端能够可靠地缓存工具列表，并在模型上下文中包含工具时提高 LLM 提示缓存命中率。
 
+<a id="protocol-messages" />
 ## 协议消息
 
+<a id="listing-tools" />
 ### 列出工具
 
 要发现可用工具，客户端发送 `tools/list` 请求。此操作支持
@@ -112,6 +116,7 @@ MCP 中的工具设计为 **模型控制**，这意味着语言模型可以根�
 }
 ```
 
+<a id="calling-tools" />
 ### 调用工具
 
 要调用工具，客户端发送 `tools/call` 请求：
@@ -151,6 +156,7 @@ MCP 中的工具设计为 **模型控制**，这意味着语言模型可以根�
 }
 ```
 
+<a id="input-required-tool-results" />
 ### 需要输入的工具结果
 
 服务器 **可以** 对 `tools/call` 返回 [`InputRequiredResult`](/specification/draft/basic/patterns/mrtr#inputrequiredresult)，以表明在工具调用完成前还需要额外输入。这遵循 [多轮往返请求](/specification/draft/basic/patterns/mrtr#multi-round-trip-requests) 机制。
@@ -213,6 +219,7 @@ MCP 中的工具设计为 **模型控制**，这意味着语言模型可以根�
 
 请注意，初始请求与重试请求中的 JSON-RPC `id` **必须** 不同。
 
+<a id="list-changed-notification" />
 ### 列表变更通知
 
 当可用工具列表发生变化时，声明了 `listChanged` 能力的服务器 **应当** 向已打开带有 `toolsListChanged: true` 的 [`subscriptions/listen`](/specification/draft/basic/patterns/subscriptions) 流的客户端发送通知：
@@ -224,6 +231,7 @@ MCP 中的工具设计为 **模型控制**，这意味着语言模型可以根�
 }
 ```
 
+<a id="message-flow" />
 ## 消息流
 
 ```mermaid
@@ -254,8 +262,10 @@ sequenceDiagram
     end
 ```
 
+<a id="data-types" />
 ## 数据类型
 
+<a id="tool" />
 ### 工具
 
 工具定义包括：
@@ -281,6 +291,7 @@ sequenceDiagram
   为了信任、安全和安全性，客户端 **必须** 将工具注解视为不可信，除非它们来自受信任的服务器。
 </Warning>
 
+<a id="tool-names" />
 #### 工具名称
 
 - 工具名称 **应当** 长度在 1 到 128 个字符之间（包含）。
@@ -301,9 +312,11 @@ sequenceDiagram
 
 </Note>
 
-#### x-mcp-header
+<a id="x-mcp-header" />
+#### x-mcp-标头
 
 `x-mcp-header` 扩展属性允许服务器在使用 [Streamable HTTP transport](/specification/draft/basic/transports/streamable-http#custom-headers-from-tool-parameters) 时，将特定工具参数镜像到 HTTP 头中。
+
 这使得网络中介（负载均衡器、代理、WAF）无需解析请求体即可根据参数值路由和处理请求。
 
 `x-mcp-header` 属性直接放置在要镜像的属性的 JSON Schema 内。其值指定结果 `Mcp-Param-{name}` HTTP 头中的名称部分。
@@ -354,6 +367,7 @@ sequenceDiagram
 
 </Warning>
 
+<a id="tool-result" />
 ### 工具结果
 
 工具结果可能包含 [**结构化**](#structured-content) 或 **非结构化** 内容。
@@ -364,6 +378,7 @@ sequenceDiagram
   所有内容类型（文本、图像、音频、资源链接和嵌入资源）都支持可选的 [注解](/specification/draft/server/resources#annotations)，提供有关受众、优先级和修改时间的元数据。这与资源和提示使用的注解格式相同。
 </Note>
 
+<a id="text-content" />
 #### 文本内容
 
 ```json
@@ -373,6 +388,7 @@ sequenceDiagram
 }
 ```
 
+<a id="image-content" />
 #### 图像内容
 
 ```json
@@ -387,6 +403,7 @@ sequenceDiagram
 }
 ```
 
+<a id="audio-content" />
 #### 音频内容
 
 ```json
@@ -397,6 +414,7 @@ sequenceDiagram
 }
 ```
 
+<a id="resource-links" />
 #### 资源链接
 
 工具 **可以** 返回指向 [资源](/specification/draft/server/resources) 的链接，以提供额外的上下文或数据。在这种情况下，工具将返回一个 URI，客户端可以订阅或获取该 URI：
@@ -417,6 +435,7 @@ sequenceDiagram
   工具返回的资源链接不保证出现在 `resources/list` 请求的结果中。
 </Info>
 
+<a id="embedded-resources" />
 #### 嵌入资源
 
 [资源](/specification/draft/server/resources) **可以** 嵌入以使用合适的 [URI scheme](./resources#common-uri-schemes) 提供额外的上下文或数据。使用嵌入资源的服务器 **应当** 实现 `resources` 能力：
@@ -427,18 +446,19 @@ sequenceDiagram
   "resource": {
     "uri": "file:///project/src/main.rs",
     "mimeType": "text/x-rust",
-    "text": "fn main() {\n    println!(\"Hello world!\");\n}",
-    "annotations": {
-      "audience": ["user", "assistant"],
-      "priority": 0.7,
-      "lastModified": "2025-05-03T14:30:00Z"
-    }
+    "text": "fn main() {\n    println!(\"Hello world!\");\n}"
+  },
+  "annotations": {
+    "audience": ["user", "assistant"],
+    "priority": 0.7,
+    "lastModified": "2025-05-03T14:30:00Z"
   }
 }
 ```
 
 嵌入资源支持与常规资源相同的 [资源注解](/specification/draft/server/resources#annotations)，以帮助客户端了解如何使用它们。
 
+<a id="structured-content" />
 #### 结构化内容
 
 结构化内容以结果的 `structuredContent` 字段中的 JSON 值返回。这可以是任何 JSON 值（对象、数组、字符串、数字、布尔值或 null），前提是它符合工具的 `outputSchema`（如果定义了）。
@@ -447,14 +467,15 @@ sequenceDiagram
 
 <Note>
 
-`structuredContent` is server-produced result data and is unrelated to LLM
-"structured outputs" (schema-constrained model generation).
-
+`structuredContent`是服务器产生的结果数据，与LLM无关
+“结构化输出”（架构约束模型生成）。
 </Note>
 
-#### Output Schema
+<a id="output-schema" />
+#### 输出模式
 
 工具还可以提供输出模式以验证结构化结果。
+
 如果提供了输出模式：
 
 - 服务器 **必须** 提供符合此模式的结构化结果。
@@ -576,8 +597,10 @@ sequenceDiagram
 - 指导客户端和 LLM 正确解析和利用返回的数据
 - 支持更好的文档和开发者体验
 
+<a id="schema-examples" />
 ### 模式示例
 
+<a id="tool-with-default-2020-12-schema" />
 #### 带有默认 2020-12 模式的工具：
 
 ```json
@@ -595,6 +618,7 @@ sequenceDiagram
 }
 ```
 
+<a id="tool-with-explicit-draft-07-schema" />
 #### 带有显式 draft-07 模式的工具：
 
 ```json
@@ -613,6 +637,7 @@ sequenceDiagram
 }
 ```
 
+<a id="tool-with-no-parameters" />
 #### 无参数工具：
 
 ```json
@@ -626,6 +651,7 @@ sequenceDiagram
 }
 ```
 
+<a id="stateful-tools" />
 ## 有状态工具
 
 <Note>
@@ -664,6 +690,7 @@ MCP 在协议层面没有会话，因此服务器不能依赖每个连接的隐�
 - **生命周期。** 由于句柄会超出任何单次连接的存活时间，服务器的保留策略应在创建工具的描述中说明（例如：“购物篮在 24 小时无活动后过期”），这样模型在决定是否创建状态时就能看到。
 - **过期错误。** 对已过期或未知句柄的调用应返回相应的工具执行错误，以便模型可以通过创建新的句柄来恢复。
 
+<a id="error-handling" />
 ## 错误处理
 
 工具使用两种错误报告机制：
@@ -711,8 +738,10 @@ MCP 在协议层面没有会话，因此服务器不能依赖每个连接的隐�
    ```
 
 客户端 **可以** 向语言模型提供协议错误，尽管这些错误不太可能导致成功恢复。  
+
 客户端 **应该** 向语言模型提供工具执行错误以启用自我纠正。
 
+<a id="security-considerations" />
 ## 安全注意事项
 
 1. 服务器 **必须**：

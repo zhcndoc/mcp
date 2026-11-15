@@ -9,16 +9,49 @@ sidebarTitle: "快速入门：发布服务器"
 
 本教程将展示如何使用官方 `mcp-publisher` CLI 工具将用 TypeScript 编写的 MCP 服务器发布到 MCP 注册表。
 
+<Note>
+  如果您要发布非 npm 软件包（PyPI、NuGet、OCI、MCPB），则总体流程是相同的，但 [步骤 1](#step-1-add-verification-information-to-the-package) 中的所有权验证步骤因软件包类型而异。请参阅[包裹类型](./package-types) 了解适用于您的包裹的验证机制，然后返回此处并执行其余步骤。
+</Note>
+
+<a id="remote-only-servers" />
+## 仅限远程服务器
+
+如果您的 MCP 服务器仅在公共远程端点上可用，您可以在没有包的情况下发布其元数据。跳过 Node.js 和 npm 先决条件以及步骤 1-2，然后继续[步骤 3](#step-3-install-mcp-publisher)。您的 `server.json` 必须包含 `remotes` 条目，并且可以省略 `packages`：
+
+```json server.json
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.my-username/weather",
+  "title": "Weather",
+  "description": "A remote MCP server for weather information.",
+  "repository": {
+    "url": "https://github.com/my-username/mcp-weather-server",
+    "source": "github"
+  },
+  "version": "1.0.0",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://weather.example.com/mcp"
+    }
+  ]
+}
+```
+
+远程 URL 必须可公开访问。有关传输、URL 变量和标头选项，请参阅[发布远程服务器](./remote-servers)。
+
+使用任何身份验证方法，注册表都会验证您是否控制 `name` 中的命名空间；它不会验证您是否控制远程 URL。详情请参见[权属验证](./remote-servers#ownership-verification)。
+
+<a id="prerequisites" />
 ## 先决条件
 
 - **Node.js** — 本教程假设 MCP 服务器是用 TypeScript 编写的。
-- **npm 账户** — MCP 注册表仅托管元数据，而非制品。在发布到 MCP 注册表之前，我们将把 MCP 服务器的包发布到 npm，因此您需要一个 [npm](https://www.npmjs.com) 账户。
-- **GitHub 账户** — MCP 注册表支持 [多种身份验证方法](./authentication)。为简单起见，本教程将使用基于 GitHub 的身份验证，因此您需要一个 [GitHub](https://github.com/) 账户。
-
+- **npm 帐户（仅限基于包的服务器）** — MCP 注册表仅托管元数据，而不托管工件。在将基于包的 MCP 服务器发布到 MCP 注册表之前，我们会将包发布到 npm，因此您需要一个 [npm](https://www.npmjs.com) 帐户。
+- **GitHub 帐户** — MCP 注册表支持[多种身份验证方法](./authentication)。为简单起见，本教程将使用基于 GitHub 的身份验证，因此您需要一个 [GitHub](https://github.com/) 帐户。
 如果您没有用 TypeScript 编写的 MCP 服务器，可以从 [`modelcontextprotocol/quickstart-resources` 仓库](https://github.com/modelcontextprotocol/quickstart-resources) 复制 `weather-server-typescript` 服务器以跟随本教程：
 
 ```bash
-git clone --depth 1 git@github.com:modelcontextprotocol/quickstart-resources.git
+git clone --depth 1 https://github.com/modelcontextprotocol/quickstart-resources.git
 cp -r quickstart-resources/weather-server-typescript .
 rm -rf quickstart-resources
 cd weather-server-typescript
@@ -46,6 +79,7 @@ cd weather-server-typescript
    "devDependencies": {
 ```
 
+<a id="step-1-add-verification-information-to-the-package" />
 ## 步骤 1：向包中添加验证信息
 
 MCP 注册表验证服务器的底层包是否与其元数据匹配。对于 npm 包，这需要在 `package.json` 中添加一个 `mcpName` 属性：
@@ -62,6 +96,7 @@ MCP 注册表验证服务器的底层包是否与其元数据匹配。对于 npm
 
 因为我们将使用基于 GitHub 的身份验证，`mcpName` **必须**以 `io.github.my-username/` 开头。
 
+<a id="step-2-publish-the-package" />
 ## 步骤 2：发布包
 
 MCP 注册表仅托管元数据，而非制品，因此在将服务器发布到 MCP 注册表之前，我们必须先将包发布到 npm。
@@ -69,10 +104,7 @@ MCP 注册表仅托管元数据，而非制品，因此在将服务器发布到 
 确保分发生成文件已构建：
 
 ```bash
-# 导航到项目目录
-cd weather-server-typescript
-
-# 安装依赖
+# Install dependencies
 npm install
 
 # 构建分发生成文件
@@ -91,6 +123,7 @@ npm publish --access public
 
 您可以通过访问其 npm URL 来验证您的包是否已发布，例如 https://www.npmjs.com/package/@my-username/mcp-weather-server。
 
+<a id="step-3-install-mcp-publisher" />
 ## 步骤 3：安装 `mcp-publisher`
 
 使用预构建的二进制文件或 [Homebrew](https://brew.sh) 安装 `mcp-publisher` CLI 工具：
@@ -106,7 +139,7 @@ $arch = if ([System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitec
 # 将 mcp-publisher.exe 移动到 PATH 中的目录
 ```
 
-```bash
+```bash Homebrew
 brew install mcp-publisher
 ```
 
@@ -131,13 +164,20 @@ Commands:
   login         Authenticate with the registry
   logout        Clear saved authentication
   publish       Publish server.json to the registry
+  status        Update the status of a server version
+  validate      Validate server.json without publishing
+
+Use 'mcp-publisher <command> --help' for more information about a command.
 ```
 
+<a id="step-4-create-serverjson" />
 ## 步骤 4：创建 `server.json`
 
 `mcp-publisher init` 命令可以生成一个 `server.json` 模板文件，其中包含一些从您的项目派生的信息。
 
-在您的服务器项目目录中，运行 `mcp-publisher init`：
+注册表将 `description` 字段限制为 100 个字符。将描述重点放在服务器的功能上；较长的描述无法通过验证。
+
+在服务器项目目录中，运行 `mcp-publisher init`：
 
 ```bash
 mcp-publisher init
@@ -154,12 +194,12 @@ mcp-publisher init
     "url": "https://github.com/my-username/mcp-weather-server",
     "source": "github"
   },
-  "version": "1.0.0",
+  "version": "1.0.1",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "@my-username/mcp-weather-server",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "transport": {
         "type": "stdio"
       },
@@ -188,14 +228,12 @@ mcp-publisher init
      "url": "https://github.com/my-username/mcp-weather-server",
      "source": "github"
    },
--  "version": "1.0.0",
-+  "version": "1.0.1",
+   "version": "1.0.1",
    "packages": [
      {
        "registryType": "npm",
        "identifier": "@my-username/mcp-weather-server",
--      "version": "1.0.0",
-+      "version": "1.0.1",
+       "version": "1.0.1",
        "transport": {
          "type": "stdio"
 -      },
@@ -216,7 +254,12 @@ mcp-publisher init
 
 `server.json` 中的 `name` 属性 **必须** 与 `package.json` 中的 `mcpName` 属性匹配。
 
-## 步骤 5：通过 MCP 注册表进行身份验证
+<Note>
+  对于[仅远程服务器](#remote-only-servers)，`mcp-publisher init` 仍会生成 `packages` 条目。将 `packages` 数组替换为 `remotes` 数组，如上面的仅远程示例所示。
+</Note>
+
+<a id="step-5-authenticate-with-the-mcp-registry" />
+## 步骤 5：使用 MCP 注册表进行身份验证
 
 在本教程中，我们将使用基于 GitHub 的身份验证通过 MCP 注册表进行身份验证。
 
@@ -245,6 +288,7 @@ Successfully authenticated!
 ✓ Successfully logged in
 ```
 
+<a id="step-6-publish-to-the-mcp-registry" />
 ## 步骤 6：发布到 MCP 注册表
 
 最后，使用 `mcp-publisher publish` 命令将您的服务器发布到 MCP 注册表：
@@ -273,18 +317,20 @@ curl "https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.my-
 {"servers":[{ ... "name":"io.github.my-username/weather" ... }]}
 ```
 
+<a id="troubleshooting" />
 ## 故障排除
 
 {/* prettier-ignore-start */}
 
 | 错误消息 | 操作 |
 | --- | --- |
-|"包注册表验证失败"|确保您的包包含所需的验证信息（例如，`package.json` 中的 `mcpName` 属性）。|
-|"注册表 JWT 令牌无效或已过期"|通过运行 `mcp-publisher login github` 重新认证。|
-|"您没有权限发布此服务器"|您的认证方法与服务器的命名空间格式不匹配。使用 GitHub 认证时，您的服务器名称必须以 `io.github.your-username/` 开头。|
+|“包的注册表验证失败”|确保您的包裹包含其包裹类型所需的所有权验证标记。对于 npm，这是 `package.json` 中的 `mcpName`；对于 PyPI 和 NuGet，它是 README 包中的 `mcp-name: <server-name>` 行（或 HTML 注释）；其他类型请参见[封装类型](./package-types)。|
+|“注册 JWT 令牌无效或过期”|通过运行 `mcp-publisher login github` 重新进行身份验证。|
+|“您无权发布此服务器”|您的身份验证方法与服务器的命名空间格式不匹配。使用 GitHub 身份验证时，您的服务器名称必须以 `io.github.your-username/` 开头。|
 
 {/* prettier-ignore-end */}
 
+<a id="next-steps" />
 ## 后续步骤
 
 - 了解 [对其他包类型的支持](./package-types)。

@@ -1,19 +1,21 @@
 ---
-title: 功能生命周期与弃用策略
-description: 单个 MCP 规范功能如何在 Active、Deprecated、Removed 状态之间流转，以及实现者可据以规划的时间线。
+title: 功能生命周期和弃用
+description: 各个 MCP 规范功能如何经历“活动”、“已弃用”和“已删除”状态，以及实施者可以规划的时间表。
 ---
 
-本策略为 Model
-Context Protocol 规范中的单个功能定义了生命周期。它定义了三种功能状态（Active、
-Deprecated、Removed）、它们之间迁移的标准与流程、弃用到移除之间的最短窗口，以及每次状态转换所需的文档。
+本页定义了如何弃用 MCP 规范的功能以及
+后来删除了，以及 SDK 的后续义务。它被采纳为
+[SEP-2596](/seps/2596)，规范增强提案 (SEP)，并且是
+由流程 SEP 更改。特点
+目前已弃用或计划删除的内容列在
+[已弃用的注册表](/specification/draft/deprecated)。
 
-本策略通过
-[SEP-2596](https://github.com/modelcontextprotocol/modelcontextprotocol/pull/2596) 采纳。
-
+<a id="scope" />
 ## 适用范围
 
 本策略适用于 MCP 核心规范的**功能**：协议消息、能力、传输、模式类型，以及规范性的行为要求。规范文档本身的修订生命周期（Draft、Current、Final）定义于 [版本控制指南](/docs/learn/versioning)。
 
+<a id="feature-states" />
 ## 功能状态
 
 一个规范功能恰好处于以下三种状态之一：
@@ -24,74 +26,116 @@ Deprecated、Removed）、它们之间迁移的标准与流程、弃用到移除
 | **Deprecated** | 该功能仍保留在规范中，但已计划移除。迁移路径已文档化（见下文）。                                                                                               | 新实现不应采用该功能。现有实现应在最早移除日期之前完成迁移。                                                             |
 | **Removed**    | 该功能已从 `draft` 中删除，并且不会出现在下一版 Current 修订中。它仍保留在其最后一次出现的 Final 修订版文档中。                                               | 面向该下一版 Current 修订的实现不得依赖该功能。                                                                          |
 
-一个处于 Deprecated 状态的功能 MAY 通过一项 SEP 恢复为 Active；该 SEP 将取代弃用 SEP，并说明变化后的情况。恢复流程与弃用流程采用相同的审批路径。如果该功能之后再次被弃用，则 [弃用功能](#deprecating-a-feature) 中的最短弃用窗口将从新的弃用生效的修订版本重新开始计算。
+已弃用的功能可以通过取代该功能的 SEP 恢复为活动状态
+弃用 SEP 并记录更改的情况。恢复如下
+与弃用相同的批准路径。如果该功能后来被弃用
+再次，最小弃用窗口
+[弃用功能](#deprecating-a-feature) 是从
+新弃用生效的修订。
 
 ### SDK
 
 从规范中移除并不要求 SDK 必须在发布中删除该功能。该时间线由 SDK 自身的修订支持策略决定。
 
+<a id="deprecating-a-feature" />
 ## 弃用一个功能
 
 在以下情况下，可以提议弃用某个功能：
 
-- 它已被另一个覆盖相同用例的功能所取代，
-- 它带来无法就地缓解的安全、隐私或互操作性风险，
-- 生态遥测数据或 SDK 维护者共识表明，相较于其维护成本，该功能的采用率可以忽略不计，
-- 或 Core Maintainers 认为适当的任何其他原因。
+- 它已被涵盖相同用例的另一个功能所取代，
+- 它带来了无法避免的安全、隐私或互操作性风险
+  就地缓解，
+- 生态系统遥测或 SDK 维护者共识表明采用率可以忽略不计
+  相对于其维护成本，
+- 核心维护者认为出于任何其他原因是适当的。
+弃用需要 SEP（请参阅 [SEP 指南](/community/sep-guidelines)）。
 
-弃用属于规范变更，因此需要遵循 [SEP 指南](/community/sep-guidelines) 提交 SEP。弃用 SEP 必须：
+弃用 SEP 必须：
+1. 通过名称识别功能并链接到 `schema.ts` 中的定义
+   （如果适用）和规范文章。
+2. 说明针对上述标准的理由。
+3. 记录迁移路径，或明确说明不需要。如果
+   迁移路径命名替换功能，该功能必须处于活动状态
+   在弃用生效的修订中；更换和
+   弃用可能会出现在同一修订版中。
+4. 指定**最小弃用窗口**：至少月数
+   十二，该功能必须保持弃用状态。该功能**最早
+   删除**是作为当前版本发布的第一个规范修订版或
+   窗口期过后。
 
-1. 按名称标识该功能，并链接到其在 `schema.ts` 中的定义（如适用）以及规范正文。
-2. 说明与上述标准相对应的弃用理由。
-3. 记录迁移路径，或明确说明不需要迁移路径。若迁移路径中提到了替代功能，则该替代功能在弃用生效的修订版中必须处于 Active；替代功能与弃用可在同一个修订版中同时落地。
-4. 指定**最短弃用窗口**：该功能在可移除之前必须保持 Deprecated 的月数，至少为十二个月。该窗口从该功能首次被标记为 Deprecated 的规范修订版发布之时开始计算，而不是从 SEP 达到 Final 的日期开始计算。该功能在窗口期届满后首次作为 Current 发布的规范修订版中，变得可被移除；该时点即为该功能的**最早移除**时间。
+当弃用 SEP 被接受时，其作者会进行以下更改
+SEP 拉取请求中的规范草案，并且发起人验证
+在设置 `final` 之前（请参阅
+[SEP指南](/community/sep-guidelines#workflow)):
+- 将 `@deprecated` JSDoc 标签添加到 `schema.ts` 中的功能条目，
+  引用弃用 SEP 以及其中弃用的修订版
+  生效。
+- 添加弃用通知，其中包含与该功能相同的信息
+  规范散文。
+- 在该修订版的 `changelog.mdx` 下记录弃用信息
+  “已弃用”标题。 “已弃用”和“已删除”是常设变更日志
+  与主要/次要/其他一起的标题。
+- 在[已弃用的注册表](#the-deprecated-registry) 中列出该功能
+  其弃用 SEP、其被弃用的修订版、其
+  迁移路径及其最早的移除。
 
-当弃用 SEP 被接受并达到 Final 后，弃用即进入计划阶段。
+当包含这些编辑的修订版本被弃用时，该功能将被弃用。
 
-- `schema.ts` 中该功能的条目会增加一个 `@deprecated` JSDoc 标签，引用弃用 SEP 以及弃用生效的修订版。
-- 该功能的规范正文会增加一条包含相同信息的弃用提示。
-- 该修订版的 `changelog.mdx` 会在“Deprecated”标题下增加一条记录。“Deprecated”和“Removed”与现有的 Major/Minor/Other 分类并列，作为固定的变更日志标题。
-- 该功能会被加入 [弃用注册表](#the-deprecated-registry)，其中包含其弃用 SEP、变为 Deprecated 的修订版、迁移路径以及最早移除时间。
+作为当前版本发布（请参阅[版本控制指南](/docs/learn/versioning)），并且
+最小弃用窗口是从该版本开始计算的，而不是从发布之日开始计算的
+9月进入决赛。
 
-当携带这些变更的修订版发布并成为新的 Current 修订版时，该功能变为 Deprecated（见 [版本控制指南](/docs/learn/versioning)）。最短弃用窗口从该发布时点开始计算。
+[SEP-2577](/seps/2577) 是弃用 SEP 的有效示例。
 
+<a id="the-deprecated-registry" />
 ## 弃用注册表
 
-[`docs/specification/draft/deprecated.mdx`](/specification/draft/deprecated) 是一个单页清单，列出所有处于 Deprecated 或 Removed 状态的功能。它是回答“哪些功能正在退出，以及何时退出”的权威依据，这样实现者就不必从分散在各修订版变更日志中的弃用条目中自行还原全貌。
+[`docs/specification/draft/deprecated.mdx`](/specification/draft/deprecated) 是
+处于“已弃用”或“已删除”状态的每个功能的单个列表。
 
+<a id="tier-1-sdk-obligations" />
 ## Tier 1 SDK 义务
 
-一旦某个功能变为 Deprecated 的那个修订版作为 Current 发布，Tier 1 SDK：
-
+一旦某个功能变为“已弃用”的修订版本被发布为“当前”版本，
+第 1 层 SDK：
 - 必须在其下一个版本中，使用该语言的原生机制将对应 API 面标记为 deprecated（例如 Java 中的 `@Deprecated`、.NET 中的 `[Obsolete]`、TypeScript 中的 `@deprecated` JSDoc、Go 中的 `Deprecated:` 文档约定），并在机制允许时引用弃用 SEP 以及最早移除日期。
 - 当使用了已弃用功能时，应使用该语言惯用的机制发出运行时警告（例如 Python 的 `DeprecationWarning`、Node.js 的 `process.emitWarning`，或可配置的日志记录器）。
 
-A Tier 1 SDK that consistently fails to surface a Deprecated feature is subject to the
-[Tier Relegation Process](/community/sdk-tiers#tier-relegation).
+始终无法显示已弃用功能的第 1 层 SDK 受到影响
+至 [等级降级](/community/sdk-tiers#tier-relegation)。
 
+<a id="removing-a-feature" />
 ## 移除一个功能
 
-1. 一旦某个功能被设定为移除，Core Maintainers 可在最短弃用窗口届满后自行决定执行移除。
-2. 移除需要在 `changelog.mdx` 和 [注册表](#the-deprecated-registry) 中记录。
-3. 对原始弃用 SEP 或移除 SEP 的任何更改都需要一个 SEP，例如延长或缩短时间线
-   ([加速移除](#expedited-removal))，或将功能恢复为 Active
-   ([功能状态](#feature-states))。
+在最短弃用窗口期满后，核心维护者可以删除
+准备发布时的功能。删除记录在
+`changelog.mdx` 在“已删除”标题下和
+[注册表](#the-deprecated-registry)。对原始弃用的任何更改或
+删除，例如延长或缩短时间
+（[加急删除](#expedited-removal)）或将该功能恢复为活动状态
+（[功能状态](#feature-states)），需要 SEP。可能会保留一个功能
+无限期弃用。
 
-功能在超过最短弃用窗口之后，也可以继续保持 Deprecated，而不必移除。
-
+<a id="expedited-removal" />
 ## 加速移除
 
-当功能带来主动安全风险时，十二个月的下限可以缩短；这里的主动安全风险是指存在已发布安全公告或有文档记载的真实世界利用、且无法就地缓解的漏洞。缩短窗口需要按照 [治理决策流程](/community/governance#decision-process) 获得 Core Maintainer 批准，并记录在弃用 SEP 中；如果风险在该 SEP 已经 Final 之后才浮现，则应记录在一份引用该 SEP 的简短加速移除 SEP 中。缩短后的窗口从功能变为 Deprecated 到其最早可移除时间之间，仍必须至少保留九十天。
+当该功能出现问题时，十二个月的最短窗口可能会缩短
+主动安全风险，意味着已发布安全性的漏洞
+咨询或记录的野外利用，但没有就地利用
+存在缓解措施。缩短窗口需要核心维护者的批准
+根据[治理决策流程](/community/governance#decision-process)，
+记录在弃用 SEP 中，或者该 SEP 之后出现的风险是
+已经是最终版本，在引用它的简短快速删除 SEP 中。的
+缩短的窗口必须在功能之间提供至少九十天的时间
+已弃用并最早被删除。
 
+<a id="roles" />
 ## 角色
 
-| 操作                                         | 负责方                                                                                            |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| 提议弃用、延长或恢复                            | 任何贡献者，依 SEP 流程而定                                                                     |
-| 发起支持                                      | 一名 Maintainer 或 Core Maintainer，依 SEP 流程而定                                              |
-| 批准弃用 SEP                                   | Core Maintainers，依 [治理决策流程](/community/governance#decision-process)                     |
-| 在发布准备期间决定是否移除                       | Core Maintainers，依 [治理决策流程](/community/governance#decision-process)                     |
-| 批准延长或恢复 SEP                               | Core Maintainers，依 [治理决策流程](/community/governance#decision-process)                     |
-| 批准加速移除                                   | Core Maintainers，依 [治理决策流程](/community/governance#decision-process)                     |
+任何贡献者都可以通过以下方式提出弃用、延期或恢复
+与赞助商一起的 SEP（请参阅 [SEP 指南](/community/sep-guidelines#sponsors)）。
 
-Lead Maintainers 依据 [治理角色](/community/governance#roles) 的定义，对上述每一项批准保留否决权。
+核心维护者批准弃用、删除时间、扩展、
+恢复和快速拆除
+[治理决策过程](/community/governance#decision-process)，主题
+首席维护者否决权（参见[治理](/community/governance#roles)）。

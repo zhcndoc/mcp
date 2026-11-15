@@ -5,11 +5,12 @@ description: Inspector 如何协商传统版与现代版 MCP，以及每项功�
 
 MCP 的 2026-07-28 修订版对协议进行了重大更改。因此，Inspector 将**协议时代**（传统版或现代版，即该修订版之前或截至该修订版）视为一个独立的、针对每个服务器的设置，并与传输方式正交：同一个 HTTP URL 既可以作为传统版服务器进行检查，也可以作为现代版服务器进行检查。根据当前生效的协议时代不同，多个选项卡会呈现出具有显著差异的 UI 和流量。
 
+<a id="the-protocol-era-setting" />
 ## `Protocol Era` 设置
 
 每个服务器都有一个 `protocolEra`，其值可以是 `legacy`、`auto` 或 `modern`。在 Web 客户端中，它位于**服务器设置**中；在目录或配置文件中，它是 `protocolEra` 字段；CLI 和 TUI 从同一个文件读取该值，而它们的 `--protocol-era <legacy|auto|modern>` 标志可以为单次运行覆盖该值。
 
-| 时代     | 检查器在连接时的行为                                                                    |
+| 时代     | Inspector在连接时的行为                                                                    |
 | -------- | --------------------------------------------------------------------------------------- |
 | `legacy` | **默认值。** 使用普通的 `initialize`，完全不进行探测。                                  |
 | `auto`   | 首先探测 `server/discover`，在任何非现代结果下回退到 `initialize`。                      |
@@ -28,6 +29,7 @@ MCP 的 2026-07-28 修订版对协议进行了重大更改。因此，Inspector 
   <img src="/images/inspector/settings-protocol-era.png" />
 </Frame>
 
+<a id="reproducing-each-era-locally" />
 ## 在本地重现各个时代
 
 下面的每个部分末尾都有一个指向 **使用……重现** 的链接，指向 Inspector 代码库中提供的某个**可组合测试服务器**的 JSON 配置。克隆代码库并构建测试服务器：
@@ -48,6 +50,7 @@ node test-servers/build/server-composable.js --config test-servers/configs/<name
 
 ---
 
+<a id="logging" />
 ## 日志
 
 <Tabs>
@@ -85,6 +88,7 @@ node test-servers/build/server-composable.js --config test-servers/configs/<name
 
 ---
 
+<a id="resource-subscriptions" />
 ## 资源订阅
 
 <Tabs>
@@ -112,9 +116,10 @@ node test-servers/build/server-composable.js --config test-servers/configs/<name
 
 ---
 
+<a id="tasks" />
 ## 任务
 
-任务在不同协议时代之间变化最大，包括_检查器 UI 标签页如何进行门控_。
+任务在不同协议时代之间变化最大，包括_Inspector UI 标签页如何进行门控_。
 
 <Tabs>
   <Tab title="旧版">
@@ -128,9 +133,9 @@ node test-servers/build/server-composable.js --config test-servers/configs/<name
 
 任务是一个**扩展**（`io.modelcontextprotocol/tasks`，[SEP-2663](/seps/2663-tasks-extension)），因此该标签页取决于服务器_播发该扩展_，而不是 `capabilities.tasks`。
 
-将工具作为任务运行时，`tools/call` 会返回一个 `CreateTaskResult`（`resultType: "task"`，可在 Protocol 和 Network 标签页中看到）。检查器仅轮询 **`tasks/get`**；不存在 `tasks/list`，因此 **Refresh** 会重新轮询客户端已知的句柄。已完成的任务会**内联其结果**，不会调用阻塞式 `tasks/result`。
+现代连接上没有 **作为任务运行** 控制。任务创建是服务器引导的，因此服务器根据请求决定 `tools/call` 是否返回 `CreateTaskResult`（`resultType: "task"`，在“协议”和“网络”选项卡中可见）。Inspector仅投票 **`tasks/get`**；没有 `tasks/list`，因此 **Refresh** 重新轮询客户端已经知道的句柄。已完成的任务**内联其结果**，不会阻塞 `tasks/result` 调用。
 
-需要更多信息的任务会转为 `input_required`，并在待处理请求模态框中显示嵌入式 [elicitation](/specification/draft/client/elicitation)（即 Web 客户端在请求等待你的响应时打开的对话框）。回答后会发送携带 `inputResponses` 的 **`tasks/update`**，下一次轮询即可完成任务。
+需要更多信息的任务会移至 `input_required`，并在待处理请求模式（每当有请求等待时 Web 客户端打开的对话框）中显示嵌入的[诱导](/specification/2026-07-28/client/elicitation)。应答时发送携带 `inputResponses` 的 **`tasks/update`**，然后下一次轮询完成。
 
 使用 `test-servers/configs/tasks-modern-http.json` 进行复现（工具为 `modern_task` 和 `modern_input_task`）。
 
@@ -147,9 +152,10 @@ node test-servers/build/server-composable.js --config test-servers/configs/<name
 
 ---
 
+<a id="multi-round-tool-results-mrtr" />
 ## 多轮工具结果（MRTR）
 
-在现代时代，工具可以返回 `input_required` 而不是最终结果，其中嵌入 [elicitation](/specification/draft/client/elicitation)、[sampling](/specification/draft/client/sampling) 请求或 [`roots/list`](/specification/draft/client/roots) 请求。客户端会响应这个嵌入式请求，并在新的 JSON-RPC id 下重试 `tools/call`，直到调用达到 `complete` 状态。
+在现代，工具可以返回 `input_required` 而不是最终结果，嵌入 [启发](/specification/2026-07-28/client/elicitation)、[采样](/specification/2026-07-28/client/sampling) 请求或 [`roots/list`](/specification/2026-07-28/client/roots) 请求。客户端应答该嵌入请求并在新的 JSON-RPC id 下重试 `tools/call`，直到调用到达 `complete`。
 
 Inspector 会**手动**驱动 MRTR，因此每一轮都会在标记为 `input_required` 的**待处理请求模态框**处暂停，等待你作答。Protocol 视图会将整个交互归为一个 MRTR 会话，而不是将其视为互不相关的调用。
 
@@ -180,6 +186,7 @@ Inspector 会**手动**驱动 MRTR，因此每一轮都会在标记为 `input_re
 
 ---
 
+<a id="tools-mirrored-headers-and-excluded-tools" />
 ## 工具：镜像请求头和已排除的工具
 
 [SEP-2243](/seps/2243-http-standardization) 允许工具使用 `x-mcp-header` 标注参数，请求 Streamable HTTP 客户端将该参数的值镜像到 `Mcp-Param-*` 请求头中。
@@ -200,6 +207,7 @@ Inspector 在 **Tools** 标签页中展示该契约的两部分：
   <img src="/images/inspector/tools-sep2243.png" />
 </Frame>
 
+<a id="-32602-error-panels" />
 ### `-32602` 错误面板
 
 返回 `-32602` 的 `tools/call` 在两个时代都会呈现为独立的**错误面板**：
@@ -211,6 +219,7 @@ Inspector 在 **Tools** 标签页中展示该契约的两部分：
 
 ---
 
+<a id="network-and-protocol-headers-and-the-error-taxonomy" />
 ## 网络与协议：标头和错误分类
 
 现代规范统一了一组 `Mcp-*` HTTP 标头，并引入了更丰富的 JSON-RPC 错误分类（[SEP-2243](/seps/2243-http-standardization) / [SEP-2575](/seps/2575-stateless-mcp)）。两个监控标签页分工如下：
@@ -220,7 +229,7 @@ Inspector 在 **Tools** 标签页中展示该契约的两部分：
 
 `test-servers/configs/modern-network-http.json` 提供四个工具，每个工具对应一种错误类别，并会生成真实的 HTTP 状态码和 JSON-RPC 错误响应体：
 
-| 工具                          | HTTP  | JSON-RPC code | 含义                                                         |
+| 工具                          | HTTP  | JSON-RPC 代码 | 含义                                                         |
 | ----------------------------- | ----- | ------------- | ------------------------------------------------------------ |
 | `trigger_header_mismatch`     | `400` | `-32020`      | 缺少必需的镜像标头，或标头值错误。                           |
 | `trigger_missing_capability`  | `400` | `-32021`      | 请求未包含服务器所需的客户端能力。                           |
@@ -237,6 +246,7 @@ Inspector 在 **Tools** 标签页中展示该契约的两部分：
 
 ---
 
+<a id="cancellation" />
 ## 取消
 
 在传统版连接中，取消正在执行的工具调用会发送 `notifications/cancelled`。在现代 Streamable HTTP 连接中，Inspector 会改为关闭该请求自己的 SSE 响应流，这是 2026-07-28 的取消信号。通过 stdio 传输时，取消仍使用 `notifications/cancelled`。
@@ -245,6 +255,7 @@ Inspector 在 **Tools** 标签页中展示该契约的两部分：
 
 ---
 
+<a id="sessions" />
 ## 会话
 
 传统的 Streamable HTTP 连接可能携带由服务器分配的会话 ID（`Mcp-Session-Id`），客户端会通过 HTTP `DELETE` 将其终止。现代连接则是**无会话且按请求进行的**：在没有会话 ID 的情况下，客户端 SDK 不会向服务器发送 `DELETE`，因此断开连接完全是本地操作。
